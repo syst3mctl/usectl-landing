@@ -711,7 +711,7 @@
             btn.textContent = 'Submitting...';
             btn.style.pointerEvents = 'none';
             btn.style.opacity = '0.7';
-            fetch('/api/founding-requests', {
+            fetch('https://manager.usectl.com/api/founding-requests', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, project, deploy_method: deploy })
