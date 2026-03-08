@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>usectl — One Prompt. Your Entire Project. Live. | Self-Hosted Deployment Platform</title>
+    <meta name="description"
+        content="Deploy backend + frontend + PostgreSQL + S3 storage in one place — starting at $0/month. Self-hosted Vercel alternative powered by K3s & Kubernetes. Push-to-deploy, auto TLS, and AI agent support.">
+    <meta name="keywords"
+        content="self-hosted, usectl, k3s, kubernetes, deployment platform, PaaS, deploy, PostgreSQL, MinIO, push to deploy, cloud hosting, docker deployment">
+    <meta name="author" content="systemctl">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#11A32A">
+    <link rel="canonical" href="https://usectl.com/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://usectl.com/">
+    <meta property="og:title" content="usectl — One Prompt. Your Entire Project. Live.">
+    <meta property="og:description"
+        content="Deploy backend + frontend + PostgreSQL + S3 storage in one place — starting at $0/month. Self-hosted Vercel alternative powered by K3s.">
+    <meta property="og:image" content="https://usectl.com/img/og-image.png">
+    <meta property="og:site_name" content="usectl">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@usectl">
+    <meta name="twitter:title" content="usectl — One Prompt. Your Entire Project. Live.">
+    <meta name="twitter:description"
+        content="Deploy backend + frontend + PostgreSQL + S3 storage in one place — starting at $0/month. Self-hosted Vercel alternative powered by K3s.">
+    <meta name="twitter:image" content="https://usectl.com/img/og-image.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+    <link rel="apple-touch-icon" href="img/logo.svg">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Organization",
+                "name": "usectl",
+                "url": "https://usectl.com",
+                "logo": "https://usectl.com/img/logo.svg",
+                "sameAs": [
+                    "https://github.com/syst3mctl/usectl",
+                    "https://x.com/usectl"
+                ],
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "customer support",
+                    "email": "support@usectl.com"
+                }
+            },
+            {
+                "@type": "SoftwareApplication",
+                "name": "usectl",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Linux, macOS, Windows",
+                "description": "Self-hosted deployment platform. Deploy backend + frontend + PostgreSQL + S3 storage in one place. Vercel alternative powered by K3s & Kubernetes.",
+                "url": "https://usectl.com",
+                "offers": [
+                    {
+                        "@type": "Offer",
+                        "name": "Free",
+                        "price": "0",
+                        "priceCurrency": "USD",
+                        "description": "1 project, subdomain, community support"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Frontend",
+                        "price": "5",
+                        "priceCurrency": "USD",
+                        "description": "Custom domain, auto TLS, push-to-deploy"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "App",
+                        "price": "12",
+                        "priceCurrency": "USD",
+                        "description": "Backend hosting, env vars, rollbacks"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Full Stack",
+                        "price": "19",
+                        "priceCurrency": "USD",
+                        "description": "PostgreSQL, MinIO storage, priority support"
+                    }
+                ]
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "What is usectl?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "usectl is a self-hosted deployment platform that lets you deploy backend, frontend, PostgreSQL, and S3-compatible storage in one place — powered by K3s and Kubernetes."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "How much does usectl cost?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "usectl starts free with 1 project. Paid plans range from $5/month (Frontend) to $19/month (Full Stack with PostgreSQL and MinIO storage). Founding member rates are available at a discount locked in forever."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "How do I deploy with usectl?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Link your GitHub repository, toggle on database and storage if needed, and push to main. Your app deploys automatically with TLS certificates and a live URL."
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <!-- NAV -->
+    <header>
+        <nav class="nav" id="nav" aria-label="Main navigation">
+            <div class="nav-inner">
+                <div class="nav-left">
+                    <a href="/" class="nav-logo" aria-label="usectl home"><img src="img/logo.svg" alt="usectl logo"
+                            width="120" height="32"></a>
+                    <span class="nav-badge">Limited Beta</span>
+                </div>
+                <div class="nav-right">
+                    <div class="nav-links">
+                        <a href="#features">Features</a>
+                        <a href="#pricing">Pricing</a>
+                        <a href="#steps">How it Works</a>
+                        <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer">Github</a>
+                    </div>
+                    <a href="https://manager.usectl.com/register" class="nav-cta-btn">Get Early Access free</a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Toggle mobile menu" aria-expanded="false"
+                    onclick="var m=document.getElementById('mobile-menu');m.classList.toggle('active');this.setAttribute('aria-expanded',m.classList.contains('active'))">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="mobile-menu" id="mobile-menu" role="menu">
+                <a href="#features" role="menuitem"
+                    onclick="document.getElementById('mobile-menu').classList.remove('active')">Features</a>
+                <a href="#pricing" role="menuitem"
+                    onclick="document.getElementById('mobile-menu').classList.remove('active')">Pricing</a>
+                <a href="#steps" role="menuitem"
+                    onclick="document.getElementById('mobile-menu').classList.remove('active')">How it
+                    Works</a>
+                <a href="https://github.com/syst3mctl/usectl" target="_blank" rel="noopener noreferrer"
+                    role="menuitem">Github</a>
+                <a href="https://manager.usectl.com/register" class="nav-cta-btn" role="menuitem"
+                    style="text-align: center; margin-top: 12px; width: 100%;">Get Early Access free</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- HERO -->
+        <section class="hero" id="hero">
+            <div class="hero-inner">
+                <div class="hero-text anim visible">
+                    <h1>One Prompt. Your<br>Entire Project.<br><span class="green">Live.</span></h1>
+                    <!-- Noscript fallback for indexing -->
+                    <noscript>
+                        <p>usectl is a self-hosted deployment platform. Deploy backend, frontend, PostgreSQL, and S3
+                            storage in one command.</p>
+                    </noscript>
+                    <p class="subtitle">Deploy backend + frontend + PostgreSQL + storage — for less than Supabase
+                        charges
+                        for a database alone.</p>
+                    <a href="https://manager.usectl.com/register" class="hero-cta">Get Early Access free</a>
+                    <p class="hero-note">Founding member slots are open — deploy free during beta, lock in founding
+                        rates
+                        forever.</p>
+                    <p class="hero-infra">Powered by Hetzner infrastructure · Kubernetes-isolated projects</p>
+                </div>
+                <div class="hero-mockup anim visible anim-delay-2">
+                    <img src="img/hero-right.svg"
+                        alt="usectl deployment flow diagram showing GitHub to Kubernetes pipeline"
+                        class="hero-right-svg" loading="eager">
+                </div>
+            </div>
+        </section>
+
+        <!-- COST COMPARISON -->
+        <section class="section cost" id="cost">
+            <div class="section-inner anim">
+                <h2 class="section-title">You're already paying too much to keep your<br>project alive.</h2>
+                <p class="cost-desc">Neon charges <span class="green-text">$19/month</span> for PostgreSQL alone. usectl
+                    Full Stack is $19 and includes the database, file storage, server, deploy pipeline, and everything
+                    else.
+                </p>
+                <div style="text-align:center">
+                    <a href="#pricing" class="cost-cta">Stop Overpaying <span class="arrow">→</span></a>
+                </div>
+                <div class="cost-cards">
+                    <div class="cost-card">
+                        <h3>Fragmented & Overpriced</h3>
+                        <div class="cost-item">
+                            <div class="cost-label">PostgreSQL</div>
+                            <div class="cost-sublabel">(Neon / Supabase) $30+/month</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-label">Compute & Hosting</div>
+                            <div class="cost-sublabel">(Vercel, AWS) $40+/month</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-label">DevOps Tools</div>
+                            <div class="cost-sublabel">(GitHub Actions, Registry) $20+/month</div>
+                        </div>
+                        <div class="cost-total">
+                            <div class="cost-total-bar">$90 <span
+                                    style="font-weight:400;font-size:.85rem;color:var(--text-subtle)">/ month</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cost-card highlight">
+                        <h3>All-in-One Infrastructure</h3>
+                        <div class="cost-card-body">
+                            <p>Everything you need to run, scale, and manage your stack in <strong>One Place</strong>
+                            </p>
+                            <ul class="cost-check-list">
+                                <li><span class="check-icon">✓</span> DB</li>
+                                <li><span class="check-icon">✓</span> Storage</li>
+                                <li><span class="check-icon">✓</span> Compute</li>
+                                <li><span class="check-icon">✓</span> Pipeline</li>
+                            </ul>
+                        </div>
+                        <div class="cost-total">
+                            <div class="cost-total-bar green">$19 <span style="font-weight:400;font-size:.85rem">/
+                                    month</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3 STEPS -->
+        <section class="section steps" id="steps">
+            <div class="section-inner">
+                <h2 class="section-title anim">Ship your project in <span class="green"
+                        style="position: relative;">three
+                        steps.<div class="bg-glow-green" style="top: 70%; left: 70%;"></div></span></h2>
+                <p class="section-sub anim">No Docker knowledge required. No server config. No YAML files.</p>
+                <div class="steps-row anim">
+                    <div class="step-item">
+                        <div class="step-num">01</div>
+                        <h3>Link your GitHub repository</h3>
+                        <div class="step-visual">
+                            <div class="step-github">
+                                <span class="gh-icon"><svg width="20" height="20" viewBox="0 0 24 24"
+                                        fill="currentColor">
+                                        <path
+                                            d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                                    </svg></span>
+                                <span class="line"></span>
+                                <span class="usectl-text">&gt;usectl</span>
+                            </div>
+                        </div>
+                        <p class="step-repo">Any repo with a Dockerfile...</p>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">02</div>
+                        <h3>Toggle on DB & Storage</h3>
+                        <div class="step-visual">
+                            <div class="step-toggle">
+                                <span class="toggle-label">Database</span>
+                                <span class="toggle"></span>
+                            </div>
+                            <div class="step-toggle">
+                                <span class="toggle-label">Storage</span>
+                                <span class="toggle"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">03</div>
+                        <h3>Push to main</h3>
+                        <div class="step-visual">
+                            <div class="step-deploy-icon"><img src="img/rocket.svg" alt="rocket"
+                                    style="width:28px;height:28px"></div>
+                            <div class="step-success"><span class="dot"></span> Success: Your app is Live</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="steps-terminal anim">
+                    <div class="steps-terminal-header">
+                        <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+                        <span class="title">usectl projects create</span>
+                    </div>
+                    <div class="steps-terminal-body">
+                        <div class="prompt">$ usectl projects create --repo github.com/you/your-app --database --storage
+                        </div>
+                        <div class="prompt">$ usectl deploy --project your-app</div>
+                        <div class="success">✓ Build complete (32s)</div>
+                        <div class="success">✓ PostgreSQL provisioned</div>
+                        <div class="success">✓ Storage bucket created</div>
+                        <div class="success">✓ TLS certificate issued</div>
+                        <div class="success">✓ Live at <span class="link">https://your-app.usectl.app</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI SECTION -->
+        <section class="section ai-section" id="ai">
+            <div class="section-inner">
+                <div class="ai-badge">
+                    <span class="ai-badge-text">Coming Soon</span>
+                </div>
+                <h2 class="section-title anim">Deploy with your AI agent.</h2>
+                <p class="ai-desc anim">Already using Claude, Cursor, or ChatGPT to build your app? Soon you'll be able
+                    to
+                    deploy it the same way — paste one prompt into your agent, answer two questions, and your entire
+                    stack
+                    deploys itself.</p>
+                <div class="ai-chat anim">
+                    <div class="ai-chat-header">
+                        <div class="ai-chat-header-left">
+                            <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span>
+                            </div>
+                            <span class="header-title"><img src="img/cli.svg" alt="cli"
+                                    style="width:14px;height:14px;vertical-align:middle;margin-right:4px"> usectl-cli —
+                                deploy — agent-v2.0.4</span>
+                        </div>
+                        <div class="ai-chat-header-right">
+                            <span>Dashboard</span>
+                            <span>Infrastructure</span>
+                            <span>Settings</span>
+                            <div class="avatar">A</div>
+                        </div>
+                    </div>
+                    <div class="ai-chat-body">
+                        <div class="chat-msg user">
+                            <div class="msg-label">YOU</div>
+                            <div class="msg-bubble">Deploy my project to usectl!</div>
+                        </div>
+                        <div class="chat-msg agent">
+                            <div class="agent-label">
+                                <span class="agent-icon">⟐</span>
+                                <span class="agent-name">USECTL AI AGENT</span>
+                            </div>
+                            <div class="msg-bubble">I'll set that up. Does your project need a database?</div>
+                        </div>
+                        <div class="chat-msg user">
+                            <div class="msg-label">YOU</div>
+                            <div class="msg-bubble">Yes</div>
+                        </div>
+                        <div class="chat-msg agent">
+                            <div class="agent-label">
+                                <span class="agent-icon">⟐</span>
+                                <span class="agent-name">USECTL AI AGENT</span>
+                            </div>
+                            <div class="chat-result">
+                                <div><span class="check">✓</span> Project created</div>
+                                <div><span class="check">✓</span> Database provisioned</div>
+                                <div><span class="check">✓</span> Live at <span
+                                        class="link">https://your-app.usectl.app</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="compat-bar">
+                        <div class="compat-left">
+                            <span class="compat-label">NATIVE COMPATIBILITY</span>
+                            <span class="compat-item"><span class="icon"><img src="img/claude.svg"
+                                        style="width:17px;height:17px;vertical-align:middle;" /> </span> Claude</span>
+                            <span class="compat-item"><span class="icon"><img src="img/chatgpt.svg"
+                                        style="width:17px;height:17px;vertical-align:middle;" /> </span>
+                                ChatGPT</span>
+                            <span class="compat-item"><span class="icon"><img src="img/cursor.svg"
+                                        style="width:17px;height:17px;vertical-align:middle;" /> </span> Cursor</span>
+                            <span class="compat-item"><span class="icon"><img src="img/w.svg"
+                                        style="width:17px;height:17px;vertical-align:middle;" /> </span> Windsurf</span>
+                        </div>
+                        <div class="compat-right">
+                            <a href="#" class="compat-link">View Config</a>
+                            <button class="compat-btn" onclick="window.location.href='#founding'"><img
+                                    src="img/rocket.svg" style="width:14px;height:14px;vertical-align:middle;"
+                                    alt="star"> Join Founder's
+                                Club</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="section" id="features">
+            <div class="section-inner">
+                <h2 class="section-title anim">Everything your project needs.<br><span class="green">Nothing you
+                        don't.</span></h2>
+                <p class="section-sub anim">Six core capabilities. Zero bloat.</p>
+                <div class="features-grid">
+                    <div class="feature-card anim">
+                        <div class="feature-icon"><img src="img/rocket.svg" alt="Push-to-deploy icon" width="18"
+                                height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
+                        <h3>Push-to-Deploy</h3>
+                        <p>Connect your GitHub repo, push code, and deploy automatically. Kaniko builds containers
+                            without a
+                            Docker daemon.</p>
+                    </div>
+                    <div class="feature-card anim anim-delay-1">
+                        <div class="feature-icon"><img src="img/pgsql.svg" alt="PostgreSQL database icon" width="18"
+                                height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
+                        <h3>PostgreSQL Database</h3>
+                        <p>Managed by CloudNativePG. One-click provisioning with credentials auto-injected as
+                            environment
+                            variables.</p>
+                    </div>
+                    <div class="feature-card anim anim-delay-2">
+                        <div class="feature-icon"><img src="img/object_storage.svg"
+                                alt="S3-compatible object storage icon" width="18" height="18"
+                                style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
+                        <h3>S3-Compatible Storage</h3>
+                        <p>Powered by MinIO. Get a private bucket with access keys — perfect for uploads, assets, and
+                            backups.</p>
+                    </div>
+                    <div class="feature-card anim anim-delay-1">
+                        <div class="feature-icon"><img src="img/lock.svg" alt="HTTPS lock icon" width="18" height="18"
+                                style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
+                        <h3>Custom Domains + HTTPS</h3>
+                        <p>Point your domain, get automatic TLS via Traefik. Wildcard subdomains included for free — no
+                            config needed.</p>
+                    </div>
+                    <div class="feature-card anim anim-delay-2">
+                        <div class="feature-icon"><img src="img/monitor.svg" alt="Real-time monitoring icon" width="18"
+                                height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
+                        <h3>Real-Time Monitoring</h3>
+                        <p>Live build logs, deployment status, and resource usage — all in one dashboard. Track
+                            everything,
+                            miss nothing.</p>
+                    </div>
+                    <div class="feature-card anim anim-delay-3">
+                        <div class="feature-icon"><img src="img/cli.svg" alt="CLI terminal icon" width="18" height="18"
+                                style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
+                        <h3>CLI + Web Dashboard</h3>
+                        <p>Full-featured CLI with <code>--json</code> output for scripting. Beautiful web dashboard for
+                            visual management.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRICING -->
+        <section class="section" id="pricing">
+            <div class="section-inner">
+                <h2 class="section-title anim">Simple pricing. <span class="green">No surprises.</span></h2>
+                <p class="section-sub anim">Pick the tier that matches your project. Upgrade or downgrade anytime.</p>
+                <div class="pricing-grid">
+                    <div class="pricing-card anim">
+                        <div class="pricing-name"
+                            style="text-align: center; font-size: 1.05rem; margin-top: 12px; margin-bottom: 28px; color: var(--text-muted);">
+                            FREE — $0/month</div>
+                        <ul class="pricing-features no-check" style="gap: 18px; display: flex; flex-direction: column;">
+                            <li>1 Project</li>
+                            <li>Subdomain only (yourproject.usectl.app)</li>
+                            <li>Auto-sleeps after inactivity</li>
+                            <li>Community support</li>
+                            <li>No database. No storage.</li>
+                        </ul>
+                        <button class="pricing-btn outline"
+                            onclick="window.location.href='https://manager.usectl.com/register'">Start Free</button>
+                        <div style="font-size:0.6rem; color:var(--text-subtle); text-align:center; margin-top:16px;">No
+                            credit card required to start</div>
+                    </div>
+                    <div class="pricing-card anim anim-delay-1">
+                        <div class="pricing-name"
+                            style="text-align: center; font-size: 1.05rem; margin-top: 12px; margin-bottom: 8px; color: var(--text-muted);">
+                            FRONTEND — $5/month</div>
+                        <div
+                            style="text-align: center; color: var(--primary); font-size: 0.72rem; margin-bottom: 28px; font-weight: 500;">
+                            (Founding rate: $3/month — locked forever)</div>
+                        <ul class="pricing-features no-check" style="gap: 18px; display: flex; flex-direction: column;">
+                            <li>Everything in Free, plus:</li>
+                            <li>Always-on (no sleep)</li>
+                            <li>Custom domain + automatic TLS</li>
+                            <li>Push-to-deploy from GitHub</li>
+                            <li>Build logs + monitoring</li>
+                            <li>Email support</li>
+                        </ul>
+                        <button class="pricing-btn outline"
+                            onclick="window.location.href='https://manager.usectl.com/register'">Get Started</button>
+                        <div style="font-size:0.6rem; color:var(--text-subtle); text-align:center; margin-top:16px;">No
+                            credit card required to start</div>
+                    </div>
+                    <div class="pricing-card anim anim-delay-2">
+                        <div class="pricing-name"
+                            style="text-align: center; font-size: 1.05rem; margin-top: 12px; margin-bottom: 8px; color: var(--text-muted);">
+                            APP — $12/month</div>
+                        <div
+                            style="text-align: center; color: var(--primary); font-size: 0.72rem; margin-bottom: 28px; font-weight: 500;">
+                            (Founding rate: $8/month — locked forever)</div>
+                        <ul class="pricing-features no-check" style="gap: 18px; display: flex; flex-direction: column;">
+                            <li>Everything in Frontend, plus:</li>
+                            <li>Backend service hosting (always-on)</li>
+                            <li>Environment variables management</li>
+                            <li>Deployment history + rollbacks</li>
+                        </ul>
+                        <button class="pricing-btn outline"
+                            onclick="window.location.href='https://manager.usectl.com/register'">Get Started</button>
+                        <div style="font-size:0.6rem; color:var(--text-subtle); text-align:center; margin-top:16px;">No
+                            credit card required to start</div>
+                    </div>
+                    <div class="pricing-card popular anim anim-delay-3">
+                        <div class="pricing-badge">MOST POPULAR</div>
+                        <div class="pricing-name"
+                            style="text-align: center; font-size: 1.05rem; margin-top: 12px; margin-bottom: 8px; color: var(--text);">
+                            FULL STACK — $19/month</div>
+                        <div
+                            style="text-align: center; color: var(--primary); font-size: 0.72rem; margin-bottom: 28px; font-weight: 500;">
+                            (Founding rate: $12/month — locked forever)</div>
+                        <ul class="pricing-features" style="gap: 18px; display: flex; flex-direction: column;">
+                            <li style="align-items: flex-start;"><span>Everything in App, plus:</span></li>
+                            <li style="align-items: flex-start;"><span>Dedicated PostgreSQL<br><span
+                                        style="color:var(--text-subtle); font-size:0.75rem;">(credentials
+                                        auto-injected)</span></span></li>
+                            <li style="align-items: flex-start;"><span>MinIO storage — 10GB<br><span
+                                        style="color:var(--text-subtle); font-size:0.75rem;">(S3-compatible, credentials
+                                        auto-injected)</span></span></li>
+                            <li style="align-items: flex-start;"><span>Priority support (24hr response)</span></li>
+                        </ul>
+                        <button class="pricing-btn"
+                            style="background: #11A32A; color: #fff; border: none; font-weight: 500; font-size: 0.9rem; padding: 12px; margin-top: auto;"
+                            onclick="window.location.href='https://manager.usectl.com/register'">Get Full Stack</button>
+                        <div style="font-size:0.6rem; color:var(--text-subtle); text-align:center; margin-top:16px;">No
+                            credit card required to start</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOUNDING MEMBER -->
+        <section class="section founding" id="founding">
+            <div class="section-inner">
+                <h2 class="section-title anim">Join as a Founding Member</h2>
+                <p class="section-sub anim">Limited founding slots. Deploy free during beta. Lock in founding rates
+                    forever
+                    when pricing launches.</p>
+                <div class="founding-form anim">
+                    <div class="founding-row">
+                        <div class="founding-field">
+                            <input type="text" class="founding-input" id="founding-name" placeholder=" " required>
+                            <label class="founding-label" for="founding-name"><span class="required">*</span>
+                                Name</label>
+                        </div>
+                        <div class="founding-field">
+                            <input type="email" class="founding-input" id="founding-email" placeholder=" " required>
+                            <label class="founding-label" for="founding-email"><span class="required">*</span>
+                                Email</label>
+                        </div>
+                    </div>
+                    <div class="founding-row">
+                        <div class="founding-field">
+                            <input type="text" class="founding-input" id="founding-project" placeholder=" ">
+                            <label class="founding-label" for="founding-project">What are you building?</label>
+                        </div>
+                        <div class="founding-field">
+                            <select class="founding-input" id="founding-deploy"
+                                onchange="this.classList.toggle('has-value', this.value !== '')">
+                                <option value="" disabled selected hidden></option>
+                                <option value="vercel">Vercel / Netlify</option>
+                                <option value="aws">AWS / GCP / Azure</option>
+                                <option value="vps">VPS (DigitalOcean, Hetzner, etc)</option>
+                                <option value="heroku">Heroku / Render</option>
+                            </select>
+                            <label class="founding-label" for="founding-deploy">How do you deploy today?</label>
+                        </div>
+                    </div>
+                    <div class="founding-submit-row">
+                        <button class="btn-solid-green" id="founding-submit" onclick="handleFoundingSubmit()">Claim My
+                            Founding Spot</button>
+                    </div>
+                    <div class="founding-form-footer">
+                        <div class="founder-avatar"></div>
+                        <div class="founder-msg">
+                            <div class="msg-top">You'll get a personal onboarding message from me within 24 hours</div>
+                            <div class="msg-bottom">19 Founding members have joined</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="founding-note-bottom anim">No credit card. No commitment. Cancel anytime.</div>
+            </div>
+        </section>
+
+        <!-- INFRASTRUCTURE -->
+        <section class="section infra" id="infra">
+            <div class="section-inner">
+                <h2 class="section-title anim">Serious infrastructure.<br><span class="green">Zero configuration.</span>
+                </h2>
+                <div class="infra-logos anim">
+                    <div class="infra-logo">
+                        <div class="infra-icon"><img src="img/k3s.svg" alt="K3s lightweight Kubernetes" width="110"
+                                height="110" style="width:110px;height:110px;vertical-align:middle;margin-right:4px"
+                                loading="lazy"></div>
+                        <span>K3s</span>
+                    </div>
+                    <div class="infra-logo">
+                        <div class="infra-icon"><img src="img/kaniko.svg" alt="Kaniko container builder" width="110"
+                                height="110" style="width:110px;height:110px;vertical-align:middle;margin-right:4px"
+                                loading="lazy"></div>
+                        <span>Kaniko</span>
+                    </div>
+                    <div class="infra-logo">
+                        <div class="infra-icon"><img src="img/cloudnativepg.svg" alt="CloudNativePG PostgreSQL operator"
+                                width="110" height="110"
+                                style="width:110px;height:110px;vertical-align:middle;margin-right:4px" loading="lazy">
+                        </div>
+                        <span>CloudNativePG</span>
+                    </div>
+                    <div class="infra-logo">
+                        <div class="infra-icon"><img src="img/minio.svg" alt="MinIO S3-compatible storage" width="110"
+                                height="110" style="width:110px;height:110px;vertical-align:middle;margin-right:4px"
+                                loading="lazy"></div>
+                        <span>MinIO</span>
+                    </div>
+                    <div class="infra-logo">
+                        <div class="infra-icon"><img src="img/traefik.svg" alt="Traefik reverse proxy and load balancer"
+                                width="110" height="110"
+                                style="width:110px;height:110px;vertical-align:middle;margin-right:4px" loading="lazy">
+                        </div>
+                        <span>Traefik</span>
+                    </div>
+
+                </div>
+                <p class="infra-desc anim">Every project runs in its own Kubernetes namespace — isolated compute,
+                    isolated
+                    databases, managed storage. Production-grade infrastructure you don't have to configure.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer-inner">
+            <div class="footer-col">
+                <div class="footer-logo"><img src="img/logo.svg" alt="usectl logo" width="120" height="32"
+                        loading="lazy"></div>
+                <div class="footer-info">Built by systemctl · Tbilisi, Georgia</div>
+                <div class="footer-info">© 2026 systemctl. All rights reserved.</div>
+            </div>
+            <div class="footer-col">
+                <div class="footer-heading">Documentation <span class="badge">Coming Soon</span></div>
+                <div class="footer-heading" style="margin-top:8px">Social</div>
+                <div class="footer-social-icons">
+                    <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener" aria-label="GitHub">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                        </svg>
+                    </a>
+                    <a href="https://x.com/usectl" target="_blank" rel="noopener" aria-label="X/Twitter">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('.anim').forEach(el => {
+            if (!el.closest('.hero')) observer.observe(el);
+        });
+
+        function handleFoundingSubmit() {
+            const name = document.getElementById('founding-name').value.trim();
+            const email = document.getElementById('founding-email').value.trim();
+            const project = document.getElementById('founding-project').value.trim();
+            const deploy = document.getElementById('founding-deploy').value;
+            if (!name || !email) { alert('Please fill in your name and email.'); return; }
+            const btn = document.getElementById('founding-submit');
+            btn.textContent = 'Submitting...';
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.7';
+            fetch('/api/founding-requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, project, deploy_method: deploy })
+            }).then(res => {
+                if (!res.ok) throw new Error('Failed');
+                btn.textContent = '✓ You\'re on the list!';
+                btn.style.background = '#0e8c24';
+                btn.style.opacity = '1';
+            }).catch(() => {
+                btn.textContent = 'Claim My Founding Spot';
+                btn.style.pointerEvents = '';
+                btn.style.opacity = '1';
+                alert('Something went wrong. Please try again.');
+            });
+        }
+
+        // Nav background on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('nav');
+            nav.style.background = window.scrollY > 50 ? 'rgba(0,0,0,.92)' : '';
+        });
+
+        // Smooth appear for step toggles
+        document.querySelectorAll('.step-toggle .toggle').forEach(t => {
+            t.addEventListener('click', () => t.classList.toggle('off'));
+        });
+    </script>
+
+</body>
+
+</html>
