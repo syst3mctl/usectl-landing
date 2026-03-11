@@ -1783,7 +1783,7 @@ select.founding-input option {
     justify-content: center;
     gap: 122px;
     flex-wrap: wrap;
-    margin-top: 34px;
+    margin-top: 48px;
     margin-bottom: 24px
 }
 
@@ -1839,7 +1839,7 @@ select.founding-input option {
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 32px;
+    gap: 64px;
     align-items: start
 }
 
@@ -1847,6 +1847,14 @@ select.founding-input option {
     display: flex;
     flex-direction: column;
     gap: 8px
+}
+
+.footer-col:nth-child(2) {
+    justify-self: center
+}
+
+.footer-col:last-child {
+    justify-self: end
 }
 
 
