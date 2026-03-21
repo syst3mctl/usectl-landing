@@ -1,0 +1,28 @@
+{
+  "name": "usectl-landing",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syst3mctl/usectl-landing.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/syst3mctl/usectl-landing/issues"
+  },
+  "homepage": "https://github.com/syst3mctl/usectl-landing#readme",
+  "dependencies": {
+    "gsap": "^3.14.2",
+    "lenis": "^1.3.18",
+    "lottie-web": "^5.13.0",
+    "vite": "^8.0.0"
+  }
+}

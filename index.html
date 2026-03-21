@@ -131,7 +131,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=2">
+    <link rel="stylesheet" href="css/styles.css?v=3">
 </head>
 
 <body>
@@ -141,41 +141,58 @@
         <nav class="nav" id="nav" aria-label="Main navigation">
             <div class="nav-inner">
                 <div class="nav-left">
-                    <a href="/" class="nav-logo" aria-label="usectl home"><img src="img/logo.svg" alt="usectl logo"
-                            width="120" height="32"></a>
+                    <a href="/" class="nav-logo" aria-label="usectl home">
+                        <img src="img/logo.svg" alt="usectl logo">
+                    </a>
                     <span class="nav-badge">Limited Beta</span>
                 </div>
                 <div class="nav-right">
                     <div class="nav-links">
+                        <a href="#steps">How it Works</a>
                         <a href="#features">Features</a>
                         <a href="#pricing">Pricing</a>
-                        <a href="#steps">How it Works</a>
                         <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer">Github</a>
+                        <a href="https://docs.usectl.com" target="_blank">Documentation</a>
                     </div>
-                    <a href="https://manager.usectl.com/register" class="nav-cta-btn">Get Early Access free</a>
+                    <a href="https://manager.usectl.com/login" class="nav-cta-btn">
+                        <span>Login</span>
+                        <div class="glitch" aria-hidden="true">
+                            <span class="letters">
+                                <span>L</span><span>o</span><span>g</span><span>i</span><span>n</span>
+                            </span>
+                        </div>
+                    </a>
                 </div>
                 <button class="mobile-menu-btn" aria-label="Toggle mobile menu" aria-expanded="false"
-                    onclick="var m=document.getElementById('mobile-menu');m.classList.toggle('active');this.setAttribute('aria-expanded',m.classList.contains('active'))">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
+                    onclick="var m=document.getElementById('mobile-menu');var n=document.getElementById('nav');m.classList.toggle('active');n.classList.toggle('active');this.classList.toggle('active');this.setAttribute('aria-expanded',m.classList.contains('active'))">
+                    <div class="hamburger">
+                        <div class="hamburger-container">
+                            <div class="hamburger-line"></div>
+                            <div class="hamburger-line"></div>
+                        </div>
+                    </div>
                 </button>
             </div>
             <div class="mobile-menu" id="mobile-menu" role="menu">
+                <a href="#steps" role="menuitem"
+                    onclick="document.getElementById('mobile-menu').classList.remove('active')">How it Works</a>
                 <a href="#features" role="menuitem"
                     onclick="document.getElementById('mobile-menu').classList.remove('active')">Features</a>
                 <a href="#pricing" role="menuitem"
                     onclick="document.getElementById('mobile-menu').classList.remove('active')">Pricing</a>
-                <a href="#steps" role="menuitem"
-                    onclick="document.getElementById('mobile-menu').classList.remove('active')">How it
-                    Works</a>
-                <a href="https://github.com/syst3mctl/usectl" target="_blank" rel="noopener noreferrer"
+
+                <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer"
                     role="menuitem">Github</a>
+                <a href="https://docs.usectl.com" target="_blank" role="menuitem">Documentation</a>
                 <a href="https://manager.usectl.com/register" class="nav-cta-btn" role="menuitem"
-                    style="text-align: center; margin-top: 12px; width: 100%;">Get Early Access free</a>
+                    style="text-align: center;">
+                    <span>Get Early Access free</span>
+                    <div class="glitch" aria-hidden="true">
+                        <span class="letters">
+                            <span>G</span><span>e</span><span>t</span><span>&nbsp;</span><span>E</span><span>a</span><span>r</span><span>l</span><span>y</span><span>&nbsp;</span><span>A</span><span>c</span><span>c</span><span>e</span><span>s</span><span>s</span><span>&nbsp;</span><span>f</span><span>r</span><span>e</span><span>e</span>
+                        </span>
+                    </div>
+                </a>
             </div>
         </nav>
     </header>
@@ -184,8 +201,9 @@
         <!-- HERO -->
         <section class="hero" id="hero">
             <div class="hero-inner">
-                <div class="hero-text anim visible">
-                    <h1>One Prompt. Your<br>Entire Project.<br><span class="green">Live.</span></h1>
+                <div class="hero-text">
+                    <h1 id="hero-h1"><span class="h1-content">One Prompt. Your<br>Entire Project.<br><span
+                                class="green">Live.</span></span><span id="h1-cursor"></span></h1>
                     <!-- Noscript fallback for indexing -->
                     <noscript>
                         <p>usectl is a self-hosted deployment platform. Deploy backend, frontend, PostgreSQL, and S3
@@ -194,83 +212,134 @@
                     <p class="subtitle">Deploy backend + frontend + PostgreSQL + storage — for less than Supabase
                         charges
                         for a database alone.</p>
-                    <a href="https://manager.usectl.com/register" class="hero-cta">Get Early Access free</a>
-                    <p class="hero-note">Founding member slots are open — deploy free during beta, lock in founding
-                        rates
-                        forever.</p>
+                    <a href="#founding" class="hero-cta">
+                        <span>Become a founding member</span>
+                        <div class="glitch" aria-hidden="true">
+                            <span class="letters">
+                                <span>B</span><span>e</span><span>c</span><span>o</span><span>m</span><span>e</span><span>&nbsp;</span><span>a</span><span>&nbsp;</span><span>f</span><span>o</span><span>u</span><span>n</span><span>d</span><span>i</span><span>n</span><span>g</span><span>&nbsp;</span><span>m</span><span>e</span><span>m</span><span>b</span><span>e</span><span>r</span>
+                            </span>
+                        </div>
+                    </a>
+                    <p class="hero-note"><span>$15/month </span>for life · 50% off regular pricing · limited to 100
+                        members</p>
                     <p class="hero-infra">Powered by Hetzner infrastructure · Kubernetes-isolated projects</p>
                 </div>
-                <div class="hero-mockup anim visible anim-delay-2">
-                    <img src="img/hero-right.svg"
-                        alt="usectl deployment flow diagram showing GitHub to Kubernetes pipeline"
-                        class="hero-right-svg" loading="eager">
+                <div class="hero-mockup">
+                    <div class="hero-mockup-scene-container">
+                        <div class="hero-mockup-scene">
+                            <div class="hero-mockup-scene-border-left"></div>
+                            <div class="hero-mockup-scene-border-top"></div>
+                            <div class="mockup-browser-card terminal">
+                                <div class="mockup-browser-bar">
+                                    <div class="dots"><span class="r"></span><span class="y"></span><span
+                                            class="g"></span>
+                                    </div>
+                                    <div class="url-bar">My favorite project</div>
+                                </div>
+                                <div class="mockup-browser-body">
+                                    <div class="terminal-git-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="13" fill="none"
+                                            viewBox="0 0 25 13">
+                                            <path fill="#fff" fillOpacity="0.74"
+                                                d="M12.5 12.5q-2.28 0-3.984-1.422T6.375 7.5H0V5h6.375q.438-2.156 2.14-3.578Q10.22 0 12.5 0t3.984 1.422T18.625 5H25v2.5h-6.375q-.438 2.156-2.14 3.578Q14.78 12.5 12.5 12.5m0-2.5q1.563 0 2.656-1.094 1.095-1.093 1.094-2.656t-1.094-2.656Q14.063 2.5 12.5 2.5T9.844 3.594 8.75 6.25t1.094 2.656Q10.937 10.001 12.5 10">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div class="terminal-text-ttl">
+                                        <span>Command</span>
+                                    </div>
+                                    <div class="terminal-text">
+
+                                        <p></p>
+                                        <p></p>
+                                        <p></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="git-build-line-container">
+                                <div class="rocket rocketCont">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none"
+                                        viewBox="0 0 12 12">
+                                        <path fill="#11A32A" fillOpacity="0.55"
+                                            d="m2.1 4.856 1.138.481q.204-.408.422-.787.22-.38.482-.758l-.817-.16zm2.07 1.21 1.663 1.649A6.3 6.3 0 0 0 7.146 7q.7-.48 1.312-1.094a7.9 7.9 0 0 0 1.597-2.267q.576-1.247.503-2.297-1.05-.073-2.304.503A7.8 7.8 0 0 0 5.98 3.442a9.3 9.3 0 0 0-1.094 1.312q-.48.7-.714 1.313m2.597-.947a1.12 1.12 0 0 1-.336-.824q0-.489.336-.824.335-.336.83-.336.497 0 .832.336.336.335.336.824t-.336.824-.831.335-.831-.335M7.044 9.8l1.225-1.225-.16-.817a9 9 0 0 1-.759.474q-.38.212-.787.416zM11.608.277a6.7 6.7 0 0 1-.342 3.434q-.62 1.67-2.137 3.187l.292 1.444q.058.292-.03.568a1.2 1.2 0 0 1-.291.482l-2.45 2.45-1.225-2.873-2.494-2.494L.058 5.25 2.494 2.8q.204-.204.488-.292.285-.087.576-.029l1.444.292Q6.518 1.254 8.182.627a6.64 6.64 0 0 1 3.426-.35M1.094 8.327q.51-.51 1.247-.518.735-.007 1.247.503.51.51.503 1.247a1.72 1.72 0 0 1-.518 1.247q-.365.364-1.218.627-.853.262-2.355.467.204-1.502.467-2.355.262-.854.627-1.218m.831.817q-.145.145-.292.532a3.8 3.8 0 0 0-.204.78q.395-.058.78-.197.386-.138.533-.284a.63.63 0 0 0 .19-.423.53.53 0 0 0-.161-.423.55.55 0 0 0-.423-.168.6.6 0 0 0-.423.183">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div class="git-build-line"></div>
+                            </div>
+                            <div class="git-build-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="23" fill="none"
+                                    viewBox="0 0 24 23">
+                                    <path fill="#fff" fillOpacity="0.74"
+                                        d="M6 23a2.9 2.9 0 0 1-2.125-.875A2.9 2.9 0 0 1 3 20q0-1.25.875-2.125A2.9 2.9 0 0 1 6 17q.35 0 .65.075t.575.2L8.65 15.5a4.34 4.34 0 0 1-.975-1.75 4.55 4.55 0 0 1-.125-1.95l-2.025-.675q-.425.625-1.075 1T3 12.5a2.9 2.9 0 0 1-2.125-.875A2.9 2.9 0 0 1 0 9.5q0-1.25.875-2.125A2.9 2.9 0 0 1 3 6.5q1.25 0 2.125.875T6 9.5v.2l2.025.7q.5-.9 1.338-1.525a4.3 4.3 0 0 1 1.887-.8V5.9a3.1 3.1 0 0 1-1.613-1.062A2.83 2.83 0 0 1 9 3q0-1.25.875-2.125A2.9 2.9 0 0 1 12 0q1.25 0 2.125.875T15 3a2.8 2.8 0 0 1-.65 1.838q-.65.787-1.6 1.062v2.175q1.05.175 1.887.8a4.8 4.8 0 0 1 1.338 1.525L18 9.7v-.2q0-1.25.875-2.125A2.9 2.9 0 0 1 21 6.5q1.25 0 2.125.875T24 9.5t-.875 2.125A2.9 2.9 0 0 1 21 12.5q-.8 0-1.462-.375a3 3 0 0 1-1.063-1l-2.025.675q.15.975-.125 1.938a4.56 4.56 0 0 1-.975 1.762l1.425 1.75q.275-.125.575-.187.3-.063.65-.063 1.25 0 2.125.875T21 20t-.875 2.125A2.9 2.9 0 0 1 18 23a2.9 2.9 0 0 1-2.125-.875A2.9 2.9 0 0 1 15 20q0-.5.162-.962a3.2 3.2 0 0 1 .438-.838l-1.425-1.775a4.4 4.4 0 0 1-2.187.575 4.4 4.4 0 0 1-2.188-.575L8.4 18.2q.275.375.438.838T9 20q0 1.25-.875 2.125A2.9 2.9 0 0 1 6 23M3 10.5q.424 0 .712-.287A.97.97 0 0 0 4 9.5a.97.97 0 0 0-.288-.713A.97.97 0 0 0 3 8.5a.97.97 0 0 0-.712.287A.97.97 0 0 0 2 9.5q0 .424.288.713.287.287.712.287M6 21q.424 0 .713-.288A.97.97 0 0 0 7 20a.97.97 0 0 0-.287-.712A.97.97 0 0 0 6 19a.97.97 0 0 0-.713.288A.97.97 0 0 0 5 20q0 .424.287.712Q5.576 21 6 21m6-17q.424 0 .713-.288A.97.97 0 0 0 13 3a.97.97 0 0 0-.287-.712A.97.97 0 0 0 12 2a.97.97 0 0 0-.713.288A.97.97 0 0 0 11 3q0 .424.287.712Q11.576 4 12 4m0 11q1.05 0 1.775-.725T14.5 12.5t-.725-1.775T12 10t-1.775.725T9.5 12.5t.725 1.775T12 15m6 6q.424 0 .712-.288A.97.97 0 0 0 19 20a.97.97 0 0 0-.288-.712A.97.97 0 0 0 18 19a.97.97 0 0 0-.712.288A.97.97 0 0 0 17 20q0 .424.288.712.287.288.712.288m3-10.5q.424 0 .712-.287A.97.97 0 0 0 22 9.5a.97.97 0 0 0-.288-.713A.97.97 0 0 0 21 8.5a.97.97 0 0 0-.712.287A.97.97 0 0 0 20 9.5q0 .424.288.713.287.287.712.287">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div class="pipeline-container">
+                                <div class="pipeline-ttl">
+                                    <span>>usectl Pipeline</span>
+                                    <div class="pipeline-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none"
+                                            viewBox="0 0 12 12">
+                                            <path fill="#11A32A" fillOpacity="0.55"
+                                                d="M4.258 11.667 4.025 9.8a2 2 0 0 1-.357-.175 5 5 0 0 1-.328-.219l-1.736.73L0 7.364l1.502-1.138a1.4 1.4 0 0 1-.014-.197v-.394q0-.094.014-.196L0 4.302l1.604-2.77 1.736.728q.16-.116.335-.218.175-.103.35-.175L4.258 0h3.209L7.7 1.867q.189.073.357.175t.328.218l1.736-.729 1.604 2.771-1.502 1.138q.014.102.014.196v.394q0 .095-.029.197l1.502 1.138-1.604 2.77-1.72-.729q-.162.116-.336.219a3 3 0 0 1-.35.175l-.233 1.867zM5.28 10.5h1.152l.204-1.546a3.3 3.3 0 0 0 .839-.343q.386-.226.707-.546l1.444.598.569-.992-1.254-.948q.072-.205.102-.43a3.6 3.6 0 0 0 0-.919 2 2 0 0 0-.102-.43l1.254-.948-.569-.992-1.444.613a3.2 3.2 0 0 0-.707-.562 3.3 3.3 0 0 0-.839-.343l-.19-1.545H5.295L5.09 2.712a3.3 3.3 0 0 0-.839.343q-.386.225-.707.547L2.1 3.004l-.569.992 1.254.933a2.4 2.4 0 0 0-.102.438 3.5 3.5 0 0 0 0 .918q.03.219.102.438l-1.254.948.569.991 1.444-.612q.321.335.707.561t.839.343zm.613-2.625q.846 0 1.443-.598t.598-1.444-.598-1.443a1.97 1.97 0 0 0-1.443-.598q-.861 0-1.451.598a1.98 1.98 0 0 0-.591 1.443q0 .846.59 1.444a1.96 1.96 0 0 0 1.452.598">
+                                            </path>
+                                        </svg>
+                                    </div>
+
+                                </div>
+                                <div class="pipeline-line">
+                                    <span></span>
+                                </div>
+                                <div class="pipline-text">
+                                    Building Docker image... 68%
+                                </div>
+                            </div>
+                            <div class="mockup-browser-card browser">
+                                <div class="mockup-browser-bar">
+                                    <div class="dots"><span class="r"></span><span class="y"></span><span
+                                            class="g"></span>
+                                    </div>
+                                    <div class="url-bar">https://your-app.com</div>
+                                </div>
+                                <div class="mockup-browser-body">
+                                    <div id="lottie-blocks" class="lottie-file"></div>
+                                    <div id="build-blocks" class="lottie-file"></div>
+                                    <div id="deploy-blocks" class="lottie-file"></div>
+                                    <div class="browser-success">
+                                        <div class="success-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none"
+                                                viewBox="0 0 25 25">
+                                                <path fill="#11A32A" fillOpacity="0.55"
+                                                    d="m10.75 18.25 8.813-8.812-1.75-1.75-7.063 7.062-3.562-3.562-1.75 1.75zM12.5 25q-2.594 0-4.875-.984a12.6 12.6 0 0 1-3.969-2.672 12.6 12.6 0 0 1-2.672-3.969Q0 15.095 0 12.5q0-2.594.984-4.875a12.6 12.6 0 0 1 2.672-3.969A12.6 12.6 0 0 1 7.625.984Q9.905 0 12.5 0q2.594 0 4.875.984a12.6 12.6 0 0 1 3.969 2.672 12.6 12.6 0 0 1 2.672 3.969Q25 9.905 25 12.5q0 2.594-.984 4.875a12.6 12.6 0 0 1-2.672 3.969 12.6 12.6 0 0 1-3.969 2.672Q15.095 25 12.5 25m0-2.5q4.188 0 7.094-2.906T22.5 12.5t-2.906-7.094T12.5 2.5 5.406 5.406 2.5 12.5t2.906 7.094T12.5 22.5">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div class="success-ttl">
+                                            <span>Successfully Deployed</span>
+                                        </div>
+                                        <div class="success-subttl">
+                                            <span>Runtime: 1.4s • Region: self-hosted</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- COST COMPARISON -->
-        <section class="section cost" id="cost">
-            <div class="section-inner anim">
-                <h2 class="section-title">You're already paying too much to keep your<br>project alive.</h2>
-                <p class="cost-desc">Neon charges <span class="green-text">$19/month</span> for PostgreSQL alone. usectl
-                    Full Stack is $19 and includes the database, file storage, server, deploy pipeline, and everything
-                    else.
-                </p>
-                <div style="text-align:center">
-                    <a href="#pricing" class="cost-cta">Stop Overpaying <span class="arrow">→</span></a>
-                </div>
-                <div class="cost-cards">
-                    <div class="cost-card">
-                        <h3>Fragmented & Overpriced</h3>
-                        <div class="cost-item">
-                            <div class="cost-label">PostgreSQL</div>
-                            <div class="cost-sublabel">(Neon / Supabase) $30+/month</div>
-                        </div>
-                        <div class="cost-item">
-                            <div class="cost-label">Compute & Hosting</div>
-                            <div class="cost-sublabel">(Vercel, AWS) $40+/month</div>
-                        </div>
-                        <div class="cost-item">
-                            <div class="cost-label">DevOps Tools</div>
-                            <div class="cost-sublabel">(GitHub Actions, Registry) $20+/month</div>
-                        </div>
-                        <div class="cost-total">
-                            <div class="cost-total-bar">$90 <span
-                                    style="font-weight:400;font-size:.85rem;color:var(--text-subtle)">/ month</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="cost-card highlight">
-                        <h3>All-in-One Infrastructure</h3>
-                        <div class="cost-card-body">
-                            <p>Everything you need to run, scale, and manage your stack in <strong>One Place</strong>
-                            </p>
-                            <ul class="cost-check-list">
-                                <li><span class="check-icon">✓</span> DB</li>
-                                <li><span class="check-icon">✓</span> Storage</li>
-                                <li><span class="check-icon">✓</span> Compute</li>
-                                <li><span class="check-icon">✓</span> Pipeline</li>
-                            </ul>
-                        </div>
-                        <div class="cost-total">
-                            <div class="cost-total-bar green">$19 <span style="font-weight:400;font-size:.85rem">/
-                                    month</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <!-- 3 STEPS -->
         <section class="section steps" id="steps">
             <div class="section-inner">
 
                 <div>
-                    <h2 class="section-title anim">Ship your project in <span class="green"
-                            style="position: relative;">three
+                    <h2 class="section-title">Ship your project in <span class="green" style="position: relative;">three
                             steps.<div class="bg-glow-green" style="top: 70%; left: 70%;"></div></span></h2>
-                    <p class="section-sub anim">No Docker knowledge required. No server config. No YAML files.</p>
-                    <div class="steps-row anim">
+                    <p class="section-sub">No Docker knowledge required. No server config. No YAML files.</p>
+                    <div class="steps-row">
                         <div class="step-item">
                             <div class="step-num">01</div>
                             <h3>Link your GitHub repository</h3>
@@ -312,7 +381,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="steps-terminal anim">
+                <div class="steps-terminal">
                     <div class="steps-terminal-header">
                         <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
                         <span class="title">usectl projects create</span>
@@ -334,16 +403,13 @@
         <!-- AI SECTION -->
         <section class="section ai-section" id="ai">
             <div class="section-inner">
-                <div class="ai-badge">
-                    <span class="ai-badge-text">Coming Soon</span>
-                </div>
-                <h2 class="section-title anim">Deploy with your AI agent.</h2>
-                <p class="ai-desc anim">Already using Claude, Cursor, or ChatGPT to build your app? Soon you'll be able
+                <h2 class="section-title">Deploy with your AI agent.</h2>
+                <p class="ai-desc">Already using Claude, Cursor, or ChatGPT to build your app? Soon you'll be able
                     to
                     deploy it the same way — paste one prompt into your agent, answer two questions, and your entire
                     stack
                     deploys itself.</p>
-                <div class="ai-chat anim">
+                <div class="ai-chat">
                     <div class="ai-chat-header">
                         <div class="ai-chat-header-left">
                             <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span>
@@ -416,11 +482,11 @@
         <!-- FEATURES -->
         <section class="section" id="features">
             <div class="section-inner">
-                <h2 class="section-title anim">Everything your project needs.<br><span class="green">Nothing you
+                <h2 class="section-title">Everything your project needs.<br><span class="green">Nothing you
                         don't. <div class="bg-glow-green" style="top: 70%; left: 58%;"></div></span></h2>
-                <p class="section-sub anim">Six core capabilities. Zero bloat.</p>
+                <p class="section-sub">Six core capabilities. Zero bloat.</p>
                 <div class="features-grid">
-                    <div class="feature-card anim">
+                    <div class="feature-card">
                         <div class="feature-icon"><img src="img/rocket.svg" alt="Push-to-deploy icon" width="18"
                                 height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
                         <h3>Push-to-Deploy</h3>
@@ -428,7 +494,7 @@
                             without a
                             Docker daemon.</p>
                     </div>
-                    <div class="feature-card anim anim-delay-1">
+                    <div class="feature-card">
                         <div class="feature-icon"><img src="img/pgsql.svg" alt="PostgreSQL database icon" width="18"
                                 height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
                         <h3>PostgreSQL Database</h3>
@@ -436,7 +502,7 @@
                             environment
                             variables.</p>
                     </div>
-                    <div class="feature-card anim anim-delay-2">
+                    <div class="feature-card">
                         <div class="feature-icon"><img src="img/object_storage.svg"
                                 alt="S3-compatible object storage icon" width="18" height="18"
                                 style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
@@ -444,14 +510,14 @@
                         <p>Powered by MinIO. Get a private bucket with access keys — perfect for uploads, assets, and
                             backups.</p>
                     </div>
-                    <div class="feature-card anim anim-delay-1">
+                    <div class="feature-card">
                         <div class="feature-icon"><img src="img/lock.svg" alt="HTTPS lock icon" width="18" height="18"
                                 style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
                         <h3>Custom Domains + HTTPS</h3>
                         <p>Point your domain, get automatic TLS via Traefik. Wildcard subdomains included for free — no
                             config needed.</p>
                     </div>
-                    <div class="feature-card anim anim-delay-2">
+                    <div class="feature-card">
                         <div class="feature-icon"><img src="img/monitor.svg" alt="Real-time monitoring icon" width="18"
                                 height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
                         <h3>Real-Time Monitoring</h3>
@@ -459,7 +525,7 @@
                             everything,
                             miss nothing.</p>
                     </div>
-                    <div class="feature-card anim anim-delay-3">
+                    <div class="feature-card">
                         <div class="feature-icon"><img src="img/cli.svg" alt="CLI terminal icon" width="18" height="18"
                                 style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
                         <h3>CLI + Web Dashboard</h3>
@@ -473,86 +539,42 @@
         <!-- PRICING -->
         <section class="section" id="pricing">
             <div class="section-inner">
-                <h2 class="section-title anim">Simple pricing. <span class="green">No surprises.</span></h2>
-                <p class="section-sub anim">Pick the tier that matches your project. Upgrade or downgrade anytime.</p>
+                <h2 class="section-title">Simple pricing. <span class="green-text">No surprises.</span></h2>
+                <p class="section-sub">Pick the tier that matches your project. Upgrade or downgrade anytime.</p>
                 <div class="pricing-grid">
-                    <div class="pricing-card anim">
-                        <div class="pricing-name"
-                            style="text-align: center; font-size: 1.05rem; margin-top: 12px; margin-bottom: 28px; color: var(--text-muted);">
-                            FREE — $0/month</div>
-                        <ul class="pricing-features no-check" style="gap: 18px; display: flex; flex-direction: column;">
-                            <li>1 Project</li>
-                            <li>Subdomain only (yourproject.usectl.app)</li>
-                            <li>Auto-sleeps after inactivity</li>
-                            <li>Community support</li>
-                            <li>No database. No storage.</li>
-                        </ul>
-                        <button class="pricing-btn outline"
-                            onclick="window.location.href='https://manager.usectl.com/register'">Start Free</button>
-                        <div style="font-size:0.6rem; color:var(--text-subtle); text-align:center; margin-top:16px;">No
-                            credit card required to start</div>
-                    </div>
-                    <div class="pricing-card anim anim-delay-1">
-                        <div class="pricing-name"
-                            style="text-align: center; font-size: 1.05rem; margin-top: 12px; margin-bottom: 8px; color: var(--text-muted);">
-                            FRONTEND — $5/month</div>
-                        <div
-                            style="text-align: center; color: var(--primary); font-size: 0.72rem; margin-bottom: 28px; font-weight: 500;">
-                            (Founding rate: $3/month — locked forever)</div>
-                        <ul class="pricing-features no-check" style="gap: 18px; display: flex; flex-direction: column;">
-                            <li>Everything in Free, plus:</li>
-                            <li>Always-on (no sleep)</li>
-                            <li>Custom domain + automatic TLS</li>
-                            <li>Push-to-deploy from GitHub</li>
-                            <li>Build logs + monitoring</li>
-                            <li>Email support</li>
-                        </ul>
-                        <button class="pricing-btn outline"
-                            onclick="window.location.href='https://manager.usectl.com/register'">Get Started</button>
-                        <div style="font-size:0.6rem; color:var(--text-subtle); text-align:center; margin-top:16px;">No
-                            credit card required to start</div>
-                    </div>
-                    <div class="pricing-card anim anim-delay-2">
-                        <div class="pricing-name"
-                            style="text-align: center; font-size: 1.05rem; margin-top: 12px; margin-bottom: 8px; color: var(--text-muted);">
-                            APP — $12/month</div>
-                        <div
-                            style="text-align: center; color: var(--primary); font-size: 0.72rem; margin-bottom: 28px; font-weight: 500;">
-                            (Founding rate: $8/month — locked forever)</div>
-                        <ul class="pricing-features no-check" style="gap: 18px; display: flex; flex-direction: column;">
-                            <li>Everything in Frontend, plus:</li>
-                            <li>Backend service hosting (always-on)</li>
-                            <li>Environment variables management</li>
-                            <li>Deployment history + rollbacks</li>
-                        </ul>
-                        <button class="pricing-btn outline"
-                            onclick="window.location.href='https://manager.usectl.com/register'">Get Started</button>
-                        <div style="font-size:0.6rem; color:var(--text-subtle); text-align:center; margin-top:16px;">No
-                            credit card required to start</div>
-                    </div>
-                    <div class="pricing-card popular anim anim-delay-3">
-                        <div class="pricing-badge">MOST POPULAR</div>
+                    <div class="pricing-card popular">
+                        <div class="pricing-badge">FOUNDING MEMBER</div>
                         <div class="pricing-name"
                             style="text-align: center; font-size: 1.05rem; margin-top: 12px; margin-bottom: 8px; color: var(--text);">
-                            FULL STACK — $19/month</div>
+                            Pro — Founding Member <br> <span style="text-decoration: line-through;">$29</span> <span
+                                style="font-size: 25px; color: var(--primary);">$15</span> /month
+                        </div>
                         <div
-                            style="text-align: center; color: var(--primary); font-size: 0.72rem; margin-bottom: 28px; font-weight: 500;">
-                            (Founding rate: $12/month — locked forever)</div>
-                        <ul class="pricing-features" style="gap: 18px; display: flex; flex-direction: column;">
-                            <li style="align-items: flex-start;"><span>Everything in App, plus:</span></li>
-                            <li style="align-items: flex-start;"><span>Dedicated PostgreSQL<br><span
-                                        style="color:var(--text-subtle); font-size:0.75rem;">(credentials
-                                        auto-injected)</span></span></li>
-                            <li style="align-items: flex-start;"><span>MinIO storage — 10GB<br><span
-                                        style="color:var(--text-subtle); font-size:0.75rem;">(S3-compatible, credentials
-                                        auto-injected)</span></span></li>
-                            <li style="align-items: flex-start;"><span>Priority support (24hr response)</span></li>
+                            style="text-align: center; color: var(--primary); font-size: 16px; margin-bottom: 28px; font-weight: 500;">
+                            Full stack. Locked at 50% off forever.</div>
+                        <ul class="pricing-features" style="display: flex; flex-direction: column;">
+                            <li style="align-items: flex-start;"><span>3-day free trial, no card required</span></li>
+                            <li style="align-items: flex-start;"><span>Custom domain + automatic SSL</span></li>
+                            <li style="align-items: flex-start;"><span>Always-on backend hosting</span></li>
+                            <li style="align-items: flex-start;"><span>Dedicated PostgreSQL database</span></li>
+                            <li style="align-items: flex-start;"><span>S3-compatible storage (10GB)</span></li>
+                            <li style="align-items: flex-start;"><span>Push-to-deploy from GitHub</span></li>
+                            <li style="align-items: flex-start;"><span>CLI + Web Dashboard</span></li>
+                            <li style="align-items: flex-start;"><span>Rollbacks + priority support</span></li>
                         </ul>
                         <button class="pricing-btn"
                             style="background: #11A32A; color: #fff; border: none; font-weight: 500; font-size: 0.9rem; padding: 12px; margin-top: auto;"
-                            onclick="window.location.href='https://manager.usectl.com/register'">Get Full Stack</button>
-                        <div style="font-size:0.6rem; color:var(--text-subtle); text-align:center; margin-top:16px;">No
-                            credit card required to start</div>
+                            onclick="window.location.href='https://manager.usectl.com/register'">
+                            <span>Claim your spot</span>
+                            <div class="glitch" aria-hidden="true">
+                                <span class="letters">
+                                    <span>G</span><span>e</span><span>t</span><span>&nbsp;</span><span>F</span><span>u</span><span>l</span><span>l</span><span>&nbsp;</span><span>S</span><span>t</span><span>a</span><span>c</span><span>k</span>
+                                </span>
+                            </div>
+                        </button>
+                        <div
+                            style="font-size:16px; color:rgba(255, 255, 255, 0.88); text-align:center; margin-top:16px;">
+                            limited to 100 members</div>
                     </div>
                 </div>
             </div>
@@ -561,27 +583,30 @@
         <!-- FOUNDING MEMBER -->
         <section class="section founding" id="founding">
             <div class="section-inner">
-                <h2 class="section-title anim">Join as a Founding Member</h2>
-                <p class="section-sub anim">Limited founding slots. Deploy free during beta. Lock in founding rates
+                <h2 class="section-title">Join as a Founding Member</h2>
+                <p class="section-sub">Limited founding slots. Deploy free during beta. Lock in founding rates
                     forever
                     when pricing launches.</p>
-                <div class="founding-form anim">
+                <div class="founding-form">
                     <div class="founding-row">
                         <div class="founding-field">
                             <input type="text" class="founding-input" id="founding-name" placeholder=" " required>
                             <label class="founding-label" for="founding-name"><span class="required">*</span>
                                 Name</label>
+                            <span class="founding-error" id="error-name"></span>
                         </div>
                         <div class="founding-field">
                             <input type="email" class="founding-input" id="founding-email" placeholder=" " required>
                             <label class="founding-label" for="founding-email"><span class="required">*</span>
                                 Email</label>
+                            <span class="founding-error" id="error-email"></span>
                         </div>
                     </div>
                     <div class="founding-row">
                         <div class="founding-field">
                             <input type="text" class="founding-input" id="founding-project" placeholder=" ">
                             <label class="founding-label" for="founding-project">What are you building?</label>
+                            <span class="founding-error" id="error-project"></span>
                         </div>
                         <div class="founding-field">
                             <select class="founding-input" id="founding-deploy"
@@ -594,31 +619,51 @@
                                 <option value="other">Other</option>
                             </select>
                             <label class="founding-label" for="founding-deploy">How do you deploy today?</label>
+                            <span class="founding-error" id="error-deploy"></span>
+                        </div>
+                    </div>
+                    <div class="founding-row">
+                        <div class="founding-field">
+                            <input type="password" class="founding-input" id="founding-password" placeholder=" " required>
+                            <label class="founding-label" for="founding-password"><span class="required">*</span>
+                                Password</label>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('founding-password', this)" aria-label="Toggle password visibility">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                            <span class="founding-error" id="error-password"></span>
+                        </div>
+                        <div class="founding-field">
+                            <input type="password" class="founding-input" id="founding-confirm-password" placeholder=" " required>
+                            <label class="founding-label" for="founding-confirm-password"><span class="required">*</span>
+                                Confirm Password</label>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('founding-confirm-password', this)" aria-label="Toggle password visibility">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                            <span class="founding-error" id="error-confirm-password"></span>
                         </div>
                     </div>
                     <div class="founding-submit-row">
-                        <button class="btn-solid-green" id="founding-submit" onclick="handleFoundingSubmit()">Claim My
-                            Founding Spot</button>
-                    </div>
-                    <div class="founding-form-footer">
-                        <div class="founder-avatar"></div>
-                        <div class="founder-msg">
-                            <div class="msg-top">You'll get a personal onboarding message from me within 24 hours</div>
-                            <div class="msg-bottom">19 Founding members have joined</div>
-                        </div>
+                        <button class="btn-solid-green" id="founding-submit" onclick="handleFoundingSubmit()">
+                            <span>Claim My Founding Spot</span>
+                            <div class="glitch" aria-hidden="true">
+                                <span class="letters">
+                                    <span>C</span><span>l</span><span>a</span><span>i</span><span>m</span><span>&nbsp;</span><span>M</span><span>y</span><span>&nbsp;</span><span>F</span><span>o</span><span>u</span><span>n</span><span>d</span><span>i</span><span>n</span><span>g</span><span>&nbsp;</span><span>S</span><span>p</span><span>o</span><span>t</span>
+                                </span>
+                            </div>
+                        </button>
                     </div>
                 </div>
-                <div class="founding-note-bottom anim">No credit card. No commitment. Cancel anytime.</div>
+                <div class="founding-note-bottom">No credit card. No commitment. Cancel anytime.</div>
             </div>
         </section>
 
         <!-- INFRASTRUCTURE -->
         <section class="section infra" id="infra">
             <div class="section-inner">
-                <h2 class="section-title anim">Serious infrastructure.<br><span class="green">Zero configuration. <div
+                <h2 class="section-title">Serious infrastructure.<br><span class="green">Zero configuration. <div
                             class="bg-glow-green" style="top: 70%; left: 58%;"></div></span>
                 </h2>
-                <div class="infra-logos anim">
+                <div class="infra-logos">
                     <div class="infra-logo">
                         <div class="infra-icon"><img src="img/k3s.svg" alt="K3s lightweight Kubernetes" width="110"
                                 height="147" style="width:110px;height:110px;vertical-align:middle;margin-right:4px"
@@ -653,7 +698,7 @@
                     </div>
 
                 </div>
-                <p class="infra-desc anim">Every project runs in its own Kubernetes namespace — isolated compute,
+                <p class="infra-desc">Every project runs in its own Kubernetes namespace — isolated compute,
                     isolated
                     databases, managed storage. Production-grade infrastructure you don't have to configure.</p>
             </div>
@@ -670,18 +715,16 @@
                 <div class="footer-info">© 2026 systemctl. All rights reserved.</div>
             </div>
             <div class="footer-col">
-                <div class="footer-heading"><a href="https://docs.usectl.com" target="_blank" rel="noopener"
-                        style="color:inherit;text-decoration:none">Documentation</a></div>
                 <div class="footer-heading" style="margin-top:8px">Social</div>
                 <div class="footer-social-icons">
                     <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener" aria-label="GitHub">
-                        <svg width="22" height="21" viewBox="0 0 24 24" fill="currentColor">
+                        <svg width="22" height="21" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)">
                             <path
                                 d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
                         </svg>
                     </a>
                     <a href="https://x.com/usectl" target="_blank" rel="noopener" aria-label="X/Twitter">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)">
                             <path
                                 d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                         </svg>
@@ -689,55 +732,182 @@
                 </div>
             </div>
             <div class="footer-col">
+                <a href="https://docs.usectl.com" class="footer-link" target="_blank">Documentation</a>
                 <a href="#" class="footer-link">Privacy Policy</a>
                 <a href="#" class="footer-link">Terms of Service</a>
             </div>
         </div>
     </footer>
+    <div id="notification-container"></div>
 
     <!-- SCRIPTS -->
+    <script type="module" src="/js/animations.js"></script>
     <script>
 
-        // Scroll animations
+        /*
+        // Scroll animations (Legacy - now handled by GSAP in animations.js)
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
         }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
         document.querySelectorAll('.anim').forEach(el => {
             if (!el.closest('.hero')) observer.observe(el);
         });
+        */
 
         function handleFoundingSubmit() {
+            clearErrors();
             const name = document.getElementById('founding-name').value.trim();
             const email = document.getElementById('founding-email').value.trim();
             const project = document.getElementById('founding-project').value.trim();
             const deploy = document.getElementById('founding-deploy').value;
-            if (!name || !email) { alert('Please fill in your name and email.'); return; }
+            const password = document.getElementById('founding-password').value;
+            const confirmPassword = document.getElementById('founding-confirm-password').value;
+
+            let hasError = false;
+
+            if (!name) {
+                showError('error-name', 'Name is required');
+                hasError = true;
+            }
+            if (!email) {
+                showError('error-email', 'Email is required');
+                hasError = true;
+            } else if (!validateEmail(email)) {
+                showError('error-email', 'Please enter a valid email');
+                hasError = true;
+            }
+            if (!password) {
+                showError('error-password', 'Password is required');
+                hasError = true;
+            }
+            if (!confirmPassword) {
+                showError('error-confirm-password', 'Please confirm your password');
+                hasError = true;
+            } else if (password !== confirmPassword) {
+                showError('error-confirm-password', 'Passwords do not match');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
             const btn = document.getElementById('founding-submit');
             btn.textContent = 'Submitting...';
             btn.style.pointerEvents = 'none';
             btn.style.opacity = '0.7';
+
             fetch('https://manager.usectl.com/api/founding-requests', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, project, deploy_method: deploy })
-            }).then(res => {
-                if (!res.ok) throw new Error('Failed');
+                body: JSON.stringify({
+                    name,
+                    email,
+                    project,
+                    deploy_method: deploy,
+                    password
+                })
+            }).then(async res => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    if (data.error === "an account with this email already exists") {
+                        showNotification("An account with this email already exists", "error");
+                        showError('error-email', 'Email already registered');
+                    } else {
+                        throw new Error(data.error || 'Failed');
+                    }
+                    return;
+                }
                 btn.textContent = '✓ You\'re on the list!';
                 btn.style.background = '#0e8c24';
                 btn.style.opacity = '1';
-            }).catch(() => {
+                showNotification("Successfully joined as a founding member! Redirecting...", "success");
+                
+                // Redirect to login page after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'https://manager.usectl.com/login';
+                }, 2000);
+            }).catch((err) => {
                 btn.textContent = 'Claim My Founding Spot';
                 btn.style.pointerEvents = '';
                 btn.style.opacity = '1';
-                alert('Something went wrong. Please try again.');
+                if (err.message !== "Email already registered") {
+                    showNotification(err.message || "Something went wrong. Please try again.", "error");
+                }
             });
         }
 
-        // Nav background on scroll
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('nav');
-            nav.style.background = window.scrollY > 50 ? 'rgba(0,0,0,.92)' : '';
-        });
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <span class="notification-icon">${type === 'success' ? '✓' : '✕'}</span>
+                    <span class="notification-message">${message}</span>
+                </div>
+                <div class="notification-progress"></div>
+            `;
+            container.appendChild(notification);
+
+            // Trigger entrance animation
+            setTimeout(() => notification.classList.add('show'), 10);
+
+            // Remove after 5 seconds
+            const timer = setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 400);
+            }, 5000);
+
+            notification.onclick = () => {
+                clearTimeout(timer);
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 400);
+            };
+        }
+
+        function showError(id, msg) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = msg;
+                el.style.display = 'block';
+                const input = el.previousElementSibling;
+                if (input && input.classList.contains('founding-input')) {
+                    input.style.borderColor = '#ff5f57';
+                }
+            }
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.founding-error').forEach(el => {
+                el.textContent = '';
+                el.style.display = 'none';
+            });
+            document.querySelectorAll('.founding-input').forEach(input => {
+                input.style.borderColor = '';
+            });
+        }
+
+        function validateEmail(email) {
+            return String(email)
+                .toLowerCase()
+                .match(
+                    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                );
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('svg');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                input.type = 'password';
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            }
+        }
+
+        // Nav background scroll effect now handled in animations.js via GSAP ScrollTrigger
+
 
         // Smooth appear for step toggles
         document.querySelectorAll('.step-toggle .toggle').forEach(t => {
