@@ -126,19 +126,7 @@ code {
     }
 }
 
-@keyframes gradientShift {
-    0% {
-        background-position: 0% 50%
-    }
-
-    50% {
-        background-position: 100% 50%
-    }
-
-    100% {
-        background-position: 0% 50%
-    }
-}
+/* gradientShift removed — was unused and would have caused non-composited paint */
 
 @keyframes glitch {
     0% {
@@ -663,18 +651,20 @@ code {
 .hero-note span {
     color: var(--primary);
     font-size: 22px;
-    animation: blink-shadow 2s infinite ease-in-out;
+    animation: blink-glow 2s infinite ease-in-out;
+    /* Use filter: drop-shadow instead of text-shadow — composited, no repaint */
+    will-change: filter;
 }
 
-@keyframes blink-shadow {
+@keyframes blink-glow {
 
     0%,
     100% {
-        text-shadow: 0 0 0px rgba(17, 163, 42, 0);
+        filter: drop-shadow(0 0 0px rgba(17, 163, 42, 0));
     }
 
     50% {
-        text-shadow: 0 0 15px rgba(17, 163, 42, 0.6);
+        filter: drop-shadow(0 0 8px rgba(17, 163, 42, 0.7));
     }
 }
 

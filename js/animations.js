@@ -1275,16 +1275,29 @@ const Scenes = {
     init() {
         this.initSmoothScroll();
         this.initGeneralAnimations();
+        // Hero scene is above-the-fold critical — init immediately
         this.initHero();
-        this.initSteps();
-        this.initAI();
-        this.initFeatures();
-        this.initPricing();
-        this.initFounding();
-        this.initInfra();
-        this.initFooter();
-        this.initActiveNav();
-        this.initNavTransition();
+
+        // Defer all scroll-triggered scenes until the browser is idle
+        // This prevents long main-thread tasks during initial page load
+        const initScrollScenes = () => {
+            this.initSteps();
+            this.initAI();
+            this.initFeatures();
+            this.initPricing();
+            this.initFounding();
+            this.initInfra();
+            this.initFooter();
+            this.initActiveNav();
+            this.initNavTransition();
+        };
+
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(initScrollScenes, { timeout: 2000 });
+        } else {
+            // Fallback for Safari (no requestIdleCallback support)
+            setTimeout(initScrollScenes, 200);
+        }
     }
 };
 
