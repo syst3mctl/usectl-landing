@@ -1,8 +1,4 @@
 import gsap from "gsap";
-import lottie from "lottie-web";
-import blocksAnimation from "./lottie/blocks.json";
-import buildAnimation from "./lottie/build.json";
-import uploadAnimation from "./lottie/upload.json";
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TextPlugin } from 'gsap/TextPlugin';
 import Lenis from 'lenis'
@@ -17,15 +13,7 @@ if (history.scrollRestoration) {
 }
 window.scrollTo(0, 0);
 
-/**
- * Scene Manager
- * Organizes animations into discrete "scenes" for better control and performance.
- */
 const Scenes = {
-    /**
-     * Hero Scene
-     * Handles the initial entrance and background effects for the hero section.
-     */
     initHero() {
         const tl = gsap.timeline({
             defaults: { ease: "power2.inOut", duration: 0.4 }
@@ -123,30 +111,7 @@ const Scenes = {
             paused: true
         });
 
-        // Initialize Lottie Animation
-        const lottieAnim = lottie.loadAnimation({
-            container: document.getElementById('lottie-blocks'),
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            animationData: blocksAnimation
-        });
-
-        const buildAnim = lottie.loadAnimation({
-            container: document.getElementById('build-blocks'),
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            animationData: buildAnimation
-        });
-
-        const deployAnim = lottie.loadAnimation({
-            container: document.getElementById('deploy-blocks'),
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            animationData: uploadAnimation
-        });
+        // Lottie animations are below-the-fold — loaded lazily in initLottie()
 
         // Initial state for h1
         const h1Content = document.querySelector('.h1-content');
@@ -453,6 +418,50 @@ const Scenes = {
                 ease: "power2.inOut"
             }, cursor + 2.9 + 0.3 + 4 + 0.3 + 4 + 0.3 + 4 + 0.3 + 0.2); // 0.2s after icon
 
+        // --- Pipline Text Cycling ---
+        const piplineText = document.querySelector('.pipline-text');
+        const lottieShowStart = cursor + 2.9;
+        const buildShowStart  = cursor + 2.9 + 0.3 + 4;        // cursor + 7.2
+        const deployShowStart = cursor + 2.9 + 0.3 + 4 + 0.3 + 4; // cursor + 11.5
+        const sceneDuration   = 12.9; // lottieShowStart → deploy hide
+
+        // Continuous percentage counter running from 0% to 100% across the whole scene
+        let currentStep = 'Register project';
+        const scenePct = { value: 0 };
+        const pipelineSpan = document.querySelector('.pipeline-line span');
+        tl.to(scenePct, {
+            value: 100,
+            duration: sceneDuration,
+            ease: "none",
+            onUpdate: () => {
+                const pct = Math.round(scenePct.value);
+                pipelineSpan.style.width = `${scenePct.value}%`;
+                if (pct >= 100) {
+                    piplineText.textContent = 'Live .... 100%';
+                } else {
+                    piplineText.textContent = `${currentStep}... ${pct}%`;
+                }
+            },
+            onComplete: () => {
+                pipelineSpan.style.width = '100%';
+                piplineText.textContent = 'Live .... 100%';
+            }
+        }, lottieShowStart);
+
+        // Step label changes via .call() — percentage updates automatically via onUpdate
+        tl.call(() => { currentStep = 'Register project'; }, null, lottieShowStart)
+          .call(() => { currentStep = 'Provision addons (DB, S3, Redis)'; }, null, lottieShowStart + 1.33)
+          .call(() => { currentStep = 'Clone repo'; }, null, lottieShowStart + 2.66)
+          .call(() => { currentStep = 'Build Docker image (Kaniko)'; }, null, buildShowStart)
+          .call(() => { currentStep = 'Push image to registry'; }, null, deployShowStart)
+          .call(() => { currentStep = 'Create namespace'; }, null, deployShowStart + 0.4)
+          .call(() => { currentStep = 'Copy registry secret'; }, null, deployShowStart + 0.8)
+          .call(() => { currentStep = 'Create addon secrets'; }, null, deployShowStart + 1.2)
+          .call(() => { currentStep = 'Create/update Deployment'; }, null, deployShowStart + 1.6)
+          .call(() => { currentStep = 'Create/update Service'; }, null, deployShowStart + 2.0)
+          .call(() => { currentStep = 'Create/update IngressRoute'; }, null, deployShowStart + 2.4)
+          .call(() => { currentStep = 'Live'; }, null, deployShowStart + 2.8);
+
         // H1 Deletion effect proxy
         const h1ExitProxy = { index: h1Parts.length };
 
@@ -512,14 +521,8 @@ const Scenes = {
             .to(".rocketCont", 0.4, { y: -2.5, rotation: -0.25, ease: "sine.inOut" })
             .to(".rocketCont", 0.4, { y: 6, rotation: 0.5, ease: "sine.inOut" });
 
-        console.log("Hero scene initialized");
     },
 
-
-    /**
-     * Steps Scene
-     * Animates the 1-2-3 steps.
-     */
     initSteps() {
         // 1. Per-Item Entrance Triggers (From Bottom - Triggered at 85% Viewport)
         const enterItems = [
@@ -637,10 +640,6 @@ const Scenes = {
         });
     },
 
-    /**
-     * AI Scene
-     * Animates the chat elements.
-     */
     initAI() {
         // 1. Entrance Triggers (85% -> 35%)
         const enterItems = [
@@ -712,10 +711,6 @@ const Scenes = {
         });
     },
 
-    /**
-     * General Scroll Animations
-     * Handles elements with the .anim class that are not part of specific scenes.
-     */
     initGeneralAnimations() {
         // Handle all elements with .anim class
         gsap.utils.toArray(".anim").forEach(el => {
@@ -735,10 +730,6 @@ const Scenes = {
 
     },
 
-    /**
-     * Features Scene
-     * Grid entrance animation.
-     */
     initFeatures() {
         // 1. Entrance Triggers (85% -> 35%)
         const enterItems = [
@@ -816,10 +807,6 @@ const Scenes = {
         });
     },
 
-    /**
-     * Pricing Scene
-     * Replicates the animation style from the Cost section.
-     */
     initPricing() {
         // 1. Per-Item Entrance Triggers (From Bottom - Triggered at 85% Viewport)
         const enterItems = [
@@ -898,10 +885,6 @@ const Scenes = {
         });
     },
 
-    /**
-     * Founding Scene
-     * Entrance and Exit animations for the founding section.
-     */
     initFounding() {
         // 1. Titles & Subtitles Entrance (Same as Pricing)
         const enterTitles = [
@@ -981,15 +964,10 @@ const Scenes = {
         });
     },
 
-    /**
-     * Infrastructure Scene
-     * Animates titles and description, with specialized scale/opacity for logos.
-     */
     initInfra() {
         const titleStart = "100%";
         const logoBaseStart = 100;
         const descStart = "100%";
-        const isDesktop = window.innerWidth > 1025;
 
         // 1. Titles Entrance (Standard y-axis slide)
         const enterTitles = [
@@ -1084,9 +1062,6 @@ const Scenes = {
         });
     },
 
-    /**
-     * Smooth Scroll Initialization
-     */
     initSmoothScroll() {
         const lenis = new Lenis({
             duration: 0.8,
@@ -1154,23 +1129,11 @@ const Scenes = {
             }
         }
 
-        // Initial refresh after a small delay to ensure all heights are settled
         window.addEventListener('load', () => {
-            setTimeout(() => {
-                ScrollTrigger.refresh();
-            }, 100);
+            setTimeout(() => ScrollTrigger.refresh(), 100);
         });
-
-        // Keep a reference if needed
-        this.lenis = lenis;
-
-        console.log("Smooth scroll initialized");
     },
 
-    /**
-     * Footer Scene
-     * Animates the footer line.
-     */
     initFooter() {
         gsap.to(".footer", {
             scrollTrigger: {
@@ -1188,10 +1151,6 @@ const Scenes = {
         });
     },
 
-    /**
-     * Active Navigation
-     * Toggles the 'active' class on nav links based on scroll position.
-     */
     initActiveNav() {
         const navLinks = ['#steps', '#pricing', '#features'];
         
@@ -1210,9 +1169,6 @@ const Scenes = {
                         }
                     } else {
                         document.querySelectorAll(`.nav-links a[href="${id}"], .mobile-menu a[href="${id}"]`).forEach(a => a.classList.remove('active'));
-                        
-                        // If leaving a section and no other section is active, we could clear hash or leave it.
-                        // For landing pages, it's often better to just let the hash be the last active one or clear it if at top.
                     }
                 }
             });
@@ -1231,12 +1187,7 @@ const Scenes = {
         });
     },
 
-    /**
-     * Navigation Transition
-     * Changes nav link colors based on active section.
-     */
     initNavTransition() {
-        const navLinks = gsap.utils.toArray(".nav-links a");
         const nav = document.querySelector(".nav");
         const navBadge = document.querySelector(".nav-badge");
 
@@ -1267,14 +1218,36 @@ const Scenes = {
         });
     },
 
-    /**
-     * Initialize all scenes
-     */
+    initLottie() {
+        const firstContainer = document.getElementById('lottie-blocks');
+        if (!firstContainer) return;
+
+        const observer = new IntersectionObserver((entries, obs) => {
+            if (!entries[0].isIntersecting) return;
+            obs.disconnect();
+
+            Promise.all([
+                import('lottie-web/build/player/lottie_light'),
+                import('./lottie/blocks.json'),
+                import('./lottie/build.json'),
+                import('./lottie/upload.json'),
+            ]).then(([{ default: lottie }, { default: blocksAnimation }, { default: buildAnimation }, { default: uploadAnimation }]) => {
+                lottie.loadAnimation({ container: document.getElementById('lottie-blocks'), renderer: 'svg', loop: true, autoplay: true, animationData: blocksAnimation });
+                lottie.loadAnimation({ container: document.getElementById('build-blocks'),  renderer: 'svg', loop: true, autoplay: true, animationData: buildAnimation });
+                lottie.loadAnimation({ container: document.getElementById('deploy-blocks'), renderer: 'svg', loop: true, autoplay: true, animationData: uploadAnimation });
+            });
+        }, { rootMargin: '200px' });
+
+        observer.observe(firstContainer);
+    },
+
     init() {
         this.initSmoothScroll();
         this.initGeneralAnimations();
         // Hero scene is above-the-fold critical — init immediately
         this.initHero();
+        // Lottie is below-the-fold — load lazily
+        this.initLottie();
 
         // Defer all scroll-triggered scenes until the browser is idle
         // This prevents long main-thread tasks during initial page load
