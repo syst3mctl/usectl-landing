@@ -644,7 +644,6 @@ const Scenes = {
     initAI() {
         // 1. Entrance Triggers (85% -> 35%)
         const enterItems = [
-            { el: ".ai-badge", y: 10 },
             { el: ".ai-section .section-title", y: 30 },
             { el: ".ai-desc", y: 30 }
         ];
@@ -678,7 +677,6 @@ const Scenes = {
 
         // 2. Exit Triggers (30% -> 10% top)
         const exitItems = [
-            { el: ".ai-badge", y: -10 },
             { el: ".ai-section .section-title", y: -30 },
             { el: ".ai-desc", y: -30 }
         ];

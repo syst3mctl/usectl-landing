@@ -9,7 +9,7 @@ function cssPreloadPlugin() {
       return html.replace(
         /(<link rel="stylesheet"[^>]*href="([^"]*\.css)"[^>]*>)/,
         (match, fullTag, href) =>
-          `<link rel="preload" as="style" fetchpriority="high" href="${href}">\n  ${fullTag}`
+          `<link rel="preload" as="style" fetchpriority="high" crossorigin href="${href}">\n  ${fullTag}`
       );
     },
   };
@@ -21,6 +21,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    modulePreload: { polyfill: false },
 
     rollupOptions: {
       input: {
