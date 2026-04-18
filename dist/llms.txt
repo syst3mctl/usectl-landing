@@ -1,0 +1,7 @@
+# usectl
+
+> usectl is a managed PaaS that gives you the control of self-hosting without the maintenance overhead. Connect a GitHub repository and usectl handles everything — building container images, provisioning databases, configuring ingress, and keeping your apps live on Kubernetes. No vendor lock-in. No per-seat billing.
+
+## Documentation
+
+Full documentation is available at https://docs.usectl.com/llms-full.txt
