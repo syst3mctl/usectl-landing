@@ -154,7 +154,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
-  <script type="module" crossorigin src="./assets/main-Da3Q5fbz.js"></script>
+  <script type="module" crossorigin src="./assets/main-D7op6aN6.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/chunk-B3K2TuZy.js">
   <link rel="preload" as="style" fetchpriority="high" crossorigin href="./assets/main-DYUf7jgl.css">
   <link rel="stylesheet" crossorigin href="./assets/main-DYUf7jgl.css">
@@ -939,6 +939,89 @@
         document.querySelectorAll('.step-toggle .toggle').forEach(t => {
             t.addEventListener('click', () => t.classList.toggle('off'));
         });
+    </script>
+
+    <!-- WebMCP — expose site tools to AI agents -->
+    <script>
+    (function registerWebMCPTools() {
+        if (!navigator.modelContext) return;
+        var controller = new AbortController();
+        var signal = controller.signal;
+
+        navigator.modelContext.registerTool({
+            name: 'get_pricing',
+            description: 'Get usectl pricing plans and founding member rates',
+            inputSchema: { type: 'object', properties: {} },
+            execute: function() {
+                return Promise.resolve({
+                    plans: [
+                        {
+                            name: 'Founding Member',
+                            price: '$15/month',
+                            originalPrice: '$29/month',
+                            discount: '50% off forever',
+                            features: [
+                                '3-day free trial, no card required',
+                                'Custom domain + automatic SSL',
+                                'Always-on backend hosting',
+                                'Dedicated PostgreSQL database',
+                                'S3-compatible storage (10GB)',
+                                'Push-to-deploy from GitHub',
+                                'CLI + Web Dashboard',
+                                'Rollbacks + priority support'
+                            ],
+                            limit: '100 members'
+                        }
+                    ],
+                    signup: 'https://manager.usectl.com/register'
+                });
+            }
+        }, { signal: signal });
+
+        navigator.modelContext.registerTool({
+            name: 'get_features',
+            description: 'Get the list of usectl platform features and capabilities',
+            inputSchema: { type: 'object', properties: {} },
+            execute: function() {
+                return Promise.resolve({
+                    features: [
+                        { name: 'Push-to-Deploy', description: 'Connect GitHub repo, push code, deploy automatically. Kaniko builds containers without Docker daemon.' },
+                        { name: 'PostgreSQL Database', description: 'Managed by CloudNativePG. One-click provisioning with credentials auto-injected as env vars.' },
+                        { name: 'S3-Compatible Storage', description: 'Powered by MinIO. Private bucket with access keys for uploads, assets, and backups.' },
+                        { name: 'Custom Domains + HTTPS', description: 'Automatic TLS via Traefik. Wildcard subdomains included for free.' },
+                        { name: 'Real-Time Monitoring', description: 'Live build logs, deployment status, and resource usage in one dashboard.' },
+                        { name: 'CLI + Web Dashboard', description: 'Full-featured CLI with --json output. Beautiful web dashboard for visual management.' }
+                    ],
+                    infrastructure: ['K3s', 'Kaniko', 'CloudNativePG', 'MinIO', 'Traefik'],
+                    docs: 'https://docs.usectl.com'
+                });
+            }
+        }, { signal: signal });
+
+        navigator.modelContext.registerTool({
+            name: 'navigate_to_section',
+            description: 'Navigate to a specific section of the usectl landing page',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    section: {
+                        type: 'string',
+                        enum: ['hero', 'steps', 'features', 'pricing', 'founding', 'ai', 'infra'],
+                        description: 'The section to navigate to'
+                    }
+                },
+                required: ['section']
+            },
+            execute: function(params) {
+                var el = document.getElementById(params.section);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                    return Promise.resolve({ success: true, section: params.section });
+                }
+                return Promise.resolve({ success: false, error: 'Section not found' });
+            }
+        }, { signal: signal });
+    })();
     </script>
 </body>
 

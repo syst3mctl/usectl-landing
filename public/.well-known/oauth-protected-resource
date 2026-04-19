@@ -1,0 +1,6 @@
+{
+  "resource": "https://manager.usectl.com/api",
+  "authorization_servers": ["https://manager.usectl.com"],
+  "scopes_supported": ["openid", "profile", "projects:read", "projects:write", "deployments:read", "deployments:write"],
+  "bearer_methods_supported": ["header"]
+}

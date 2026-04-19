@@ -1,0 +1,24 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://manager.usectl.com/api",
+      "service-desc": [
+        {
+          "href": "https://docs.usectl.com/openapi.yaml",
+          "type": "application/openapi+yaml"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://docs.usectl.com",
+          "type": "text/html"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://manager.usectl.com/api/health"
+        }
+      ]
+    }
+  ]
+}
