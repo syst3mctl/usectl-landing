@@ -115,7 +115,7 @@ const Scenes = {
 
         // Initial state for h1
         const h1Content = document.querySelector('.h1-content');
-        const h1HTML = "One Prompt. Your<br>Entire Project.<br><span class=\"green\">Live.</span>";
+        const h1HTML = "One flat price.<br><span class=\"green\">No bandwidth bills.</span>";
         h1Content.innerHTML = "";
 
         // Animation sequence — scene + glitch starts immediately at t=0

@@ -15,11 +15,11 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>usectl — One Prompt. Your Entire Project. Live. | Self-Hosted Deployment Platform</title>
+    <title>usectl · One flat price. No bandwidth bills. | Managed deployment for AI-assisted engineers</title>
     <meta name="description"
-        content="Deploy backend + frontend + PostgreSQL + S3 storage in one place — starting at $0/month. Self-hosted Vercel alternative powered by K3s & Kubernetes. Push-to-deploy, auto TLS, and AI agent support.">
+        content="Pick your vCPU, RAM, and storage on a slider. We spin up a managed project with your full stack inside: PostgreSQL, S3-compatible storage, Redis, PR previews, unlimited team seats. No bandwidth metering, no per-build surprises. First 30 days free.">
     <meta name="keywords"
-        content="self-hosted, usectl, k3s, kubernetes, deployment platform, PaaS, deploy, PostgreSQL, MinIO, push to deploy, cloud hosting, docker deployment">
+        content="flat pricing deployment, usectl, kubernetes PaaS, Vercel alternative, Render alternative, Railway alternative, PostgreSQL hosting, S3-compatible storage, CLI deployment, AI-assisted developers, push to deploy, Hetzner hosting, SeaweedFS">
     <meta name="author" content="systemctl">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#11A32A">
@@ -28,24 +28,24 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://usectl.com/">
-    <meta property="og:title" content="usectl — One Prompt. Your Entire Project. Live.">
+    <meta property="og:title" content="usectl · One flat price. No bandwidth bills.">
     <meta property="og:description"
-        content="Deploy backend + frontend + PostgreSQL + S3 storage in one place starting at $0/month. Self-hosted Vercel alternative powered by K3s.">
+        content="Configure a server. Get a full stack. One flat bill. No bandwidth metering, no per-build surprises. Built for AI-assisted engineers and small teams.">
     <meta property="og:image" content="https://usectl.com/img/ogimage.jpeg">
     <meta property="og:image:secure_url" content="https://usectl.com/img/ogimage.jpeg">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1600">
     <meta property="og:image:height" content="837">
-    <meta property="og:image:alt" content="usectl — One Prompt. Your Entire Project. Live.">
+    <meta property="og:image:alt" content="usectl · One flat price. No bandwidth bills.">
     <meta property="og:site_name" content="usectl">
     <meta property="og:locale" content="en_US">
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://usectl.com/">
-    <meta name="twitter:title" content="usectl — One Prompt. Your Entire Project. Live.">
+    <meta name="twitter:title" content="usectl · One flat price. No bandwidth bills.">
     <meta name="twitter:description"
-        content="Deploy backend + frontend + PostgreSQL + S3 storage in one place starting at $0/month. Self-hosted Vercel alternative powered by K3s.">
+        content="Configure a server. Get a full stack. One flat bill. No bandwidth metering, no per-build surprises. Built for AI-assisted engineers and small teams.">
     <meta name="twitter:image" content="https://usectl.com/img/ogimage.jpeg">
     <meta name="twitter:site" content="@usectl">
     <meta name="twitter:creator" content="@usectl">
@@ -82,36 +82,36 @@
                 "name": "usectl",
                 "applicationCategory": "DeveloperApplication",
                 "operatingSystem": "Linux, macOS, Windows",
-                "description": "Self-hosted deployment platform. Deploy backend + frontend + PostgreSQL + S3 storage in one place. Vercel alternative powered by K3s & Kubernetes.",
+                "description": "Managed deployment platform. Pick vCPU, RAM, and storage on a slider. Get a full stack on one flat monthly bill: managed PostgreSQL, S3-compatible object storage, Redis, cron jobs, PR previews, custom domains. No bandwidth metering, no per-build charges, no seat pricing. Designed to be driven from a CLI by engineers and AI agents alike.",
                 "url": "https://usectl.com",
                 "offers": [
                     {
                         "@type": "Offer",
-                        "name": "Free",
+                        "name": "Small configured project",
+                        "price": "20.10",
+                        "priceCurrency": "USD",
+                        "description": "1 vCPU, 2 GB RAM, 10 GB storage. Full stack, all addons, bandwidth included."
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Medium configured project",
+                        "price": "40.50",
+                        "priceCurrency": "USD",
+                        "description": "2 vCPU, 4 GB RAM, 50 GB storage. Full stack, all addons, bandwidth included."
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Large configured project",
+                        "price": "82.00",
+                        "priceCurrency": "USD",
+                        "description": "4 vCPU, 8 GB RAM, 200 GB storage. Full stack, all addons, bandwidth included."
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "First project, 30 days free",
                         "price": "0",
                         "priceCurrency": "USD",
-                        "description": "1 project, subdomain, community support"
-                    },
-                    {
-                        "@type": "Offer",
-                        "name": "Frontend",
-                        "price": "5",
-                        "priceCurrency": "USD",
-                        "description": "Custom domain, auto TLS, push-to-deploy"
-                    },
-                    {
-                        "@type": "Offer",
-                        "name": "App",
-                        "price": "12",
-                        "priceCurrency": "USD",
-                        "description": "Backend hosting, env vars, rollbacks"
-                    },
-                    {
-                        "@type": "Offer",
-                        "name": "Full Stack",
-                        "price": "19",
-                        "priceCurrency": "USD",
-                        "description": "PostgreSQL, MinIO storage, priority support"
+                        "description": "First project free for 30 days on any configuration up to 4 vCPU / 8 GB RAM. Custom enterprise configurations available on request."
                     }
                 ]
             },
@@ -123,7 +123,7 @@
                         "name": "What is usectl?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "usectl is a self-hosted deployment platform that lets you deploy backend, frontend, PostgreSQL, and S3-compatible storage in one place — powered by K3s and Kubernetes."
+                            "text": "usectl is a flat-priced managed deployment platform. You pick vCPU, RAM, and storage on a slider. We spin up a managed project with a full stack inside on one monthly bill. Managed PostgreSQL, S3-compatible object storage, Redis, cron jobs, PR previews, custom domains, and every other addon are all included. Built on bare metal in Europe so we do not meter bandwidth or builds."
                         }
                     },
                     {
@@ -131,7 +131,15 @@
                         "name": "How much does usectl cost?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "usectl starts free with 1 project. Paid plans range from $5/month (Frontend) to $19/month (Full Stack with PostgreSQL and MinIO storage). Founding member rates are available at a discount locked in forever."
+                            "text": "You pay for the server you configure. The formula is $10 per vCPU plus $5 per GB of RAM plus $0.01 per GB of object storage, per month. A 1 vCPU / 2 GB / 10 GB server is $20.10/month. A 2 vCPU / 4 GB / 50 GB server is $40.50/month. Every addon, all bandwidth, every team member, and every PR preview are included in that price. No seat billing, no usage metering, no surprises."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Is there a free trial?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Your first project is free for 30 days on any configuration up to 4 vCPU / 8 GB RAM. No credit card required to start."
                         }
                     },
                     {
@@ -139,7 +147,7 @@
                         "name": "How do I deploy with usectl?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "Link your GitHub repository, toggle on database and storage if needed, and push to main. Your app deploys automatically with TLS certificates and a live URL."
+                            "text": "Install the CLI with `curl -fsSL https://usectl.com/install.sh | bash`. Run `usectl projects create`, connect your GitHub repo, and push to your configured branch. Your app builds with Kaniko, deploys to the project you configured, gets automatic TLS, and is live. The CLI also exposes every operation to AI coding agents like Claude Code, Cursor, and Windsurf. They just run the commands."
                         }
                     }
                 ]
@@ -167,7 +175,7 @@
                     <a href="/" class="nav-logo" aria-label="usectl home">
                         <img src="img/logo.svg" alt="usectl logo" width="83" height="22">
                     </a>
-                    <span class="nav-badge">Limited Beta</span>
+                    <span class="nav-badge">Beta</span>
                 </div>
                 <div class="nav-right">
                     <div class="nav-links">
@@ -225,27 +233,32 @@
         <section class="hero" id="hero">
             <div class="hero-inner">
                 <div class="hero-text">
-                    <h1 id="hero-h1"><span class="h1-content">One Prompt. Your<br>Entire Project.<br><span
-                                class="green">Live.</span></span><span id="h1-cursor"></span></h1>
+                    <h1 id="hero-h1"><span class="h1-content">One flat price.<br><span
+                                class="green">No bandwidth bills.</span></span><span id="h1-cursor"></span></h1>
                     <!-- Noscript fallback for indexing -->
                     <noscript>
-                        <p>usectl is a self-hosted deployment platform. Deploy backend, frontend, PostgreSQL, and S3
-                            storage in one command.</p>
+                        <p>usectl is a managed deployment platform. Pick your vCPU, RAM, and storage. We spin
+                            up a managed project with a full stack inside on one flat monthly bill. PostgreSQL,
+                            S3-compatible object storage, Redis, PR previews, custom domains. No bandwidth
+                            metering. No per-build surprises.</p>
                     </noscript>
-                    <p class="subtitle">Deploy backend + frontend + PostgreSQL + storage — for less than Supabase
-                        charges
-                        for a database alone.</p>
-                    <a href="#founding" class="hero-cta">
-                        <span>Become a founding member</span>
+                    <p class="subtitle">Pick the size you need. We spin up a managed project with your full
+                        stack inside. App, database, cache, workers, PR previews. Every addon, every byte of
+                        bandwidth, every team seat: included. We run on our own bare metal at Hetzner, not on
+                        AWS or Google Cloud. That's why the pricing stays flat, and the only surprises are
+                        features we add for free.</p>
+                    <a href="#signup" class="hero-cta">
+                        <span>Start 30 days free</span>
                         <div class="glitch" aria-hidden="true">
                             <span class="letters">
-                                <span>B</span><span>e</span><span>c</span><span>o</span><span>m</span><span>e</span><span>&nbsp;</span><span>a</span><span>&nbsp;</span><span>f</span><span>o</span><span>u</span><span>n</span><span>d</span><span>i</span><span>n</span><span>g</span><span>&nbsp;</span><span>m</span><span>e</span><span>m</span><span>b</span><span>e</span><span>r</span>
+                                <span>S</span><span>t</span><span>a</span><span>r</span><span>t</span><span>&nbsp;</span><span>3</span><span>0</span><span>&nbsp;</span><span>d</span><span>a</span><span>y</span><span>s</span><span>&nbsp;</span><span>f</span><span>r</span><span>e</span><span>e</span>
                             </span>
                         </div>
                     </a>
-                    <p class="hero-note"><span>$15/month </span>for life · 50% off regular pricing · limited to 100
-                        members</p>
-                    <p class="hero-infra">Powered by Hetzner infrastructure · Kubernetes-isolated projects</p>
+                    <p class="hero-note"><span>First project free for 30 days.</span> No credit card. Up to 4
+                        vCPU and 8 GB RAM.</p>
+                    <p class="hero-infra">Our own bare metal at Hetzner. Kubernetes-isolated projects. Driven
+                        from a CLI your AI agent already knows how to use.</p>
                 </div>
                 <div class="hero-mockup">
                     <div class="hero-mockup-scene-container">
@@ -359,13 +372,31 @@
             <div class="section-inner">
 
                 <div>
-                    <h2 class="section-title">Ship your project in <span class="green" style="position: relative;">three
-                            steps.<div class="bg-glow-green" style="top: 70%; left: 70%;"></div></span></h2>
+                    <h2 class="section-title">Configure. Connect. <span class="green" style="position: relative;">Ship.<div class="bg-glow-green" style="top: 70%; left: 70%;"></div></span></h2>
                     <p class="section-sub">No Docker knowledge required. No server config. No YAML files.</p>
                     <div class="steps-row">
                         <div class="step-item">
                             <div class="step-num">01</div>
-                            <h3>Link your GitHub repository</h3>
+                            <h3>Configure your server</h3>
+                            <div class="step-visual">
+                                <div class="step-toggle">
+                                    <span class="toggle-label">vCPU</span>
+                                    <span class="toggle"></span>
+                                </div>
+                                <div class="step-toggle">
+                                    <span class="toggle-label">RAM</span>
+                                    <span class="toggle"></span>
+                                </div>
+                                <div class="step-toggle">
+                                    <span class="toggle-label">Storage</span>
+                                    <span class="toggle"></span>
+                                </div>
+                            </div>
+                            <p class="step-repo">Pick your size. See the price.</p>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-num">02</div>
+                            <h3>Connect your GitHub repo</h3>
                             <div class="step-visual">
                                 <div class="step-github">
                                     <span class="gh-icon"><svg width="32" height="32" viewBox="0 0 24 24"
@@ -377,21 +408,7 @@
                                     <span class="usectl-text"><img src="img/logo.svg" alt="usectl logo" width="83" height="22" loading="lazy"></span>
                                 </div>
                             </div>
-                            <p class="step-repo">Any repo with a Dockerfile...</p>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-num">02</div>
-                            <h3>Toggle on DB & Storage</h3>
-                            <div class="step-visual">
-                                <div class="step-toggle">
-                                    <span class="toggle-label">Database</span>
-                                    <span class="toggle"></span>
-                                </div>
-                                <div class="step-toggle">
-                                    <span class="toggle-label">Storage</span>
-                                    <span class="toggle"></span>
-                                </div>
-                            </div>
+                            <p class="step-repo">Any repo with a Dockerfile, or let us detect it.</p>
                         </div>
                         <div class="step-item">
                             <div class="step-num">03</div>
@@ -410,12 +427,14 @@
                         <span class="title">usectl projects create</span>
                     </div>
                     <div class="steps-terminal-body">
-                        <div class="prompt">$ usectl projects create --repo github.com/you/your-app --database --storage
-                        </div>
+                        <div class="prompt">$ usectl projects create --repo github.com/you/your-app \</div>
+                        <div class="prompt">    --vcpu 2 --ram 4 --storage 50 --postgres --redis</div>
                         <div class="prompt">$ usectl deploy --project your-app</div>
+                        <div class="success">✓ Server provisioned (2 vCPU / 4 GB RAM / 50 GB)</div>
                         <div class="success">✓ Build complete (32s)</div>
-                        <div class="success">✓ PostgreSQL provisioned</div>
-                        <div class="success">✓ Storage bucket created</div>
+                        <div class="success">✓ PostgreSQL ready. $DATABASE_URL injected</div>
+                        <div class="success">✓ Redis ready. $REDIS_URL injected</div>
+                        <div class="success">✓ S3 bucket ready. $S3_ENDPOINT injected</div>
                         <div class="success">✓ TLS certificate issued</div>
                         <div class="success">✓ Live at <span class="link">https://your-app.usectl.app</span></div>
                     </div>
@@ -426,60 +445,48 @@
         <!-- AI SECTION -->
         <section class="section ai-section" id="ai">
             <div class="section-inner">
-                <h2 class="section-title">Deploy with your AI agent.</h2>
-                <p class="ai-desc">Already using Claude, Cursor, or ChatGPT to build your app? Soon you'll be able
-                    to
-                    deploy it the same way — paste one prompt into your agent, answer two questions, and your entire
-                    stack
-                    deploys itself.</p>
+                <h2 class="section-title">The CLI is the product.</h2>
+                <p class="ai-desc">Every capability of usectl is a single-binary CLI command. Structured
+                    <code>--json</code> output so your tooling can pipe it. Clear error messages so your AI agent
+                    can self-correct. Install once and every AI coding agent, whether Claude Code, Cursor,
+                    Windsurf, or ChatGPT, can deploy, read logs, and manage infrastructure just by running
+                    commands. No special plugin. No MCP connector required. Your agent already knows how to
+                    use a terminal.</p>
                 <div class="ai-chat">
                     <div class="ai-chat-header">
                         <div class="ai-chat-header-left">
                             <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span>
                             </div>
                             <span class="header-title"><img src="img/cli.svg" alt="cli" width="14" height="14"
-                                    style="width:14px;height:14px;vertical-align:middle;margin-right:4px"> usectl-cli —
-                                deploy — agent-v2.0.4</span>
-                        </div>
-                        <div class="ai-chat-header-right">
-                            <span>Dashboard</span>
-                            <span>Infrastructure</span>
-                            <span>Settings</span>
-                            <div class="avatar">A</div>
+                                    style="width:14px;height:14px;vertical-align:middle;margin-right:4px"> ~/your-saas · usectl-cli v2.0.4</span>
                         </div>
                     </div>
-                    <div class="ai-chat-body">
-                        <div class="chat-msg user">
-                            <div class="msg-label">YOU</div>
-                            <div class="msg-bubble">Deploy my project to usectl!</div>
-                        </div>
-                        <div class="chat-msg agent">
-                            <div class="agent-label">
-                                <span class="agent-icon">⟐</span>
-                                <span class="agent-name">USECTL AI AGENT</span>
-                            </div>
-                            <div class="msg-bubble">I'll set that up. Does your project need a database?</div>
-                        </div>
-                        <div class="chat-msg user">
-                            <div class="msg-label">YOU</div>
-                            <div class="msg-bubble">Yes</div>
-                        </div>
-                        <div class="chat-msg agent">
-                            <div class="agent-label">
-                                <span class="agent-icon">⟐</span>
-                                <span class="agent-name">USECTL AI AGENT</span>
-                            </div>
-                            <div class="chat-result">
-                                <div><span class="check">✓</span> Project created</div>
-                                <div><span class="check">✓</span> Database provisioned</div>
-                                <div><span class="check">✓</span> Live at <span
-                                        class="link">https://your-app.usectl.app</span></div>
-                            </div>
-                        </div>
+                    <div class="ai-chat-body"
+                        style="font-family: 'JetBrains Mono', monospace; padding: 32px; color: rgba(255,255,255,0.85); font-size: 14px; line-height: 1.75; display: block; min-height: 420px;">
+                        <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl auth login</div>
+                        <div style="color: #11A32A;">✓ Authenticated as you@example.com</div>
+                        <div style="height: 12px;"></div>
+                        <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl projects create \</div>
+                        <div style="padding-left: 24px; color: rgba(255,255,255,0.75);">--repo github.com/you/your-saas --vcpu 2 --ram 4 \</div>
+                        <div style="padding-left: 24px; color: rgba(255,255,255,0.75);">--storage 50 --postgres --redis</div>
+                        <div style="color: #11A32A;">✓ Server provisioned (2 vCPU / 4 GB RAM / 50 GB)</div>
+                        <div style="color: #11A32A;">✓ PostgreSQL ready. <span style="color: rgba(255,255,255,0.6);">$DATABASE_URL</span> injected</div>
+                        <div style="color: #11A32A;">✓ Redis ready. <span style="color: rgba(255,255,255,0.6);">$REDIS_URL</span> injected</div>
+                        <div style="height: 12px;"></div>
+                        <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl deploy</div>
+                        <div style="color: rgba(255,255,255,0.55);">Building with Kaniko...</div>
+                        <div style="color: #11A32A;">✓ Build complete (28s)</div>
+                        <div style="color: #11A32A;">✓ TLS certificate issued</div>
+                        <div style="color: #11A32A;">✓ Live at <span style="color: #fff; text-decoration: underline;">https://your-saas.usectl.app</span></div>
+                        <div style="height: 12px;"></div>
+                        <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl logs --follow</div>
+                        <div style="color: rgba(255,255,255,0.7);">[app] listening on :3000</div>
+                        <div style="color: rgba(255,255,255,0.7);">[app] GET /api/health 200 12ms</div>
+                        <div style="color: rgba(255,255,255,0.7);">[worker] processing queue...<span style="animation: blink 1s infinite; color: #11A32A;">▊</span></div>
                     </div>
                     <div class="compat-bar">
                         <div class="compat-left">
-                            <span class="compat-label">NATIVE COMPATIBILITY</span>
+                            <span class="compat-label">WORKS WITH ANY AGENT</span>
                             <span class="compat-item"><span class="icon"><img src="img/claude.svg" alt="Claude" width="17" height="17"
                                         style="width:17px;height:17px;vertical-align:middle;" /> </span> Claude</span>
                             <span class="compat-item"><span class="icon"><img src="img/chatgpt.svg" alt="ChatGPT" width="17" height="17"
@@ -491,13 +498,16 @@
                                         style="width:17px;height:17px;vertical-align:middle;" /> </span> Windsurf</span>
                         </div>
                         <div class="compat-right">
-                            <a href="#" class="compat-link">View Config</a>
-                            <button class="compat-btn" onclick="window.location.href='#founding'"><img
+                            <a href="https://docs.usectl.com" class="compat-link" target="_blank">CLI docs</a>
+                            <button class="compat-btn" onclick="window.location.href='#pricing'"><img
                                     src="img/rocket.svg" style="width:14px;height:14px;vertical-align:middle;"
-                                    alt="star"> Join Founder's
-                                Club</button>
+                                    alt="rocket"> Configure your server</button>
                         </div>
                     </div>
+                    <p style="text-align: center; color: rgba(255,255,255,0.6); font-size: 14px; margin-top: 20px; margin-bottom: 0;">
+                        Prefer MCP? The built-in MCP server exposes the same commands as tool calls for tighter
+                        integration with Claude Code and Cursor. <a href="https://docs.usectl.com" target="_blank" style="color: var(--primary); text-decoration: none;">See the MCP docs →</a>
+                    </p>
                 </div>
             </div>
         </section>
@@ -505,55 +515,56 @@
         <!-- FEATURES -->
         <section class="section" id="features">
             <div class="section-inner">
-                <h2 class="section-title">Everything your project needs.<br><span class="green">Nothing you
-                        don't. <div class="bg-glow-green" style="top: 70%; left: 58%;"></div></span></h2>
-                <p class="section-sub">Six core capabilities. Zero bloat.</p>
+                <h2 class="section-title">Your server. <span class="green">Everything included. <div class="bg-glow-green" style="top: 70%; left: 58%;"></div></span></h2>
+                <p class="section-sub">Turn on anything. Postgres, Redis, S3, cron, search. It all runs inside
+                    the project you configured. One bill. No addon charges.</p>
                 <div class="features-grid">
                     <div class="feature-card">
                         <div class="feature-icon"><img src="img/rocket.svg" alt="Push-to-deploy icon" width="18"
                                 height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>Push-to-Deploy</h3>
-                        <p>Connect your GitHub repo, push code, and deploy automatically. Kaniko builds containers
-                            without a
-                            Docker daemon.</p>
+                        <h3>Push-to-Deploy + PR Previews</h3>
+                        <p>Connect your GitHub repo and every push builds automatically with Kaniko. Every pull
+                            request gets its own preview URL. Previews are torn down when you merge. No extra
+                            charge.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon"><img src="img/pgsql.svg" alt="PostgreSQL database icon" width="18"
                                 height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>PostgreSQL Database</h3>
-                        <p>Managed by CloudNativePG. One-click provisioning with credentials auto-injected as
-                            environment
-                            variables.</p>
+                        <h3>Managed PostgreSQL</h3>
+                        <p>CloudNativePG operator, automatic backups, point-in-time recovery. Connection
+                            string injected as an env var. Runs inside your project's compute budget. No
+                            separate database bill, ever.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon"><img src="img/object_storage.svg"
                                 alt="S3-compatible object storage icon" width="18" height="18"
                                 style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>S3-Compatible Storage</h3>
-                        <p>Powered by MinIO. Get a private bucket with access keys — perfect for uploads, assets, and
-                            backups.</p>
+                        <h3>S3-Compatible Object Storage</h3>
+                        <p>Private buckets with access keys. Works with any AWS SDK. Egress is unmetered. The
+                            storage you configured on the slider is yours. No surprise per-byte charges.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon"><img src="img/lock.svg" alt="HTTPS lock icon" width="18" height="18"
                                 style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
                         <h3>Custom Domains + HTTPS</h3>
-                        <p>Point your domain, get automatic TLS via Traefik. Wildcard subdomains included for free — no
-                            config needed.</p>
+                        <p>Point your domain, get automatic TLS via Traefik and Let's Encrypt. Wildcard
+                            subdomains included. Apex domains and multi-level paths just work.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon"><img src="img/monitor.svg" alt="Real-time monitoring icon" width="18"
                                 height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>Real-Time Monitoring</h3>
-                        <p>Live build logs, deployment status, and resource usage — all in one dashboard. Track
-                            everything,
-                            miss nothing.</p>
+                        <h3>Logs, Metrics, Rollback</h3>
+                        <p>Real-time logs and metrics per service. One-click rollback to any previous deploy.
+                            Redis, Mongo, Meilisearch, NATS, cron jobs, OAuth2 Proxy, and Grafana all available
+                            with zero extra cost.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon"><img src="img/cli.svg" alt="CLI terminal icon" width="18" height="18"
                                 style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>CLI + Web Dashboard</h3>
-                        <p>Full-featured CLI with <code>--json</code> output for scripting. Beautiful web dashboard for
-                            visual management.</p>
+                        <h3>CLI + Dashboard</h3>
+                        <p>Single-binary CLI with <code>--json</code> output for scripting. Dashboard for
+                            humans. Every AI agent, whether Claude Code, Cursor, Windsurf, or ChatGPT, already
+                            knows how to use it. MCP available too, if you want it.</p>
                     </div>
                 </div>
             </div>
@@ -562,54 +573,118 @@
         <!-- PRICING -->
         <section class="section" id="pricing">
             <div class="section-inner">
-                <h2 class="section-title">Simple pricing. <span class="green-text">No surprises.</span></h2>
-                <p class="section-sub">Pick the tier that matches your project. Upgrade or downgrade anytime.</p>
-                <div class="pricing-grid">
-                    <div class="pricing-card popular">
-                        <div class="pricing-badge">FOUNDING MEMBER</div>
-                        <div class="pricing-name"
-                            style="text-align: center; font-size: 1.05rem; margin-top: 12px; margin-bottom: 8px; color: var(--text);">
-                            Pro — Founding Member <br> <span style="text-decoration: line-through;">$29</span> <span
-                                style="font-size: 25px; color: var(--primary);">$15</span> /month
+                <h2 class="section-title">Pick your size. <span class="green-text">See your price.</span></h2>
+                <p class="section-sub">Pick your vCPU, RAM, and storage. Everything else is included. Every
+                    addon, all bandwidth, all team seats, all PR previews. One bill. No surprises.</p>
+
+                <div class="config-server"
+                    style="max-width: 820px; margin: 0 auto; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px;">
+
+                    <div class="config-slider-row" style="margin-bottom: 32px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+                            <label for="slider-vcpu"
+                                style="color: rgba(255,255,255,0.85); font-size: 15px; letter-spacing: 0.02em; font-weight: 500;">vCPU</label>
+                            <span style="font-family: 'JetBrains Mono', monospace; font-size: 22px; color: var(--primary); font-weight: 500;"
+                                id="val-vcpu-display"><span id="val-vcpu">2</span></span>
                         </div>
-                        <div
-                            style="text-align: center; color: var(--primary); font-size: 16px; margin-bottom: 28px; font-weight: 500;">
-                            Full stack. Locked at 50% off forever.</div>
-                        <ul class="pricing-features" style="display: flex; flex-direction: column;">
-                            <li style="align-items: flex-start;"><span>3-day free trial, no card required</span></li>
-                            <li style="align-items: flex-start;"><span>Custom domain + automatic SSL</span></li>
-                            <li style="align-items: flex-start;"><span>Always-on backend hosting</span></li>
-                            <li style="align-items: flex-start;"><span>Dedicated PostgreSQL database</span></li>
-                            <li style="align-items: flex-start;"><span>S3-compatible storage (10GB)</span></li>
-                            <li style="align-items: flex-start;"><span>Push-to-deploy from GitHub</span></li>
-                            <li style="align-items: flex-start;"><span>CLI + Web Dashboard</span></li>
-                            <li style="align-items: flex-start;"><span>Rollbacks + priority support</span></li>
-                        </ul>
-                        <button class="pricing-btn"
-                            style="background: #11A32A; color: #fff; border: none; font-weight: 500; font-size: 0.9rem; padding: 12px; margin-top: auto;"
-                            onclick="window.location.href='https://manager.usectl.com/register'">
-                            <span>Claim your spot</span>
-                            <div class="glitch" aria-hidden="true">
-                                <span class="letters">
-                                    <span>G</span><span>e</span><span>t</span><span>&nbsp;</span><span>F</span><span>u</span><span>l</span><span>l</span><span>&nbsp;</span><span>S</span><span>t</span><span>a</span><span>c</span><span>k</span>
-                                </span>
-                            </div>
-                        </button>
-                        <div
-                            style="font-size:16px; color:rgba(255, 255, 255, 0.88); text-align:center; margin-top:16px;">
-                            limited to 100 members</div>
+                        <input type="range" id="slider-vcpu" min="0.25" max="16" step="0.25" value="2"
+                            style="width: 100%; accent-color: #11A32A; height: 6px;">
+                        <div style="display: flex; justify-content: space-between; color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 6px; font-family: 'JetBrains Mono', monospace;">
+                            <span>0.25</span>
+                            <span>16</span>
+                        </div>
                     </div>
+
+                    <div class="config-slider-row" style="margin-bottom: 32px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+                            <label for="slider-ram"
+                                style="color: rgba(255,255,255,0.85); font-size: 15px; letter-spacing: 0.02em; font-weight: 500;">RAM</label>
+                            <span style="font-family: 'JetBrains Mono', monospace; font-size: 22px; color: var(--primary); font-weight: 500;"><span id="val-ram">4</span>
+                                GB</span>
+                        </div>
+                        <input type="range" id="slider-ram" min="0.25" max="64" step="0.25" value="4"
+                            style="width: 100%; accent-color: #11A32A; height: 6px;">
+                        <div style="display: flex; justify-content: space-between; color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 6px; font-family: 'JetBrains Mono', monospace;">
+                            <span>0.25 GB</span>
+                            <span>64 GB</span>
+                        </div>
+                    </div>
+
+                    <div class="config-slider-row" style="margin-bottom: 32px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+                            <label for="slider-storage"
+                                style="color: rgba(255,255,255,0.85); font-size: 15px; letter-spacing: 0.02em; font-weight: 500;">Object
+                                storage</label>
+                            <span style="font-family: 'JetBrains Mono', monospace; font-size: 22px; color: var(--primary); font-weight: 500;"><span
+                                    id="val-storage">50</span> GB</span>
+                        </div>
+                        <input type="range" id="slider-storage" min="1" max="500" step="1" value="50"
+                            style="width: 100%; accent-color: #11A32A; height: 6px;">
+                        <div style="display: flex; justify-content: space-between; color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 6px; font-family: 'JetBrains Mono', monospace;">
+                            <span>1 GB</span>
+                            <span>500 GB</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; padding: 32px 0; border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 24px;">
+                        <div style="color: rgba(255,255,255,0.6); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">
+                            Your monthly bill</div>
+                        <div style="font-size: 56px; font-weight: 700; letter-spacing: -0.02em; line-height: 1;">
+                            $<span id="total-price">40.50</span><span style="font-size: 20px; font-weight: 400; color: rgba(255,255,255,0.6);">
+                                /month</span></div>
+                        <div style="color: rgba(255,255,255,0.5); font-size: 13px; margin-top: 12px; font-family: 'JetBrains Mono', monospace;">
+                            <span id="formula-display">$10 × 2 vCPU + $5 × 4 GB RAM + $0.01 × 50 GB
+                                storage</span>
+                        </div>
+                    </div>
+
+                    <button onclick="window.location.href='https://manager.usectl.com/register'"
+                        style="width: 100%; background: #11A32A; color: #fff; border: none; padding: 18px; font-size: 16px; font-weight: 500; border-radius: 8px; cursor: pointer; margin-bottom: 16px; letter-spacing: 0.02em;">
+                        Start 30 days free
+                    </button>
+
+                    <p style="text-align: center; color: rgba(255,255,255,0.6); font-size: 14px; margin: 0;">
+                        <span id="trial-eligibility">Free for 30 days on your first project.</span> No credit card.
+                    </p>
                 </div>
+
+                <div style="max-width: 820px; margin: 48px auto 0; padding: 32px; background: rgba(17, 163, 42, 0.04); border: 1px solid rgba(17, 163, 42, 0.15); border-radius: 16px;">
+                    <h3 style="color: var(--text); font-size: 18px; margin: 0 0 20px 0; text-align: center; font-weight: 500;">
+                        Every project includes</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 24px; color: rgba(255,255,255,0.85); font-size: 15px;">
+                        <div>✓ Managed PostgreSQL + backups</div>
+                        <div>✓ Redis, Mongo, SQL Server</div>
+                        <div>✓ NATS messaging + Meilisearch</div>
+                        <div>✓ Cron jobs + OAuth2 Proxy</div>
+                        <div>✓ Grafana monitoring</div>
+                        <div>✓ PR preview environments</div>
+                        <div>✓ Custom domains + automatic TLS</div>
+                        <div>✓ Unlimited team seats</div>
+                        <div>✓ Unmetered bandwidth</div>
+                        <div>✓ Unmetered builds</div>
+                        <div>✓ Push-to-deploy + instant rollback</div>
+                        <div>✓ CLI + dashboard + MCP</div>
+                    </div>
+                    <p style="color: rgba(255,255,255,0.6); font-size: 13px; text-align: center; margin: 20px 0 0;">
+                        Shared across projects, free. One Postgres, one Redis, one cache, used by as many
+                        projects as you want.</p>
+                </div>
+
+                <p style="text-align: center; color: rgba(255,255,255,0.6); font-size: 14px; margin: 32px auto 0; max-width: 640px; line-height: 1.6;">
+                    Need more than 16 vCPU / 64 GB RAM / 500 GB storage, dedicated hardware, SLAs, or compliance
+                    add-ons? <a href="mailto:support@usectl.com?subject=Enterprise%20inquiry"
+                        style="color: var(--primary); text-decoration: none;">Talk to us about custom.</a>
+                </p>
+
             </div>
         </section>
 
-        <!-- FOUNDING MEMBER -->
-        <section class="section founding" id="founding">
+        <!-- SIGNUP -->
+        <section class="section founding" id="signup">
             <div class="section-inner">
-                <h2 class="section-title">Join as a Founding Member</h2>
-                <p class="section-sub">Limited founding slots. Deploy free during beta. Lock in founding rates
-                    forever
-                    when pricing launches.</p>
+                <h2 class="section-title">Deploy your first project</h2>
+                <p class="section-sub">First 30 days free, up to 4 vCPU / 8 GB RAM. No credit card. Your full
+                    stack live in under five minutes.</p>
                 <div class="founding-form">
                     <div class="founding-row">
                         <div class="founding-field">
@@ -667,16 +742,17 @@
                     </div>
                     <div class="founding-submit-row">
                         <button class="btn-solid-green" id="founding-submit" onclick="handleFoundingSubmit()">
-                            <span>Claim My Founding Spot</span>
+                            <span>Create my account</span>
                             <div class="glitch" aria-hidden="true">
                                 <span class="letters">
-                                    <span>C</span><span>l</span><span>a</span><span>i</span><span>m</span><span>&nbsp;</span><span>M</span><span>y</span><span>&nbsp;</span><span>F</span><span>o</span><span>u</span><span>n</span><span>d</span><span>i</span><span>n</span><span>g</span><span>&nbsp;</span><span>S</span><span>p</span><span>o</span><span>t</span>
+                                    <span>C</span><span>r</span><span>e</span><span>a</span><span>t</span><span>e</span><span>&nbsp;</span><span>m</span><span>y</span><span>&nbsp;</span><span>a</span><span>c</span><span>c</span><span>o</span><span>u</span><span>n</span><span>t</span>
                                 </span>
                             </div>
                         </button>
                     </div>
                 </div>
-                <div class="founding-note-bottom">No credit card. No commitment. Cancel anytime.</div>
+                <div class="founding-note-bottom">No credit card. No commitment. Cancel anytime. 30 days free on
+                    first project up to 4 vCPU / 8 GB RAM.</div>
             </div>
         </section>
 
@@ -707,10 +783,10 @@
                         <span>CloudNativePG</span>
                     </div>
                     <div class="infra-logo">
-                        <div class="infra-icon"><img src="img/minio.svg" alt="MinIO S3-compatible storage" width="110"
+                        <div class="infra-icon"><img src="img/object_storage.svg" alt="SeaweedFS S3-compatible storage" width="110"
                                 height="147" style="width:110px;height:110px;vertical-align:middle;margin-right:4px"
                                 loading="lazy"></div>
-                        <span>MinIO</span>
+                        <span>SeaweedFS</span>
                     </div>
                     <div class="infra-logo">
                         <div class="infra-icon"><img src="img/traefik.svg" alt="Traefik reverse proxy and load balancer"
@@ -721,9 +797,12 @@
                     </div>
 
                 </div>
-                <p class="infra-desc">Every project runs in its own Kubernetes namespace — isolated compute,
-                    isolated
-                    databases, managed storage. Production-grade infrastructure you don't have to configure.</p>
+                <p class="infra-desc">Every project runs in its own Kubernetes namespace. Isolated compute,
+                    isolated databases, managed storage. Production-grade infrastructure you don't have to
+                    configure.</p>
+                <p class="infra-desc" style="margin-top: 16px; font-size: 14px; color: rgba(255,255,255,0.55);">
+                    We swapped MinIO for SeaweedFS to scale object storage better per tenant. S3 API is the
+                    same, so your AWS SDK code keeps working.</p>
             </div>
         </section>
     </main>
@@ -759,7 +838,6 @@
                 <a href="#" class="footer-link">Privacy Policy</a>
                 <a href="#" class="footer-link">Terms of Service</a>
             </div>
-            <a href="https://builders.to/projects/usectl?utm_source=badge" target="_blank" rel="noopener noreferrer"><img src="https://builders.to/badges/featured-on-builders.svg" alt="Usectl - Featured on Builders.to" width="171" height="54" /></a>
         </div>
     </footer>
     <div id="notification-container"></div>
@@ -840,17 +918,17 @@
                     }
                     return;
                 }
-                btn.textContent = '✓ You\'re on the list!';
+                btn.textContent = '✓ Account created';
                 btn.style.background = '#0e8c24';
                 btn.style.opacity = '1';
-                showNotification("Successfully joined as a founding member! Redirecting...", "success");
-                
+                showNotification("Account created! Redirecting...", "success");
+
                 // Redirect to login page after 2 seconds
                 setTimeout(() => {
                     window.location.href = 'https://manager.usectl.com/login';
                 }, 2000);
             }).catch((err) => {
-                btn.textContent = 'Claim My Founding Spot';
+                btn.textContent = 'Create my account';
                 btn.style.pointerEvents = '';
                 btn.style.opacity = '1';
                 if (err.message !== "Email already registered") {
@@ -937,9 +1015,54 @@
         document.querySelectorAll('.step-toggle .toggle').forEach(t => {
             t.addEventListener('click', () => t.classList.toggle('off'));
         });
+
+        // Pricing configurator
+        (function () {
+            const sliderVcpu = document.getElementById('slider-vcpu');
+            const sliderRam = document.getElementById('slider-ram');
+            const sliderStorage = document.getElementById('slider-storage');
+            if (!sliderVcpu) return;
+
+            function formatNumber(n) {
+                if (Number.isInteger(n)) return n.toString();
+                return n.toFixed(2).replace(/\.?0+$/, '');
+            }
+
+            function update() {
+                const vcpu = parseFloat(sliderVcpu.value);
+                const ram = parseFloat(sliderRam.value);
+                const storage = parseInt(sliderStorage.value, 10);
+
+                document.getElementById('val-vcpu').textContent = formatNumber(vcpu);
+                document.getElementById('val-ram').textContent = formatNumber(ram);
+                document.getElementById('val-storage').textContent = storage;
+
+                const total = (vcpu * 10) + (ram * 5) + (storage * 0.01);
+                document.getElementById('total-price').textContent = total.toFixed(2);
+
+                document.getElementById('formula-display').textContent =
+                    '$10 × ' + formatNumber(vcpu) + ' vCPU + $5 × ' + formatNumber(ram) +
+                    ' GB RAM + $0.01 × ' + storage + ' GB storage';
+
+                const trialEl = document.getElementById('trial-eligibility');
+                if (vcpu <= 4 && ram <= 8) {
+                    trialEl.innerHTML = 'Free for 30 days on your first project.';
+                    trialEl.style.color = 'rgba(255,255,255,0.6)';
+                } else {
+                    trialEl.innerHTML = 'Trial covers up to 4 vCPU / 8 GB RAM. Bigger configs bill from day 1.';
+                    trialEl.style.color = 'rgba(255,193,7,0.9)';
+                }
+            }
+
+            sliderVcpu.addEventListener('input', update);
+            sliderRam.addEventListener('input', update);
+            sliderStorage.addEventListener('input', update);
+
+            update();
+        })();
     </script>
 
-    <!-- WebMCP — expose site tools to AI agents -->
+    <!-- WebMCP. Expose site tools to AI agents -->
     <script>
     (function registerWebMCPTools() {
         if (!navigator.modelContext) return;
@@ -948,29 +1071,38 @@
 
         navigator.modelContext.registerTool({
             name: 'get_pricing',
-            description: 'Get usectl pricing plans and founding member rates',
+            description: 'Get usectl pricing model and the configured-server formula',
             inputSchema: { type: 'object', properties: {} },
             execute: function() {
                 return Promise.resolve({
-                    plans: [
-                        {
-                            name: 'Founding Member',
-                            price: '$15/month',
-                            originalPrice: '$29/month',
-                            discount: '50% off forever',
-                            features: [
-                                '3-day free trial, no card required',
-                                'Custom domain + automatic SSL',
-                                'Always-on backend hosting',
-                                'Dedicated PostgreSQL database',
-                                'S3-compatible storage (10GB)',
-                                'Push-to-deploy from GitHub',
-                                'CLI + Web Dashboard',
-                                'Rollbacks + priority support'
-                            ],
-                            limit: '100 members'
-                        }
+                    tagline: 'One flat price. No bandwidth bills.',
+                    promise: 'Pick vCPU, RAM, and storage on a slider. We spin up a managed project with a full stack inside on one flat monthly bill: managed PostgreSQL, S3-compatible object storage, Redis, cron jobs, PR previews, custom domains, unlimited team seats. Everything included. No bandwidth metering, no per-build surprises, no seat pricing.',
+                    model: 'configured-server',
+                    formula: {
+                        vCPU: '$10 per vCPU per month',
+                        RAM: '$5 per GB RAM per month',
+                        storage: '$0.01 per GB object storage per month',
+                        increments: '0.25 vCPU, 0.25 GB RAM, 1 GB storage',
+                        example_small: '1 vCPU / 2 GB / 10 GB = $20.10/month',
+                        example_medium: '2 vCPU / 4 GB / 50 GB = $40.50/month',
+                        example_large: '4 vCPU / 8 GB / 200 GB = $82/month',
+                        example_xl: '8 vCPU / 16 GB / 500 GB = $165/month'
+                    },
+                    included_in_every_server: [
+                        'Managed PostgreSQL with backups',
+                        'Redis, Mongo, SQL Server, NATS, Meilisearch',
+                        'Cron jobs, OAuth2 Proxy, Grafana',
+                        'PR preview environments',
+                        'Custom domains + automatic TLS',
+                        'Unlimited team seats (never per-seat)',
+                        'Unmetered bandwidth',
+                        'Unmetered builds',
+                        'Push-to-deploy + instant rollback',
+                        'CLI + dashboard + MCP',
+                        'Sharing addons across projects is free'
                     ],
+                    trial: '30 days free on your first project, up to 4 vCPU / 8 GB RAM. No credit card required.',
+                    enterprise: 'Custom configurations above 16 vCPU / 64 GB RAM / 500 GB storage, dedicated hardware, SLAs, or compliance add-ons. Contact support@usectl.com.',
                     signup: 'https://manager.usectl.com/register'
                 });
             }
@@ -982,15 +1114,22 @@
             inputSchema: { type: 'object', properties: {} },
             execute: function() {
                 return Promise.resolve({
+                    primary_interface: 'CLI. Every capability is a single-binary command. Structured --json output. Every AI coding agent (Claude Code, Cursor, Windsurf, ChatGPT) can drive the platform by running commands. MCP server available too for tighter integration.',
                     features: [
-                        { name: 'Push-to-Deploy', description: 'Connect GitHub repo, push code, deploy automatically. Kaniko builds containers without Docker daemon.' },
-                        { name: 'PostgreSQL Database', description: 'Managed by CloudNativePG. One-click provisioning with credentials auto-injected as env vars.' },
-                        { name: 'S3-Compatible Storage', description: 'Powered by MinIO. Private bucket with access keys for uploads, assets, and backups.' },
-                        { name: 'Custom Domains + HTTPS', description: 'Automatic TLS via Traefik. Wildcard subdomains included for free.' },
-                        { name: 'Real-Time Monitoring', description: 'Live build logs, deployment status, and resource usage in one dashboard.' },
-                        { name: 'CLI + Web Dashboard', description: 'Full-featured CLI with --json output. Beautiful web dashboard for visual management.' }
+                        { name: 'Push-to-Deploy + PR Previews', description: 'Push to GitHub, build automatically with Kaniko. Every pull request gets its own preview URL, auto torn-down on merge. No extra cost.' },
+                        { name: 'Managed PostgreSQL', description: 'CloudNativePG operator. Automatic backups, point-in-time recovery. Connection string injected. Runs in your server\'s resource budget.' },
+                        { name: 'S3-Compatible Object Storage', description: 'SeaweedFS (recently migrated from MinIO). Private buckets with access keys. Egress is unmetered.' },
+                        { name: 'Redis, Mongo, SQL Server, NATS, Meilisearch', description: 'All available as one-click operator-managed addons. Run inside your project. No separate bill.' },
+                        { name: 'Cron jobs, OAuth2 Proxy, Grafana', description: 'Standard tools for scheduled jobs, auth gating, and observability. Free, included.' },
+                        { name: 'Custom Domains + HTTPS', description: 'Automatic TLS via Traefik and Let\'s Encrypt. Wildcard subdomains included.' },
+                        { name: 'Logs, Metrics, Rollback', description: 'Real-time logs and metrics per service. One-click rollback to any previous deploy. History of last 5 deploys kept.' },
+                        { name: 'CLI + Dashboard', description: 'Single-binary CLI with --json output. Dashboard for humans. MCP server available for agent tighter integration.' },
+                        { name: 'Unlimited team seats', description: 'Never per-seat pricing. Four roles (owner, admin, member, viewer). Invite by email.' },
+                        { name: 'Shared addons across projects', description: 'One Postgres, one Redis, one cache. Share across as many projects as you want. No duplicate billing.' }
                     ],
-                    infrastructure: ['K3s', 'Kaniko', 'CloudNativePG', 'MinIO', 'Traefik'],
+                    infrastructure: ['K3s', 'Kaniko', 'CloudNativePG', 'SeaweedFS', 'Traefik'],
+                    bareMetal: 'We run on our own bare metal at Hetzner. Flat-priced because we own the hardware, not because we cut a deal with AWS or Google Cloud.',
+                    storage_migration_note: 'Object storage was migrated from MinIO to SeaweedFS for better multi-tenant performance. The S3 API is unchanged. Customer code did not need any changes.',
                     docs: 'https://docs.usectl.com'
                 });
             }
@@ -1004,7 +1143,7 @@
                 properties: {
                     section: {
                         type: 'string',
-                        enum: ['hero', 'steps', 'features', 'pricing', 'founding', 'ai', 'infra'],
+                        enum: ['hero', 'steps', 'features', 'pricing', 'signup', 'ai', 'infra'],
                         description: 'The section to navigate to'
                     }
                 },

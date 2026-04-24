@@ -1,6 +1,6 @@
 # Deploy with usectl
 
-Deploy applications to [usectl](https://usectl.com) — a managed PaaS with
+Deploy applications to [usectl](https://usectl.com), a managed PaaS with
 GitHub integration, PostgreSQL, and S3-compatible storage.
 
 ## Prerequisites
@@ -31,7 +31,7 @@ usectl deploy --project your-app
 |---------------------|--------------------------------------------|
 | Container runtime   | Kubernetes namespace with isolated compute  |
 | PostgreSQL          | Managed by CloudNativePG, credentials auto-injected |
-| S3 storage          | MinIO bucket with access keys              |
+| S3 storage          | SeaweedFS bucket with access keys          |
 | Domain + TLS        | Automatic HTTPS via Traefik                |
 | CI/CD               | Push-to-deploy from GitHub                 |
 
@@ -52,10 +52,10 @@ Returns a JWT Bearer token for subsequent API calls.
 
 ### Key Endpoints
 
-- `POST /api/projects` — Create a new project
-- `GET /api/projects` — List projects
-- `POST /api/projects/{id}/deploy` — Trigger deployment
-- `GET /api/projects/{id}/logs` — Stream build/runtime logs
+- `POST /api/projects`: Create a new project
+- `GET /api/projects`: List projects
+- `POST /api/projects/{id}/deploy`: Trigger deployment
+- `GET /api/projects/{id}/logs`: Stream build/runtime logs
 
 ## MCP Integration
 

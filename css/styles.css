@@ -1257,7 +1257,7 @@ code {
     gap: 16px
 }
 
-.step-item:not(:last-child) .step-num::after {
+.step-item .step-num::after {
     content: '';
     flex: 1;
     border-bottom: 0.3px solid;

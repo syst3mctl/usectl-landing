@@ -4,7 +4,7 @@
     {
       "name": "deploy-with-usectl",
       "type": "skill-md",
-      "description": "Deploy applications to usectl — a managed PaaS with GitHub integration, PostgreSQL, and S3 storage",
+      "description": "Deploy applications to usectl, a managed PaaS with GitHub integration, PostgreSQL, and S3 storage",
       "url": "https://usectl.com/.well-known/agent-skills/deploy/SKILL.md",
       "digest": "sha256:7de27d59781acdadda4f1a11e601c09004b4afe4b9dfc424aa3c32d953902419"
     }

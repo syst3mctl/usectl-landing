@@ -2,7 +2,7 @@
   "serverInfo": {
     "name": "usectl",
     "version": "1.0.0",
-    "description": "usectl deployment platform MCP server — manage projects, deployments, and infrastructure via AI agents"
+    "description": "usectl deployment platform MCP server. Manage projects, deployments, and infrastructure via AI agents."
   },
   "transport": {
     "type": "sse",
