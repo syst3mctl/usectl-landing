@@ -57,6 +57,23 @@
     <meta name="msapplication-TileImage" content="/img/fav.png">
     <meta name="msapplication-TileColor" content="#11A32A">
 
+    <!-- Agent Discovery — RFC 8288 Link relations in HTML as fallback for HTTP Link headers -->
+    <link rel="api-catalog" href="/.well-known/api-catalog">
+    <link rel="mcp-server" href="/.well-known/mcp/server-card.json">
+    <link rel="agent-skills" href="/.well-known/agent-skills/index.json">
+    <link rel="describedby" href="/llms.txt" type="text/plain">
+    <link rel="alternate" href="/llms.txt" type="text/plain" title="Plain-text summary for AI agents">
+    <link rel="alternate" href="/index.md" type="text/markdown" title="Markdown version for AI agents">
+    <link rel="service-doc" href="https://docs.usectl.com">
+    <link rel="service-desc" href="https://docs.usectl.com/openapi.yaml" type="application/openapi+yaml">
+    <link rel="authorization_server" href="/.well-known/oauth-authorization-server">
+    <link rel="oauth-protected-resource" href="/.well-known/oauth-protected-resource">
+    <link rel="ucp-profile" href="/.well-known/ucp">
+    <link rel="acp-discovery" href="/.well-known/acp.json">
+
+    <!-- Content Signals for AI agents (search=yes, ai-train=yes, ai-input=yes) -->
+    <meta name="content-signal" content="search=yes, ai-train=yes, ai-input=yes">
+
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
     {
@@ -237,16 +254,11 @@
                                 class="green">No bandwidth bills.</span></span><span id="h1-cursor"></span></h1>
                     <!-- Noscript fallback for indexing -->
                     <noscript>
-                        <p>usectl is a managed deployment platform. Pick your vCPU, RAM, and storage. We spin
-                            up a managed project with a full stack inside on one flat monthly bill. PostgreSQL,
-                            S3-compatible object storage, Redis, PR previews, custom domains. No bandwidth
-                            metering. No per-build surprises.</p>
+                        <p>Managed full-stack deployment. Every addon, every byte of bandwidth, every team
+                            seat: included. Built on our own bare metal at Hetzner.</p>
                     </noscript>
-                    <p class="subtitle">Pick the size you need. We spin up a managed project with your full
-                        stack inside. App, database, cache, workers, PR previews. Every addon, every byte of
-                        bandwidth, every team seat: included. We run on our own bare metal at Hetzner, not on
-                        AWS or Google Cloud. That's why the pricing stays flat, and the only surprises are
-                        features we add for free.</p>
+                    <p class="subtitle">Managed full-stack deployment. Every addon, every byte of bandwidth,
+                        every team seat: included.</p>
                     <a href="#signup" class="hero-cta">
                         <span>Start 30 days free</span>
                         <div class="glitch" aria-hidden="true">
@@ -255,10 +267,7 @@
                             </span>
                         </div>
                     </a>
-                    <p class="hero-note"><span>First project free for 30 days.</span> No credit card. Up to 4
-                        vCPU and 8 GB RAM.</p>
-                    <p class="hero-infra">Our own bare metal at Hetzner. Kubernetes-isolated projects. Driven
-                        from a CLI your AI agent already knows how to use.</p>
+                    <p class="hero-note"><span>Free for 30 days.</span> No credit card.</p>
                 </div>
                 <div class="hero-mockup">
                     <div class="hero-mockup-scene-container">

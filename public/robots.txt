@@ -1,4 +1,93 @@
+# usectl robots.txt
+# We welcome AI agents and search crawlers.
+# The llms.txt file at the root describes the site for AI consumption.
+
 User-agent: *
+Allow: /
+
+# Content Signals (Cloudflare / IETF draft).
+# search=yes     → allow traditional search indexing
+# ai-train=yes   → allow training use
+# ai-input=yes   → allow AI search / answer-engine use
+Content-Signal: search=yes, ai-train=yes, ai-input=yes
+
+# ── Explicit allow for major AI crawlers ─────────────────────────────
+
+# OpenAI
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+# Anthropic
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Google (AI training opt-in)
+User-agent: Google-Extended
+Allow: /
+
+# Apple (AI training opt-in)
+User-agent: Applebot-Extended
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# Common Crawl (used by many AI training datasets)
+User-agent: CCBot
+Allow: /
+
+# Meta (Llama training and Meta AI)
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+# Cohere
+User-agent: cohere-ai
+Allow: /
+
+User-agent: cohere-training-data-crawler
+Allow: /
+
+# DuckDuckGo Assist
+User-agent: DuckAssistBot
+Allow: /
+
+# Amazon
+User-agent: Amazonbot
+Allow: /
+
+# Mistral
+User-agent: MistralAI-User
+Allow: /
+
+# ByteDance / Doubao
+User-agent: Bytespider
+Allow: /
+
+# Diffbot
+User-agent: Diffbot
+Allow: /
+
+# xAI (Grok)
+User-agent: xAI-Bot
 Allow: /
 
 Sitemap: https://usectl.com/sitemap.xml

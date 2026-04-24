@@ -1,0 +1,13 @@
+{
+  "issuer": "https://manager.usectl.com",
+  "authorization_endpoint": "https://manager.usectl.com/api/auth/login",
+  "token_endpoint": "https://manager.usectl.com/api/auth/login",
+  "userinfo_endpoint": "https://manager.usectl.com/api/auth/profile",
+  "response_types_supported": ["token"],
+  "grant_types_supported": ["password"],
+  "subject_types_supported": ["public"],
+  "id_token_signing_alg_values_supported": ["HS256"],
+  "scopes_supported": ["openid", "profile", "projects:read", "projects:write", "deployments:read", "deployments:write"],
+  "token_endpoint_auth_methods_supported": ["client_secret_post"],
+  "service_documentation": "https://docs.usectl.com"
+}
