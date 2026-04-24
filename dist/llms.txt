@@ -2,7 +2,7 @@
 
 > **One flat price. No bandwidth bills.**
 >
-> usectl is a configured-server deployment platform. Pick your vCPU, RAM, and storage on a slider. Get a full stack on one flat monthly bill — managed PostgreSQL, S3-compatible object storage, Redis, cron jobs, PR previews, custom domains, unlimited team seats. No bandwidth metering. No per-build charges. No seat pricing.
+> usectl is a managed deployment platform. Pick your vCPU, RAM, and storage on a slider. We spin up a managed project with a full stack inside on one flat monthly bill: managed PostgreSQL, S3-compatible object storage, Redis, cron jobs, PR previews, custom domains, unlimited team seats. No bandwidth metering. No per-build charges. No seat pricing.
 >
 > **Pricing formula:** $10 per vCPU + $5 per GB RAM + $0.01 per GB storage, per month. A 1 vCPU / 2 GB / 10 GB server is $20.10/month. A 2 vCPU / 4 GB / 50 GB server is $40.50/month.
 >
@@ -10,7 +10,7 @@
 >
 > **Primary interface:** CLI (single binary, `--json` output, Claude Code / Cursor / Windsurf can drive it out of the box). MCP server available for tighter AI integration.
 >
-> **Substrate:** Hetzner bare metal in Falkenstein, Germany. K3s + Kaniko + CloudNativePG + SeaweedFS + Traefik. We own the hardware, which is why the pricing is flat.
+> **Substrate:** Our own bare metal at Hetzner. K3s + Kaniko + CloudNativePG + SeaweedFS + Traefik. We own the hardware, not AWS or Google Cloud, which is why the pricing is flat.
 >
 > **Built for:** AI-assisted developers and small engineering teams. Not vibecoders. Not AWS-native enterprise.
 

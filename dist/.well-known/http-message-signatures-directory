@@ -1,0 +1,4 @@
+{
+  "keys": [],
+  "note": "usectl does not currently send outbound bot requests that require signing. This directory is published for discoverability per the Web Bot Auth proposal. When usectl begins making outbound agent-signed requests, active JWKS entries will appear here."
+}

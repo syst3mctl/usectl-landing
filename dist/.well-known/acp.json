@@ -1,0 +1,58 @@
+{
+  "protocol": {
+    "name": "acp",
+    "version": "0.1"
+  },
+  "api_base_url": "https://manager.usectl.com/api",
+  "supported_transports": ["https"],
+  "capabilities": {
+    "services": [
+      {
+        "id": "configured-server",
+        "name": "Configured deployment project",
+        "description": "Managed Kubernetes-isolated project with configurable vCPU, RAM, and S3-compatible object storage. Full stack included: PostgreSQL, Redis, Mongo, SQL Server, NATS, Meilisearch, cron jobs, PR previews, custom domains with TLS, unlimited team seats.",
+        "type": "subscription",
+        "billing_period": "monthly",
+        "pricing": {
+          "model": "formula",
+          "currency": "USD",
+          "rates": {
+            "vcpu_per_month": 10,
+            "ram_gb_per_month": 5,
+            "object_storage_gb_per_month": 0.01
+          }
+        },
+        "trial": {
+          "duration_days": 30,
+          "max_vcpu": 4,
+          "max_ram_gb": 8,
+          "credit_card_required": false
+        }
+      }
+    ],
+    "checkout": {
+      "supported": true,
+      "endpoint": "https://manager.usectl.com/api/subscribe"
+    },
+    "subscription_management": {
+      "supported": true,
+      "endpoint": "https://manager.usectl.com/api/subscription"
+    },
+    "cancellation": {
+      "supported": true,
+      "endpoint": "https://manager.usectl.com/api/subscription/cancel"
+    }
+  },
+  "authentication": {
+    "type": "oauth2",
+    "discovery_url": "https://usectl.com/.well-known/oauth-authorization-server",
+    "protected_resource_metadata": "https://usectl.com/.well-known/oauth-protected-resource"
+  },
+  "contact": {
+    "support_email": "support@usectl.com",
+    "organization": "systemctl LTD"
+  },
+  "documentation": "https://docs.usectl.com",
+  "privacy_policy": "https://usectl.com/privacy",
+  "terms_of_service": "https://usectl.com/terms"
+}

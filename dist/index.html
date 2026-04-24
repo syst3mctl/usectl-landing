@@ -57,6 +57,23 @@
     <meta name="msapplication-TileImage" content="./img/fav.png">
     <meta name="msapplication-TileColor" content="#11A32A">
 
+    <!-- Agent Discovery — RFC 8288 Link relations in HTML as fallback for HTTP Link headers -->
+    <link rel="api-catalog" href="./.well-known/api-catalog">
+    <link rel="mcp-server" href="./.well-known/mcp/server-card.json">
+    <link rel="agent-skills" href="./.well-known/agent-skills/index.json">
+    <link rel="describedby" href="./llms.txt" type="text/plain">
+    <link rel="alternate" href="./llms.txt" type="text/plain" title="Plain-text summary for AI agents">
+    <link rel="alternate" href="./index.md" type="text/markdown" title="Markdown version for AI agents">
+    <link rel="service-doc" href="https://docs.usectl.com">
+    <link rel="service-desc" href="https://docs.usectl.com/openapi.yaml" type="application/openapi+yaml">
+    <link rel="authorization_server" href="./.well-known/oauth-authorization-server">
+    <link rel="oauth-protected-resource" href="./.well-known/oauth-protected-resource">
+    <link rel="ucp-profile" href="./.well-known/ucp">
+    <link rel="acp-discovery" href="./.well-known/acp.json">
+
+    <!-- Content Signals for AI agents (search=yes, ai-train=yes, ai-input=yes) -->
+    <meta name="content-signal" content="search=yes, ai-train=yes, ai-input=yes">
+
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
     {
@@ -162,10 +179,10 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
-  <script type="module" crossorigin src="./assets/main-D7op6aN6.js"></script>
+  <script type="module" crossorigin src="./assets/main-B0Z9RYrp.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/chunk-B3K2TuZy.js">
-  <link rel="preload" as="style" fetchpriority="high" crossorigin href="./assets/main-DYUf7jgl.css">
-  <link rel="stylesheet" crossorigin href="./assets/main-DYUf7jgl.css">
+  <link rel="preload" as="style" fetchpriority="high" crossorigin href="./assets/main-0GA912wl.css">
+  <link rel="stylesheet" crossorigin href="./assets/main-0GA912wl.css">
 </head>
 
 <body>
@@ -240,15 +257,11 @@
                                 class="green">No bandwidth bills.</span></span><span id="h1-cursor"></span></h1>
                     <!-- Noscript fallback for indexing -->
                     <noscript>
-                        <p>usectl is a managed deployment platform. Pick your vCPU, RAM, and storage. We spin
-                            up a managed project with a full stack inside on one flat monthly bill. PostgreSQL,
-                            S3-compatible object storage, Redis, PR previews, custom domains. No bandwidth
-                            metering. No per-build surprises.</p>
+                        <p>Managed full-stack deployment. Every addon, every byte of bandwidth, every team
+                            seat: included. Built on our own bare metal at Hetzner.</p>
                     </noscript>
-                    <p class="subtitle">Pick the size you need. We spin up a managed project in Falkenstein with
-                        your full stack inside. App, database, cache, workers, PR previews. Every addon, every
-                        byte of bandwidth, every team seat. Included. The only surprises are features we add
-                        for free.</p>
+                    <p class="subtitle">Managed full-stack deployment. Every addon, every byte of bandwidth,
+                        every team seat: included.</p>
                     <a href="#signup" class="hero-cta">
                         <span>Start 30 days free</span>
                         <div class="glitch" aria-hidden="true">
@@ -257,10 +270,7 @@
                             </span>
                         </div>
                     </a>
-                    <p class="hero-note"><span>First project free for 30 days.</span> No credit card. Up to 4
-                        vCPU and 8 GB RAM.</p>
-                    <p class="hero-infra">Built on bare metal in Falkenstein. Kubernetes-isolated projects.
-                        Driven from a CLI your AI agent already knows how to use.</p>
+                    <p class="hero-note"><span>Free for 30 days.</span> No credit card.</p>
                 </div>
                 <div class="hero-mockup">
                     <div class="hero-mockup-scene-container">
@@ -460,43 +470,31 @@
                             <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span>
                             </div>
                             <span class="header-title"><img src="img/cli.svg" alt="cli" width="14" height="14"
-                                    style="width:14px;height:14px;vertical-align:middle;margin-right:4px"> usectl-cli · deploy · agent-v2.0.4</span>
-                        </div>
-                        <div class="ai-chat-header-right">
-                            <span>Dashboard</span>
-                            <span>Infrastructure</span>
-                            <span>Settings</span>
-                            <div class="avatar">A</div>
+                                    style="width:14px;height:14px;vertical-align:middle;margin-right:4px"> ~/your-saas · usectl-cli v2.0.4</span>
                         </div>
                     </div>
-                    <div class="ai-chat-body">
-                        <div class="chat-msg user">
-                            <div class="msg-label">YOU</div>
-                            <div class="msg-bubble">Deploy my project to usectl!</div>
-                        </div>
-                        <div class="chat-msg agent">
-                            <div class="agent-label">
-                                <span class="agent-icon">⟐</span>
-                                <span class="agent-name">USECTL AI AGENT</span>
-                            </div>
-                            <div class="msg-bubble">I'll set that up. Does your project need a database?</div>
-                        </div>
-                        <div class="chat-msg user">
-                            <div class="msg-label">YOU</div>
-                            <div class="msg-bubble">Yes</div>
-                        </div>
-                        <div class="chat-msg agent">
-                            <div class="agent-label">
-                                <span class="agent-icon">⟐</span>
-                                <span class="agent-name">USECTL AI AGENT</span>
-                            </div>
-                            <div class="chat-result">
-                                <div><span class="check">✓</span> Project created</div>
-                                <div><span class="check">✓</span> Database provisioned</div>
-                                <div><span class="check">✓</span> Live at <span
-                                        class="link">https://your-app.usectl.app</span></div>
-                            </div>
-                        </div>
+                    <div class="ai-chat-body"
+                        style="font-family: 'JetBrains Mono', monospace; padding: 32px; color: rgba(255,255,255,0.85); font-size: 14px; line-height: 1.75; display: block; min-height: 420px;">
+                        <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl auth login</div>
+                        <div style="color: #11A32A;">✓ Authenticated as you@example.com</div>
+                        <div style="height: 12px;"></div>
+                        <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl projects create \</div>
+                        <div style="padding-left: 24px; color: rgba(255,255,255,0.75);">--repo github.com/you/your-saas --vcpu 2 --ram 4 \</div>
+                        <div style="padding-left: 24px; color: rgba(255,255,255,0.75);">--storage 50 --postgres --redis</div>
+                        <div style="color: #11A32A;">✓ Server provisioned (2 vCPU / 4 GB RAM / 50 GB)</div>
+                        <div style="color: #11A32A;">✓ PostgreSQL ready. <span style="color: rgba(255,255,255,0.6);">$DATABASE_URL</span> injected</div>
+                        <div style="color: #11A32A;">✓ Redis ready. <span style="color: rgba(255,255,255,0.6);">$REDIS_URL</span> injected</div>
+                        <div style="height: 12px;"></div>
+                        <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl deploy</div>
+                        <div style="color: rgba(255,255,255,0.55);">Building with Kaniko...</div>
+                        <div style="color: #11A32A;">✓ Build complete (28s)</div>
+                        <div style="color: #11A32A;">✓ TLS certificate issued</div>
+                        <div style="color: #11A32A;">✓ Live at <span style="color: #fff; text-decoration: underline;">https://your-saas.usectl.app</span></div>
+                        <div style="height: 12px;"></div>
+                        <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl logs --follow</div>
+                        <div style="color: rgba(255,255,255,0.7);">[app] listening on :3000</div>
+                        <div style="color: rgba(255,255,255,0.7);">[app] GET /api/health 200 12ms</div>
+                        <div style="color: rgba(255,255,255,0.7);">[worker] processing queue...<span style="animation: blink 1s infinite; color: #11A32A;">▊</span></div>
                     </div>
                     <div class="compat-bar">
                         <div class="compat-left">
@@ -815,9 +813,8 @@
                     isolated databases, managed storage. Production-grade infrastructure you don't have to
                     configure.</p>
                 <p class="infra-desc" style="margin-top: 16px; font-size: 14px; color: rgba(255,255,255,0.55);">
-                    We recently migrated object storage from MinIO to SeaweedFS for better multi-tenant
-                    performance and lower tail latency at scale. The S3 API stays unchanged. Your code
-                    doesn't notice the difference.</p>
+                    We swapped MinIO for SeaweedFS to scale object storage better per tenant. S3 API is the
+                    same, so your AWS SDK code keeps working.</p>
             </div>
         </section>
     </main>
@@ -853,7 +850,6 @@
                 <a href="#" class="footer-link">Privacy Policy</a>
                 <a href="#" class="footer-link">Terms of Service</a>
             </div>
-            <a href="https://builders.to/projects/usectl?utm_source=badge" target="_blank" rel="noopener noreferrer"><img src="https://builders.to/badges/featured-on-builders.svg" alt="Usectl - Featured on Builders.to" width="171" height="54" /></a>
         </div>
     </footer>
     <div id="notification-container"></div>
@@ -1143,8 +1139,8 @@
                         { name: 'Shared addons across projects', description: 'One Postgres, one Redis, one cache. Share across as many projects as you want. No duplicate billing.' }
                     ],
                     infrastructure: ['K3s', 'Kaniko', 'CloudNativePG', 'SeaweedFS', 'Traefik'],
-                    bareMetal: 'Hetzner bare metal in Falkenstein, Germany. Flat-priced because we own the hardware.',
-                    storage_migration_note: 'Object storage was migrated from MinIO to SeaweedFS for better multi-tenant performance. The S3 API is unchanged — customer code did not need any changes.',
+                    bareMetal: 'We run on our own bare metal at Hetzner. Flat-priced because we own the hardware, not because we cut a deal with AWS or Google Cloud.',
+                    storage_migration_note: 'Object storage was migrated from MinIO to SeaweedFS for better multi-tenant performance. The S3 API is unchanged. Customer code did not need any changes.',
                     docs: 'https://docs.usectl.com'
                 });
             }

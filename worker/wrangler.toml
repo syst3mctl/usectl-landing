@@ -1,0 +1,13 @@
+name = "usectl-agent-readiness"
+main = "src/index.js"
+compatibility_date = "2026-04-01"
+
+# Bind this Worker to usectl.com routes.
+# The Worker sits in front of the existing origin (R2, nginx, or wherever usectl.com is hosted today).
+routes = [
+  { pattern = "usectl.com/*", zone_name = "usectl.com" },
+  { pattern = "www.usectl.com/*", zone_name = "usectl.com" },
+]
+
+[observability]
+enabled = true

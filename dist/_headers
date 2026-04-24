@@ -17,9 +17,27 @@
   Content-Type: application/json
   Access-Control-Allow-Origin: *
 
+/.well-known/oauth-authorization-server
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+
 /.well-known/oauth-protected-resource
   Content-Type: application/json
   Access-Control-Allow-Origin: *
+
+/.well-known/http-message-signatures-directory
+  Content-Type: application/jwk-set+json
+  Access-Control-Allow-Origin: *
+
+/.well-known/ucp
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+
+/.well-known/acp.json
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
 
 /.well-known/mcp/server-card.json
   Content-Type: application/json
@@ -33,6 +51,16 @@
   Content-Type: text/markdown; charset=utf-8
   Access-Control-Allow-Origin: *
 
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+
+/index.md
+  Content-Type: text/markdown; charset=utf-8
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+
 # ── Default Headers ───────────────────────────────────────────────────
 
 /*
@@ -40,10 +68,22 @@
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
+  Content-Signal: search=yes, ai-train=yes, ai-input=yes
 
 # ── Homepage Link Headers (RFC 8288) ─────────────────────────────────
 
 /
   Link: </.well-known/api-catalog>; rel="api-catalog"
+  Link: </.well-known/mcp/server-card.json>; rel="mcp-server"
+  Link: </.well-known/agent-skills/index.json>; rel="agent-skills"
+  Link: </.well-known/oauth-authorization-server>; rel="authorization_server"
+  Link: </.well-known/oauth-protected-resource>; rel="oauth-protected-resource"
+  Link: </.well-known/ucp>; rel="ucp-profile"
+  Link: </.well-known/acp.json>; rel="acp-discovery"
   Link: </llms.txt>; rel="describedby"; type="text/plain"
+  Link: </llms.txt>; rel="alternate"; type="text/plain"
+  Link: </index.md>; rel="alternate"; type="text/markdown"
   Link: <https://docs.usectl.com>; rel="service-doc"
+  Link: <https://docs.usectl.com/openapi.yaml>; rel="service-desc"; type="application/openapi+yaml"
+  Vary: Accept
+  Content-Signal: search=yes, ai-train=yes, ai-input=yes

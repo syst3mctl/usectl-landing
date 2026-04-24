@@ -1,8 +1,8 @@
 {
-  "resource": "https://manager.usectl.com/api",
+  "resource": "https://usectl.com",
   "authorization_servers": [
-    "https://manager.usectl.com",
-    "https://usectl.com/.well-known/oauth-authorization-server"
+    "https://usectl.com/.well-known/oauth-authorization-server",
+    "https://manager.usectl.com"
   ],
   "scopes_supported": [
     "openid",
@@ -15,7 +15,7 @@
   "bearer_methods_supported": ["header"],
   "resource_documentation": "https://docs.usectl.com",
   "resource_signing_alg_values_supported": ["HS256"],
-  "resource_name": "usectl API",
-  "resource_policy_uri": "https://usectl.com/#",
+  "resource_name": "usectl",
+  "resource_policy_uri": "https://usectl.com/",
   "tls_client_certificate_bound_access_tokens": false
 }

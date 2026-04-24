@@ -1,0 +1,100 @@
+{
+  "ucp_version": "0.1",
+  "name": "usectl",
+  "description": "Managed deployment platform. AI agents and engineers can configure a server (vCPU, RAM, storage) and deploy a full stack on one flat monthly subscription. No bandwidth metering. No seat pricing.",
+  "provider": {
+    "name": "systemctl LTD",
+    "website": "https://usectl.com",
+    "support_email": "support@usectl.com",
+    "jurisdiction": "Georgia"
+  },
+  "services": [
+    {
+      "id": "configured-server",
+      "name": "Configured project",
+      "description": "A managed Kubernetes-isolated project with configurable vCPU, RAM, and S3-compatible object storage. Includes managed PostgreSQL, Redis, Mongo, SQL Server, NATS, Meilisearch, cron jobs, PR previews, custom domains with TLS, unlimited team seats, and unmetered bandwidth.",
+      "type": "subscription",
+      "billing_period": "monthly",
+      "pricing_model": "formula",
+      "pricing_formula": {
+        "currency": "USD",
+        "vcpu_per_month": 10,
+        "ram_gb_per_month": 5,
+        "object_storage_gb_per_month": 0.01
+      },
+      "configurable_dimensions": [
+        {
+          "id": "vcpu",
+          "label": "vCPU",
+          "min": 0.25,
+          "max": 16,
+          "step": 0.25,
+          "unit": "vCPU"
+        },
+        {
+          "id": "ram",
+          "label": "RAM",
+          "min": 0.25,
+          "max": 64,
+          "step": 0.25,
+          "unit": "GB"
+        },
+        {
+          "id": "storage",
+          "label": "Object storage",
+          "min": 1,
+          "max": 500,
+          "step": 1,
+          "unit": "GB"
+        }
+      ],
+      "examples": [
+        {
+          "label": "Small",
+          "config": { "vcpu": 1, "ram": 2, "storage": 10 },
+          "price_per_month_usd": 20.10
+        },
+        {
+          "label": "Medium",
+          "config": { "vcpu": 2, "ram": 4, "storage": 50 },
+          "price_per_month_usd": 40.50
+        },
+        {
+          "label": "Large",
+          "config": { "vcpu": 4, "ram": 8, "storage": 200 },
+          "price_per_month_usd": 82.00
+        }
+      ],
+      "trial": {
+        "period_days": 30,
+        "eligibility": "First project per account",
+        "max_vcpu": 4,
+        "max_ram_gb": 8
+      },
+      "schema_url": "https://usectl.com/.well-known/ucp/services/configured-server.json"
+    }
+  ],
+  "capabilities": [
+    "checkout",
+    "subscription",
+    "trial",
+    "modify",
+    "cancel"
+  ],
+  "endpoints": {
+    "checkout": "https://manager.usectl.com/api/subscribe",
+    "subscription_status": "https://manager.usectl.com/api/subscription",
+    "modify": "https://manager.usectl.com/api/projects",
+    "cancel": "https://manager.usectl.com/api/subscription/cancel"
+  },
+  "authentication": {
+    "protocol": "oauth2",
+    "discovery": "https://usectl.com/.well-known/oauth-authorization-server",
+    "protected_resource": "https://usectl.com/.well-known/oauth-protected-resource"
+  },
+  "payment_methods": ["card"],
+  "currencies": ["USD"],
+  "documentation": "https://docs.usectl.com",
+  "terms_of_service": "https://usectl.com/terms",
+  "privacy_policy": "https://usectl.com/privacy"
+}
