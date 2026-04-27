@@ -519,12 +519,12 @@ code {
 
 
 .hero-text h1 {
-    font-size: 96px;
+    font-size: 80px;
     font-weight: 700;
     line-height: 100%;
     letter-spacing: -.03em;
     margin-bottom: 53px;
-    min-height: 300px;
+    min-height: 165px;
 }
 
 .hero-text h1 .green {
@@ -1718,7 +1718,6 @@ code {
     border: 1px solid #11A32A59;
     border-radius: var(--radius-lg);
     padding: 28px;
-    height: 215px;
     display: flex;
     flex-direction: column;
 }
@@ -2287,8 +2286,8 @@ select.founding-input option {
     }
 
     .hero-text h1 {
-        font-size: 75px;
-        min-height: 245px;
+        font-size: 65px;
+        min-height: 135px;
     }
 
     .hero-text .subtitle {
