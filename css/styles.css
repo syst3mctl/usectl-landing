@@ -1996,10 +1996,12 @@ select.founding-input option {
 
 .founding-input:-webkit-autofill,
 .founding-input:-webkit-autofill:hover,
-.founding-input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
-    -webkit-text-fill-color: var(--text);
+.founding-input:-webkit-autofill:focus,
+.founding-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg) inset !important;
+    -webkit-text-fill-color: var(--text) !important;
     caret-color: var(--text);
+    background-color: var(--bg) !important;
     transition: background-color 5000s ease-in-out 0s;
 }
 
