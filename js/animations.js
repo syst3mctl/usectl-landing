@@ -1,17 +1,9 @@
 import gsap from "gsap";
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TextPlugin } from 'gsap/TextPlugin';
-import Lenis from 'lenis'
 
 
 // Register plugins
-gsap.registerPlugin(ScrollTrigger, TextPlugin);
-
-// Scroll to top on refresh
-if (history.scrollRestoration) {
-    history.scrollRestoration = 'manual';
-}
-window.scrollTo(0, 0);
+gsap.registerPlugin(TextPlugin);
 
 const Scenes = {
     initHero() {
@@ -23,7 +15,7 @@ const Scenes = {
         gsap.set(".hero-text h1", { y: 30, opacity: 0 });
         gsap.set(".hero-text p", { y: 20, opacity: 0 });
         gsap.set(".hero-cta", { scale: 0.9, opacity: 0 });
-        gsap.set(".hero-note, .hero-infra", { y: 5, opacity: 0 });
+        gsap.set(".hero-note", { y: 5, opacity: 0 });
         gsap.set(".hero-mockup-scene-container", { scale: 0.95, opacity: 0 });
         gsap.set(".mockup-browser-card.terminal", { y: 15, opacity: 0 });
 
@@ -145,26 +137,6 @@ const Scenes = {
                 gsap.set(".nav-logo", { x: 0, y: 0 });
             }, null, 0.6)
             .to(".hero-text h1", { y: 0, opacity: 1, duration: 0.1, overwrite: "auto" }, 0);
- 
-        // Infinite Logo Glitch Loop (every 10 seconds)
-        const logoLoopTl = gsap.timeline({
-            repeat: -1,
-            repeatDelay: 10,
-            delay: 5 // Start first loop 5s after entrance
-        });
-
-        logoLoopTl.call(() => {
-            document.body.classList.add('glitch-active-logo');
-            logoShake.play();
-            logoPathGlitchAnim.play();
-        })
-        .to({}, { duration: 0.6 }) // Glitch duration
-        .call(() => {
-            document.body.classList.remove('glitch-active-logo');
-            logoShake.pause();
-            logoPathGlitchAnim.pause();
-            gsap.set(".nav-logo", { x: 0, y: 0 });
-        });
 
         // Refactored H1 typing with proxy
         const h1Parts = h1HTML.match(/(<[^>]+>|[^<])/g);
@@ -187,7 +159,6 @@ const Scenes = {
         tl.to(".hero-text .subtitle", { y: 0, opacity: 1, duration: 0.4, ease: "power2.inOut", overwrite: "auto" }, h1TypeEnd)
             .to(".hero-cta", { scale: 1, opacity: 1, duration: 0.4, ease: "power2.inOut", overwrite: "auto" }, h1TypeEnd + 0.1)
             .to(".hero-note", { y: 0, opacity: 1, duration: 0.4, ease: "power2.inOut", overwrite: "auto" }, h1TypeEnd + 0.2)
-            .to(".hero-infra", { y: 0, opacity: 1, duration: 0.4, ease: "power2.inOut", overwrite: "auto" }, h1TypeEnd + 0.3)
             .to(".mockup-browser-card.terminal", { y: 0, opacity: 1, duration: 0.4, ease: "power2.inOut", overwrite: "auto" }, 0.6);
 
         // Terminal typewriter — starts with a small delay after card slide (t=1.3)
@@ -462,58 +433,6 @@ const Scenes = {
           .call(() => { currentStep = 'Create/update IngressRoute'; }, null, deployShowStart + 2.4)
           .call(() => { currentStep = 'Live'; }, null, deployShowStart + 2.8);
 
-        // H1 Deletion effect proxy
-        const h1ExitProxy = { index: h1Parts.length };
-
-        // --- Hero Exit & Re-entry Scroll Animation ---
-        const mm = gsap.matchMedia();
-
-        mm.add("(min-width: 1025px)", () => {
-            const exitTl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: ".hero",
-                    start: "top 0%",
-                    end: "bottom 0%",
-                    scrub: 1,
-                    enabled: false
-                }
-            });
-
-            tl.call(() => exitTl.scrollTrigger && exitTl.scrollTrigger.enable(), null, h1TypeEnd);
-
-            exitTl.to(".hero-infra", { y: -30, opacity: 0, duration: 0.5 }, 0)
-                .to(".hero-note", { y: -30, opacity: 0, duration: 0.5 }, 0.1)
-                .to(".hero-cta", { scale: 0.9, y: -20, opacity: 0, duration: 0.5 }, 0.2)
-                .to(".hero-text .subtitle", { y: -30, opacity: 0, duration: 0.5 }, 0.3)
-                .to(".hero-mockup-scene-container", { scale: 0.95, y: -80, opacity: 0, duration: 1 }, 0)
-                .to(".mockup-browser-card.terminal", { y: -60, opacity: 0, duration: 1 }, 0.1)
-                .to(h1ExitProxy, {
-                    index: 0,
-                    ease: "none",
-                    onUpdate: () => {
-                        const currentIdx = Math.ceil(h1ExitProxy.index);
-                        h1Content.innerHTML = h1Parts.slice(0, currentIdx).join("");
-                    }
-                }, 0);
-        });
-
-        mm.add("(max-width: 1024px)", () => {
-            const exitTl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: ".hero-mockup-scene-container",
-                    start: "top 0%",
-                    end: "bottom 0%",
-                    scrub: 1,
-                    enabled: false
-                }
-            });
-
-            tl.call(() => exitTl.scrollTrigger && exitTl.scrollTrigger.enable(), null, h1TypeEnd);
-
-            exitTl.to(".hero-mockup-scene-container", { scale: 0.9, y: -40, opacity: 0, duration: 1 }, 0)
-                .to(".hero-text h1, .hero-text .subtitle, .hero-cta, .hero-note, .hero-infra", { opacity: 0, y: -20, stagger: 0.05, duration: 0.5 }, 0);
-        });
-
         // Infinite Fly Animation for Rocket
         gsap.timeline({ yoyo: true, repeat: -1 })
             .to(".rocketCont", 0.4, { y: 5, rotation: -0.5, transformOrigin: "bottom center", ease: "sine.inOut" })
@@ -521,701 +440,6 @@ const Scenes = {
             .to(".rocketCont", 0.4, { y: -2.5, rotation: -0.25, ease: "sine.inOut" })
             .to(".rocketCont", 0.4, { y: 6, rotation: 0.5, ease: "sine.inOut" });
 
-    },
-
-    initSteps() {
-        // 1. Per-Item Entrance Triggers (From Bottom - Triggered at 85% Viewport)
-        const enterItems = [
-            { el: ".steps .section-title", y: 30 },
-            { el: ".steps .section-sub", y: 30 },
-            { el: ".steps .steps-terminal", y: 10 }
-        ];
-
-        enterItems.forEach(item => {
-            gsap.fromTo(item.el, { y: item.y, opacity: 0 }, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 85%",
-                    end: "top 35%",
-                    scrub: 1,
-                },
-                y: 0,
-                opacity: 1,
-                ease: "power2.inOut"
-            });
-        });
-
-        // Entrance triggers for steps - Grouped Stagger
-        gsap.fromTo(".steps .step-item", { y: 15, opacity: 0 }, {
-            scrollTrigger: {
-                trigger: ".steps .step-item",
-                start: "top 85%",
-                end: "top 35%",
-                scrub: 1,
-            },
-            y: 0,
-            opacity: 1,
-            stagger: 0.1,
-            ease: "power2.inOut"
-        });
-
-        // Entrance triggers for terminal text - Sequential Typing
-        const terminalLines = gsap.utils.toArray(".steps-terminal-body > div");
-
-        // Reset text/opacity initially
-        terminalLines.forEach(line => {
-            const originalText = line.innerText;
-            if (line.classList.contains('prompt')) {
-                line.setAttribute("data-text", originalText);
-                line.innerText = "";
-            } else {
-                gsap.set(line, { opacity: 0 });
-            }
-        });
-
-        // Entrance Typing (Triggered once at 80%)
-        const enterTl = gsap.timeline({
-            scrollTrigger: {
-                trigger: ".steps-terminal",
-                start: "top 80%",
-                toggleActions: "play none none none",
-            }
-        });
-
-        terminalLines.forEach((line) => {
-            if (line.classList.contains('prompt')) {
-                const text = line.getAttribute("data-text");
-                const duration = Math.max(0.2, text.length * 0.02);
-                enterTl.to(line, {
-                    text: { value: text, delimiter: "" },
-                    duration: duration,
-                    ease: "none"
-                }, ">0.1");
-            } else {
-                enterTl.to(line, {
-                    opacity: 1,
-                    duration: 0.1,
-                    ease: "none"
-                }, ">0.1");
-            }
-        });
-
-        // 2. Per-Item Exit Triggers (To Top - Triggered at 30% Viewport)
-        const exitItems = [
-            { el: ".steps .section-title", y: -30 },
-            { el: ".steps .section-sub", y: -30 },
-            { el: ".steps .steps-terminal", y: -10 }
-        ];
-
-        exitItems.forEach(item => {
-            gsap.to(item.el, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 30% top",
-                    end: "top 10% top",
-                    scrub: 1,
-                },
-                y: item.y,
-                opacity: 0,
-                overwrite: "auto",
-                immediateRender: false,
-                ease: "power2.inOut"
-            });
-        });
-
-        // Individual triggers for steps - Grouped Stagger
-        gsap.to(".steps .step-item", {
-            scrollTrigger: {
-                trigger: ".steps .step-item",
-                start: "top 30% top",
-                end: "top 10% top",
-                scrub: 1,
-            },
-            y: -15,
-            opacity: 0,
-            stagger: 0.1,
-            overwrite: "auto",
-            immediateRender: false,
-            ease: "power2.inOut"
-        });
-    },
-
-    initAI() {
-        // 1. Entrance Triggers (85% -> 35%)
-        const enterItems = [
-            { el: ".ai-section .section-title", y: 30 },
-            { el: ".ai-desc", y: 30 }
-        ];
-
-        enterItems.forEach(item => {
-            gsap.fromTo(item.el, { y: item.y, opacity: 0 }, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 85%",
-                    end: "top 35%",
-                    scrub: 1,
-                },
-                y: 0,
-                opacity: 1,
-                ease: "power2.inOut"
-            });
-        });
-
-        const aiTl = gsap.timeline({
-            scrollTrigger: {
-                trigger: ".ai-chat",
-                start: "top 85%",
-                end: "top 30%",
-                scrub: 1,
-            }
-        });
-
-        aiTl.from(".ai-chat", { scale: 0.9, opacity: 0, duration: 1 })
-            .from(".chat-msg", { x: -20, opacity: 0, stagger: 0.3, duration: 0.6 }, "-=0.2")
-            .from(".compat-bar", { y: 20, opacity: 0, duration: 0.8 }, "-=0.3");
-
-        // 2. Exit Triggers (30% -> 10% top)
-        const exitItems = [
-            { el: ".ai-section .section-title", y: -30 },
-            { el: ".ai-desc", y: -30 }
-        ];
-
-        exitItems.forEach(item => {
-            gsap.to(item.el, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 10% top",
-                    end: "top -20% top",
-                    scrub: 1,
-                },
-                y: item.y,
-                opacity: 0,
-                overwrite: "auto",
-                immediateRender: false,
-                ease: "power2.inOut"
-            });
-        });
-
-        gsap.to(".ai-chat", {
-            scrollTrigger: {
-                trigger: ".ai-chat",
-                start: "top 10% top",
-                end: "top -20% top",
-                scrub: 1,
-            },
-            y: -20,
-            opacity: 0,
-            overwrite: "auto",
-            immediateRender: false,
-            ease: "power2.inOut"
-        });
-    },
-
-    initGeneralAnimations() {
-        // Handle all elements with .anim class
-        gsap.utils.toArray(".anim").forEach(el => {
-            // Skip elements in sections that have their own discrete animation logic
-            const skipSections = ['.hero', '.steps', '.ai-section', '#features', '#pricing', '#founding', '#infra'];
-            if (skipSections.some(section => el.closest(section))) return;
-
-            gsap.to(el, {
-                scrollTrigger: {
-                    trigger: el,
-                    start: "top 90%", // Start when top of element is at 90% of viewport
-                    onEnter: () => el.classList.add('visible'),
-                    once: true // Only trigger once
-                }
-            });
-        });
-
-    },
-
-    initFeatures() {
-        // 1. Entrance Triggers (85% -> 35%)
-        const enterItems = [
-            { el: "#features .section-title", y: 30 },
-            { el: "#features .section-sub", y: 30 }
-        ];
-
-        enterItems.forEach(item => {
-            gsap.fromTo(item.el, { y: item.y, opacity: 0 }, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 85%",
-                    end: "top 35%",
-                    scrub: 1,
-                },
-                y: 0,
-                opacity: 1,
-                ease: "power2.inOut"
-            });
-        });
-
-        // Entrance triggers for cards - Grouped Stagger (Matching Cost Style)
-        gsap.fromTo(".feature-card", { opacity: 0 }, {
-            scrollTrigger: {
-                trigger: ".features-grid",
-                start: "top 80%",
-                end: "top 30%",
-                scrub: 1,
-            },
-            opacity: 1,
-            stagger: 0.1,
-            ease: "power2.inOut"
-        });
-
-        // 2. Exit Triggers (30% -> 10% top)
-        const exitItems = [
-            { el: "#features .section-title", y: -30 },
-            { el: "#features .section-sub", y: -30 }
-        ];
-
-        exitItems.forEach(item => {
-            gsap.to(item.el, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 30% top",
-                    end: "top 10% top",
-                    scrub: 1,
-                },
-                y: item.y,
-                opacity: 0,
-                overwrite: "auto",
-                immediateRender: false,
-                ease: "power2.inOut"
-            });
-        });
-
-        // Individual per-card exit triggers (Triggered at 15% top - Scroll Scrubbed with Rhythmic Offset)
-        gsap.utils.toArray(".feature-card").forEach((card, i) => {
-            // Positional offset to simulate "staggered delay" while remaining scroll-synced
-            const startOffset = 15 - (i * 1.5);
-            const endOffset = startOffset - 10;
-
-            gsap.to(card, {
-                scrollTrigger: {
-                    trigger: card,
-                    start: `top ${startOffset}% top`,
-                    end: `top ${endOffset}% top`,
-                    scrub: 1,
-                },
-                opacity: 0,
-                overwrite: "auto",
-                immediateRender: false,
-                ease: "power2.inOut"
-            });
-        });
-    },
-
-    initPricing() {
-        // 1. Per-Item Entrance Triggers (From Bottom - Triggered at 85% Viewport)
-        const enterItems = [
-            { el: "#pricing .section-title", y: 30 },
-            { el: "#pricing .section-sub", y: 30 }
-        ];
-
-        enterItems.forEach(item => {
-            gsap.fromTo(item.el, { y: item.y, opacity: 0 }, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 85%",
-                    end: "top 35%",
-                    scrub: 1,
-                },
-                y: 0,
-                opacity: 1,
-                ease: "power2.inOut"
-            });
-        });
-
-        // Entrance triggers for cards - Grouped Stagger
-        gsap.fromTo(".pricing-card", { y: 15, opacity: 0 }, {
-            scrollTrigger: {
-                trigger: ".pricing-grid",
-                start: "top 85%",
-                end: "top 35%",
-                scrub: 1,
-            },
-            y: 0,
-            opacity: 1,
-            stagger: 0.1,
-            ease: "power2.inOut"
-        });
-
-        // 2. Per-Item Exit Triggers (To Top - Triggered at 30% Viewport)
-        const exitItems = [
-            { el: "#pricing .section-title", y: -30 },
-            { el: "#pricing .section-sub", y: -30 }
-        ];
-
-        exitItems.forEach(item => {
-            gsap.to(item.el, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 30% top",
-                    end: "top 10% top",
-                    scrub: 1,
-                },
-                y: item.y,
-                opacity: 0,
-                overwrite: "auto",
-                immediateRender: false,
-                ease: "power2.inOut"
-            });
-        });
-
-        // Individual triggers for cards - Per Card (-20% Top)
-        gsap.utils.toArray(".pricing-card").forEach((card, i) => {
-            const startPos = -20 - (i * 3); // Staggered start starting from -20%
-            const endPos = startPos - 15;
-
-            gsap.to(card, {
-                scrollTrigger: {
-                    trigger: card,
-                    start: `top ${startPos}% top`,
-                    end: `top ${endPos}% top`,
-                    scrub: 1,
-                },
-                y: -30,
-                opacity: 0,
-                overwrite: "auto",
-                immediateRender: false,
-                ease: "power2.inOut"
-            });
-        });
-    },
-
-    initFounding() {
-        // 1. Titles & Subtitles Entrance (Same as Pricing)
-        const enterTitles = [
-            { el: "#founding .section-title", y: 30 },
-            { el: "#founding .section-sub", y: 30 }
-        ];
-
-        enterTitles.forEach(item => {
-            gsap.fromTo(item.el, { y: item.y, opacity: 0 }, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 85%",
-                    end: "top 35%",
-                    scrub: 1,
-                },
-                y: 0,
-                opacity: 1,
-                ease: "power2.inOut"
-            });
-        });
-
-        // 2. Titles & Subtitles Exit (Same as Pricing: 30% -> 10%)
-        enterTitles.forEach(item => {
-            gsap.to(item.el, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 30% top",
-                    end: "top 10% top",
-                    scrub: 1,
-                },
-                y: -30,
-                opacity: 0,
-                overwrite: "auto",
-                immediateRender: false,
-                ease: "power2.inOut"
-            });
-        });
-
-        // 3. Content Elements (Form and Note) Entrance (85% -> 35%)
-        const contentItems = [
-            { el: ".founding-form", y: 15 },
-            { el: ".founding-note-bottom", y: 10 }
-        ];
-
-        contentItems.forEach(item => {
-            gsap.fromTo(item.el, { y: item.y, opacity: 0 }, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 85%",
-                    end: "top 35%",
-                    scrub: 1,
-                },
-                y: 0,
-                opacity: 1,
-                ease: "power2.inOut"
-            });
-        });
-
-        // 4. Content Elements Exit (Individual Viewport Triggers - like Pricing Cards)
-        contentItems.forEach((item, i) => {
-            const startPos = -20 - (i * 3); // Staggered start
-            const endPos = startPos - 15;
-
-            gsap.to(item.el, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: `top ${startPos}% top`,
-                    end: `top ${endPos}% top`,
-                    scrub: 1,
-                },
-                y: -30,
-                opacity: 0,
-                overwrite: "auto",
-                immediateRender: false,
-                ease: "power2.inOut"
-            });
-        });
-    },
-
-    initInfra() {
-        const titleStart = "100%";
-        const logoBaseStart = 100;
-        const descStart = "100%";
-
-        // 1. Titles Entrance (Standard y-axis slide)
-        const enterTitles = [
-            { el: "#infra .section-title", y: 30 }
-        ];
-
-        enterTitles.forEach(item => {
-            gsap.fromTo(item.el, { y: item.y, opacity: 0 }, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: `top ${titleStart}`,
-                    end: "top 35%",
-                    scrub: 1,
-                },
-                y: 0,
-                opacity: 1,
-                ease: "power2.inOut"
-            });
-        });
-
-        // 2. Logos Entrance (Individual Triggers)
-        gsap.utils.toArray(".infra-logo").forEach((logo, i) => {
-            const startOffset = logoBaseStart - (i * 1.5); // Slight rhythmic offset
-            const endOffset = startOffset - 50;
-
-            gsap.fromTo(logo, { scale: 0.7, opacity: 0 }, {
-                scrollTrigger: {
-                    trigger: logo,
-                    start: `top ${startOffset}%`,
-                    end: `top ${endOffset}%`,
-                    scrub: 1,
-                },
-                scale: 1,
-                opacity: 1,
-                ease: "power2.inOut"
-            });
-        });
-
-        // 3. Infrastructure Description Entrance
-        gsap.fromTo("#infra .infra-desc", { y: 30, opacity: 0 }, {
-            scrollTrigger: {
-                trigger: "#infra .infra-desc",
-                start: `top ${descStart}`,
-                end: "top 45%",
-                scrub: 1,
-            },
-            y: 0,
-            opacity: 1,
-            ease: "power2.inOut"
-        });
-
-        // 4. Titles & Description Exit (Standard y-axis slide to top)
-        const exitItems = [
-            { el: "#infra .section-title", y: -30 },
-            { el: "#infra .infra-desc", y: -30 }
-        ];
-
-        exitItems.forEach(item => {
-            gsap.to(item.el, {
-                scrollTrigger: {
-                    trigger: item.el,
-                    start: "top 30% top",
-                    end: "top 10% top",
-                    scrub: 1,
-                },
-                y: -30,
-                opacity: 0,
-                overwrite: "auto",
-                immediateRender: false,
-                ease: "power2.inOut"
-            });
-        });
-
-        // 5. Logos Exit (Individual triggers with slight stagger offset)
-        gsap.utils.toArray(".infra-logo").forEach((logo, i) => {
-            const startPos = -20 - (i * 2); // Staggered start
-            const endPos = startPos - 15;
-
-            gsap.to(logo, {
-                scrollTrigger: {
-                    trigger: logo,
-                    start: `top ${startPos}% top`,
-                    end: `top ${endPos}% top`,
-                    scrub: 1,
-                },
-                y: -20,
-                opacity: 0,
-                overwrite: "auto",
-                immediateRender: false,
-                ease: "power2.inOut"
-            });
-        });
-    },
-
-    initSmoothScroll() {
-        const lenis = new Lenis({
-            duration: 0.8,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            orientation: 'vertical',
-            gestureOrientation: 'vertical',
-            smoothWheel: true,
-            wheelMultiplier: 1.3,
-            touchMultiplier: 2,
-            infinite: false,
-        });
-
-        // Sync Lenis with ScrollTrigger
-        lenis.on('scroll', ScrollTrigger.update);
-
-        gsap.ticker.add((time) => {
-            lenis.raf(time * 1000);
-        });
-
-        gsap.ticker.lagSmoothing(0);
-
-        // Anchor click handler
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                const target = this.getAttribute('href');
-                if (target === '#') return;
-                
-                // If the target exists on the page, use Lenis to scroll to it
-                const targetEl = document.querySelector(target);
-                if (targetEl) {
-                    e.preventDefault();
-
-                    // Update URL hash without jumping
-                    history.pushState(null, null, target);
-
-                    lenis.scrollTo(targetEl, {
-                        offset: 0,
-                        duration: 1.2,
-                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                        onComplete: () => {
-                            ScrollTrigger.refresh();
-                        }
-                    });
-                }
-            });
-        });
-
-        // Scroll to hash on page load
-        const initialHash = window.location.hash;
-        if (initialHash) {
-            const targetEl = document.querySelector(initialHash);
-            if (targetEl) {
-                window.addEventListener('load', () => {
-                    setTimeout(() => {
-                        lenis.scrollTo(targetEl, {
-                            offset: 0,
-                            duration: 1.2,
-                            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                            onComplete: () => {
-                                ScrollTrigger.refresh();
-                            }
-                        });
-                    }, 200);
-                });
-            }
-        }
-
-        window.addEventListener('load', () => {
-            setTimeout(() => ScrollTrigger.refresh(), 100);
-        });
-    },
-
-    initFooter() {
-        gsap.to(".footer", {
-            scrollTrigger: {
-                trigger: ".footer",
-                start: "top 90%",
-                onEnter: () => {
-                    gsap.to(".footer", {
-                        "--footer-line-scale": 1,
-                        duration: 1.5,
-                        ease: "power2.inOut"
-                    });
-                },
-                once: true
-            }
-        });
-    },
-
-    initActiveNav() {
-        const navLinks = ['#steps', '#pricing', '#features'];
-        
-        navLinks.forEach(id => {
-            ScrollTrigger.create({
-                trigger: id,
-                start: "top 40%",
-                end: "bottom 60%",
-                onToggle: self => {
-                    if (self.isActive) {
-                        document.querySelectorAll(`.nav-links a[href="${id}"], .mobile-menu a[href="${id}"]`).forEach(a => a.classList.add('active'));
-                        
-                        // Update URL hash on scroll
-                        if (window.location.hash !== id) {
-                            history.replaceState(null, null, id);
-                        }
-                    } else {
-                        document.querySelectorAll(`.nav-links a[href="${id}"], .mobile-menu a[href="${id}"]`).forEach(a => a.classList.remove('active'));
-                    }
-                }
-            });
-        });
-
-        // Special case for hero section to clear hash when at the top
-        ScrollTrigger.create({
-            trigger: "#hero",
-            start: "top top",
-            end: "bottom 40%",
-            onEnterBack: () => {
-                if (window.location.hash !== "" && window.location.hash !== "#hero") {
-                    history.replaceState(null, null, " ");
-                }
-            }
-        });
-    },
-
-    initNavTransition() {
-        const nav = document.querySelector(".nav");
-        const navBadge = document.querySelector(".nav-badge");
-
-        ScrollTrigger.create({
-            trigger: "#ai",
-            start: "top 64px", // 64px is nav height
-            end: "bottom 64px",
-            onEnter: () => {
-                gsap.to(".nav-links", { color: "rgb(30, 29, 29)", duration: 0.3 });
-                gsap.to(nav, { "--burger-color": "rgb(30, 29, 29)", duration: 0.3 });
-                gsap.to(navBadge, { color: "rgb(30, 29, 29)", duration: 0.3 });
-            },
-            onLeave: () => {
-                gsap.to(".nav-links", { color: "rgba(255, 255, 255, 0.7)", duration: 0.3 });
-                gsap.to(nav, { "--burger-color": "rgb(255, 255, 255)", duration: 0.3 });
-                gsap.to(navBadge, { color: "rgb(255, 255, 255)", duration: 0.3 });
-            },
-            onEnterBack: () => {
-                gsap.to(".nav-links", { color: "rgb(30, 29, 29)", duration: 0.3 });
-                gsap.to(nav, { "--burger-color": "rgb(30, 29, 29)", duration: 0.3 });
-                gsap.to(navBadge, { color: "rgb(30, 29, 29)", duration: 0.3 });
-            },
-            onLeaveBack: () => {
-                gsap.to(".nav-links", { color: "rgba(255, 255, 255, 0.7)", duration: 0.3 });
-                gsap.to(nav, { "--burger-color": "rgb(255, 255, 255)", duration: 0.3 });
-                gsap.to(navBadge, { color: "rgb(255, 255, 255)", duration: 0.3 });
-            }
-        });
     },
 
     initLottie() {
@@ -1241,34 +465,66 @@ const Scenes = {
         observer.observe(firstContainer);
     },
 
+    initNavTransition() {
+        const nav = document.querySelector(".nav");
+        const navBadge = document.querySelector(".nav-badge");
+        const aiSection = document.getElementById("ai");
+        if (!aiSection || !nav) return;
+
+        const NAV_HEIGHT = 64;
+        let isDark = false;
+
+        function check() {
+            const rect = aiSection.getBoundingClientRect();
+            // AI section is behind the nav when its top is above 64px and its bottom is below 64px
+            const shouldBeDark = rect.top <= NAV_HEIGHT && rect.bottom >= NAV_HEIGHT;
+
+            if (shouldBeDark && !isDark) {
+                isDark = true;
+                gsap.to(".nav-links", { color: "rgb(30, 29, 29)", duration: 0.3 });
+                gsap.to(nav, { "--burger-color": "rgb(30, 29, 29)", duration: 0.3 });
+                gsap.to(navBadge, { color: "rgb(30, 29, 29)", duration: 0.3 });
+            } else if (!shouldBeDark && isDark) {
+                isDark = false;
+                gsap.to(".nav-links", { color: "rgba(255, 255, 255, 0.7)", duration: 0.3 });
+                gsap.to(nav, { "--burger-color": "rgb(255, 255, 255)", duration: 0.3 });
+                gsap.to(navBadge, { color: "rgb(255, 255, 255)", duration: 0.3 });
+            }
+        }
+
+        window.addEventListener("scroll", check, { passive: true });
+        check();
+    },
+
+    initFooter() {
+        const footer = document.querySelector(".footer");
+        if (!footer) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    gsap.to(".footer", {
+                        "--footer-line-scale": 1,
+                        duration: 1.5,
+                        ease: "power2.inOut"
+                    });
+                    observer.disconnect();
+                }
+            });
+        }, { threshold: 0.1 });
+
+        observer.observe(footer);
+    },
+
     init() {
-        this.initSmoothScroll();
-        this.initGeneralAnimations();
         // Hero scene is above-the-fold critical — init immediately
         this.initHero();
         // Lottie is below-the-fold — load lazily
         this.initLottie();
-
-        // Defer all scroll-triggered scenes until the browser is idle
-        // This prevents long main-thread tasks during initial page load
-        const initScrollScenes = () => {
-            this.initSteps();
-            this.initAI();
-            this.initFeatures();
-            this.initPricing();
-            this.initFounding();
-            this.initInfra();
-            this.initFooter();
-            this.initActiveNav();
-            this.initNavTransition();
-        };
-
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(initScrollScenes, { timeout: 2000 });
-        } else {
-            // Fallback for Safari (no requestIdleCallback support)
-            setTimeout(initScrollScenes, 200);
-        }
+        // Nav color transition for AI section (uses IntersectionObserver, not scroll animation)
+        this.initNavTransition();
+        // Footer line animation
+        this.initFooter();
     }
 };
 

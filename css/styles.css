@@ -22,27 +22,6 @@
     --max-w: 1920px;
 }
 
-html.lenis,
-html.lenis body {
-    height: auto;
-}
-
-.lenis.lenis-smooth {
-    scroll-behavior: auto !important;
-}
-
-.lenis.lenis-smooth [data-lenis-prevent] {
-    overscroll-behavior: contain;
-}
-
-.lenis.lenis-stopped {
-    overflow: hidden;
-}
-
-.lenis.lenis-scrolling iframe {
-    pointer-events: none;
-}
-
 html {
     scroll-behavior: auto;
 }
@@ -209,8 +188,8 @@ code {
 }
 
 .anim {
-    opacity: 0;
-    transform: translateY(24px)
+    opacity: 1;
+    transform: none;
 }
 
 .anim.visible {
@@ -2013,6 +1992,15 @@ select.founding-input option {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 1px var(--primary)
+}
+
+.founding-input:-webkit-autofill,
+.founding-input:-webkit-autofill:hover,
+.founding-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
+    -webkit-text-fill-color: var(--text);
+    caret-color: var(--text);
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .founding-input::placeholder {
