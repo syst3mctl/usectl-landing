@@ -697,13 +697,13 @@
                 <div class="founding-form">
                     <div class="founding-row">
                         <div class="founding-field">
-                            <input type="text" class="founding-input" id="founding-name" placeholder=" " required autocomplete="off">
+                            <input type="text" class="founding-input" id="founding-name" placeholder=" " required autocomplete="one-time-code">
                             <label class="founding-label" for="founding-name"><span class="required">*</span>
                                 Name</label>
                             <span class="founding-error" id="error-name"></span>
                         </div>
                         <div class="founding-field">
-                            <input type="email" class="founding-input" id="founding-email" placeholder=" " required autocomplete="off">
+                            <input type="text" class="founding-input" id="founding-email" placeholder=" " required autocomplete="one-time-code">
                             <label class="founding-label" for="founding-email"><span class="required">*</span>
                                 Email</label>
                             <span class="founding-error" id="error-email"></span>
@@ -711,12 +711,12 @@
                     </div>
                     <div class="founding-row">
                         <div class="founding-field">
-                            <input type="text" class="founding-input" id="founding-project" placeholder=" " autocomplete="off">
+                            <input type="text" class="founding-input" id="founding-project" placeholder=" " autocomplete="one-time-code">
                             <label class="founding-label" for="founding-project">What are you building?</label>
                             <span class="founding-error" id="error-project"></span>
                         </div>
                         <div class="founding-field">
-                            <select class="founding-input" id="founding-deploy" autocomplete="off"
+                            <select class="founding-input" id="founding-deploy" autocomplete="one-time-code"
                                 onchange="this.classList.toggle('has-value', this.value !== '')">
                                 <option value="" disabled selected hidden></option>
                                 <option value="vercel">Vercel / Netlify</option>
@@ -731,7 +731,7 @@
                     </div>
                     <div class="founding-row">
                         <div class="founding-field">
-                            <input type="password" class="founding-input" id="founding-password" placeholder=" " required autocomplete="new-password">
+                            <input type="password" class="founding-input" id="founding-password" placeholder=" " required autocomplete="one-time-code">
                             <label class="founding-label" for="founding-password"><span class="required">*</span>
                                 Password</label>
                             <button type="button" class="password-toggle" onclick="togglePasswordVisibility('founding-password', this)" aria-label="Toggle password visibility">
@@ -740,7 +740,7 @@
                             <span class="founding-error" id="error-password"></span>
                         </div>
                         <div class="founding-field">
-                            <input type="password" class="founding-input" id="founding-confirm-password" placeholder=" " required autocomplete="new-password">
+                            <input type="password" class="founding-input" id="founding-confirm-password" placeholder=" " required autocomplete="one-time-code">
                             <label class="founding-label" for="founding-confirm-password"><span class="required">*</span>
                                 Confirm Password</label>
                             <button type="button" class="password-toggle" onclick="togglePasswordVisibility('founding-confirm-password', this)" aria-label="Toggle password visibility">
