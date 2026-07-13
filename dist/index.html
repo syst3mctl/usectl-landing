@@ -180,9 +180,10 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
-  <script type="module" crossorigin src="./assets/main-_iCC-rNz.js"></script>
-  <link rel="preload" as="style" fetchpriority="high" crossorigin href="./assets/main-9FnWuL-F.css">
-  <link rel="stylesheet" crossorigin href="./assets/main-9FnWuL-F.css">
+  <script type="module" crossorigin src="./assets/main-CTceVn_l.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/chunk-B3K2TuZy.js">
+  <link rel="preload" as="style" fetchpriority="high" crossorigin href="./assets/main-Cyxq4D-5.css">
+  <link rel="stylesheet" crossorigin href="./assets/main-Cyxq4D-5.css">
 </head>
 
 <body>
@@ -192,27 +193,27 @@
         <nav class="nav" id="nav" aria-label="Main navigation">
             <div class="nav-inner">
                 <div class="nav-left">
-                    <a href="/" class="nav-logo" aria-label="usectl home">
-                        <img src="img/logo.svg" alt="usectl logo" width="83" height="22">
+                    <a href="/" class="nav-logo-text" aria-label="usectl home">
+                        <span class="tilde">~</span><span class="asterisk">✳</span> usectl
                     </a>
                 </div>
-                <div class="nav-right">
+                
+                <div class="nav-center">
+                    
                     <div class="nav-links">
-                        <a href="#steps">How it Works</a>
+                        <a href="#machine">The Machine</a>
+                        <a href="#ai">Agents</a>
                         <a href="#features">Features</a>
                         <a href="#pricing">Pricing</a>
-                        <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer">Github</a>
                         <a href="https://docs.usectl.com" target="_blank">Documentation</a>
                     </div>
-                    <a href="https://manager.usectl.com/login" class="nav-cta-btn">
-                        <span>Login</span>
-                        <div class="glitch" aria-hidden="true">
-                            <span class="letters">
-                                <span>L</span><span>o</span><span>g</span><span>i</span><span>n</span>
-                            </span>
-                        </div>
-                    </a>
                 </div>
+
+                <div class="nav-right">
+                    <a href="https://manager.usectl.com/login" class="nav-login-btn">Login</a>
+                    <a href="https://manager.usectl.com/register" class="nav-start-btn">Start Free</a>
+                </div>
+
                 <button class="mobile-menu-btn" aria-label="Toggle mobile menu" aria-expanded="false"
                     onclick="var m=document.getElementById('mobile-menu');var n=document.getElementById('nav');m.classList.toggle('active');n.classList.toggle('active');this.classList.toggle('active');this.setAttribute('aria-expanded',m.classList.contains('active'))">
                     <div class="hamburger">
@@ -224,25 +225,20 @@
                 </button>
             </div>
             <div class="mobile-menu" id="mobile-menu" role="menu">
-                <a href="#steps" role="menuitem"
-                    onclick="document.getElementById('mobile-menu').classList.remove('active')">How it Works</a>
+                <a href="#machine" role="menuitem"
+                    onclick="document.getElementById('mobile-menu').classList.remove('active')">The Machine</a>
+                <a href="#ai" role="menuitem"
+                    onclick="document.getElementById('mobile-menu').classList.remove('active')">Agents</a>
                 <a href="#features" role="menuitem"
                     onclick="document.getElementById('mobile-menu').classList.remove('active')">Features</a>
                 <a href="#pricing" role="menuitem"
                     onclick="document.getElementById('mobile-menu').classList.remove('active')">Pricing</a>
-
-                <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer"
-                    role="menuitem">Github</a>
                 <a href="https://docs.usectl.com" target="_blank" role="menuitem">Documentation</a>
-                <a href="https://manager.usectl.com/login" class="nav-cta-btn" role="menuitem"
-                    style="text-align: center;">
-                    <span>Login</span>
-                    <div class="glitch" aria-hidden="true">
-                        <span class="letters">
-                            <span>L</span><span>o</span><span>g</span><span>i</span><span>n</span>
-                        </span>
-                    </div>
-                </a>
+                
+                <div style="display: flex; gap: 16px; margin-top: 20px;">
+                    <a href="https://manager.usectl.com/login" class="nav-login-btn" role="menuitem">Login</a>
+                    <a href="https://manager.usectl.com/register" class="nav-start-btn" role="menuitem">Start Free</a>
+                </div>
             </div>
         </nav>
     </header>
@@ -253,10 +249,10 @@
             <div class="hero-inner">
                 <div class="hero-headline">
                     <div class="hero-badge" aria-hidden="true">
-                        <img src="./img/hero-badge.svg" alt="" width="120" height="60">
+                        <img src="img/hero-badge.svg" alt="" width="120" height="60">
                     </div>
                     <h1 id="hero-h1">
-                        <span class="h1-content">Your own machine<br><span class="green">in the cloud.</span></span>
+                        <span class="h1-content">Your own machine<br><span class="hero-cloud-line">in the cloud.</span></span>
                         <span id="h1-cursor"></span>
                     </h1>
                 </div>
@@ -266,7 +262,7 @@
                             you just ship.</p>
                     </noscript>
                     <p class="subtitle">host your whole stack on real servers you own. we run the databases, backups,
-                        and uptime, so <span class="hero-underline">you just ship.</span></p>
+                        and uptime, so you just ship.</p>
                     <div class="hero-cta-row">
                         <a href="#signup" class="hero-cta">
                             <span>Start 30 Days Free</span>
@@ -285,7 +281,7 @@
                         <p>Don't worry, I've got your stack.</p>
                         <span class="hero-bubble-tail" aria-hidden="true"></span>
                     </div>
-                    <img class="hero-devo" src="./img/devo-idle.svg" alt="" width="130" height="242">
+                    <img class="hero-devo" src="img/devo-idle.svg" alt="" width="130" height="242">
                 </div>
             </div>
         </section>
