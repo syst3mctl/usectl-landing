@@ -244,34 +244,150 @@ code {
 .nav-inner {
     max-width: var(--max-w);
     margin: 0 auto;
-    padding: 0 117px;
-    height: 64px;
+    padding: 0 40px; /* Reduced padding to match design */
+    height: 80px; /* Taller header */
     display: flex;
     align-items: center;
-    justify-content: space-between
+    justify-content: space-between;
 }
 
 .nav-left {
     display: flex;
     align-items: center;
-    gap: 12px
+    width: 200px; /* Fixed width to balance flex layout */
 }
 
-.nav-logo {
+/* Text Logo Styles */
+.nav-logo-text {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--primary);
+    text-decoration: none;
     display: flex;
     align-items: center;
-    opacity: 0;
+    gap: 8px;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s;
+    animation: logoPulse 4s infinite ease-in-out;
 }
 
-.glitch-active-logo .nav-logo {
-    clip-path: url(#glitchClipPathLogo);
+.nav-logo-text:hover {
+    opacity: 0.8;
 }
 
-.nav-logo img {
-    height: 22px;
-    width: auto
+.nav-logo-text .tilde {
+    color: var(--primary);
 }
 
+.nav-logo-text .asterisk {
+    font-size: 1.3rem;
+    margin-top: 2px;
+}
+
+/* Center Navigation Links (Pill) */
+.nav-center {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 585px;
+    height: 48px;
+    background: transparent;
+    border: 1px solid #FFFFFF33;
+    border-radius: 12px;
+    padding: 19px 24px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-sizing: border-box;
+}
+
+.nav-links a {
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #FFFFFF99;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: #fff !important;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    width: 250px;
+}
+
+/* Action Buttons */
+.nav-login-btn {
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 100%;
+    color: #FFFFFF33;
+    width: 95px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: transparent;
+    border: 1px solid #FFFFFF33;
+    transition: all 0.2s;
+    text-decoration: none;
+    padding: 15px 22px;
+    box-sizing: border-box;
+}
+
+.nav-login-btn:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-start-btn {
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 100%;
+    color: #fff;
+    width: 115px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background-color: #11A32A6B;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+    padding: 15px 22px;
+    box-sizing: border-box;
+}
+
+.nav-start-btn:hover {
+    background: #0e8c24;
+    box-shadow: 0 0 15px rgba(17, 163, 42, 0.4);
+    color: #fff;
+}
+
+/* Hamburger */
 .mobile-menu-btn {
     display: none;
     background: none;
@@ -281,7 +397,6 @@ code {
     padding: 0;
 }
 
-/* Hamburger */
 .hamburger {
     width: 32px;
     height: 32px;
@@ -383,82 +498,8 @@ code {
     font-weight: 500;
 }
 
-.nav-badge {
-    font-size: .65rem;
-    font-weight: 600;
-    color: var(--text);
-    background: linear-gradient(90deg, rgba(17, 163, 42, 0.1) 0%, rgba(0, 0, 0, 0.25) 100%);
-    padding: 3px 10px;
-    border-radius: 20px;
-    letter-spacing: .04em;
-    opacity: 0;
-    transform: scale(0.8);
-}
-
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    opacity: 0;
-    color: rgba(255, 255, 255, .7);
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 32px
-}
-
-.nav-links a {
-    color: inherit;
-    font-size: .88rem;
-    font-weight: 500;
-    transition: color .2s
-}
-
-.nav-links a:hover,
-.nav-links a.active {
-    color: var(--primary) !important;
-}
-
-.white-link {
-    color: #fff !important;
-}
-
-.nav-cta-btn {
-    position: relative;
-    color: #fff;
-    padding: 9px 20px;
-    border-radius: 8px;
-    font-size: .85rem;
-    font-weight: 600;
-    transition: all .3s;
-    border: none;
-    background: #11a329e1;
-    cursor: pointer;
-    white-space: nowrap;
-    opacity: 0;
-    transform: scale(0.8);
-}
-
-.nav-cta-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(90deg, rgba(17, 163, 42, 0.6) 0%, rgba(17, 163, 42, 0.08) 100%);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none
-}
-
-.nav-cta-btn:hover {
-    background: #11A32A90;
-    color: #fff;
-    box-shadow: 0 0 20px var(--primary-shadow)
+    .nav-badge {
+    display: none;
 }
 
 /* HERO — 2 column */
@@ -2260,7 +2301,7 @@ select.founding-input option {
     }
 
     .nav-inner {
-        padding: 0 50px;
+        padding: 0 40px;
     }
 
     .hero {
@@ -2415,9 +2456,17 @@ select.founding-input option {
     .infra {
         padding-bottom: 150px;
     }
+}
 
-    .nav-right {
-        display: none;
+
+/* Mobile Nav Overrides */
+@media(max-width:1024px) {
+    .nav-inner {
+        padding: 0 40px;
+    }
+    
+    .nav-center, .nav-right {
+        display: none; /* Hide desktop links and buttons on mobile */
     }
 
     .mobile-menu-btn {
@@ -2533,11 +2582,11 @@ select.founding-input option {
     }
 
     .nav-inner {
-        height: 50px;
+        height: 60px;
     }
 
-    .nav-logo {
-        width: 85px;
+    .nav-logo-text {
+        font-size: 1rem;
     }
 
     .features-grid {

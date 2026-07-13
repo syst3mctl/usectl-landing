@@ -180,7 +180,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=3">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
@@ -190,28 +190,27 @@
         <nav class="nav" id="nav" aria-label="Main navigation">
             <div class="nav-inner">
                 <div class="nav-left">
-                    <a href="/" class="nav-logo" aria-label="usectl home">
-                        <img src="img/logo.svg" alt="usectl logo" width="83" height="22">
+                    <a href="/" class="nav-logo-text" aria-label="usectl home">
+                        <span class="tilde">~</span><span class="asterisk">✳</span> usectl
                     </a>
-                    <span class="nav-badge">Beta</span>
                 </div>
-                <div class="nav-right">
+                
+                <div class="nav-center">
+                    
                     <div class="nav-links">
-                        <a href="#steps">How it Works</a>
+                        <a href="#machine">The Machine</a>
+                        <a href="#ai">Agents</a>
                         <a href="#features">Features</a>
                         <a href="#pricing">Pricing</a>
-                        <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer">Github</a>
                         <a href="https://docs.usectl.com" target="_blank">Documentation</a>
                     </div>
-                    <a href="https://manager.usectl.com/login" class="nav-cta-btn">
-                        <span>Login</span>
-                        <div class="glitch" aria-hidden="true">
-                            <span class="letters">
-                                <span>L</span><span>o</span><span>g</span><span>i</span><span>n</span>
-                            </span>
-                        </div>
-                    </a>
                 </div>
+
+                <div class="nav-right">
+                    <a href="https://manager.usectl.com/login" class="nav-login-btn">Login</a>
+                    <a href="https://manager.usectl.com/register" class="nav-start-btn">Start Free</a>
+                </div>
+
                 <button class="mobile-menu-btn" aria-label="Toggle mobile menu" aria-expanded="false"
                     onclick="var m=document.getElementById('mobile-menu');var n=document.getElementById('nav');m.classList.toggle('active');n.classList.toggle('active');this.classList.toggle('active');this.setAttribute('aria-expanded',m.classList.contains('active'))">
                     <div class="hamburger">
@@ -223,25 +222,20 @@
                 </button>
             </div>
             <div class="mobile-menu" id="mobile-menu" role="menu">
-                <a href="#steps" role="menuitem"
-                    onclick="document.getElementById('mobile-menu').classList.remove('active')">How it Works</a>
+                <a href="#machine" role="menuitem"
+                    onclick="document.getElementById('mobile-menu').classList.remove('active')">The Machine</a>
+                <a href="#ai" role="menuitem"
+                    onclick="document.getElementById('mobile-menu').classList.remove('active')">Agents</a>
                 <a href="#features" role="menuitem"
                     onclick="document.getElementById('mobile-menu').classList.remove('active')">Features</a>
                 <a href="#pricing" role="menuitem"
                     onclick="document.getElementById('mobile-menu').classList.remove('active')">Pricing</a>
-
-                <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer"
-                    role="menuitem">Github</a>
                 <a href="https://docs.usectl.com" target="_blank" role="menuitem">Documentation</a>
-                <a href="https://manager.usectl.com/register" class="nav-cta-btn" role="menuitem"
-                    style="text-align: center;">
-                    <span>Get Early Access free</span>
-                    <div class="glitch" aria-hidden="true">
-                        <span class="letters">
-                            <span>G</span><span>e</span><span>t</span><span>&nbsp;</span><span>E</span><span>a</span><span>r</span><span>l</span><span>y</span><span>&nbsp;</span><span>A</span><span>c</span><span>c</span><span>e</span><span>s</span><span>s</span><span>&nbsp;</span><span>f</span><span>r</span><span>e</span><span>e</span>
-                        </span>
-                    </div>
-                </a>
+                
+                <div style="display: flex; gap: 16px; margin-top: 20px;">
+                    <a href="https://manager.usectl.com/login" class="nav-login-btn" role="menuitem">Login</a>
+                    <a href="https://manager.usectl.com/register" class="nav-start-btn" role="menuitem">Start Free</a>
+                </div>
             </div>
         </nav>
     </header>
