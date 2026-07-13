@@ -1355,7 +1355,8 @@ code {
     margin: 0 auto;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1.05fr);
-    gap: clamp(48px, 5vw, 96px);
+    column-gap: 0;
+    row-gap: 0;
     align-items: center;
     height: 100vh;
     box-sizing: border-box;
@@ -1390,6 +1391,8 @@ code {
     align-items: flex-start;
     text-align: left;
     width: 100%;
+    padding-right: clamp(48px, 5vw, 96px);
+    box-sizing: border-box;
     z-index: 1;
 }
 
@@ -1565,8 +1568,10 @@ code {
     position: relative;
     display: flex;
     align-items: flex-start;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: clamp(16px, 1.25vw, 24px);
+    padding-left: 78px;
+    box-sizing: border-box;
 }
 
 .steps-bird {
@@ -3089,8 +3094,8 @@ select.founding-input option {
 }
 
 @media(max-width:1350px) {
-    .steps-inner {
-        gap: 48px;
+    .steps-copy {
+        padding-right: 48px;
     }
 }
 
@@ -3163,6 +3168,7 @@ select.founding-input option {
 
     .steps-visual {
         justify-content: center;
+        padding-left: 0;
     }
 
     .steps-machine-card {
