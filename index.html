@@ -276,78 +276,211 @@
         </section>
 
 
-        <!-- 3 STEPS -->
+        <!-- STEPS / MACHINE -->
         <section class="section steps" id="steps">
-            <div class="section-inner">
+            <div class="steps-top-spacer" aria-hidden="true"></div>
+            <div class="steps-pin-wrap">
+                <div class="steps-inner">
+                    <div class="steps-copy">
+                        <img class="steps-cloud" src="img/steps-cloud.svg" alt="" width="320" height="200" aria-hidden="true">
+                        <div class="steps-copy-viewport">
+                            <div class="steps-copy-track">
+                            <article class="steps-slide" data-step="0">
+                                <div class="steps-badge">
+                                    <img src="img/steps-badge-icon.svg" alt="" width="72" height="37" aria-hidden="true">
+                                    <span>Your own machine in the cloud</span>
+                                </div>
+                                <h2 class="steps-heading">Spin up a machine. it's yours alone.</h2>
+                                <p class="steps-desc">three sliders for vcpu, ram, and storage. you see the price as you go. then it's real metal you control, dedicated and encrypted. not a slice of someone else's cloud.</p>
+                                <a href="https://manager.usectl.com/register" class="steps-cta">Spin up your machine free</a>
+                            </article>
 
-                <div>
-                    <h2 class="section-title">Configure. Connect. <span class="green" style="position: relative;">Ship.
-                            <div class="bg-glow-green" style="top: 70%; left: 70%;"></div></span></h2>
-                    <p class="section-sub">No Docker knowledge required. No server config. No YAML files.</p>
-                    <div class="steps-row">
-                        <div class="step-item">
-                            <div class="step-num">01</div>
-                            <h3>Configure your server</h3>
-                            <div class="step-visual">
-                                <div class="step-toggle">
-                                    <span class="toggle-label">vCPU</span>
-                                    <span class="toggle"></span>
+                            <article class="steps-slide" data-step="1">
+                                <div class="steps-badge">
+                                    <img src="img/steps-badge-icon.svg" alt="" width="72" height="37" aria-hidden="true">
+                                    <span>Fill it up</span>
                                 </div>
-                                <div class="step-toggle">
-                                    <span class="toggle-label">RAM</span>
-                                    <span class="toggle"></span>
+                                <h2 class="steps-heading">Add what you need. it all lives inside.</h2>
+                                <p class="steps-desc">apps from github, postgres, redis, storage, cron. each one a pod in your machine. one place, one bill. we manage the hard parts.</p>
+                            </article>
+
+                            <article class="steps-slide" data-step="2">
+                                <div class="steps-badge">
+                                    <img src="img/steps-badge-icon.svg" alt="" width="72" height="37" aria-hidden="true">
+                                    <span>Take the wheel</span>
                                 </div>
-                                <div class="step-toggle">
-                                    <span class="toggle-label">Storage</span>
-                                    <span class="toggle"></span>
-                                </div>
-                            </div>
-                            <p class="step-repo">Pick your size. See the price.</p>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-num">02</div>
-                            <h3>Connect your GitHub repo</h3>
-                            <div class="step-visual">
-                                <div class="step-github">
-                                    <span class="gh-icon"><svg width="32" height="32" viewBox="0 0 24 24"
-                                            fill="currentColor">
-                                            <path
-                                                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                                        </svg></span>
-                                    <span class="line"></span>
-                                    <span class="usectl-text"><img src="img/logo.svg" alt="usectl logo" width="83"
-                                            height="22" loading="lazy"></span>
-                                </div>
-                            </div>
-                            <p class="step-repo">Any repo with a Dockerfile, or let us detect it.</p>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-num">03</div>
-                            <h3>Push to main</h3>
-                            <div class="step-visual">
-                                <div class="step-deploy-icon"><img src="img/rocket.svg" alt="rocket"
-                                        style="width:28px;height:28px"></div>
-                                <div class="step-success"><span class="dot"></span> Success: Your app is Live</div>
+                                <h2 class="steps-heading">Watch it run. roll back in a click.</h2>
+                                <p class="steps-desc">live metrics, logs, and environments on one dashboard. a bad deploy rolls back on its own, before your users notice.</p>
+                            </article>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="steps-terminal">
-                    <div class="steps-terminal-header">
-                        <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-                        <span class="title">usectl projects create</span>
+
+                    <div class="steps-divider" aria-hidden="true">
+                        <span class="steps-divider-progress"></span>
                     </div>
-                    <div class="steps-terminal-body">
-                        <div class="prompt">$ usectl projects create --repo github.com/you/your-app \</div>
-                        <div class="prompt"> --vcpu 2 --ram 4 --storage 50 --postgres --redis</div>
-                        <div class="prompt">$ usectl deploy --project your-app</div>
-                        <div class="success">✓ Server provisioned (2 vCPU / 4 GB RAM / 50 GB)</div>
-                        <div class="success">✓ Build complete (32s)</div>
-                        <div class="success">✓ PostgreSQL ready. $DATABASE_URL injected</div>
-                        <div class="success">✓ Redis ready. $REDIS_URL injected</div>
-                        <div class="success">✓ S3 bucket ready. $S3_ENDPOINT injected</div>
-                        <div class="success">✓ TLS certificate issued</div>
-                        <div class="success">✓ Live at <span class="link">https://your-app.usectl.app</span></div>
+
+                    <div class="steps-visual">
+                        <div class="steps-visual-viewport">
+                            <div class="steps-visual-track">
+                            <div class="steps-panel" data-step="0">
+                                <div class="steps-machine-card">
+                                    <div class="steps-card-header">
+                                        <div>
+                                            <h3 class="steps-card-title">Add New Machine</h3>
+                                            <p class="steps-card-subtitle">Deploy your services</p>
+                                        </div>
+                                        <span class="steps-card-badge">Personal</span>
+                                    </div>
+
+                                    <div class="steps-card-section">
+                                        <span class="steps-card-label">Basic</span>
+                                        <label class="steps-field-label" for="steps-machine-name">Machine Name</label>
+                                        <div class="steps-name-input">
+                                            <input type="text" id="steps-machine-name" value="my-app" aria-label="Machine name">
+                                            <span class="steps-name-suffix">.usectl.com</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="steps-card-section">
+                                        <div class="steps-resources-head">
+                                            <span class="steps-card-label">Resources</span>
+                                            <span class="steps-resources-hint">Pick now — change anytime later.</span>
+                                        </div>
+                                        <div class="steps-billing-toggle" role="group" aria-label="Billing period">
+                                            <button type="button" class="steps-billing-btn is-active" data-billing="monthly" aria-pressed="true">Monthly</button>
+                                            <button type="button" class="steps-billing-btn" data-billing="yearly" aria-pressed="false">Yearly (save 2 months)</button>
+                                        </div>
+
+                                        <div class="steps-finetune">
+                                            <p class="steps-finetune-title">Fine-tune starter</p>
+
+                                            <div class="steps-resource-row" data-resource="vcpu">
+                                                <div class="steps-resource-info">
+                                                    <span class="steps-resource-name">vCPU</span>
+                                                    <span class="steps-resource-hint">1 vCPU — $10.00/mo · Max 10</span>
+                                                </div>
+                                                <div class="steps-stepper">
+                                                    <button type="button" class="steps-stepper-btn" data-action="dec" data-target="vcpu" aria-label="Decrease vCPU">−</button>
+                                                    <span class="steps-stepper-value" id="steps-val-vcpu">2</span>
+                                                    <button type="button" class="steps-stepper-btn" data-action="inc" data-target="vcpu" aria-label="Increase vCPU">+</button>
+                                                </div>
+                                                <span class="steps-resource-price" id="steps-price-vcpu">$20/mo</span>
+                                            </div>
+
+                                            <div class="steps-resource-row" data-resource="ram">
+                                                <div class="steps-resource-info">
+                                                    <span class="steps-resource-name">RAM</span>
+                                                    <span class="steps-resource-hint">1 GB — $5.00/mo · Max 64GB</span>
+                                                </div>
+                                                <div class="steps-stepper">
+                                                    <button type="button" class="steps-stepper-btn" data-action="dec" data-target="ram" aria-label="Decrease RAM">−</button>
+                                                    <span class="steps-stepper-value" id="steps-val-ram">5GB</span>
+                                                    <button type="button" class="steps-stepper-btn" data-action="inc" data-target="ram" aria-label="Increase RAM">+</button>
+                                                </div>
+                                                <span class="steps-resource-price" id="steps-price-ram">$25/mo</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="steps-card-footer">
+                                        <div class="steps-total">
+                                            <span class="steps-total-label" id="steps-total-label">Monthly total</span>
+                                            <span class="steps-total-price" id="steps-total-price">$62.80/mo</span>
+                                        </div>
+                                        <a href="https://manager.usectl.com/register" class="steps-create-btn">Create Machine</a>
+                                    </div>
+
+                                    <p class="steps-card-meta">Dedicated cores · encrypted at rest · one region you pick</p>
+                                </div>
+                            </div>
+
+                            <div class="steps-panel" data-step="1">
+                                <div class="steps-mockup steps-mockup-pods">
+                                    
+                                    <div class="steps-mockup-header">
+                                        <button type="button" class="steps-mockup-select" aria-label="Select machine">
+                                            <span class="steps-mockup-dot"></span>
+                                            MACHINE 01
+                                            <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+                                        </button>
+                                        <button type="button" class="steps-mockup-settings" aria-label="Settings">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                        </button>
+                                    </div>
+                                    <div class="steps-pod-list">
+                                        <div class="steps-pod-row"><span class="steps-pod-dot is-green"></span><span class="steps-pod-name">fins-landing</span><span class="steps-pod-icon" aria-hidden="true">⬡</span></div>
+                                        <div class="steps-pod-row"><span class="steps-pod-dot is-green"></span><span class="steps-pod-name">fins-landing</span><span class="steps-pod-icon" aria-hidden="true">⬡</span></div>
+                                        <div class="steps-pod-row"><span class="steps-pod-dot is-red"></span><span class="steps-pod-name">fins-landing</span><span class="steps-pod-icon" aria-hidden="true">⬡</span></div>
+                                        <div class="steps-pod-row"><span class="steps-pod-dot is-green"></span><span class="steps-pod-name">fins-landing</span><span class="steps-pod-icon" aria-hidden="true">⬡</span></div>
+                                    </div>
+                                    <div class="steps-pod-stats">
+                                        <span>CPU <strong>0.25</strong></span>
+                                        <span>Memory <strong>0.25GB</strong></span>
+                                        <span><strong>47ms</strong></span>
+                                        <span>Storage <strong>1GB</strong></span>
+                                        <span><strong>2replica</strong></span>
+                                    </div>
+                                    <p class="steps-mockup-deployed">Deployed 2 h ago</p>
+                                </div>
+                            </div>
+
+                            <div class="steps-panel" data-step="2">
+                                <div class="steps-mockup-stack">
+                                    <div class="steps-mockup steps-mockup-gauges">
+                                        <div class="steps-mockup-header">
+                                            <button type="button" class="steps-mockup-select" aria-label="Select machine">
+                                                <span class="steps-mockup-dot"></span>
+                                                MACHINE 01
+                                                <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+                                            </button>
+                                            <span class="steps-mockup-status">Running</span>
+                                        </div>
+                                        <div class="steps-gauge-row">
+                                            <div class="steps-gauge">
+                                                <svg class="steps-gauge-arc" viewBox="0 0 120 70" aria-hidden="true">
+                                                    <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" stroke-linecap="round"/>
+                                                    <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-dasharray="78 157"/>
+                                                </svg>
+                                                <span class="steps-gauge-value">42</span>
+                                                <span class="steps-gauge-label">CPU</span>
+                                            </div>
+                                            <div class="steps-gauge">
+                                                <svg class="steps-gauge-arc" viewBox="0 0 120 70" aria-hidden="true">
+                                                    <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" stroke-linecap="round"/>
+                                                    <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-dasharray="110 157"/>
+                                                </svg>
+                                                <span class="steps-gauge-value">1.2K</span>
+                                                <span class="steps-gauge-label">REQ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="steps-mockup steps-mockup-gauges">
+                                        <div class="steps-mockup-header">
+                                            <button type="button" class="steps-mockup-select" aria-label="Select machine">
+                                                <span class="steps-mockup-dot"></span>
+                                                MACHINE 01
+                                                <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+                                            </button>
+                                            <span class="steps-mockup-status">Running</span>
+                                        </div>
+                                        <div class="steps-gauge-row steps-gauge-row--single">
+                                            <div class="steps-gauge steps-gauge--large">
+                                                <svg class="steps-gauge-arc" viewBox="0 0 160 90" aria-hidden="true">
+                                                    <path d="M15 75 A65 65 0 0 1 145 75" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" stroke-linecap="round"/>
+                                                    <path d="M15 75 A65 65 0 0 1 145 75" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-dasharray="102 204"/>
+                                                </svg>
+                                                <span class="steps-gauge-value">50</span>
+                                                <span class="steps-gauge-label">MEM</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+
+                        <img class="steps-bird" src="img/steps-bird.svg" alt="" width="120" height="80" aria-hidden="true">
                     </div>
                 </div>
             </div>
@@ -978,10 +1111,105 @@
         // Nav background scroll effect now handled in animations.js via GSAP ScrollTrigger
 
 
-        // Smooth appear for step toggles
-        document.querySelectorAll('.step-toggle .toggle').forEach(t => {
-            t.addEventListener('click', () => t.classList.toggle('off'));
-        });
+        // Steps machine configurator
+        (function () {
+            const card = document.querySelector('.steps-machine-card');
+            if (!card) return;
+
+            const STORAGE_GB = 50;
+            const PLATFORM_FEE = 17.30;
+
+            const limits = {
+                vcpu: { min: 1, max: 10, step: 1 },
+                ram: { min: 1, max: 64, step: 1 }
+            };
+
+            const state = { vcpu: 2, ram: 5, billing: 'monthly' };
+
+            const valVcpu = document.getElementById('steps-val-vcpu');
+            const valRam = document.getElementById('steps-val-ram');
+            const priceVcpu = document.getElementById('steps-price-vcpu');
+            const priceRam = document.getElementById('steps-price-ram');
+            const totalPrice = document.getElementById('steps-total-price');
+            const totalLabel = document.getElementById('steps-total-label');
+            const billingBtns = card.querySelectorAll('.steps-billing-btn');
+            const stepperBtns = card.querySelectorAll('.steps-stepper-btn');
+
+            const formatMoney = (amount) => {
+                const rounded = Math.round(amount * 100) / 100;
+                if (Number.isInteger(rounded)) return '$' + rounded;
+                return '$' + rounded.toFixed(2);
+            };
+
+            const getMonthlySubtotal = () => {
+                return (state.vcpu * 10) + (state.ram * 5) + (STORAGE_GB * 0.01) + PLATFORM_FEE;
+            };
+
+            const getDisplayTotal = () => {
+                const monthly = getMonthlySubtotal();
+                if (state.billing === 'yearly') {
+                    return (monthly * 10) / 12;
+                }
+                return monthly;
+            };
+
+            const updateStepperButtons = () => {
+                stepperBtns.forEach((btn) => {
+                    const target = btn.dataset.target;
+                    const action = btn.dataset.action;
+                    const limit = limits[target];
+                    const value = state[target];
+                    if (action === 'dec') {
+                        btn.disabled = value <= limit.min;
+                    } else {
+                        btn.disabled = value >= limit.max;
+                    }
+                });
+            };
+
+            const update = () => {
+                const monthly = getMonthlySubtotal();
+                const displayTotal = getDisplayTotal();
+                const suffix = state.billing === 'yearly' ? '/mo' : '/mo';
+                const billedLabel = state.billing === 'yearly' ? 'Yearly total (billed monthly)' : 'Monthly total';
+
+                valVcpu.textContent = state.vcpu.toString();
+                valRam.textContent = state.ram + 'GB';
+                priceVcpu.textContent = formatMoney(state.vcpu * 10) + '/mo';
+                priceRam.textContent = formatMoney(state.ram * 5) + '/mo';
+                totalPrice.textContent = formatMoney(displayTotal) + suffix;
+                totalLabel.textContent = billedLabel;
+
+                updateStepperButtons();
+            };
+
+            stepperBtns.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.target;
+                    const action = btn.dataset.action;
+                    const limit = limits[target];
+                    const delta = action === 'inc' ? limit.step : -limit.step;
+                    const next = state[target] + delta;
+                    if (next < limit.min || next > limit.max) return;
+                    state[target] = next;
+                    update();
+                });
+            });
+
+            billingBtns.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    state.billing = btn.dataset.billing;
+                    billingBtns.forEach((b) => {
+                        const isActive = b === btn;
+                        b.classList.toggle('is-active', isActive);
+                        b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    });
+                    update();
+                });
+            });
+
+            update();
+        })();
 
         // Pricing configurator
         (function () {

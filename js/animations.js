@@ -1,9 +1,10 @@
 import gsap from "gsap";
 import { TextPlugin } from 'gsap/TextPlugin';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 
 // Register plugins
-gsap.registerPlugin(TextPlugin);
+gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
 const Scenes = {
     initHero() {
@@ -177,6 +178,129 @@ const Scenes = {
         observer.observe(footer);
     },
 
+    initStepsScroll() {
+        const stepsSection = document.getElementById('steps');
+        const pinWrap = document.querySelector('.steps-pin-wrap');
+        if (!stepsSection || !pinWrap) return;
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+
+        if (prefersReducedMotion || isMobile) {
+            stepsSection.classList.add('steps-static');
+            return;
+        }
+
+        const stepsInner = document.querySelector('.steps-inner');
+        const copyViewport = document.querySelector('.steps-copy-viewport');
+        const copyTrack = document.querySelector('.steps-copy-track');
+        const visualViewport = document.querySelector('.steps-visual-viewport');
+        const visualTrack = document.querySelector('.steps-visual-track');
+        const slides = gsap.utils.toArray('.steps-slide');
+        const panels = gsap.utils.toArray('.steps-panel');
+        const progress = document.querySelector('.steps-divider-progress');
+        const panel0 = panels[0];
+
+        if (!stepsInner || !copyViewport || !copyTrack || !visualViewport || !visualTrack || !slides.length || !panels.length) return;
+
+        document.querySelectorAll('.pin-spacer').forEach((spacer) => {
+            const pinned = spacer.querySelector('.steps-inner');
+            if (pinned) spacer.replaceWith(pinned);
+        });
+
+        const syncStepsContentHeight = () => {
+            stepsInner.style.setProperty('--steps-content-h', '545px');
+            stepsInner.style.setProperty('--steps-visual-w', '542px');
+        };
+
+        const getTrackStep = (items) => {
+            if (items.length < 2) return 0;
+            return items[1].offsetTop - items[0].offsetTop;
+        };
+
+        syncStepsContentHeight();
+
+        const getCopyStep = () => getTrackStep(slides);
+        const getVisualStep = () => getTrackStep(panels);
+
+        gsap.set(copyTrack, { y: 0 });
+        gsap.set(visualTrack, { y: 0 });
+
+        if (progress) {
+            gsap.set(progress, { y: 0 });
+        }
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: stepsInner,
+                start: 'center center',
+                endTrigger: pinWrap,
+                end: 'bottom bottom',
+                scrub: true,
+                onUpdate: (self) => {
+                    stepsSection.classList.toggle('is-inner-scrolling', self.progress > 0);
+
+                    if (panel0) {
+                        panel0.style.pointerEvents = self.progress < 0.34 ? 'auto' : 'none';
+                    }
+                },
+            },
+        });
+
+        if (progress) {
+            tl.to(progress, {
+                y: () => {
+                    const divider = document.querySelector('.steps-divider');
+                    const thumb = progress;
+                    if (!divider || !thumb) return 0;
+                    return divider.offsetHeight - thumb.offsetHeight;
+                },
+                ease: 'none',
+                duration: 1,
+            }, 0);
+        }
+
+        tl.to(copyTrack, {
+            y: () => -getCopyStep() * (slides.length - 1),
+            ease: 'none',
+            duration: 1,
+        }, 0);
+
+        tl.to(visualTrack, {
+            y: () => -getVisualStep() * (panels.length - 1),
+            ease: 'none',
+            duration: 1,
+        }, 0);
+
+        const handleResize = () => {
+            const nowMobile = window.matchMedia('(max-width: 1024px)').matches;
+            if (nowMobile && !stepsSection.classList.contains('steps-static')) {
+                ScrollTrigger.getAll().forEach((st) => {
+                    if (st.trigger === stepsInner) st.kill();
+                });
+                tl.kill();
+                stepsSection.classList.remove('is-inner-scrolling');
+                stepsSection.classList.add('steps-static');
+                gsap.set(copyTrack, { clearProps: 'all' });
+                gsap.set(visualTrack, { clearProps: 'all' });
+                if (progress) gsap.set(progress, { clearProps: 'all' });
+                return;
+            }
+
+            syncStepsContentHeight();
+            ScrollTrigger.refresh(true);
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        window.addEventListener('load', () => {
+            syncStepsContentHeight();
+            ScrollTrigger.refresh();
+        });
+
+        ScrollTrigger.refresh();
+    },
+
     init() {
         // Hero scene is above-the-fold critical — init immediately
         this.initHero();
@@ -186,6 +310,8 @@ const Scenes = {
         this.initNavTransition();
         // Footer line animation
         this.initFooter();
+        // Steps sticky scroll
+        this.initStepsScroll();
     }
 };
 
