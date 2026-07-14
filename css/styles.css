@@ -3328,7 +3328,7 @@ code {
     justify-content: center;
     width: clamp(56px, 4.167vw, 64px);
     height: clamp(56px, 4.167vw, 64px);
-    margin-bottom: clamp(20px, 1.667vw, 28px);
+    margin-bottom: 15px;
 }
 
 .section-stacks-icon::before {
@@ -3350,8 +3350,8 @@ code {
 .section-stacks-icon svg {
     position: relative;
     z-index: 1;
-    width: clamp(40px, 2.5vw, 48px);
-    height: clamp(40px, 2.5vw, 48px);
+    width: clamp(52px, 3.281vw, 63px);
+    height: clamp(52px, 3.281vw, 63px);
 }
 
 .section-stacks-card-title {
