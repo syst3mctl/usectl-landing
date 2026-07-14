@@ -801,6 +801,116 @@
             <p class="section-stacks-footer">REPLACES Supabase, Upstash, Auth0, Cloudflare R2</p>
         </section>
 
+        <!-- PRICE SECTION -->
+        <section class="section section-price" id="pricing">
+            <div class="section-price-inner">
+                <div class="section-price-hero">
+                    <div class="section-price-badge">
+                        <img src="img/steps-badge-icon.svg" alt="" width="72" height="37" aria-hidden="true">
+                        <span>The price</span>
+                    </div>
+                    <h2 class="section-price-heading">The price is a slider, <span class="section-price-underline">not a surprise.</span></h2>
+                    <p class="section-price-lead">Pick Vcpu, Ram, and Storage. that is your bill. it does not move when you grow.</p>
+                </div>
+
+                <div class="section-price-body">
+                    <div class="section-price-left">
+                        <div class="section-price-stats">
+                            <article class="section-price-stat">
+                                <p class="section-price-stat-value">$1<span class="section-price-stat-accent">/tb</span></p>
+                                <p class="section-price-stat-desc">Bandwidth, not $90 like AWS</p>
+                            </article>
+                            <article class="section-price-stat">
+                                <p class="section-price-stat-value">$0<span class="section-price-stat-accent">/Seat</span></p>
+                                <p class="section-price-stat-desc">unlimited team, no per-seat bill</p>
+                            </article>
+                            <article class="section-price-stat">
+                                <p class="section-price-stat-value">30 <span class="section-price-stat-accent">/Days</span></p>
+                                <p class="section-price-stat-desc">Free, no credit card</p>
+                            </article>
+                        </div>
+
+                        <div class="section-price-config">
+                        <div class="section-price-resource" data-resource="vcpu">
+                            <div class="section-price-resource-head">
+                                <div class="section-price-resource-info">
+                                    <span class="section-price-resource-name">vCPU</span>
+                                    <span class="section-price-resource-hint">1 vCPU — $10.00/mo - Max 16</span>
+                                </div>
+                                <div class="section-price-resource-controls">
+                                    <div class="section-price-stepper">
+                                        <button type="button" class="section-price-stepper-btn" data-action="dec" data-target="vcpu" aria-label="Decrease vCPU">−</button>
+                                        <span class="section-price-stepper-value" id="price-val-vcpu">2</span>
+                                        <button type="button" class="section-price-stepper-btn" data-action="inc" data-target="vcpu" aria-label="Increase vCPU">+</button>
+                                    </div>
+                                    <span class="section-price-resource-cost" id="price-cost-vcpu">$20/mo</span>
+                                </div>
+                            </div>
+                            <input type="range" class="section-price-slider" id="price-slider-vcpu" min="0.25" max="16" step="0.25" value="2" aria-label="vCPU amount">
+                        </div>
+
+                        <div class="section-price-resource" data-resource="ram">
+                            <div class="section-price-resource-head">
+                                <div class="section-price-resource-info">
+                                    <span class="section-price-resource-name">Ram</span>
+                                    <span class="section-price-resource-hint">1 GB — $5.00/mo - Max 64GB</span>
+                                </div>
+                                <div class="section-price-resource-controls">
+                                    <div class="section-price-stepper">
+                                        <button type="button" class="section-price-stepper-btn" data-action="dec" data-target="ram" aria-label="Decrease RAM">−</button>
+                                        <span class="section-price-stepper-value" id="price-val-ram">4</span>
+                                        <button type="button" class="section-price-stepper-btn" data-action="inc" data-target="ram" aria-label="Increase RAM">+</button>
+                                    </div>
+                                    <span class="section-price-resource-cost" id="price-cost-ram">$20/mo</span>
+                                </div>
+                            </div>
+                            <input type="range" class="section-price-slider" id="price-slider-ram" min="0.25" max="64" step="0.25" value="4" aria-label="RAM amount in GB">
+                        </div>
+
+                        <div class="section-price-resource" data-resource="storage">
+                            <div class="section-price-resource-head">
+                                <div class="section-price-resource-info">
+                                    <span class="section-price-resource-name">Storage</span>
+                                    <span class="section-price-resource-hint">1 GB — $0.01/mo - Max 500GB</span>
+                                </div>
+                                <div class="section-price-resource-controls">
+                                    <div class="section-price-stepper">
+                                        <button type="button" class="section-price-stepper-btn" data-action="dec" data-target="storage" aria-label="Decrease storage">−</button>
+                                        <span class="section-price-stepper-value" id="price-val-storage">45</span>
+                                        <button type="button" class="section-price-stepper-btn" data-action="inc" data-target="storage" aria-label="Increase storage">+</button>
+                                    </div>
+                                    <span class="section-price-resource-cost" id="price-cost-storage">$0.45/mo</span>
+                                </div>
+                            </div>
+                            <input type="range" class="section-price-slider" id="price-slider-storage" min="1" max="500" step="1" value="45" aria-label="Storage amount in GB">
+                        </div>
+
+                        <div class="section-price-total">
+                            <div class="section-price-total-copy">
+                                <p class="section-price-total-label">Your monthly bill</p>
+                                <p class="section-price-total-note">no metering · no egress fees · no per-seat creep</p>
+                            </div>
+                            <p class="section-price-total-value" id="price-total">$40.45</p>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div class="section-price-features">
+                        <ul class="section-price-feature-list">
+                            <li class="section-price-feature-item"><span>Managed postgres, redis, mongo + backups</span></li>
+                            <li class="section-price-feature-item"><span>S3-compatible storage, unmetered egress</span></li>
+                            <li class="section-price-feature-item"><span>Unmetered bandwidth and builds</span></li>
+                            <li class="section-price-feature-item"><span>Pr previews, custom domains, automatic tls</span></li>
+                            <li class="section-price-feature-item"><span>Unlimited team seats</span></li>
+                            <li class="section-price-feature-item"><span>Cli, dashboard, and mcp server</span></li>
+                        </ul>
+                        <a href="https://manager.usectl.com/register" class="section-price-cta">Start 30 Days Free</a>
+                        <p class="section-price-cta-note">first 30 days free · no credit card · cancel anytime</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- AI SECTION -->
         <section class="section ai-section" id="ai">
             <div class="section-inner">
@@ -942,134 +1052,6 @@
                             knows how to use it. MCP available too, if you want it.</p>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- PRICING -->
-        <section class="section" id="pricing">
-            <div class="section-inner">
-                <h2 class="section-title">Pick your size. <span class="green-text">See your price.</span></h2>
-                <p class="section-sub">Pick your vCPU, RAM, and storage. Everything else is included. Every
-                    addon, all bandwidth, all team seats, all PR previews. One bill. No surprises.</p>
-
-                <div class="config-server"
-                    style="max-width: 820px; margin: 0 auto; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px;">
-
-                    <div class="config-slider-row" style="margin-bottom: 32px;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
-                            <label for="slider-vcpu"
-                                style="color: rgba(255,255,255,0.85); font-size: 15px; letter-spacing: 0.02em; font-weight: 500;">vCPU</label>
-                            <span
-                                style="font-family: 'JetBrains Mono', monospace; font-size: 22px; color: var(--primary); font-weight: 500;"
-                                id="val-vcpu-display"><span id="val-vcpu">2</span></span>
-                        </div>
-                        <input type="range" id="slider-vcpu" min="0.25" max="16" step="0.25" value="2"
-                            style="width: 100%; accent-color: #11A32A; height: 6px;">
-                        <div
-                            style="display: flex; justify-content: space-between; color: rgba(255,255,255,0.55); font-size: 12px; margin-top: 6px; font-family: 'JetBrains Mono', monospace;">
-                            <span>0.25</span>
-                            <span>16</span>
-                        </div>
-                    </div>
-
-                    <div class="config-slider-row" style="margin-bottom: 32px;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
-                            <label for="slider-ram"
-                                style="color: rgba(255,255,255,0.85); font-size: 15px; letter-spacing: 0.02em; font-weight: 500;">RAM</label>
-                            <span
-                                style="font-family: 'JetBrains Mono', monospace; font-size: 22px; color: var(--primary); font-weight: 500;"><span
-                                    id="val-ram">4</span>
-                                GB</span>
-                        </div>
-                        <input type="range" id="slider-ram" min="0.25" max="64" step="0.25" value="4"
-                            style="width: 100%; accent-color: #11A32A; height: 6px;">
-                        <div
-                            style="display: flex; justify-content: space-between; color: rgba(255,255,255,0.55); font-size: 12px; margin-top: 6px; font-family: 'JetBrains Mono', monospace;">
-                            <span>0.25 GB</span>
-                            <span>64 GB</span>
-                        </div>
-                    </div>
-
-                    <div class="config-slider-row" style="margin-bottom: 32px;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
-                            <label for="slider-storage"
-                                style="color: rgba(255,255,255,0.85); font-size: 15px; letter-spacing: 0.02em; font-weight: 500;">Object
-                                storage</label>
-                            <span
-                                style="font-family: 'JetBrains Mono', monospace; font-size: 22px; color: var(--primary); font-weight: 500;"><span
-                                    id="val-storage">50</span> GB</span>
-                        </div>
-                        <input type="range" id="slider-storage" min="1" max="500" step="1" value="50"
-                            style="width: 100%; accent-color: #11A32A; height: 6px;">
-                        <div
-                            style="display: flex; justify-content: space-between; color: rgba(255,255,255,0.55); font-size: 12px; margin-top: 6px; font-family: 'JetBrains Mono', monospace;">
-                            <span>1 GB</span>
-                            <span>500 GB</span>
-                        </div>
-                    </div>
-
-                    <div
-                        style="text-align: center; padding: 32px 0; border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 24px;">
-                        <div
-                            style="color: rgba(255,255,255,0.6); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">
-                            Your monthly bill</div>
-                        <div style="font-size: 56px; font-weight: 700; letter-spacing: -0.02em; line-height: 1;">
-                            $<span id="total-price">40.50</span><span
-                                style="font-size: 20px; font-weight: 400; color: rgba(255,255,255,0.6);">
-                                /month</span></div>
-                        <div
-                            style="color: rgba(255,255,255,0.6); font-size: 13px; margin-top: 12px; font-family: 'JetBrains Mono', monospace;">
-
-                            <span id="formula-display">$10 × 2 vCPU + $5 × 4 GB RAM + $0.01 × 50 GB
-                                storage</span>
-                        </div>
-                    </div>
-
-                    <button onclick="window.location.href='https://manager.usectl.com/register'"
-                        style="width: 100%; background: #11A32A; color: #fff; border: none; padding: 18px; font-size: 18.5px; font-weight: 700; border-radius: 8px; cursor: pointer; margin-bottom: 16px; letter-spacing: 0.02em;">
-                        Start 30 days free
-                    </button>
-
-                    <p style="text-align: center; color: rgba(255,255,255,0.6); font-size: 14px; margin: 0;">
-                        <span id="trial-eligibility">Free for 30 days on your first project.</span> No credit card.
-                    </p>
-                </div>
-
-                <div
-                    style="max-width: 820px; margin: 48px auto 0; padding: 32px; background: rgba(17, 163, 42, 0.04); border: 1px solid rgba(17, 163, 42, 0.15); border-radius: 16px;">
-                    <h3
-                        style="color: var(--text); font-size: 18px; margin: 0 0 20px 0; text-align: center; font-weight: 500;">
-                        Every project includes</h3>
-                    <div
-                        style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 24px; color: rgba(255,255,255,0.85); font-size: 15px;">
-                        <div>✓ Managed PostgreSQL + backups</div>
-                        <div>✓ Redis, Mongo, SQL Server</div>
-                        <div>✓ NATS messaging + Meilisearch</div>
-                        <div>✓ Cron jobs + OAuth2 Proxy</div>
-                        <div>✓ Grafana monitoring</div>
-                        <div>✓ PR preview environments</div>
-                        <div>✓ Custom domains + automatic TLS</div>
-                        <div>✓ Unlimited team seats</div>
-                        <div>✓ Unmetered bandwidth</div>
-                        <div>✓ Unmetered builds</div>
-                        <div>✓ Push-to-deploy + instant rollback</div>
-                        <div>✓ CLI + dashboard + MCP</div>
-                    </div>
-                    <p style="color: rgba(255,255,255,0.6); font-size: 13px; text-align: center; margin: 20px 0 0;">
-                        Shared across projects, free. One Postgres, one Redis, one cache, used by as many
-                        projects as you want.</p>
-                </div>
-
-                <p
-                    style="text-align: center; color: rgba(255,255,255,0.6); font-size: 14px; margin: 32px auto 0; max-width: 640px; line-height: 1.6;">
-                    Need more than 16 vCPU / 64 GB RAM / 500 GB storage, dedicated hardware, SLAs, or compliance
-                    add-ons? <a href="mailto:support@usectl.com?subject=Enterprise%20inquiry"
-                        style="color: var(--primary); text-decoration: none;">Talk to us about custom.</a>
-                </p>
-
             </div>
         </section>
 
@@ -1526,47 +1508,110 @@
             update();
         })();
 
-        // Pricing configurator
+        // Section-price configurator
         (function () {
-            const sliderVcpu = document.getElementById('slider-vcpu');
-            const sliderRam = document.getElementById('slider-ram');
-            const sliderStorage = document.getElementById('slider-storage');
+            const sliderVcpu = document.getElementById('price-slider-vcpu');
+            const sliderRam = document.getElementById('price-slider-ram');
+            const sliderStorage = document.getElementById('price-slider-storage');
             if (!sliderVcpu) return;
 
-            function formatNumber(n) {
+            const limits = {
+                vcpu: { min: 0.25, max: 16, step: 0.25 },
+                ram: { min: 0.25, max: 64, step: 0.25 },
+                storage: { min: 1, max: 500, step: 1 }
+            };
+
+            const sliders = {
+                vcpu: sliderVcpu,
+                ram: sliderRam,
+                storage: sliderStorage
+            };
+
+            const valEls = {
+                vcpu: document.getElementById('price-val-vcpu'),
+                ram: document.getElementById('price-val-ram'),
+                storage: document.getElementById('price-val-storage')
+            };
+
+            const costEls = {
+                vcpu: document.getElementById('price-cost-vcpu'),
+                ram: document.getElementById('price-cost-ram'),
+                storage: document.getElementById('price-cost-storage')
+            };
+
+            const totalEl = document.getElementById('price-total');
+            const stepperBtns = document.querySelectorAll('.section-price-stepper-btn');
+
+            const formatNumber = (n) => {
                 if (Number.isInteger(n)) return n.toString();
                 return n.toFixed(2).replace(/\.?0+$/, '');
-            }
+            };
 
-            function update() {
+            const formatMoney = (n) => '$' + (Number.isInteger(n) ? n.toString() : n.toFixed(2));
+
+            const clampValue = (key, value) => {
+                const { min, max, step } = limits[key];
+                const clamped = Math.min(max, Math.max(min, value));
+                const steps = Math.round((clamped - min) / step);
+                return Math.round((min + steps * step) * 100) / 100;
+            };
+
+            const setSliderFill = (slider) => {
+                const min = parseFloat(slider.min);
+                const max = parseFloat(slider.max);
+                const val = parseFloat(slider.value);
+                const fill = ((val - min) / (max - min)) * 100;
+                slider.style.setProperty('--fill', fill + '%');
+            };
+
+            const update = () => {
                 const vcpu = parseFloat(sliderVcpu.value);
                 const ram = parseFloat(sliderRam.value);
                 const storage = parseInt(sliderStorage.value, 10);
 
-                document.getElementById('val-vcpu').textContent = formatNumber(vcpu);
-                document.getElementById('val-ram').textContent = formatNumber(ram);
-                document.getElementById('val-storage').textContent = storage;
+                valEls.vcpu.textContent = formatNumber(vcpu);
+                valEls.ram.textContent = formatNumber(ram);
+                valEls.storage.textContent = storage.toString();
+
+                costEls.vcpu.textContent = formatMoney(vcpu * 10) + '/mo';
+                costEls.ram.textContent = formatMoney(ram * 5) + '/mo';
+                costEls.storage.textContent = formatMoney(storage * 0.01) + '/mo';
 
                 const total = (vcpu * 10) + (ram * 5) + (storage * 0.01);
-                document.getElementById('total-price').textContent = total.toFixed(2);
+                totalEl.textContent = formatMoney(total);
 
-                document.getElementById('formula-display').textContent =
-                    '$10 × ' + formatNumber(vcpu) + ' vCPU + $5 × ' + formatNumber(ram) +
-                    ' GB RAM + $0.01 × ' + storage + ' GB storage';
+                Object.values(sliders).forEach(setSliderFill);
 
-                const trialEl = document.getElementById('trial-eligibility');
-                if (vcpu <= 4 && ram <= 8) {
-                    trialEl.innerHTML = 'Free for 30 days on your first project.';
-                    trialEl.style.color = 'rgba(255,255,255,0.6)';
-                } else {
-                    trialEl.innerHTML = 'Trial covers up to 4 vCPU / 8 GB RAM. Bigger configs bill from day 1.';
-                    trialEl.style.color = 'rgba(255,193,7,0.9)';
-                }
-            }
+                stepperBtns.forEach((btn) => {
+                    const key = btn.dataset.target;
+                    const { min, max } = limits[key];
+                    const val = parseFloat(sliders[key].value);
+                    btn.disabled = (btn.dataset.action === 'dec' && val <= min) ||
+                        (btn.dataset.action === 'inc' && val >= max);
+                });
+            };
 
-            sliderVcpu.addEventListener('input', update);
-            sliderRam.addEventListener('input', update);
-            sliderStorage.addEventListener('input', update);
+            Object.entries(sliders).forEach(([key, slider]) => {
+                slider.addEventListener('input', update);
+            });
+
+            stepperBtns.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const key = btn.dataset.target;
+                    const { step } = limits[key];
+                    const slider = sliders[key];
+                    let val = parseFloat(slider.value);
+
+                    if (btn.dataset.action === 'inc') {
+                        val = clampValue(key, val + step);
+                    } else {
+                        val = clampValue(key, val - step);
+                    }
+
+                    slider.value = key === 'storage' ? Math.round(val) : val;
+                    update();
+                });
+            });
 
             update();
         })();
