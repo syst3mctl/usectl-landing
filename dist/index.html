@@ -180,10 +180,10 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
-  <script type="module" crossorigin src="./assets/main-B_UgLswx.js"></script>
+  <script type="module" crossorigin src="./assets/main-B6bQrz9z.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/chunk-B3K2TuZy.js">
-  <link rel="preload" as="style" fetchpriority="high" crossorigin href="./assets/main-CLyzApCP.css">
-  <link rel="stylesheet" crossorigin href="./assets/main-CLyzApCP.css">
+  <link rel="preload" as="style" fetchpriority="high" crossorigin href="./assets/main-d9MAzek5.css">
+  <link rel="stylesheet" crossorigin href="./assets/main-d9MAzek5.css">
 </head>
 
 <body>
@@ -281,6 +281,7 @@
 
         <!-- STEPS / MACHINE -->
         <section class="section steps" id="steps">
+            <div class="steps-top-spacer" aria-hidden="true"></div>
             <div class="steps-pin-wrap">
                 <div class="steps-inner">
                     <div class="steps-copy">
@@ -399,6 +400,7 @@
 
                             <div class="steps-panel" data-step="1">
                                 <div class="steps-mockup steps-mockup-pods">
+                                    
                                     <div class="steps-mockup-header">
                                         <button type="button" class="steps-mockup-select" aria-label="Select machine">
                                             <span class="steps-mockup-dot"></span>
@@ -484,6 +486,106 @@
                         <img class="steps-bird" src="img/steps-bird.svg" alt="" width="120" height="80" aria-hidden="true">
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- FEATURED -->
+        <section class="section section-featured" id="featured">
+            <div class="section-featured-inner">
+                <div class="section-featured-hero">
+                    <div class="section-featured-copy">
+                        <div class="section-featured-badge">
+                            <img src="img/steps-badge-icon.svg" alt="" width="72" height="37" aria-hidden="true">
+                            <span>Yours, not shared</span>
+                        </div>
+                        <h2 class="section-featured-heading">a private machine beats <span class="section-featured-underline">public</span> transport.</h2>
+                        <p class="section-featured-desc">the public cloud is a crowded train. you share the engine with strangers, you slow down when it gets busy, and you never quite see who is riding next to you. your machine is your own car. you drive it, nobody rides along, and we still keep the engine running.</p>
+                    </div>
+                    <div class="section-featured-visual" aria-hidden="true">
+                        <img class="section-featured-cloud" src="img/steps-cloud.svg" alt="" width="320" height="200">
+                        <img class="section-featured-bird" src="img/steps-bird.svg" alt="" width="120" height="80">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-featured-grid">
+                    <article class="section-featured-item">
+                        <div class="section-featured-icon-wrap">
+                            <img src="icons/chip.svg" alt="" width="143" height="143" aria-hidden="true">
+                        </div>
+                        <h3 class="section-featured-item-title">NO NOISY NEIGHBORS</h3>
+                        <p class="section-featured-item-desc">Dedicated cores, your performance is yours, nobody else's traffic ever touches it.</p>
+                    </article>
+                    <article class="section-featured-item">
+                        <div class="section-featured-icon-wrap">
+                            <img src="icons/human.svg" alt="" width="139" height="139" aria-hidden="true">
+                        </div>
+                        <h3 class="section-featured-item-title">PRIVATE AND SECURE</h3>
+                        <p class="section-featured-item-desc">your data, your machine, your region, isolated and encrypted, yours to lock down.</p>
+                    </article>
+                    <article class="section-featured-item">
+                        <div class="section-featured-icon-wrap">
+                            <img src="icons/loop.svg" alt="" width="138" height="138" aria-hidden="true">
+                        </div>
+                        <h3 class="section-featured-item-title">NO DOWNTIME ON REDEPLOY</h3>
+                        <p class="section-featured-item-desc">replicas keep serving while a new version rolls out. nobody waits on the platform.</p>
+                    </article>
+                    <article class="section-featured-item">
+                        <div class="section-featured-icon-wrap">
+                            <img src="icons/database.svg" alt="" width="139" height="139" aria-hidden="true">
+                        </div>
+                        <h3 class="section-featured-item-title">EVERYTHING BACKED UP</h3>
+                        <p class="section-featured-item-desc">daily database backups and point-in-time recovery. if something breaks, we already have a copy.</p>
+                    </article>
+            </div>
+        </section>
+
+        <!-- INFO -->
+        <section class="section section-info" id="info">
+            <div class="section-info-inner">
+                <div class="section-info-hero">
+                    <div class="section-info-copy">
+                        <div class="section-info-badge">
+                            <img src="img/steps-badge-icon.svg" alt="" width="72" height="37" aria-hidden="true">
+                            <span>Yours, not shared</span>
+                        </div>
+                        <h2 class="section-info-heading">The words, <span class="section-info-underline">in plain english.</span></h2>
+                        <p class="section-info-lead">three ideas, and how each promise is actually kept.</p>
+                        <dl class="section-info-terms">
+                            <div class="section-info-term">
+                                <dt class="section-info-term-label">MACHINE</dt>
+                                <dd class="section-info-term-desc">The server you sized. its own private space on real bare metal, walled off in its own kubernetes namespace. nobody else runs inside it.</dd>
+                            </div>
+                            <div class="section-info-term">
+                                <dt class="section-info-term-label">POD</dt>
+                                <dd class="section-info-term-desc">Anything running in your machine. an app from github, a managed database, a cron job. add as many as you want, they share the compute you bought.</dd>
+                            </div>
+                            <div class="section-info-term">
+                                <dt class="section-info-term-label">REPLICA</dt>
+                                <dd class="section-info-term-desc">A running copy of a pod. we keep the old one serving while the new one boots, so a redeploy never drops a request. more replicas also spread the load.</dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="section-info-visual" aria-hidden="true">
+                        <img class="section-info-cloud" src="img/steps-cloud.svg" alt="" width="320" height="200">
+                        <img class="section-info-robot" src="img/info-robot.svg" alt="" width="80" height="96">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-info-grid">
+                <article class="section-info-item">
+                    <h3 class="section-info-item-title">NO DOWNTIME</h3>
+                    <p class="section-info-item-desc">Rolling replicas swap in the new version, then retire the old one. your users never see the seam.</p>
+                </article>
+                <article class="section-info-item">
+                    <h3 class="section-info-item-title">ALWAYS BACKED UP</h3>
+                    <p class="section-info-item-desc">Cloudnativepg snapshots your databases on a schedule, with point-in-time recovery if you need to rewind.</p>
+                </article>
+                <article class="section-info-item">
+                    <h3 class="section-info-item-title">ISOLATED BY DESIGN</h3>
+                    <p class="section-info-item-desc">Your namespace is yours. dedicated cores, private networking, encrypted storage. no shared tenancy you can't see into.</p>
+                </article>
             </div>
         </section>
 

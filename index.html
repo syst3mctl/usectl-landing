@@ -537,6 +537,55 @@
             </div>
         </section>
 
+        <!-- INFO -->
+        <section class="section section-info" id="info">
+            <div class="section-info-inner">
+                <div class="section-info-hero">
+                    <div class="section-info-copy">
+                        <div class="section-info-badge">
+                            <img src="img/steps-badge-icon.svg" alt="" width="72" height="37" aria-hidden="true">
+                            <span>Yours, not shared</span>
+                        </div>
+                        <h2 class="section-info-heading">The words, <span class="section-info-underline">in plain english.</span></h2>
+                        <p class="section-info-lead">three ideas, and how each promise is actually kept.</p>
+                        <dl class="section-info-terms">
+                            <div class="section-info-term">
+                                <dt class="section-info-term-label">MACHINE</dt>
+                                <dd class="section-info-term-desc">The server you sized. its own private space on real bare metal, walled off in its own kubernetes namespace. nobody else runs inside it.</dd>
+                            </div>
+                            <div class="section-info-term">
+                                <dt class="section-info-term-label">POD</dt>
+                                <dd class="section-info-term-desc">Anything running in your machine. an app from github, a managed database, a cron job. add as many as you want, they share the compute you bought.</dd>
+                            </div>
+                            <div class="section-info-term">
+                                <dt class="section-info-term-label">REPLICA</dt>
+                                <dd class="section-info-term-desc">A running copy of a pod. we keep the old one serving while the new one boots, so a redeploy never drops a request. more replicas also spread the load.</dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="section-info-visual" aria-hidden="true">
+                        <img class="section-info-cloud" src="img/steps-cloud.svg" alt="" width="320" height="200">
+                        <img class="section-info-robot" src="img/info-robot.svg" alt="" width="80" height="96">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-info-grid">
+                <article class="section-info-item">
+                    <h3 class="section-info-item-title">NO DOWNTIME</h3>
+                    <p class="section-info-item-desc">Rolling replicas swap in the new version, then retire the old one. your users never see the seam.</p>
+                </article>
+                <article class="section-info-item">
+                    <h3 class="section-info-item-title">ALWAYS BACKED UP</h3>
+                    <p class="section-info-item-desc">Cloudnativepg snapshots your databases on a schedule, with point-in-time recovery if you need to rewind.</p>
+                </article>
+                <article class="section-info-item">
+                    <h3 class="section-info-item-title">ISOLATED BY DESIGN</h3>
+                    <p class="section-info-item-desc">Your namespace is yours. dedicated cores, private networking, encrypted storage. no shared tenancy you can't see into.</p>
+                </article>
+            </div>
+        </section>
+
         <!-- AI SECTION -->
         <section class="section ai-section" id="ai">
             <div class="section-inner">
