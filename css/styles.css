@@ -365,6 +365,7 @@ code {
 }
 
 .nav-start-btn {
+    position: relative;
     font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
     font-weight: 400;
     font-size: 14px;
@@ -651,7 +652,13 @@ code {
 .hero-cta,
 .nav-cta-btn,
 .pricing-btn,
-.btn-solid-green {
+.btn-solid-green,
+.nav-start-btn,
+.steps-cta,
+.steps-create-btn,
+.section-agents-cta,
+.section-price-cta,
+.compat-btn {
     --shimmy-distance: 5;
     --clip-one: polygon(0 2%, 100% 2%, 100% 95%, 95% 95%, 95% 90%, 85% 90%, 85% 95%, 8% 95%, 0 70%);
     --clip-two: polygon(0 78%, 100% 78%, 100% 100%, 95% 100%, 95% 90%, 85% 90%, 85% 100%, 8% 100%, 0 78%);
@@ -662,12 +669,12 @@ code {
     --clip-seven: polygon(0 63%, 100% 63%, 100% 80%, 95% 80%, 95% 80%, 85% 80%, 85% 80%, 8% 80%, 0 70%);
 }
 
-:is(.hero-cta, .nav-cta-btn, .pricing-btn, .btn-solid-green):hover .glitch {
+:is(.hero-cta, .nav-cta-btn, .pricing-btn, .btn-solid-green, .nav-start-btn, .steps-cta, .steps-create-btn, .section-agents-cta, .section-price-cta, .compat-btn):hover .glitch {
     display: flex;
     animation: glitch 2s infinite;
 }
 
-:is(.hero-cta, .nav-cta-btn, .pricing-btn, .btn-solid-green) .glitch {
+:is(.hero-cta, .nav-cta-btn, .pricing-btn, .btn-solid-green, .nav-start-btn, .steps-cta, .steps-create-btn, .section-agents-cta, .section-price-cta, .compat-btn) .glitch {
     display: none;
     position: absolute;
     inset: 0;
@@ -679,18 +686,18 @@ code {
     z-index: 10;
 }
 
-:is(.hero-cta, .nav-cta-btn, .pricing-btn, .btn-solid-green) .letters {
+:is(.hero-cta, .nav-cta-btn, .pricing-btn, .btn-solid-green, .nav-start-btn, .steps-cta, .steps-create-btn, .section-agents-cta, .section-price-cta, .compat-btn) .letters {
     display: flex;
     color: var(--primary);
     font-weight: 700;
     white-space: nowrap;
 }
 
-:is(.hero-cta, .nav-cta-btn, .pricing-btn, .btn-solid-green) .letters span:nth-of-type(2n) {
+:is(.hero-cta, .nav-cta-btn, .pricing-btn, .btn-solid-green, .nav-start-btn, .steps-cta, .steps-create-btn, .section-agents-cta, .section-price-cta, .compat-btn) .letters span:nth-of-type(2n) {
     scale: 1 -1;
 }
 
-:is(.hero-cta, .nav-cta-btn, .pricing-btn, .btn-solid-green) .letters span:nth-of-type(3n) {
+:is(.hero-cta, .nav-cta-btn, .pricing-btn, .btn-solid-green, .nav-start-btn, .steps-cta, .steps-create-btn, .section-agents-cta, .section-price-cta, .compat-btn) .letters span:nth-of-type(3n) {
     scale: -1 -1;
 }
 
@@ -1933,6 +1940,7 @@ code {
 }
 
 .steps-create-btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3832,6 +3840,7 @@ code {
 }
 
 .section-price-cta {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -4305,6 +4314,7 @@ code {
 }
 
 .compat-btn {
+    position: relative;
     background: var(--primary);
     color: #fff;
     padding: 6px 14px;

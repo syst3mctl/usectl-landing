@@ -6,6 +6,79 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // Register plugins
 gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
+const GLITCH_BTN_SELECTOR = [
+    '.nav-start-btn',
+    '.steps-cta',
+    '.steps-create-btn',
+    '.section-agents-cta',
+    '.section-price-cta',
+    '.compat-btn',
+].join(', ');
+
+const createLetterSpans = (text) => {
+    return [...text].map((char) => {
+        const span = document.createElement('span');
+        span.innerHTML = char === ' ' ? '&nbsp;' : char;
+        return span;
+    });
+};
+
+const createGlitchOverlay = (text) => {
+    const glitch = document.createElement('div');
+    glitch.className = 'glitch';
+    glitch.setAttribute('aria-hidden', 'true');
+
+    const letters = document.createElement('span');
+    letters.className = 'letters';
+    createLetterSpans(text).forEach((span) => letters.appendChild(span));
+    glitch.appendChild(letters);
+    return glitch;
+};
+
+const getButtonLabel = (btn) => {
+    const existingSpan = btn.querySelector(':scope > span:not(.letters)');
+    if (existingSpan) return existingSpan.textContent.trim();
+
+    const text = [...btn.childNodes]
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent)
+        .join('')
+        .trim();
+
+    return text || btn.textContent.trim();
+};
+
+const initButtonGlitch = () => {
+    document.querySelectorAll(GLITCH_BTN_SELECTOR).forEach((btn) => {
+        if (btn.querySelector('.glitch')) return;
+
+        const label = getButtonLabel(btn);
+        if (!label) return;
+
+        [...btn.childNodes].forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                btn.removeChild(node);
+            }
+        });
+
+        let labelSpan = btn.querySelector(':scope > span:not(.letters)');
+        if (!labelSpan) {
+            labelSpan = document.createElement('span');
+            labelSpan.textContent = label;
+            const img = btn.querySelector('img');
+            if (img) {
+                img.after(labelSpan);
+            } else {
+                btn.prepend(labelSpan);
+            }
+        } else {
+            labelSpan.textContent = label;
+        }
+
+        btn.appendChild(createGlitchOverlay(label));
+    });
+};
+
 const Scenes = {
     initHero() {
         const tl = gsap.timeline({
@@ -302,6 +375,7 @@ const Scenes = {
     },
 
     init() {
+        initButtonGlitch();
         // Hero scene is above-the-fold critical — init immediately
         this.initHero();
         // Lottie is below-the-fold — load lazily
