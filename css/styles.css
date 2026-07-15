@@ -5143,9 +5143,11 @@ select.founding-input option {
     }
 
     .steps.section {
-        padding-top: 0;
-        padding-left: var(--tablet-px);
-        padding-right: var(--tablet-px);
+        display: none !important;
+    }
+
+    .hero-cta-secondary {
+        display: none !important;
     }
 
     .steps-top-spacer {
@@ -6064,8 +6066,11 @@ select.founding-input option {
     }
 
     .steps.section {
-        padding-left: 48px;
-        padding-right: 48px;
+        display: none !important;
+    }
+
+    .hero-cta-secondary {
+        display: none !important;
     }
 
     .section {
