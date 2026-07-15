@@ -367,8 +367,11 @@ const Scenes = {
         });
 
         const syncStepsContentHeight = () => {
-            stepsInner.style.setProperty('--steps-content-h', '545px');
-            stepsInner.style.setProperty('--steps-visual-w', '542px');
+            const scale = window.innerWidth >= 1280 && window.innerWidth <= 1919
+                ? window.innerWidth / 1920
+                : 1;
+            stepsInner.style.setProperty('--steps-content-h', `${545 * scale}px`);
+            stepsInner.style.setProperty('--steps-visual-w', `${542 * scale}px`);
         };
 
         const getTrackStep = (items) => {

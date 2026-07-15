@@ -20,6 +20,8 @@
     --radius: 12px;
     --radius-lg: 16px;
     --max-w: 1920px;
+    --design-w: 1920;
+    --ui-scale: 1;
     --hero-px: clamp(20px, 5.729vw, 110px);
     --hero-pt: clamp(80px, 9.167vw, 176px);
     --hero-pb: clamp(32px, 2.5vw, 48px);
@@ -32,9 +34,9 @@
     --hero-bubble-w: clamp(280px, 22vw, 420px);
     --hero-devo-w: clamp(90px, 6.771vw, 130px);
     --hero-col-gap: clamp(40px, 3.125vw, 60px);
-    --hero-h1-gap: 29px;
-    --hero-subtitle-gap: 36px;
-    --hero-cta-gap: 14px;
+    --hero-h1-gap: calc(29px * var(--ui-scale));
+    --hero-subtitle-gap: calc(36px * var(--ui-scale));
+    --hero-cta-gap: calc(14px * var(--ui-scale));
     --hero-content-min-h: calc(
         (var(--hero-h1-l1) * 2) +
         var(--hero-h1-gap) +
@@ -42,7 +44,7 @@
         var(--hero-subtitle-gap) +
         var(--hero-btn-h) +
         var(--hero-cta-gap) +
-        20px
+        calc(20px * var(--ui-scale))
     );
 }
 
@@ -256,8 +258,8 @@ code {
 .nav-inner {
     max-width: var(--max-w);
     margin: 0 auto;
-    padding: 0 40px; /* Reduced padding to match design */
-    height: 80px; /* Taller header */
+    padding: 0 calc(40px * var(--ui-scale));
+    height: calc(80px * var(--ui-scale));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -266,7 +268,7 @@ code {
 .nav-left {
     display: flex;
     align-items: center;
-    width: 200px; /* Fixed width to balance flex layout */
+    width: calc(200px * var(--ui-scale));
 }
 
 /* Text Logo Styles */
@@ -308,13 +310,13 @@ code {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    width: 585px;
-    height: 48px;
+    gap: calc(10px * var(--ui-scale));
+    width: calc(585px * var(--ui-scale));
+    height: calc(48px * var(--ui-scale));
     background: transparent;
     border: 1px solid #FFFFFF33;
-    border-radius: 12px;
-    padding: 19px 24px;
+    border-radius: calc(12px * var(--ui-scale));
+    padding: calc(19px * var(--ui-scale)) calc(24px * var(--ui-scale));
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     box-sizing: border-box;
@@ -323,7 +325,7 @@ code {
 .nav-links a {
     font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
     font-weight: 400;
-    font-size: 16px;
+    font-size: calc(16px * var(--ui-scale));
     line-height: 100%;
     letter-spacing: 0%;
     color: #FFFFFF99;
@@ -342,28 +344,28 @@ code {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 10px;
-    width: 250px;
+    gap: calc(10px * var(--ui-scale));
+    width: calc(250px * var(--ui-scale));
 }
 
 /* Action Buttons */
 .nav-login-btn {
     font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
     font-weight: 400;
-    font-size: 14px;
+    font-size: calc(14px * var(--ui-scale));
     line-height: 100%;
     color: #FFFFFFB2;
-    width: 95px;
-    height: 48px;
+    width: calc(95px * var(--ui-scale));
+    height: calc(48px * var(--ui-scale));
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
+    border-radius: calc(12px * var(--ui-scale));
     background: transparent;
     border: 1px solid #FFFFFF33;
     transition: all 0.2s;
     text-decoration: none;
-    padding: 15px 22px;
+    padding: calc(15px * var(--ui-scale)) calc(22px * var(--ui-scale));
     box-sizing: border-box;
 }
 
@@ -377,20 +379,20 @@ code {
     position: relative;
     font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
     font-weight: 400;
-    font-size: 14px;
+    font-size: calc(14px * var(--ui-scale));
     line-height: 100%;
     color: #FFFFFF;
-    width: 115px;
-    height: 48px;
+    width: calc(115px * var(--ui-scale));
+    height: calc(48px * var(--ui-scale));
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
+    border-radius: calc(12px * var(--ui-scale));
     background-color: #11A32A6B;
     border: none;
     transition: all 0.2s;
     text-decoration: none;
-    padding: 15px 22px;
+    padding: calc(15px * var(--ui-scale)) calc(22px * var(--ui-scale));
     box-sizing: border-box;
 }
 
@@ -714,7 +716,7 @@ code {
 }
 
 .hero-note {
-    font-size: 14px;
+    font-size: calc(14px * var(--ui-scale));
     color: #11A32ACC;
     text-transform: lowercase;
     margin: 0;
@@ -811,7 +813,7 @@ code {
 }
 
 .hero-infra {
-    font-size: 16px;
+    font-size: calc(16px * var(--ui-scale));
     color: var(--text-muted);
     margin-top: 4px
 }
@@ -1311,7 +1313,7 @@ code {
 
 /* SECTION SHARED */
 .section {
-    padding: 170px 100px 36px
+    padding: calc(170px * var(--ui-scale)) calc(100px * var(--ui-scale)) calc(36px * var(--ui-scale));
 }
 
 .section-inner {
@@ -1321,8 +1323,8 @@ code {
 
 .bg-glow-green {
     position: absolute;
-    width: 90px;
-    height: 90px;
+    width: calc(90px * var(--ui-scale));
+    height: calc(90px * var(--ui-scale));
     border-radius: 9999px;
     background: rgba(17, 163, 42, 0.07);
     filter: blur(20px);
@@ -1336,10 +1338,10 @@ code {
 }
 
 .section-title {
-    font-size: 58px;
+    font-size: calc(58px * var(--ui-scale));
     font-weight: 700;
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: calc(16px * var(--ui-scale));
     letter-spacing: -.02em;
     line-height: 1.2;
     position: relative;
@@ -1353,8 +1355,8 @@ code {
     text-align: center;
     color: var(--text-muted);
     font-size: .95rem;
-    margin-bottom: 48px;
-    max-width: 600px;
+    margin-bottom: calc(48px * var(--ui-scale));
+    max-width: calc(600px * var(--ui-scale));
     margin-left: auto;
     margin-right: auto;
     line-height: 1.6
@@ -1369,7 +1371,7 @@ code {
 }
 
 .steps-top-spacer {
-    height: 120px;
+    height: calc(120px * var(--ui-scale));
     pointer-events: none;
 }
 
@@ -1379,8 +1381,8 @@ code {
 }
 
 .steps-inner {
-    --steps-content-h: 545px;
-    --steps-visual-w: 542px;
+    --steps-content-h: calc(545px * var(--ui-scale));
+    --steps-visual-w: calc(542px * var(--ui-scale));
     --steps-frame-gap: clamp(64px, 6vw, 120px);
     position: sticky;
     top: 0;
@@ -1445,7 +1447,7 @@ code {
     left: 0;
     right: 0;
     bottom: 0;
-    height: 48px;
+    height: calc(48px * var(--ui-scale));
     background: linear-gradient(to bottom, transparent, var(--bg));
     pointer-events: none;
     z-index: 2;
@@ -1488,7 +1490,7 @@ code {
     left: 0;
     right: 0;
     bottom: 0;
-    height: 56px;
+    height: calc(56px * var(--ui-scale));
     background: linear-gradient(to bottom, transparent, var(--bg));
     pointer-events: none;
     z-index: 2;
@@ -1647,7 +1649,7 @@ code {
     background: transparent;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 12px 16px 12px;
+    padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(12px * var(--ui-scale));
     display: flex;
     flex-direction: column;
     overflow: visible;
@@ -1659,11 +1661,11 @@ code {
 }
 
 .steps-machine-card .steps-card-title {
-    font-size: 18px;
+    font-size: calc(18px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-card-subtitle {
-    font-size: 12px;
+    font-size: calc(12px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-card-section {
@@ -1671,8 +1673,8 @@ code {
 }
 
 .steps-machine-card .steps-card-label {
-    margin-bottom: 8px;
-    font-size: 12px;
+    margin-bottom: calc(8px * var(--ui-scale));
+    font-size: calc(12px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-billing-toggle {
@@ -1684,8 +1686,8 @@ code {
 }
 
 .steps-machine-card .steps-finetune-title {
-    margin-bottom: 10px;
-    font-size: 11px;
+    margin-bottom: calc(10px * var(--ui-scale));
+    font-size: calc(11px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-resource-row {
@@ -1694,27 +1696,27 @@ code {
 }
 
 .steps-machine-card .steps-resource-name {
-    font-size: 13px;
+    font-size: calc(13px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-resource-hint {
-    font-size: 10px;
+    font-size: calc(10px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-stepper-btn {
-    width: 24px;
-    height: 24px;
-    font-size: 14px;
+    width: calc(24px * var(--ui-scale));
+    height: calc(24px * var(--ui-scale));
+    font-size: calc(14px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-stepper-value {
-    min-width: 32px;
-    font-size: 13px;
+    min-width: calc(32px * var(--ui-scale));
+    font-size: calc(13px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-resource-price {
-    font-size: 12px;
-    min-width: 52px;
+    font-size: calc(12px * var(--ui-scale));
+    min-width: calc(52px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-card-footer {
@@ -1723,17 +1725,17 @@ code {
 }
 
 .steps-machine-card .steps-total-price {
-    font-size: 22px;
+    font-size: calc(22px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-create-btn {
-    padding: 10px 16px;
-    font-size: 13px;
+    padding: calc(10px * var(--ui-scale)) calc(16px * var(--ui-scale));
+    font-size: calc(13px * var(--ui-scale));
 }
 
 .steps-machine-card .steps-card-meta {
-    margin-top: 6px;
-    font-size: 10px;
+    margin-top: calc(6px * var(--ui-scale));
+    font-size: calc(10px * var(--ui-scale));
     line-height: 1.3;
 }
 
@@ -2566,7 +2568,7 @@ code {
     align-self: flex-start;
     gap: clamp(12px, 1.041vw, 16px);
     font-family: var(--font-body);
-    font-size: 20px;
+    font-size: calc(20px * var(--ui-scale));
     font-weight: 400;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -2576,8 +2578,8 @@ code {
 .section-info-term-label::before {
     content: '';
     flex-shrink: 0;
-    width: 12px;
-    height: 26px;
+    width: calc(12px * var(--ui-scale));
+    height: calc(26px * var(--ui-scale));
     background: #11A32A;
 }
 
@@ -2645,7 +2647,7 @@ code {
 
 .section-info-item-title {
     font-family: var(--font-body);
-    font-size: 28px;
+    font-size: calc(28px * var(--ui-scale));
     font-weight: 400;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -2655,7 +2657,7 @@ code {
 
 .section-info-item-desc {
     font-family: var(--font-body);
-    font-size: 18px;
+    font-size: calc(18px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     color: #FFFFFFB2;
@@ -2782,7 +2784,7 @@ code {
 .section-products-item-label {
     align-self: flex-end;
     font-family: var(--font-body);
-    font-size: 16px;
+    font-size: calc(16px * var(--ui-scale));
     font-weight: 500;
     line-height: 100%;
     color: #11A32A;
@@ -2791,7 +2793,7 @@ code {
 
 .section-products-item-title {
     font-family: var(--font-body);
-    font-size: 36px;
+    font-size: calc(36px * var(--ui-scale));
     font-weight: 700;
     line-height: 100%;
     letter-spacing: 0.08em;
@@ -2813,7 +2815,7 @@ code {
 
 /* AGENTS */
 .section-agents {
-    margin-top: 250px;
+    margin-top: calc(250px * var(--ui-scale));
     padding: 0 0 clamp(60px, 4.167vw, 80px);
     overflow: visible;
 }
@@ -2830,8 +2832,8 @@ code {
 }
 
 .section-agents-hero {
-    --agents-content-h: 610px;
-    --agents-visual-w: 900px;
+    --agents-content-h: calc(610px * var(--ui-scale));
+    --agents-visual-w: calc(900px * var(--ui-scale));
     display: grid;
     grid-template-columns: 1fr 1px 1fr;
     column-gap: 0;
@@ -2972,7 +2974,7 @@ code {
 
 .section-agents-lead {
     font-family: var(--font-body);
-    font-size: 26px;
+    font-size: calc(26px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     color: #FFFFFFCC;
@@ -3020,7 +3022,7 @@ code {
 
 .section-agents-subtitle {
     font-family: var(--font-body);
-    font-size: 24px;
+    font-size: calc(24px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     letter-spacing: 0;
@@ -3052,7 +3054,7 @@ code {
 
 .section-agents-quote-before {
     font-family: var(--font-body);
-    font-size: 22px;
+    font-size: calc(22px * var(--ui-scale));
     font-weight: 500;
     line-height: 100%;
     color: #FFFFFF;
@@ -3072,15 +3074,15 @@ code {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: calc(10px * var(--ui-scale));
     width: auto;
-    min-width: 234px;
+    min-width: calc(234px * var(--ui-scale));
     max-width: 100%;
-    height: 48px;
-    padding: 15px 22px;
-    border-radius: 12px;
+    height: calc(48px * var(--ui-scale));
+    padding: calc(15px * var(--ui-scale)) calc(22px * var(--ui-scale));
+    border-radius: calc(12px * var(--ui-scale));
     font-family: var(--font-body);
-    font-size: 14px;
+    font-size: calc(14px * var(--ui-scale));
     font-weight: 500;
     line-height: 1;
     color: #FFFFFF;
@@ -3333,7 +3335,7 @@ code {
     align-items: center;
     justify-content: center;
     text-align: center;
-    min-height: 310px;
+    min-height: calc(310px * var(--ui-scale));
     padding: clamp(32px, 2.5vw, 48px) clamp(24px, 2vw, 40px);
     border-right: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -3505,19 +3507,19 @@ code {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 4px;
+    gap: calc(4px * var(--ui-scale));
     width: clamp(200px, 13.958vw, 268px);
-    height: 80px;
-    padding: 14px 18px 15px;
+    height: calc(80px * var(--ui-scale));
+    padding: calc(14px * var(--ui-scale)) calc(18px * var(--ui-scale)) calc(15px * var(--ui-scale));
     border: 1px solid #FFFFFF33;
-    border-radius: 12px;
+    border-radius: calc(12px * var(--ui-scale));
     background: transparent;
     box-sizing: border-box;
 }
 
 .section-price-stat-value {
     font-family: var(--font-body);
-    font-size: 24px;
+    font-size: calc(24px * var(--ui-scale));
     font-weight: 700;
     line-height: 100%;
     letter-spacing: -0.02em;
@@ -3527,7 +3529,7 @@ code {
 
 .section-price-stat-accent {
     font-family: var(--font-body);
-    font-size: 16px;
+    font-size: calc(16px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     letter-spacing: -0.02em;
@@ -3604,7 +3606,7 @@ code {
 
 .section-price-resource-hint {
     font-family: var(--font-body);
-    font-size: 14px;
+    font-size: calc(14px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     letter-spacing: 0;
@@ -3633,13 +3635,13 @@ code {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: calc(28px * var(--ui-scale));
+    height: calc(28px * var(--ui-scale));
     border: none;
-    border-radius: 6px;
+    border-radius: calc(6px * var(--ui-scale));
     background: rgba(255, 255, 255, 0.06);
     color: rgba(255, 255, 255, 0.8);
-    font-size: 16px;
+    font-size: calc(16px * var(--ui-scale));
     line-height: 1;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
@@ -3727,17 +3729,17 @@ code {
 
 .section-price-total-label {
     font-family: var(--font-body);
-    font-size: 18px;
+    font-size: calc(18px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     letter-spacing: -0.02em;
     color: #FFFFFFCC;
-    margin-bottom: 6px;
+    margin-bottom: calc(6px * var(--ui-scale));
 }
 
 .section-price-total-note {
     font-family: var(--font-body);
-    font-size: 18px;
+    font-size: calc(18px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     letter-spacing: -0.02em;
@@ -3748,7 +3750,7 @@ code {
 
 .section-price-total-value {
     font-family: var(--font-body);
-    font-size: 36px;
+    font-size: calc(36px * var(--ui-scale));
     font-weight: 700;
     line-height: 100%;
     letter-spacing: -0.02em;
@@ -3774,15 +3776,15 @@ code {
 
 .section-price-feature-item {
     --wireframe-line: rgba(255, 255, 255, 0.2);
-    --wireframe-top-overhang: 8px;
-    --wireframe-bottom-overhang: 8px;
+    --wireframe-top-overhang: calc(8px * var(--ui-scale));
+    --wireframe-bottom-overhang: calc(8px * var(--ui-scale));
     --wireframe-skew: -30deg;
 
     position: relative;
     display: flex;
     align-items: center;
-    min-height: 48px;
-    padding: 16px 24px 16px 36px;
+    min-height: calc(48px * var(--ui-scale));
+    padding: calc(16px * var(--ui-scale)) calc(24px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(36px * var(--ui-scale));
     background: transparent;
     border-top: 1px solid var(--wireframe-line);
     border-bottom: 1px solid var(--wireframe-line);
@@ -3824,7 +3826,7 @@ code {
     z-index: 1;
     width: 100%;
     font-family: var(--font-body);
-    font-size: 18px;
+    font-size: calc(18px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     letter-spacing: -0.02em;
@@ -3839,8 +3841,8 @@ code {
     justify-content: center;
     align-self: flex-start;
     width: auto;
-    min-height: 48px;
-    padding: 15px 22px;
+    min-height: calc(48px * var(--ui-scale));
+    padding: calc(15px * var(--ui-scale)) calc(22px * var(--ui-scale));
     background: #11A32AE5;
     color: #fff;
     font-family: var(--font-body);
@@ -3861,7 +3863,7 @@ code {
 
 .section-price-cta-note {
     font-family: var(--font-body);
-    font-size: 14px;
+    font-size: calc(14px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     letter-spacing: 0;
@@ -4769,7 +4771,7 @@ select.founding-input option {
 
 /* FOOTER */
 .footer {
-    padding: 32px 117px;
+    padding: calc(32px * var(--ui-scale)) calc(117px * var(--ui-scale));
     position: relative;
     backdrop-filter: blur(1px);
     --footer-line-scale: 0;
@@ -4816,7 +4818,7 @@ select.founding-input option {
 
 .footer-logo-text {
     font-family: var(--font-body);
-    font-size: 16px;
+    font-size: calc(16px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     letter-spacing: -0.02em;
@@ -4837,7 +4839,7 @@ select.founding-input option {
 }
 
 .footer-logo-text .asterisk {
-    font-size: 16px;
+    font-size: calc(16px * var(--ui-scale));
     margin-top: 0;
 }
 
@@ -4847,7 +4849,7 @@ select.founding-input option {
 .footer-nav a,
 .footer-nav-sep {
     font-family: var(--font-body);
-    font-size: 16px;
+    font-size: calc(16px * var(--ui-scale));
     font-weight: 400;
     line-height: 100%;
     letter-spacing: -0.02em;
@@ -4888,51 +4890,9 @@ select.founding-input option {
 
 
 /* RESPONSIVE */
-@media(max-width:1700px) {
-    .pricing-features {
-        gap: 8px;
-    }
-
-    .infra {
-        padding-bottom: 100px;
-    }
-
-    .nav-inner {
-        padding: 0 40px;
-    }
-
-    .hero {
-        padding: 100px 50px 100px;
-    }
-
-    .hero .subtitle {
-        font-size: .92rem
-    }
-
-
-    .hero-infra {
-        font-size: .72rem
-    }
-
-    .section-sub {
-        font-size: .88rem
-    }
-
-    .section-title {
-        font-size: 45px;
-    }
-
-    .ai-desc {
-        font-size: .92rem
-    }
-
-    .nav-links a {
-        font-size: .82rem
-    }
-
-    .nav-cta-btn {
-        font-size: .8rem;
-        padding: 8px 18px
+@media (min-width: 1280px) and (max-width: 1919px) {
+    :root {
+        --ui-scale: calc(100vw / 1920px);
     }
 }
 
