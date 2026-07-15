@@ -723,58 +723,116 @@
                 </div>
             </div>
 
-            <div class="section-stacks-grid">
-                <div class="section-stacks-row section-stacks-row--top">
-                    <article class="section-stacks-card section-stacks-card--large">
-                        <div class="section-stacks-icon" aria-hidden="true">
-                            <img src="icons/database.svg" alt="" width="63" height="63">
+            <div class="section-stacks-grid" aria-label="Platform capabilities">
+                <div class="section-stacks-marquee-track">
+                    <div class="section-stacks-marquee-group">
+                        <div class="section-stacks-row section-stacks-row--top">
+                            <article class="section-stacks-card section-stacks-card--large">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/database.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Databases</h3>
+                                <p class="section-stacks-card-subtitle">Postgres, Redis, Mongo, SQL Server</p>
+                                <p class="section-stacks-card-desc">managed, auto-provisioned, backed up daily, connection strings injected for you.</p>
+                            </article>
+                            <article class="section-stacks-card section-stacks-card--large">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/rocket.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Deploys</h3>
+                                <p class="section-stacks-card-subtitle">Push-to-deploy + PR Previews</p>
+                                <p class="section-stacks-card-desc">Every push builds with kaniko. every pull request gets its own preview url.</p>
+                            </article>
                         </div>
-                        <h3 class="section-stacks-card-title">Databases</h3>
-                        <p class="section-stacks-card-subtitle">Postgres, Redis, Mongo, SQL Server</p>
-                        <p class="section-stacks-card-desc">managed, auto-provisioned, backed up daily, connection strings injected for you.</p>
-                    </article>
-                    <article class="section-stacks-card section-stacks-card--large">
-                        <div class="section-stacks-icon" aria-hidden="true">
-                            <img src="icons/rocket.svg" alt="" width="63" height="63">
+                        <div class="section-stacks-row section-stacks-row--bottom">
+                            <article class="section-stacks-card section-stacks-card--small">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/activity.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Observability</h3>
+                                <p class="section-stacks-card-subtitle">Logs, Metrics, Rollback</p>
+                                <p class="section-stacks-card-desc">real-time logs and per-pod metrics, one-click rollback to any previous deploy.</p>
+                            </article>
+                            <article class="section-stacks-card section-stacks-card--small">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/storage.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Storage</h3>
+                                <p class="section-stacks-card-subtitle">S3-Compatible Object Storage</p>
+                                <p class="section-stacks-card-desc">private buckets, any aws sdk works. egress is unmetered.</p>
+                            </article>
+                            <article class="section-stacks-card section-stacks-card--small">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/network.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Networking</h3>
+                                <p class="section-stacks-card-subtitle">Custom Domains + https</p>
+                                <p class="section-stacks-card-desc">automatic tls, wildcard subdomains, ingress routing. it just works.</p>
+                            </article>
+                            <article class="section-stacks-card section-stacks-card--small">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/extra.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Extras</h3>
+                                <p class="section-stacks-card-subtitle">Cron, Search, Auth, Grafana</p>
+                                <p class="section-stacks-card-desc">meilisearch, nats, oauth2 proxy, scheduled jobs. all available, zero extra cost.</p>
+                            </article>
                         </div>
-                        <h3 class="section-stacks-card-title">Deploys</h3>
-                        <p class="section-stacks-card-subtitle">Push-to-deploy + PR Previews</p>
-                        <p class="section-stacks-card-desc">Every push builds with kaniko. every pull request gets its own preview url.</p>
-                    </article>
-                </div>
-                <div class="section-stacks-row section-stacks-row--bottom">
-                    <article class="section-stacks-card section-stacks-card--small">
-                        <div class="section-stacks-icon" aria-hidden="true">
-                            <img src="icons/activity.svg" alt="" width="63" height="63">
+                    </div>
+                    <div class="section-stacks-marquee-group" aria-hidden="true">
+                        <div class="section-stacks-row section-stacks-row--top">
+                            <article class="section-stacks-card section-stacks-card--large">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/database.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Databases</h3>
+                                <p class="section-stacks-card-subtitle">Postgres, Redis, Mongo, SQL Server</p>
+                                <p class="section-stacks-card-desc">managed, auto-provisioned, backed up daily, connection strings injected for you.</p>
+                            </article>
+                            <article class="section-stacks-card section-stacks-card--large">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/rocket.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Deploys</h3>
+                                <p class="section-stacks-card-subtitle">Push-to-deploy + PR Previews</p>
+                                <p class="section-stacks-card-desc">Every push builds with kaniko. every pull request gets its own preview url.</p>
+                            </article>
                         </div>
-                        <h3 class="section-stacks-card-title">Observability</h3>
-                        <p class="section-stacks-card-subtitle">Logs, Metrics, Rollback</p>
-                        <p class="section-stacks-card-desc">real-time logs and per-pod metrics, one-click rollback to any previous deploy.</p>
-                    </article>
-                    <article class="section-stacks-card section-stacks-card--small">
-                        <div class="section-stacks-icon" aria-hidden="true">
-                            <img src="icons/storage.svg" alt="" width="63" height="63">
+                        <div class="section-stacks-row section-stacks-row--bottom">
+                            <article class="section-stacks-card section-stacks-card--small">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/activity.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Observability</h3>
+                                <p class="section-stacks-card-subtitle">Logs, Metrics, Rollback</p>
+                                <p class="section-stacks-card-desc">real-time logs and per-pod metrics, one-click rollback to any previous deploy.</p>
+                            </article>
+                            <article class="section-stacks-card section-stacks-card--small">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/storage.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Storage</h3>
+                                <p class="section-stacks-card-subtitle">S3-Compatible Object Storage</p>
+                                <p class="section-stacks-card-desc">private buckets, any aws sdk works. egress is unmetered.</p>
+                            </article>
+                            <article class="section-stacks-card section-stacks-card--small">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/network.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Networking</h3>
+                                <p class="section-stacks-card-subtitle">Custom Domains + https</p>
+                                <p class="section-stacks-card-desc">automatic tls, wildcard subdomains, ingress routing. it just works.</p>
+                            </article>
+                            <article class="section-stacks-card section-stacks-card--small">
+                                <div class="section-stacks-icon" aria-hidden="true">
+                                    <img src="icons/extra.svg" alt="" width="63" height="63">
+                                </div>
+                                <h3 class="section-stacks-card-title">Extras</h3>
+                                <p class="section-stacks-card-subtitle">Cron, Search, Auth, Grafana</p>
+                                <p class="section-stacks-card-desc">meilisearch, nats, oauth2 proxy, scheduled jobs. all available, zero extra cost.</p>
+                            </article>
                         </div>
-                        <h3 class="section-stacks-card-title">Storage</h3>
-                        <p class="section-stacks-card-subtitle">S3-Compatible Object Storage</p>
-                        <p class="section-stacks-card-desc">private buckets, any aws sdk works. egress is unmetered.</p>
-                    </article>
-                    <article class="section-stacks-card section-stacks-card--small">
-                        <div class="section-stacks-icon" aria-hidden="true">
-                            <img src="icons/network.svg" alt="" width="63" height="63">
-                        </div>
-                        <h3 class="section-stacks-card-title">Networking</h3>
-                        <p class="section-stacks-card-subtitle">Custom Domains + https</p>
-                        <p class="section-stacks-card-desc">automatic tls, wildcard subdomains, ingress routing. it just works.</p>
-                    </article>
-                    <article class="section-stacks-card section-stacks-card--small">
-                        <div class="section-stacks-icon" aria-hidden="true">
-                            <img src="icons/extra.svg" alt="" width="63" height="63">
-                        </div>
-                        <h3 class="section-stacks-card-title">Extras</h3>
-                        <p class="section-stacks-card-subtitle">Cron, Search, Auth, Grafana</p>
-                        <p class="section-stacks-card-desc">meilisearch, nats, oauth2 proxy, scheduled jobs. all available, zero extra cost.</p>
-                    </article>
+                    </div>
                 </div>
             </div>
 
