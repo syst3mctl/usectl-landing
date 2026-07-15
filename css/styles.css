@@ -5190,7 +5190,7 @@ select.founding-input option {
     }
 
     .section-featured-visual {
-        min-height: 200px;
+        min-height: 70px;
         align-items: flex-end;
         justify-content: flex-end;
     }
@@ -5248,17 +5248,31 @@ select.founding-input option {
     }
 
     .section-info-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .section-info-item {
+        padding: clamp(20px, 4vw, 32px) clamp(16px, 2.5vw, 24px);
+    }
+    
+    .section-info-item-title {
+        font-size: clamp(14px, 4vw, 18px);
+        margin-bottom: clamp(6px, 1.5vw, 10px);
+    }
+
+    .section-info-item-desc {
+        font-size: clamp(12px, 3.5vw, 14px);
     }
 
     .section-info-item:first-child {
-        grid-column: 1 / -1;
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        grid-column: auto;
+        border-right: 1px solid rgba(255, 255, 255, 0.12);
+        border-bottom: none;
     }
 
     .section-info-item:nth-child(2) {
         border-right: 1px solid rgba(255, 255, 255, 0.12);
+        border-bottom: none;
     }
 
     .section-info-item:nth-child(3) {
@@ -5365,7 +5379,7 @@ select.founding-input option {
 
     .section-agents-hero {
         grid-template-columns: 1fr;
-        gap: clamp(20px, 3vw, 32px);
+        gap: clamp(64px, 10vw, 96px);
         width: 100%;
         margin-right: 0;
         --agents-content-h: auto;
@@ -5373,7 +5387,7 @@ select.founding-input option {
 
     .section-agents-copy {
         grid-column: auto;
-        padding: 0 var(--tablet-px);
+        padding: 0;
     }
 
     .section-agents-copy-viewport {
@@ -5397,7 +5411,7 @@ select.founding-input option {
     .section-agents-visual {
         grid-column: auto;
         justify-content: stretch;
-        padding: 0 var(--tablet-px);
+        padding: 0;
     }
 
     .section-agents-terminal {
@@ -5923,30 +5937,21 @@ select.founding-input option {
         height: clamp(160px, 32vw, 220px);
     }
 
-    .section-featured-grid,
+    .section-featured-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
     .section-info-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, 1fr);
     }
-
-    .section-featured-item,
+    
     .section-info-item {
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .section-featured-item:last-child,
-    .section-info-item:last-child {
+        border-right: 1px solid rgba(255, 255, 255, 0.12);
         border-bottom: none;
     }
 
-    .section-info-item:first-child {
-        grid-column: 1 / -1;
+    .section-info-item:last-child {
         border-right: none;
-    }
-
-    .section-info-item:nth-child(3) {
-        grid-column: auto;
-        border-top: none;
     }
 
     .section-stacks-row--top {
@@ -5989,9 +5994,21 @@ select.founding-input option {
         max-width: 420px;
     }
 
-    .section-featured-grid,
-    .section-info-grid {
+    .section-featured-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .section-info-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .section-info-item {
+        border-right: 1px solid rgba(255, 255, 255, 0.12);
+        border-bottom: none;
+    }
+
+    .section-info-item:last-child {
+        border-right: none;
     }
 
     .section-stacks-row--top {
@@ -6032,7 +6049,7 @@ select.founding-input option {
 
     .section-agents-copy,
     .section-agents-visual {
-        padding: 0 48px;
+        padding: 0;
     }
 
     .nav-inner,
@@ -6061,9 +6078,21 @@ select.founding-input option {
         gap: 56px;
     }
 
-    .section-featured-grid,
-    .section-info-grid {
+    .section-featured-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .section-info-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .section-info-item {
+        border-right: 1px solid rgba(255, 255, 255, 0.12);
+        border-bottom: none;
+    }
+
+    .section-info-item:last-child {
+        border-right: none;
     }
 
     .section-stacks-row--top {
@@ -6394,25 +6423,22 @@ select.founding-input option {
     }
 
     .section-featured-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .section-featured-item {
-        border-right: none;
+        border-right: 1px solid rgba(255, 255, 255, 0.12);
         border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        padding: clamp(16px, 4vw, 24px) clamp(12px, 2.5vw, 20px);
     }
 
-    .section-featured-item:last-child {
+    .section-featured-item:nth-child(even) {
+        border-right: none;
+    }
+
+    .section-featured-item:nth-child(3),
+    .section-featured-item:nth-child(4) {
         border-bottom: none;
-    }
-
-    .section-featured-item:nth-child(2) {
-        border-right: none;
-    }
-
-    .section-featured-item:nth-child(1),
-    .section-featured-item:nth-child(2) {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .section-featured-bird {
@@ -6429,20 +6455,30 @@ select.founding-input option {
     }
 
     .section-info-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, 1fr);
     }
 
     .section-info-item {
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        border-right: 1px solid rgba(255, 255, 255, 0.12);
+        border-bottom: none;
+        padding: clamp(12px, 3vw, 20px) clamp(8px, 1.5vw, 16px);
+    }
+    
+    .section-info-item-title {
+        font-size: clamp(10px, 2.5vw, 14px);
+        margin-bottom: clamp(4px, 1vw, 8px);
+    }
+
+    .section-info-item-desc {
+        font-size: clamp(9px, 2vw, 11px);
     }
 
     .section-info-item:first-child {
-        grid-column: 1 / -1;
+        grid-column: auto;
     }
 
     .section-info-item:last-child {
-        border-bottom: none;
+        border-right: none;
     }
 
     .section-info-item:nth-child(3) {
@@ -6612,11 +6648,11 @@ select.founding-input option {
     }
 
     .section-agents-copy {
-        padding: 0 20px;
+        padding: 0;
     }
 
     .section-agents-visual {
-        padding: 0 20px;
+        padding: 0;
     }
 
     .section.section-agents {
