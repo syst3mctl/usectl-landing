@@ -180,10 +180,10 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
-  <script type="module" crossorigin src="./assets/main-zjRCoK7C.js"></script>
+  <script type="module" crossorigin src="./assets/main-BnSuy7wz.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/chunk-B3K2TuZy.js">
-  <link rel="preload" as="style" fetchpriority="high" crossorigin href="./assets/main-DAy0dXLW.css">
-  <link rel="stylesheet" crossorigin href="./assets/main-DAy0dXLW.css">
+  <link rel="preload" as="style" fetchpriority="high" crossorigin href="./assets/main-B7VznY5j.css">
+  <link rel="stylesheet" crossorigin href="./assets/main-B7VznY5j.css">
 </head>
 
 <body>
@@ -225,17 +225,18 @@
                 </button>
             </div>
             <div class="mobile-menu" id="mobile-menu" role="menu">
-                <a href="#machine" role="menuitem"
-                    onclick="document.getElementById('mobile-menu').classList.remove('active')">The Machine</a>
-                <a href="#ai" role="menuitem"
-                    onclick="document.getElementById('mobile-menu').classList.remove('active')">Agents</a>
-                <a href="#features" role="menuitem"
-                    onclick="document.getElementById('mobile-menu').classList.remove('active')">Features</a>
-                <a href="#pricing" role="menuitem"
-                    onclick="document.getElementById('mobile-menu').classList.remove('active')">Pricing</a>
-                <a href="https://docs.usectl.com" target="_blank" role="menuitem">Documentation</a>
-                
-                <div style="display: flex; gap: 16px; margin-top: 20px;">
+                <div class="mobile-menu-links">
+                    <a href="#machine" role="menuitem"
+                        onclick="document.getElementById('mobile-menu').classList.remove('active')">The Machine</a>
+                    <a href="#ai" role="menuitem"
+                        onclick="document.getElementById('mobile-menu').classList.remove('active')">Agents</a>
+                    <a href="#features" role="menuitem"
+                        onclick="document.getElementById('mobile-menu').classList.remove('active')">Features</a>
+                    <a href="#pricing" role="menuitem"
+                        onclick="document.getElementById('mobile-menu').classList.remove('active')">Pricing</a>
+                    <a href="https://docs.usectl.com" target="_blank" role="menuitem">Documentation</a>
+                </div>
+                <div class="mobile-menu-actions">
                     <a href="https://manager.usectl.com/login" class="nav-login-btn" role="menuitem">Login</a>
                     <a href="https://manager.usectl.com/register" class="nav-start-btn" role="menuitem">Start Free</a>
                 </div>
@@ -248,8 +249,7 @@
         <section class="hero" id="hero">
             <div class="hero-inner">
                 <h1 id="hero-h1">
-                    <span class="h1-content">Your own machine<br>in the <span class="hero-cloud-line">cloud.<img src="icons/line.svg" alt="" aria-hidden="true" class="underline-deco"></span></span>
-                    <span id="h1-cursor"></span>
+                    <span class="h1-content">Your own machine<br>in the <span class="hero-cloud-line">cloud.<img src="icons/line.svg" alt="" aria-hidden="true" class="underline-deco"><span id="h1-cursor"></span></span></span>
                 </h1>
                 <noscript>
                     <p>Host your whole stack on real servers you own. We run the databases, backups, and uptime, so
@@ -359,7 +359,7 @@
                                         </div>
 
                                         <div class="steps-finetune">
-                                            <p class="steps-finetune-title">Fine-tune starter</p>
+                                            <p class="steps-finetune-title">Fine-tune starter </p>
 
                                             <div class="steps-resource-row" data-resource="vcpu">
                                                 <div class="steps-resource-info">

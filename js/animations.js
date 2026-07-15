@@ -11,8 +11,14 @@ const getUiScale = () => {
     if (viewportWidth >= 1280 && viewportWidth <= 1919) {
         return viewportWidth / 1920;
     }
+    if (viewportWidth >= 768 && viewportWidth <= 1279) {
+        return viewportWidth / 1920;
+    }
     return 1;
 };
+
+const isPhone = () => window.matchMedia('(max-width: 767px)').matches;
+const isTablet = () => window.matchMedia('(max-width: 1279px)').matches;
 
 const GLITCH_BTN_SELECTOR = [
     '.nav-start-btn',
@@ -351,9 +357,8 @@ const Scenes = {
         if (!stepsSection || !pinWrap) return;
 
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const isMobile = window.matchMedia('(max-width: 1024px)').matches;
 
-        if (prefersReducedMotion || isMobile) {
+        if (prefersReducedMotion || isPhone()) {
             stepsSection.classList.add('steps-static');
             return;
         }
@@ -376,11 +381,20 @@ const Scenes = {
         });
 
         const syncStepsContentHeight = () => {
-            const scale = window.innerWidth >= 1280 && window.innerWidth <= 1919
-                ? window.innerWidth / 1920
-                : 1;
-            stepsInner.style.setProperty('--steps-content-h', `${545 * scale}px`);
-            stepsInner.style.setProperty('--steps-visual-w', `${542 * scale}px`);
+            const w = window.innerWidth;
+            if (w >= 1280 && w <= 1919) {
+                const scale = w / 1920;
+                stepsInner.style.setProperty('--steps-content-h', `${545 * scale}px`);
+                stepsInner.style.setProperty('--steps-visual-w', `${542 * scale}px`);
+                return;
+            }
+            if (w >= 768 && w <= 1279) {
+                const scale = w / 1920;
+                const contentH = Math.max(340, Math.min(480, 545 * scale));
+                const visualW = Math.max(260, Math.min(480, 542 * scale));
+                stepsInner.style.setProperty('--steps-content-h', `${contentH}px`);
+                stepsInner.style.setProperty('--steps-visual-w', `${visualW}px`);
+            }
         };
 
         const getTrackStep = (items) => {
@@ -443,8 +457,7 @@ const Scenes = {
         }, 0);
 
         const handleResize = () => {
-            const nowMobile = window.matchMedia('(max-width: 1024px)').matches;
-            if (nowMobile && !stepsSection.classList.contains('steps-static')) {
+            if (isPhone() && !stepsSection.classList.contains('steps-static')) {
                 ScrollTrigger.getAll().forEach((st) => {
                     if (st.trigger === stepsInner) st.kill();
                 });
