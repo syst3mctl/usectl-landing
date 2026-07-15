@@ -81,6 +81,17 @@ const initButtonGlitch = () => {
 
 const Scenes = {
     initHero() {
+        const heroInner = document.querySelector(".hero-inner");
+        const h1Content = document.querySelector(".h1-content");
+
+        if (heroInner) {
+            heroInner.style.minHeight = `${heroInner.offsetHeight}px`;
+        }
+
+        if (h1Content) {
+            h1Content.style.minHeight = `${h1Content.offsetHeight}px`;
+        }
+
         const tl = gsap.timeline({
             defaults: { ease: "power2.inOut", duration: 0.4 }
         });
@@ -91,6 +102,29 @@ const Scenes = {
         gsap.set(".hero-note", { y: 5, opacity: 0 });
         gsap.set(".hero-visual", { scale: 0.95, opacity: 0 });
         gsap.set(".hero-bubble", { y: 10, opacity: 0 });
+
+        const heroCloud = document.querySelector(".hero-cloud");
+        const heroRobo = document.querySelector(".hero-robo");
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        if (heroCloud && heroRobo) {
+            if (prefersReducedMotion) {
+                gsap.set(heroCloud, { opacity: 0.85, x: 0, y: 0, scaleY: 1 });
+                gsap.set(heroRobo, { y: 0 });
+            } else {
+                gsap.set(heroCloud, {
+                    opacity: 0,
+                    x: 28,
+                    y: 12,
+                    scaleY: 1,
+                    transformOrigin: "50% 0%"
+                });
+                gsap.set(heroRobo, {
+                    y: -150,
+                    transformOrigin: "50% 100%"
+                });
+            }
+        }
 
         const svgNS = "http://www.w3.org/2000/svg";
         const logoGlitchSvg = document.createElementNS(svgNS, "svg");
@@ -137,7 +171,6 @@ const Scenes = {
             paused: true
         });
 
-        const h1Content = document.querySelector('.h1-content');
         const h1HTML = 'Your own machine<br>in the <span class="hero-cloud-line">cloud.</span>';
         if (h1Content) h1Content.innerHTML = "";
 
@@ -157,10 +190,62 @@ const Scenes = {
             }, null, 0.6)
             .to("#hero-h1", { y: 0, opacity: 1, duration: 0.1, overwrite: "auto" }, 0);
 
+        if (heroCloud && heroRobo && !prefersReducedMotion) {
+            const stackStart = 0.22;
+
+            tl.to(heroCloud, {
+                opacity: 0.85,
+                x: 0,
+                y: 0,
+                duration: 0.42,
+                ease: "power3.out"
+            }, stackStart)
+            .to(heroRobo, {
+                y: 0,
+                duration: 0.34,
+                ease: "power4.in"
+            }, stackStart + 0.36)
+            .to(heroCloud, {
+                scaleY: 0.88,
+                y: 3,
+                duration: 0.07,
+                ease: "power2.in"
+            }, stackStart + 0.68)
+            .to(heroRobo, {
+                y: 5,
+                duration: 0.07,
+                ease: "power2.in"
+            }, stackStart + 0.68)
+            .to(heroCloud, {
+                scaleY: 1,
+                y: 0,
+                duration: 0.28,
+                ease: "power2.out"
+            }, stackStart + 0.75)
+            .to(heroRobo, {
+                y: -2,
+                duration: 0.12,
+                ease: "power2.out"
+            }, stackStart + 0.75)
+            .to(heroRobo, {
+                y: 0,
+                duration: 0.18,
+                ease: "power2.inOut"
+            }, stackStart + 0.87)
+            .call(() => {
+                gsap.set(heroCloud, { clearProps: "transform" });
+                gsap.set(heroRobo, { clearProps: "transform" });
+            }, null, stackStart + 1.05);
+        }
+
         const h1Parts = h1HTML.match(/(<[^>]+>|[^<])/g) || [];
         const h1Proxy = { index: 0 };
         const h1TypeSpeed = 0.04;
         const h1TypeDuration = h1Parts.length * h1TypeSpeed;
+
+        tl.call(() => {
+            if (h1Content) h1Content.style.visibility = "visible";
+        }, null, 0.2);
 
         tl.to(h1Proxy, {
             index: h1Parts.length,
