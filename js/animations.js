@@ -6,6 +6,14 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // Register plugins
 gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
+const getUiScale = () => {
+    const viewportWidth = window.innerWidth;
+    if (viewportWidth >= 1280 && viewportWidth <= 1919) {
+        return viewportWidth / 1920;
+    }
+    return 1;
+};
+
 const GLITCH_BTN_SELECTOR = [
     '.nav-start-btn',
     '.steps-cta',
@@ -106,6 +114,7 @@ const Scenes = {
         const heroCloud = document.querySelector(".hero-cloud");
         const heroRobo = document.querySelector(".hero-robo");
         const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const uiScale = getUiScale();
 
         if (heroCloud && heroRobo) {
             if (prefersReducedMotion) {
@@ -114,13 +123,13 @@ const Scenes = {
             } else {
                 gsap.set(heroCloud, {
                     opacity: 0,
-                    x: 28,
-                    y: 12,
+                    x: 28 * uiScale,
+                    y: 12 * uiScale,
                     scaleY: 1,
                     transformOrigin: "50% 0%"
                 });
                 gsap.set(heroRobo, {
-                    y: -150,
+                    y: -150 * uiScale,
                     transformOrigin: "50% 100%"
                 });
             }
@@ -171,7 +180,7 @@ const Scenes = {
             paused: true
         });
 
-        const h1HTML = 'Your own machine<br>in the <span class="hero-cloud-line">cloud.</span>';
+        const h1HTML = 'Your own machine<br>in the <span class="hero-cloud-line">cloud.<img src="icons/line.svg" alt="" aria-hidden="true" class="underline-deco"><span id="h1-cursor"></span></span>';
         if (h1Content) h1Content.innerHTML = "";
 
         tl.to(".nav", { "--nav-scale": 1, duration: 1, ease: "none" }, 0)
@@ -207,12 +216,12 @@ const Scenes = {
             }, stackStart + 0.36)
             .to(heroCloud, {
                 scaleY: 0.88,
-                y: 3,
+                y: 3 * uiScale,
                 duration: 0.07,
                 ease: "power2.in"
             }, stackStart + 0.68)
             .to(heroRobo, {
-                y: 5,
+                y: 5 * uiScale,
                 duration: 0.07,
                 ease: "power2.in"
             }, stackStart + 0.68)
@@ -223,7 +232,7 @@ const Scenes = {
                 ease: "power2.out"
             }, stackStart + 0.75)
             .to(heroRobo, {
-                y: -2,
+                y: -2 * uiScale,
                 duration: 0.12,
                 ease: "power2.out"
             }, stackStart + 0.75)
