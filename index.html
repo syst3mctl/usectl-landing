@@ -357,64 +357,27 @@
         <!-- 3 STEPS -->
         <section class="section steps" id="steps">
             <div class="section-inner">
+                <div style="max-width: 640px; margin: 0 auto;">
+                    <div style="text-align: left; margin-bottom: 48px;">
+                        <div style="margin-bottom: 28px;">
+                            <div style="font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.95); margin-bottom: 6px;"><span style="color: rgba(255,255,255,0.45); font-weight: 600;">01</span> Create a machine.</div>
+                            <div style="font-size: 17px; color: rgba(255,255,255,0.7); line-height: 1.5;">Postgres, Redis, S3, cron, domains. We run the metal.</div>
+                        </div>
+                        <div style="margin-bottom: 28px;">
+                            <div style="font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.95); margin-bottom: 6px;"><span style="color: rgba(255,255,255,0.45); font-weight: 600;">02</span> Connect a repo.</div>
+                            <div style="font-size: 17px; color: rgba(255,255,255,0.7); line-height: 1.5;">GitHub or the CLI.</div>
+                        </div>
+                        <div style="margin-bottom: 28px;">
+                            <div style="font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.95); margin-bottom: 6px;"><span style="color: rgba(255,255,255,0.45); font-weight: 600;">03</span> Push.</div>
+                            <div style="font-size: 17px; color: rgba(255,255,255,0.7); line-height: 1.5;">You get https://name.usectl.com.</div>
+                        </div>
+                    </div>
 
-                <div>
-                    <h2 class="section-title">Create a machine. <span class="green" style="position: relative;">Connect GitHub. Deploy.
-                            <div class="bg-glow-green" style="top: 70%; left: 70%;"></div></span></h2>
-                    <p class="section-sub">No Docker knowledge required. No server config. No YAML files.</p>
-                    <div class="steps-row">
-                        <div class="step-item">
-                            <div class="step-num">01</div>
-                            <h3>Create a machine</h3>
-                            <div class="step-visual">
-                                <div class="step-deploy-icon"><img src="img/rocket.svg" alt="rocket"
-                                        style="width:28px;height:28px"></div>
-                            </div>
-                            <p class="step-repo">One flat price. Full stack included.</p>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-num">02</div>
-                            <h3>Connect your GitHub repo</h3>
-                            <div class="step-visual">
-                                <div class="step-github">
-                                    <span class="gh-icon"><svg width="32" height="32" viewBox="0 0 24 24"
-                                            fill="currentColor">
-                                            <path
-                                                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                                        </svg></span>
-                                    <span class="line"></span>
-                                    <span class="usectl-text"><img src="img/logo.svg" alt="usectl logo" width="83"
-                                            height="22" loading="lazy"></span>
-                                </div>
-                            </div>
-                            <p class="step-repo">Any repo with a Dockerfile, or let us detect it.</p>
-                        </div>
-                        <div class="step-item">
-                            <div class="step-num">03</div>
-                            <h3>Push to main</h3>
-                            <div class="step-visual">
-                                <div class="step-deploy-icon"><img src="img/rocket.svg" alt="rocket"
-                                        style="width:28px;height:28px"></div>
-                                <div class="step-success"><span class="dot"></span> Success: Your app is Live</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="steps-terminal">
-                    <div class="steps-terminal-header">
-                        <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-                        <span class="title">usectl machines create</span>
-                    </div>
-                    <div class="steps-terminal-body">
-                        <div class="prompt">$ usectl machines create --repo github.com/you/your-app \</div>
-                        <div class="prompt"> --postgres --redis</div>
-                        <div class="prompt">$ usectl deploy --project your-app</div>
-                        <div class="success">✓ Build complete (32s)</div>
-                        <div class="success">✓ PostgreSQL ready. $DATABASE_URL injected</div>
-                        <div class="success">✓ Redis ready. $REDIS_URL injected</div>
-                        <div class="success">✓ S3 bucket ready. $S3_ENDPOINT injected</div>
-                        <div class="success">✓ TLS certificate issued</div>
-                        <div class="success">✓ Live at <span class="link">https://your-app.usectl.app</span></div>
+                    <pre style="background: rgba(17, 163, 42, 0.04); border: 1px solid rgba(17, 163, 42, 0.15); border-radius: 8px; padding: 20px; margin: 0 0 12px 0; overflow-x: auto;"><code style="font-family: 'JetBrains Mono', monospace; font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.7;">$ usectl login
+$ usectl machines create --repo … --postgres --redis</code></pre>
+
+                    <div style="text-align: left;">
+                        <span style="color: #11A32A; font-size: 15px;">https://name.usectl.com</span>
                     </div>
                 </div>
             </div>
