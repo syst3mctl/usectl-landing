@@ -469,58 +469,31 @@ $ usectl machines create --repo … --postgres --redis</code></pre>
         <!-- FEATURES -->
         <section class="section" id="features">
             <div class="section-inner">
-                <h2 class="section-title">Your server. <span class="green">Everything included. <div
-                            class="bg-glow-green" style="top: 70%; left: 58%;"></div></span></h2>
-                <p class="section-sub">Turn on anything. Postgres, Redis, S3, cron, search. It all runs inside
-                    the project you configured. One bill. No addon charges.</p>
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon"><img src="img/rocket.svg" alt="Push-to-deploy icon" width="18"
-                                height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>Push-to-Deploy + PR Previews</h3>
-                        <p>Connect your GitHub repo and every push builds automatically with Kaniko. Every pull
-                            request gets its own preview URL. Previews are torn down when you merge. No extra
-                            charge.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon"><img src="img/pgsql.svg" alt="PostgreSQL database icon" width="18"
-                                height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>Managed PostgreSQL</h3>
-                        <p>CloudNativePG operator, automatic backups, point-in-time recovery. Connection
-                            string injected as an env var. Runs inside your project's compute budget. No
-                            separate database bill, ever.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon"><img src="img/object_storage.svg"
-                                alt="S3-compatible object storage icon" width="18" height="18"
-                                style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>S3-Compatible Object Storage</h3>
-                        <p>Private buckets with access keys. Works with any AWS SDK. Egress is unmetered. The
-                            storage you provision is yours. No surprise per-byte charges.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon"><img src="img/lock.svg" alt="HTTPS lock icon" width="18" height="18"
-                                style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>Custom Domains + HTTPS</h3>
-                        <p>Point your domain, get automatic TLS via Traefik and Let's Encrypt. Wildcard
-                            subdomains included. Apex domains and multi-level paths just work.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon"><img src="img/monitor.svg" alt="Real-time monitoring icon" width="18"
-                                height="18" style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>Logs, Metrics, Rollback</h3>
-                        <p>Real-time logs and metrics per service. One-click rollback to any previous deploy.
-                            Redis, Mongo, Meilisearch, NATS, cron jobs, OAuth2 Proxy, and Grafana all available
-                            with zero extra cost.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon"><img src="img/cli.svg" alt="CLI terminal icon" width="18" height="18"
-                                style="width:18px;height:18px;vertical-align:middle;" loading="lazy"></div>
-                        <h3>CLI + Dashboard</h3>
-                        <p>Single-binary CLI with <code>--json</code> output for scripting. Dashboard for
-                            humans. Every AI agent, whether Claude Code, Cursor, Windsurf, or ChatGPT, already
-                            knows how to use it. MCP available too, if you want it.</p>
-                    </div>
+                <h2 class="section-title">On our Hetzner.</h2>
+                <p class="section-sub">Postgres, Redis, S3, cron, domains. You push git.</p>
+                <div style="max-width: 640px; margin: 0 auto;">
+                    <ul style="list-style: none; padding: 0; text-align: left;">
+                        <li style="margin-bottom: 16px;">
+                            <p style="font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.85); margin: 0;">
+                                Git push. You get <span style="color: #11A32A;">https://name.usectl.com</span>.
+                            </p>
+                        </li>
+                        <li style="margin-bottom: 16px;">
+                            <p style="font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.85); margin: 0;">
+                                Postgres and Redis. Strings in the env.
+                            </p>
+                        </li>
+                        <li style="margin-bottom: 16px;">
+                            <p style="font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.85); margin: 0;">
+                                S3. Cron. Domains and TLS.
+                            </p>
+                        </li>
+                        <li style="margin-bottom: 16px;">
+                            <p style="font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.85); margin: 0;">
+                                CLI. Same commands as the how-to.
+                            </p>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </section>

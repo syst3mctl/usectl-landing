@@ -220,6 +220,7 @@ code {
     left: 0;
     right: 0;
     z-index: 100;
+    background: rgb(30, 29, 29);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     transition: .3s ease-in-out;
@@ -1149,6 +1150,10 @@ code {
 /* SECTION SHARED */
 .section {
     padding: 170px 100px 36px
+}
+
+#features {
+    padding-top: calc(64px + 24px);
 }
 
 .section-inner {
@@ -2569,6 +2574,10 @@ select.founding-input option {
 
     .nav-logo {
         width: 85px;
+    }
+
+    #features {
+        padding-top: calc(50px + 24px);
     }
 
     .features-grid {
