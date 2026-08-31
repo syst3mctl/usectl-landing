@@ -358,20 +358,20 @@
         <section class="section steps" id="steps">
             <div class="section-inner">
                 <div style="max-width: 640px; margin: 0 auto;">
-                    <div style="text-align: left; margin-bottom: 48px;">
-                        <div style="margin-bottom: 28px;">
-                            <div style="font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.95); margin-bottom: 6px;"><span style="color: rgba(255,255,255,0.45); font-weight: 600;">01</span> Create a machine.</div>
-                            <div style="font-size: 17px; color: rgba(255,255,255,0.7); line-height: 1.5;">Postgres, Redis, S3, cron, domains. We run the metal.</div>
-                        </div>
-                        <div style="margin-bottom: 28px;">
-                            <div style="font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.95); margin-bottom: 6px;"><span style="color: rgba(255,255,255,0.45); font-weight: 600;">02</span> Connect a repo.</div>
-                            <div style="font-size: 17px; color: rgba(255,255,255,0.7); line-height: 1.5;">GitHub or the CLI.</div>
-                        </div>
-                        <div style="margin-bottom: 28px;">
-                            <div style="font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.95); margin-bottom: 6px;"><span style="color: rgba(255,255,255,0.45); font-weight: 600;">03</span> Push.</div>
-                            <div style="font-size: 17px; color: rgba(255,255,255,0.7); line-height: 1.5;">You get https://name.usectl.com.</div>
-                        </div>
-                    </div>
+                    <ol class="steps-list">
+                        <li class="steps-list-item">
+                            <h3 class="steps-list-title"><span class="steps-list-num">01</span> Create a machine.</h3>
+                            <p class="steps-list-body">Postgres, Redis, S3, cron, domains. We run the metal.</p>
+                        </li>
+                        <li class="steps-list-item">
+                            <h3 class="steps-list-title"><span class="steps-list-num">02</span> Connect a repo.</h3>
+                            <p class="steps-list-body">GitHub or the CLI.</p>
+                        </li>
+                        <li class="steps-list-item">
+                            <h3 class="steps-list-title"><span class="steps-list-num">03</span> Push.</h3>
+                            <p class="steps-list-body">You get https://name.usectl.com.</p>
+                        </li>
+                    </ol>
 
                     <pre style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 20px; margin: 0 0 12px 0; overflow-x: auto;"><code style="font-family: 'JetBrains Mono', monospace; font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.7;">$ usectl login
 $ usectl machines create --repo … --postgres --redis</code></pre>

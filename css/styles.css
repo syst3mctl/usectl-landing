@@ -1214,6 +1214,37 @@ code {
     max-width: 500px
 }
 
+/* Steps list - semantic ol/li/p markup */
+.steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 48px 0;
+    text-align: left;
+}
+
+.steps-list-item {
+    margin-bottom: 28px;
+}
+
+.steps-list-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.95);
+    margin: 0 0 6px 0;
+}
+
+.steps-list-num {
+    color: rgba(255,255,255,0.45);
+    font-weight: 600;
+}
+
+.steps-list-body {
+    font-size: 17px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+    margin: 0;
+}
+
 .steps-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
