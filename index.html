@@ -184,7 +184,6 @@
                     <div class="nav-links">
                         <a href="#steps">How it Works</a>
                         <a href="#features">Features</a>
-                        <a href="#pricing">Pricing</a>
                         <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer">Github</a>
                         <a href="https://docs.usectl.com" target="_blank">Documentation</a>
                     </div>
@@ -212,8 +211,6 @@
                     onclick="document.getElementById('mobile-menu').classList.remove('active')">How it Works</a>
                 <a href="#features" role="menuitem"
                     onclick="document.getElementById('mobile-menu').classList.remove('active')">Features</a>
-                <a href="#pricing" role="menuitem"
-                    onclick="document.getElementById('mobile-menu').classList.remove('active')">Pricing</a>
 
                 <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer"
                     role="menuitem">Github</a>
@@ -236,15 +233,12 @@
         <section class="hero" id="hero">
             <div class="hero-inner">
                 <div class="hero-text">
-                    <h1 id="hero-h1"><span class="h1-content">One flat price.<br><span class="green">No bandwidth
-                                bills.</span></span><span id="h1-cursor"></span></h1>
+                    <h1 id="hero-h1"><span class="h1-content">Push git. You get https://name.usectl.com.<br><span class="green">We run the metal. You created a machine.</span></span><span id="h1-cursor"></span></h1>
                     <!-- Noscript fallback for indexing -->
                     <noscript>
-                        <p>Managed full-stack deployment. Every addon, every byte of bandwidth, every team
-                            seat: included. Built on our own bare metal at Hetzner.</p>
+                        <p>Push your code to GitHub. Get a live URL. We run the infrastructure on our own bare metal at Hetzner.</p>
                     </noscript>
-                    <p class="subtitle">Managed full-stack deployment. Every addon, every byte of bandwidth,
-                        every team seat: included.</p>
+                    <p class="subtitle">Push your code to GitHub. Get a live URL. We run the infrastructure on our own bare metal.</p>
                     <a href="https://manager.usectl.com/register" class="hero-cta">
                         <span>Create a machine</span>
                         <div class="glitch" aria-hidden="true">
@@ -349,7 +343,7 @@
                                             <span>Successfully Deployed</span>
                                         </div>
                                         <div class="success-subttl">
-                                            <span>Runtime: 1.4s • Region: self-hosted</span>
+                                            <span>Runtime: 1.4s • Hetzner DC</span>
                                         </div>
                                     </div>
                                 </div>
@@ -366,7 +360,7 @@
             <div class="section-inner">
 
                 <div>
-                    <h2 class="section-title">Connect. Deploy. <span class="green" style="position: relative;">Ship.
+                    <h2 class="section-title">Create a machine. <span class="green" style="position: relative;">Connect GitHub. Deploy.
                             <div class="bg-glow-green" style="top: 70%; left: 70%;"></div></span></h2>
                     <p class="section-sub">No Docker knowledge required. No server config. No YAML files.</p>
                     <div class="steps-row">
@@ -410,13 +404,12 @@
                 <div class="steps-terminal">
                     <div class="steps-terminal-header">
                         <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-                        <span class="title">usectl projects create</span>
+                        <span class="title">usectl machines create</span>
                     </div>
                     <div class="steps-terminal-body">
-                        <div class="prompt">$ usectl projects create --repo github.com/you/your-app \</div>
-                        <div class="prompt"> --vcpu 2 --ram 4 --storage 50 --postgres --redis</div>
+                        <div class="prompt">$ usectl machines create --repo github.com/you/your-app \</div>
+                        <div class="prompt"> --postgres --redis</div>
                         <div class="prompt">$ usectl deploy --project your-app</div>
-                        <div class="success">✓ Server provisioned (2 vCPU / 4 GB RAM / 50 GB)</div>
                         <div class="success">✓ Build complete (32s)</div>
                         <div class="success">✓ PostgreSQL ready. $DATABASE_URL injected</div>
                         <div class="success">✓ Redis ready. $REDIS_URL injected</div>
@@ -454,12 +447,10 @@
                         <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl auth login</div>
                         <div style="color: #11A32A;">✓ Authenticated as you@example.com</div>
                         <div style="height: 12px;"></div>
-                        <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl projects create \</div>
-                        <div style="padding-left: 24px; color: rgba(255,255,255,0.75);">--repo github.com/you/your-saas
-                            --vcpu 2 --ram 4 \</div>
-                        <div style="padding-left: 24px; color: rgba(255,255,255,0.75);">--storage 50 --postgres --redis
+                        <div><span style="color: rgba(255,255,255,0.35);">$</span> usectl machines create \</div>
+                        <div style="padding-left: 24px; color: rgba(255,255,255,0.75);">--repo github.com/you/your-saas \</div>
+                        <div style="padding-left: 24px; color: rgba(255,255,255,0.75);">--postgres --redis
                         </div>
-                        <div style="color: #11A32A;">✓ Server provisioned (2 vCPU / 4 GB RAM / 50 GB)</div>
                         <div style="color: #11A32A;">✓ PostgreSQL ready. <span
                                 style="color: rgba(255,255,255,0.6);">$DATABASE_URL</span> injected</div>
                         <div style="color: #11A32A;">✓ Redis ready. <span
@@ -679,29 +670,13 @@
                             
                             <span class="founding-error" id="error-password"></span>
                         </div>
-                        <div class="founding-field">
-                            <input type="password" class="founding-input" id="founding-confirm-password" placeholder=" " required autocomplete="one-time-code">
-                            <label class="founding-label" for="founding-confirm-password"><span class="required">*</span>
-                                Confirm Password</label>
-                            <button type="button" class="password-toggle"
-                                onclick="togglePasswordVisibility('founding-confirm-password', this)"
-                                aria-label="Toggle password visibility">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="eye-icon">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                            </button>
-                            <span class="founding-error" id="error-confirm-password"></span>
-                        </div>
                     </div>
                     <div class="founding-submit-row">
                         <button class="btn-solid-green" id="founding-submit" onclick="handleFoundingSubmit()">
-                            <span>Create my account</span>
+                            <span>Create a machine</span>
                             <div class="glitch" aria-hidden="true">
                                 <span class="letters">
-                                    <span>C</span><span>r</span><span>e</span><span>a</span><span>t</span><span>e</span><span>&nbsp;</span><span>m</span><span>y</span><span>&nbsp;</span><span>a</span><span>c</span><span>c</span><span>o</span><span>u</span><span>n</span><span>t</span>
+                                    <span>C</span><span>r</span><span>e</span><span>a</span><span>t</span><span>e</span><span>&nbsp;</span><span>a</span><span>&nbsp;</span><span>m</span><span>a</span><span>c</span><span>h</span><span>i</span><span>n</span><span>e</span>
                                 </span>
                             </div>
                         </button>
@@ -823,7 +798,6 @@
             const project = document.getElementById('founding-project').value.trim();
             const deploy = document.getElementById('founding-deploy').value;
             const password = document.getElementById('founding-password').value;
-            const confirmPassword = document.getElementById('founding-confirm-password').value;
 
             let hasError = false;
 
@@ -840,13 +814,6 @@
             }
             if (!password) {
                 showError('error-password', 'Password is required');
-                hasError = true;
-            }
-            if (!confirmPassword) {
-                showError('error-confirm-password', 'Please confirm your password');
-                hasError = true;
-            } else if (password !== confirmPassword) {
-                showError('error-confirm-password', 'Passwords do not match');
                 hasError = true;
             }
 
@@ -888,7 +855,7 @@
                     window.location.href = 'https://manager.usectl.com/login';
                 }, 2000);
             }).catch((err) => {
-                btn.textContent = 'Create my account';
+                btn.textContent = 'Create a machine';
                 btn.style.pointerEvents = '';
                 btn.style.opacity = '1';
                 if (err.message !== "Email already registered") {
