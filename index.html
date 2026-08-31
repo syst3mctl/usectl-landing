@@ -993,17 +993,6 @@
                     return Promise.resolve({
                         tagline: 'One flat price. No bandwidth bills.',
                         promise: 'Managed full-stack deployment. We spin up a managed project with a full stack inside on one flat monthly bill: managed PostgreSQL, S3-compatible object storage, Redis, cron jobs, PR previews, custom domains, unlimited team seats. Everything included. No bandwidth metering, no per-build surprises, no seat pricing.',
-                        model: 'configured-server',
-                        formula: {
-                            vCPU: '$10 per vCPU per month',
-                            RAM: '$5 per GB RAM per month',
-                            storage: '$0.01 per GB object storage per month',
-                            increments: '0.25 vCPU, 0.25 GB RAM, 1 GB storage',
-                            example_small: '1 vCPU / 2 GB / 10 GB = $20.10/month',
-                            example_medium: '2 vCPU / 4 GB / 50 GB = $40.50/month',
-                            example_large: '4 vCPU / 8 GB / 200 GB = $82/month',
-                            example_xl: '8 vCPU / 16 GB / 500 GB = $165/month'
-                        },
                         included_in_every_server: [
                             'Managed PostgreSQL with backups',
                             'Redis, Mongo, SQL Server, NATS, Meilisearch',
