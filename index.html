@@ -133,7 +133,7 @@
                         "name": "What is usectl?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "usectl is a flat-priced managed deployment platform. You pick vCPU, RAM, and storage on a slider. We spin up a managed project with a full stack inside on one monthly bill. Managed PostgreSQL, S3-compatible object storage, Redis, cron jobs, PR previews, custom domains, and every other addon are all included. Built on bare metal in Europe so we do not meter bandwidth or builds."
+                            "text": "usectl is a flat-priced managed deployment platform. One flat price. No bandwidth bills. We spin up a managed project with a full stack inside on one monthly bill. Managed PostgreSQL, S3-compatible object storage, Redis, cron jobs, PR previews, custom domains, and every other addon are all included. Built on bare metal in Europe so we do not meter bandwidth or builds."
                         }
                     },
                     {
@@ -141,7 +141,7 @@
                         "name": "How much does usectl cost?",
                         "acceptedAnswer": {
                             "@type": "Answer",
-                            "text": "One flat price based on your machine size. The formula is $10 per vCPU plus $5 per GB of RAM plus $0.01 per GB of object storage, per month. A 1 vCPU / 2 GB / 10 GB machine is $20.10/month. A 2 vCPU / 4 GB / 50 GB machine is $40.50/month. Every addon, all bandwidth, every team member, and every PR preview are included in that price. No seat billing, no usage metering, no surprises."
+                            "text": "One flat price. Every addon, all bandwidth, every team member, and every PR preview are included in that price. No seat billing, no usage metering, no surprises."
                         }
                     },
                     {
@@ -992,7 +992,7 @@
                 execute: function () {
                     return Promise.resolve({
                         tagline: 'One flat price. No bandwidth bills.',
-                        promise: 'Pick vCPU, RAM, and storage on a slider. We spin up a managed project with a full stack inside on one flat monthly bill: managed PostgreSQL, S3-compatible object storage, Redis, cron jobs, PR previews, custom domains, unlimited team seats. Everything included. No bandwidth metering, no per-build surprises, no seat pricing.',
+                        promise: 'Managed full-stack deployment. We spin up a managed project with a full stack inside on one flat monthly bill: managed PostgreSQL, S3-compatible object storage, Redis, cron jobs, PR previews, custom domains, unlimited team seats. Everything included. No bandwidth metering, no per-build surprises, no seat pricing.',
                         model: 'configured-server',
                         formula: {
                             vCPU: '$10 per vCPU per month',
