@@ -4,7 +4,7 @@
     {
       "name": "deploy-with-usectl",
       "type": "skill-md",
-      "description": "Deploy full-stack applications to usectl, a flat-priced managed deployment platform. Configure a project (vCPU, RAM, storage), get managed PostgreSQL, S3-compatible object storage, Redis, and every other addon on one flat bill. No bandwidth metering, no per-build charges.",
+      "description": "Deploy full-stack applications to usectl, a flat-priced managed deployment platform. Create a machine, get managed PostgreSQL, S3-compatible object storage, Redis, and every other addon on one flat bill. No bandwidth metering, no per-build charges.",
       "url": "https://usectl.com/.well-known/agent-skills/deploy/SKILL.md",
       "digest": "sha256:50a09d22023b2b9a98740dfc5974fc1b5b852c7ecf77fac1d73199c40dec9931"
     }
