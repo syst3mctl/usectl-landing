@@ -1,23 +1,6 @@
 # Deploy with usectl
 
-Deploy full-stack applications to [usectl](https://usectl.com), a flat-priced managed deployment platform. One flat monthly bill covers a configured project (vCPU + RAM + storage) with managed PostgreSQL, S3-compatible object storage, Redis, Mongo, SQL Server, NATS, Meilisearch, cron jobs, PR previews, custom domains, and unlimited team seats. No bandwidth metering. No per-build charges. No seat pricing.
-
-## Pricing
-
-Transparent linear formula:
-
-- **vCPU:** $10 per vCPU per month
-- **RAM:** $5 per GB RAM per month
-- **Object storage:** $0.01 per GB per month
-
-**Worked examples:**
-
-- 1 vCPU / 2 GB RAM / 10 GB storage: **$20.10/month**
-- 2 vCPU / 4 GB RAM / 50 GB storage: **$40.50/month**
-- 4 vCPU / 8 GB RAM / 200 GB storage: **$82/month**
-- 8 vCPU / 16 GB RAM / 500 GB storage: **$165/month**
-
-**Trial:** First project free for 30 days on any configuration up to 4 vCPU / 8 GB RAM. No credit card required.
+Deploy full-stack applications to [usectl](https://usectl.com), a flat-priced managed deployment platform. One flat monthly bill covers a configured project with managed PostgreSQL, S3-compatible object storage, Redis, Mongo, SQL Server, NATS, Meilisearch, cron jobs, PR previews, custom domains, and unlimited team seats. No bandwidth metering. No per-build charges. No seat pricing.
 
 ## Prerequisites
 

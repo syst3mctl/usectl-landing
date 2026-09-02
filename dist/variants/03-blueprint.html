@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TXPX5SYRNJ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-TXPX5SYRNJ');
+    </script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="systemctl">
+    <meta name="theme-color" content="#11A32A">
+    <meta name="msapplication-TileImage" content="../img/fav.png">
+    <meta name="msapplication-TileColor" content="#11A32A">
+    <meta name="content-signal" content="search=yes, ai-train=yes, ai-input=yes">
+    <link rel="canonical" href="https://usectl.com/variants/03-blueprint.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://usectl.com/variants/03-blueprint.html">
+    <meta property="og:title" content="usectl · one box. many machines. · blueprint">
+    <meta property="og:description" content="every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.">
+    <meta property="og:image:alt" content="usectl · one box. many machines. · blueprint">
+    <meta name="twitter:url" content="https://usectl.com/variants/03-blueprint.html">
+    <meta name="twitter:title" content="usectl · one box. many machines. · blueprint">
+    <meta name="twitter:description" content="every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.">
+    <meta property="og:image" content="https://usectl.com/img/ogimage.jpeg">
+    <meta property="og:image:secure_url" content="https://usectl.com/img/ogimage.jpeg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1600">
+    <meta property="og:image:height" content="837">
+    <meta property="og:site_name" content="usectl">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://usectl.com/img/ogimage.jpeg">
+    <meta name="twitter:site" content="@usectl">
+    <meta name="twitter:creator" content="@usectl">
+    <link rel="icon" type="image/png" sizes="32x32" href="../img/fav.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../img/fav.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../img/fav.png">
+    <link rel="manifest" href="../site.webmanifest">
+    <title>usectl · one box. many machines. · blueprint</title>
+    <meta name="description" content="every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.">
+    <meta name="robots" content="noindex, follow">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Public+Sans:wght@300;400;500&display=swap">
+<style>
+  :root{
+    --bp-ground:#1e3a5f;
+    --bp-ground-deep:#182f4e;
+    --bp-line:#eef3fa;
+    --bp-pale:#9fbde0;
+    --bp-faint:rgba(238,243,250,.09);
+    --bp-grid:rgba(238,243,250,.07);
+    --bp-grid-major:rgba(238,243,250,.13);
+    --bp-callout:#E8734A;
+    --bp-callout-ink:#1a2a40;
+    --mono:"Azeret Mono","IBM Plex Mono","SFMono-Regular",Menlo,Consolas,monospace;
+    --sans:"Public Sans","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bp-ground);
+    color:var(--bp-line);
+    font-family:var(--sans);
+    font-weight:300;
+    font-size:16px;
+    line-height:1.55;
+    background-image:
+      linear-gradient(var(--bp-grid-major) 1px,transparent 1px),
+      linear-gradient(90deg,var(--bp-grid-major) 1px,transparent 1px),
+      linear-gradient(var(--bp-grid) 1px,transparent 1px),
+      linear-gradient(90deg,var(--bp-grid) 1px,transparent 1px);
+    background-size:120px 120px,120px 120px,24px 24px,24px 24px;
+    overflow-x:hidden;
+  }
+  a{color:var(--bp-line)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--bp-callout);outline-offset:3px}
+  .nav{
+    position:absolute;top:14px;left:18px;
+    display:flex;gap:18px;align-items:baseline;
+    font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--bp-pale);
+    z-index:2;
+  }
+  .nav a{color:var(--bp-pale);text-decoration:none;border-bottom:1px solid transparent}
+  .nav a:hover{border-bottom-color:var(--bp-pale)}
+  .sheet{
+    max-width:1320px;
+    margin:44px auto 40px;
+    padding:0 20px;
+  }
+  .frame{
+    border:1.5px solid var(--bp-line);
+    outline:1px solid var(--bp-faint);
+    outline-offset:6px;
+    padding:48px 56px 0;
+    position:relative;
+  }
+  .frame::before,.frame::after{
+    content:"";position:absolute;width:14px;height:14px;
+    border:1px solid var(--bp-pale);
+  }
+  .frame::before{top:-8px;left:-8px;border-right:0;border-bottom:0}
+  .frame::after{bottom:-8px;right:-8px;border-left:0;border-top:0}
+  .mono{font-family:var(--mono)}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+    color:var(--bp-pale);margin:0 0 22px;
+  }
+  .eyebrow .mark{color:var(--bp-callout);font-weight:600}
+  .hero{
+    display:grid;
+    grid-template-columns:minmax(0,5fr) minmax(0,7fr);
+    gap:48px;
+    align-items:start;
+  }
+  h1{
+    font-family:var(--mono);font-weight:500;
+    font-size:clamp(34px,4.2vw,56px);line-height:1.08;letter-spacing:-.02em;
+    margin:0 0 22px;text-wrap:balance;
+  }
+  .sub{max-width:44ch;font-size:17px;margin:0 0 30px;color:var(--bp-line)}
+  .ctas{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;margin:0 0 34px}
+  .btn{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    padding:12px 18px;text-decoration:none;
+    border:1.5px solid var(--bp-line);color:var(--bp-line);
+    position:relative;
+  }
+  .btn.primary{background:var(--bp-callout);border-color:var(--bp-callout);color:var(--bp-callout-ink);font-weight:600}
+  .btn.primary:hover{background:#f08b66;border-color:#f08b66}
+  .btn.secondary:hover{background:var(--bp-faint)}
+  .cta-note{font-family:var(--mono);font-size:11px;color:var(--bp-pale);letter-spacing:.04em}
+  .term{
+    font-family:var(--mono);font-size:12.5px;line-height:1.7;
+    border:1px solid var(--bp-pale);
+    padding:16px 18px;margin:0;
+    overflow-x:auto;white-space:pre;
+    background:var(--bp-ground-deep);
+    position:relative;
+  }
+  .term .k{color:var(--bp-callout)}
+  .term .p{color:var(--bp-pale)}
+  .term-label{
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--bp-pale);
+    margin:0 0 6px;
+  }
+  /* diagram */
+  .drawing{min-width:0}
+  .drawing svg{width:100%;height:auto;display:block}
+  .drawing text{font-family:var(--mono)}
+  .dimnote{
+    font-family:var(--mono);font-size:11px;color:var(--bp-pale);letter-spacing:.04em;
+    margin:8px 0 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  /* section rule */
+  .rule{
+    display:flex;align-items:center;gap:16px;margin:64px 0 28px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--bp-pale);
+  }
+  .rule::before,.rule::after{content:"";flex:1;border-top:1px solid var(--bp-faint)}
+  .rule::before{flex:0 0 40px}
+  h2{
+    font-family:var(--mono);font-weight:500;font-size:30px;letter-spacing:-.01em;margin:0 0 14px;
+    text-wrap:balance;
+  }
+  .math{
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:start;
+  }
+  .math-intro{max-width:44ch;font-size:16.5px;margin:0 0 22px}
+  .ledger{
+    list-style:none;margin:0;padding:0;
+    font-family:var(--mono);font-size:13px;
+  }
+  .ledger li{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;
+    gap:10px 20px;align-items:baseline;
+    padding:14px 0;
+    border-top:1px solid var(--bp-faint);
+  }
+  .ledger li:last-child{border-bottom:1px solid var(--bp-faint)}
+  .ledger .what{color:var(--bp-line)}
+  .ledger .price{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--bp-pale)}
+  .ledger li.ours .price{color:var(--bp-callout);font-weight:600}
+  .ledger li.ours .what{font-weight:500}
+  /* dimension bar: a real dimension line for the price */
+  .dim{
+    display:block;height:14px;position:relative;margin-top:8px;
+  }
+  .dim::before{
+    content:"";position:absolute;left:0;right:0;top:7px;border-top:1px solid var(--bp-pale);
+  }
+  .dim::after{
+    content:"";position:absolute;left:0;top:2px;bottom:2px;border-left:1px solid var(--bp-pale);
+  }
+  .dim i{position:absolute;right:0;top:2px;bottom:2px;border-right:1px solid var(--bp-pale)}
+  .dim b{position:absolute;top:7px;height:0;left:0;border-top:1.5px solid var(--bp-callout);width:var(--w)}
+  .many{
+    margin:26px 0 0;font-size:16px;max-width:60ch;
+    padding-left:16px;border-left:1.5px solid var(--bp-callout);
+  }
+  .foot{font-family:var(--mono);font-size:11px;color:var(--bp-pale);margin:16px 0 0;letter-spacing:.02em}
+  .proof{
+    margin:0;
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;
+    align-items:start;
+  }
+  .proof p{margin:0;max-width:58ch;font-size:16.5px}
+  .proof p + p{margin-top:16px}
+  .proof .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--bp-pale)}
+  .closing{
+    margin:44px 0 0;
+    font-family:var(--mono);font-size:22px;font-weight:500;line-height:1.35;letter-spacing:-.01em;
+    max-width:30ch;
+  }
+  .closing .k{color:var(--bp-callout)}
+  /* title block: the drafting flourish */
+  .titleblock{
+    margin:56px -56px 0;
+    border-top:1.5px solid var(--bp-line);
+    display:grid;
+    grid-template-columns:2fr 1.2fr 1fr 1fr 1fr;
+    font-family:var(--mono);font-size:11px;letter-spacing:.04em;
+  }
+  .titleblock > div{
+    padding:10px 14px 12px;border-right:1px solid var(--bp-faint);
+    display:flex;flex-direction:column;gap:6px;min-width:0;
+  }
+  .titleblock > div:last-child{border-right:0}
+  .titleblock .h{font-size:9.5px;letter-spacing:.14em;color:var(--bp-pale)}
+  .titleblock .v{color:var(--bp-line);font-size:12px;overflow-wrap:anywhere}
+  .titleblock .v .mark{color:var(--bp-callout);font-weight:600}
+
+  /* ---- new details: generic section grid, labels and leads ---- */
+  .sec{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:start}
+  .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--bp-pale);display:block;margin:0 0 12px}
+  .lead{max-width:46ch;font-size:16.5px;margin:0}
+  .small{font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--bp-pale);margin:22px 0 0;max-width:66ch;letter-spacing:.01em}
+  /* keyed notes: a drawing key with numbered callout bubbles */
+  .keys{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .keys li{
+    position:relative;padding:18px 20px 20px 46px;
+    border-top:1px solid var(--bp-faint);border-left:1px solid var(--bp-faint);
+  }
+  .keys li:nth-child(-n+2){border-top:1.5px solid var(--bp-pale)}
+  .keys li:nth-child(odd){border-left:0}
+  .keys li:nth-last-child(-n+2){border-bottom:1px solid var(--bp-faint)}
+  .keys .n{
+    position:absolute;left:8px;top:19px;
+    width:22px;height:22px;border-radius:50%;
+    border:1px solid var(--bp-callout);color:var(--bp-callout);
+    font-family:var(--mono);font-size:10.5px;font-weight:600;
+    display:grid;place-items:center;
+  }
+  .keys h3{font-family:var(--mono);font-size:13.5px;font-weight:500;margin:0 0 6px;letter-spacing:.01em}
+  .keys p{margin:0;font-size:15px;color:var(--bp-line)}
+  .keys.three{grid-template-columns:1fr}
+  .keys.three li{border-left:0;padding-left:46px}
+  .keys.three li:nth-child(-n+2){border-top:1px solid var(--bp-faint)}
+  .keys.three li:first-child{border-top:1.5px solid var(--bp-pale)}
+  .keys.three li:nth-last-child(-n+2){border-bottom:0}
+  .keys.three li:last-child{border-bottom:1px solid var(--bp-faint)}
+  /* parts list: the addons drawn as labeled parts */
+  .parts{
+    list-style:none;margin:30px 0 0;padding:0;
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    border-top:1.5px solid var(--bp-pale);border-left:1px solid var(--bp-faint);
+  }
+  .parts li{
+    padding:18px 18px 20px;
+    border-right:1px solid var(--bp-faint);border-bottom:1px solid var(--bp-faint);
+    display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 12px;align-items:start;
+  }
+  .parts .glyph{
+    grid-row:1 / span 2;
+    width:44px;height:44px;border:1px solid var(--bp-pale);
+    display:grid;place-items:center;color:var(--bp-line);
+  }
+  .parts .glyph svg{width:28px;height:28px;display:block;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+  .parts .pn{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--bp-callout)}
+  .parts .pn b{font-weight:600}
+  .parts .pn span{color:var(--bp-line);font-weight:500;letter-spacing:.02em;font-size:13px;margin-left:8px}
+  .parts p{margin:0;font-size:14px;line-height:1.5;color:var(--bp-line)}
+  /* plan view: two rooms */
+  .rooms{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:30px 0 0;border:1.5px solid var(--bp-line);position:relative}
+  .room{padding:22px 24px 26px;position:relative;min-width:0}
+  .room + .room{border-left:1.5px solid var(--bp-line)}
+  .room .rn{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--bp-pale);margin:0 0 10px;display:flex;justify-content:space-between;gap:10px}
+  .room h3{font-family:var(--mono);font-size:20px;font-weight:500;margin:0 0 10px;letter-spacing:-.01em}
+  .room p{margin:0;font-size:15.5px;max-width:40ch}
+  .room .k{color:var(--bp-callout)}
+  /* door swing: a real plan-view door on the wall between the rooms */
+  .rooms::after{
+    content:"";position:absolute;left:50%;bottom:-1px;width:36px;height:36px;
+    border:1px solid var(--bp-callout);border-right:0;border-bottom:0;
+    border-top-left-radius:36px;margin-left:-36px;background:var(--bp-ground);
+  }
+  .rooms-note{
+    margin:0;padding:14px 0 0;
+    font-family:var(--mono);font-size:12px;letter-spacing:.02em;color:var(--bp-pale);
+    display:flex;gap:14px;align-items:baseline;
+  }
+  .rooms-note::before{content:"";flex:0 0 40px;border-top:1px solid var(--bp-callout);transform:translateY(-4px)}
+  /* who it is for: three schedule cards */
+  .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:30px 0 0}
+  .card{border:1px solid var(--bp-pale);padding:20px 22px 24px;position:relative;min-width:0}
+  .card::before{content:"";position:absolute;top:6px;left:6px;right:6px;bottom:6px;border:1px solid var(--bp-faint);pointer-events:none}
+  .card .tn{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--bp-callout);margin:0 0 10px}
+  .card h3{font-family:var(--mono);font-size:17px;font-weight:500;margin:0 0 10px;letter-spacing:-.01em}
+  .card p{margin:0;font-size:15px}
+  /* how it ships: sequence diagram */
+  .seq-wrap{margin:28px 0 0;overflow-x:auto}
+  .seq{width:100%;min-width:900px;height:auto;display:block}
+  .seq text{font-family:var(--mono)}
+  .steps{
+    list-style:none;margin:22px 0 0;padding:0;
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;
+    border-top:1px solid var(--bp-faint);
+    counter-reset:step;
+  }
+  .steps li{padding:16px 18px 6px 0;position:relative;font-size:15px;counter-increment:step;min-width:0}
+  .steps li + li{padding-left:18px;border-left:1px solid var(--bp-faint)}
+  .steps li::before{
+    content:counter(step,decimal-leading-zero);
+    display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--bp-callout);margin:0 0 8px;
+  }
+  /* faq: keyed notes, two columns */
+  .faq{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:0 48px}
+  .faq li{padding:18px 0 20px;border-top:1px solid var(--bp-faint)}
+  .faq li:nth-child(-n+2){border-top:1.5px solid var(--bp-pale)}
+  .faq li:nth-last-child(-n+2){border-bottom:1px solid var(--bp-faint)}
+  .faq .q{font-family:var(--mono);font-size:13.5px;font-weight:500;margin:0 0 8px;display:flex;gap:12px}
+  .faq .q::before{content:"q";color:var(--bp-callout);font-size:10.5px;letter-spacing:.12em;padding-top:3px}
+  .faq .a{margin:0;font-size:15px;max-width:52ch}
+  /* final cta: a revision cloud of a box */
+  .cta-box{
+    margin:0;border:1.5px solid var(--bp-line);padding:40px 44px 44px;
+    display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:40px;align-items:center;position:relative;
+  }
+  .cta-box::before{content:"";position:absolute;inset:6px;border:1px solid var(--bp-faint);pointer-events:none}
+  .cta-box h2{font-size:clamp(30px,3.6vw,46px);margin:0 0 12px;line-height:1.1}
+  .cta-box p{margin:0;font-size:16.5px;max-width:44ch}
+  .cta-box .ctas{margin:0;justify-content:flex-start}
+  .cta-box .dimtag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--bp-callout);position:absolute;top:-8px;left:22px;background:var(--bp-ground);padding:0 8px}
+
+  @media (max-width:1100px){
+    .parts{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .steps{grid-template-columns:1fr 1fr}
+    .steps li:nth-child(3){padding-left:0;border-left:0;border-top:1px solid var(--bp-faint)}
+    .steps li:nth-child(4){border-top:1px solid var(--bp-faint)}
+  }
+  @media (max-width:900px){
+    .frame{padding:40px 24px 0}
+    .hero,.math,.proof,.sec,.cta-box{grid-template-columns:1fr;gap:32px}
+    .titleblock{margin:48px -24px 0;grid-template-columns:1fr 1fr}
+    .titleblock > div:nth-child(2n){border-right:0}
+    .titleblock > div{border-bottom:1px solid var(--bp-faint)}
+    .parts{grid-template-columns:1fr 1fr}
+    .cards{grid-template-columns:1fr}
+    .rooms{grid-template-columns:1fr}
+    .room + .room{border-left:0;border-top:1.5px solid var(--bp-line)}
+    .rooms::after{display:none}
+    .faq{grid-template-columns:1fr}
+    .faq li:nth-child(2){border-top:1px solid var(--bp-faint)}
+    .cta-box{padding:32px 24px}
+  }
+  @media (max-width:640px){
+    .keys{grid-template-columns:1fr}
+    .keys li{border-left:0}
+    .keys li:nth-child(2){border-top:1px solid var(--bp-faint)}
+    .parts{grid-template-columns:1fr}
+    .steps{grid-template-columns:1fr}
+    .steps li + li{padding-left:0;border-left:0;border-top:1px solid var(--bp-faint)}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .btn{transition:background .15s ease}
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/variants/">← all directions</a>
+  <span>03 · blueprint</span>
+</div>
+
+<main class="sheet">
+  <div class="frame">
+    <p class="eyebrow"><span class="mark">~*</span> usectl · managed kubernetes on our own metal · falkenstein</p>
+
+    <section class="hero" id="hero">
+      <div>
+        <h1>one box.<br>many machines.</h1>
+        <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+        <div class="ctas">
+          <a class="btn primary" href="https://manager.usectl.com">create a machine</a>
+          <a class="btn secondary" href="https://docs.usectl.com">read the docs</a>
+          <span class="cta-note">30 days free. no card.</span>
+        </div>
+        <p class="term-label">detail a · the cli</p>
+<pre class="term"><span class="p">$</span> usectl login
+<span class="p">$</span> usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3
+<span class="k">✓</span> postgres ready. DATABASE_URL injected
+<span class="k">✓</span> redis ready. REDIS_URL injected
+<span class="k">✓</span> s3 ready. S3_BUCKET injected
+<span class="p">$</span> usectl deploy omnitech
+<span class="k">✓</span> build 28s · tls issued · live at https://omnitech.usectl.com</pre>
+      </div>
+
+      <figure class="drawing" style="margin:0">
+        <svg viewBox="0 0 720 560" role="img" aria-label="line drawing of one physical box containing four isolated namespaces: omnitech, clinic, ev-charging and agent, each with its own postgres, redis, s3 and domain">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M0 1 L10 5 L0 9 z" fill="#E8734A"/>
+            </marker>
+            <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#9fbde0" stroke-width=".7" opacity=".55"/>
+            </pattern>
+          </defs>
+
+          <!-- outer box, the physical machine -->
+          <g fill="none" stroke="#eef3fa" stroke-width="1.6">
+            <rect x="80" y="88" width="560" height="384"/>
+            <!-- isometric top face suggestion -->
+            <path d="M80 88 L124 52 L684 52 L640 88" stroke-width="1.2"/>
+            <path d="M684 52 L684 436 L640 472" stroke-width="1.2"/>
+            <line x1="640" y1="88" x2="684" y2="52" stroke-width="1.2"/>
+          </g>
+          <!-- hidden edges, dashed -->
+          <g fill="none" stroke="#9fbde0" stroke-width=".9" stroke-dasharray="5 4" opacity=".7">
+            <path d="M80 472 L124 436 L684 436"/>
+            <line x1="124" y1="52" x2="124" y2="436"/>
+          </g>
+          <!-- top face hatch -->
+          <path d="M80 88 L124 52 L684 52 L640 88 z" fill="url(#hatch)" stroke="none"/>
+
+          <!-- box label -->
+          <text x="96" y="114" font-size="11" fill="#9fbde0" letter-spacing="1.5">hetzner bare metal · falkenstein</text>
+          <text x="96" y="130" font-size="10" fill="#9fbde0">kubernetes · one node · many namespaces</text>
+
+          <!-- namespaces: 2 x 2 grid -->
+          <g id="ns" font-size="10" stroke-width="1.2">
+            <!-- omnitech -->
+            <g transform="translate(104,150)">
+              <rect width="248" height="140" fill="none" stroke="#eef3fa"/>
+              <text x="10" y="18" font-size="12" fill="#eef3fa" font-weight="600">omnitech</text>
+              <text x="10" y="32" fill="#9fbde0">namespace · 2 vcpu / 4 gb / 20 gb</text>
+              <g fill="none" stroke="#9fbde0">
+                <rect x="10" y="46" width="70" height="34"/><text x="16" y="67" fill="#eef3fa" stroke="none">postgres</text>
+                <rect x="89" y="46" width="70" height="34"/><text x="95" y="67" fill="#eef3fa" stroke="none">redis</text>
+                <rect x="168" y="46" width="70" height="34"/><text x="174" y="67" fill="#eef3fa" stroke="none">s3</text>
+                <rect x="10" y="90" width="149" height="34"/><text x="16" y="111" fill="#eef3fa" stroke="none">omnitech.usectl.com</text>
+                <rect x="168" y="90" width="70" height="34" stroke-dasharray="3 3"/><text x="174" y="111" fill="#9fbde0" stroke="none">agent</text>
+              </g>
+            </g>
+            <!-- clinic -->
+            <g transform="translate(368,150)">
+              <rect width="248" height="140" fill="none" stroke="#eef3fa"/>
+              <text x="10" y="18" font-size="12" fill="#eef3fa" font-weight="600">clinic</text>
+              <text x="10" y="32" fill="#9fbde0">namespace · postgres · oauth2 proxy</text>
+              <g fill="none" stroke="#9fbde0">
+                <rect x="10" y="46" width="70" height="34"/><text x="16" y="67" fill="#eef3fa" stroke="none">postgres</text>
+                <rect x="89" y="46" width="70" height="34"/><text x="95" y="67" fill="#eef3fa" stroke="none">s3</text>
+                <rect x="168" y="46" width="70" height="34"/><text x="174" y="67" fill="#eef3fa" stroke="none">oauth2</text>
+                <rect x="10" y="90" width="149" height="34"/><text x="16" y="111" fill="#eef3fa" stroke="none">clinic.usectl.com</text>
+                <rect x="168" y="90" width="70" height="34"/><text x="174" y="111" fill="#eef3fa" stroke="none">cron</text>
+              </g>
+            </g>
+            <!-- ev-charging -->
+            <g transform="translate(104,306)">
+              <rect width="248" height="140" fill="none" stroke="#eef3fa"/>
+              <text x="10" y="18" font-size="12" fill="#eef3fa" font-weight="600">ev-charging</text>
+              <text x="10" y="32" fill="#9fbde0">namespace · 16 services</text>
+              <g fill="none" stroke="#9fbde0">
+                <rect x="10" y="46" width="70" height="34"/><text x="16" y="67" fill="#eef3fa" stroke="none">postgres</text>
+                <rect x="89" y="46" width="70" height="34"/><text x="95" y="67" fill="#eef3fa" stroke="none">nats</text>
+                <rect x="168" y="46" width="70" height="34"/><text x="174" y="67" fill="#eef3fa" stroke="none">redis</text>
+                <rect x="10" y="90" width="70" height="34"/><text x="16" y="111" fill="#eef3fa" stroke="none">grafana</text>
+                <rect x="89" y="90" width="70" height="34"/><text x="95" y="111" fill="#eef3fa" stroke="none">glitchtip</text>
+                <rect x="168" y="90" width="70" height="34"/><text x="174" y="111" fill="#eef3fa" stroke="none">s3</text>
+              </g>
+            </g>
+            <!-- agent -->
+            <g transform="translate(368,306)">
+              <rect width="248" height="140" fill="none" stroke="#eef3fa"/>
+              <text x="10" y="18" font-size="12" fill="#eef3fa" font-weight="600">agent</text>
+              <text x="10" y="32" fill="#9fbde0">namespace · agent pods</text>
+              <g fill="none" stroke="#9fbde0">
+                <rect x="10" y="46" width="70" height="34"/><text x="16" y="67" fill="#eef3fa" stroke="none">hermes</text>
+                <rect x="89" y="46" width="70" height="34"/><text x="95" y="67" fill="#eef3fa" stroke="none">openclaw</text>
+                <rect x="168" y="46" width="70" height="34"/><text x="174" y="67" fill="#eef3fa" stroke="none">browser</text>
+                <rect x="10" y="90" width="149" height="34"/><text x="16" y="111" fill="#eef3fa" stroke="none">local qwen3-14b</text>
+                <rect x="168" y="90" width="70" height="34"/><text x="174" y="111" fill="#eef3fa" stroke="none">redis</text>
+              </g>
+            </g>
+          </g>
+
+          <!-- dimension: bottom, width of box -->
+          <g stroke="#E8734A" stroke-width="1" fill="none">
+            <line x1="80" y1="486" x2="80" y2="512"/>
+            <line x1="640" y1="486" x2="640" y2="512"/>
+            <line x1="82" y1="504" x2="638" y2="504" marker-start="url(#arr)" marker-end="url(#arr)"/>
+          </g>
+          <rect x="292" y="495" width="136" height="18" fill="#1e3a5f"/>
+          <text x="360" y="508" font-size="10.5" fill="#E8734A" text-anchor="middle" letter-spacing="1">one physical box</text>
+
+          <!-- dimension: left, height, namespace isolation -->
+          <g stroke="#E8734A" stroke-width="1" fill="none">
+            <line x1="66" y1="150" x2="40" y2="150"/>
+            <line x1="66" y1="446" x2="40" y2="446"/>
+            <line x1="48" y1="152" x2="48" y2="444" marker-start="url(#arr)" marker-end="url(#arr)"/>
+          </g>
+          <text transform="translate(38,298) rotate(-90)" font-size="10.5" fill="#E8734A" text-anchor="middle" letter-spacing="1">isolated namespaces</text>
+
+          <!-- callout: one flat price -->
+          <g stroke="#E8734A" stroke-width="1" fill="none">
+            <line x1="520" y1="70" x2="580" y2="28"/>
+            <circle cx="520" cy="70" r="2.5" fill="#E8734A" stroke="none"/>
+          </g>
+          <text x="584" y="26" font-size="10.5" fill="#E8734A" letter-spacing="1">one flat price</text>
+
+          <!-- callout: tls + domain, leader runs in the gap between the namespace rows -->
+          <g stroke="#E8734A" stroke-width="1" fill="none">
+            <line x1="180" y1="262" x2="180" y2="298"/>
+            <line x1="180" y1="298" x2="704" y2="298"/>
+            <circle cx="180" cy="262" r="2.5" fill="#E8734A" stroke="none"/>
+          </g>
+          <text x="704" y="293" font-size="10.5" fill="#E8734A" text-anchor="end" letter-spacing="1">domain + tls per namespace</text>
+
+          <!-- drawing number -->
+          <text x="640" y="548" font-size="9.5" fill="#9fbde0" text-anchor="end" letter-spacing="1.5">fig. 01 · n.t.s.</text>
+        </svg>
+        <figcaption class="dimnote">
+          <span>section through one machine</span>
+          <span>dashed: hidden edge · hatched: top face</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <div class="rule">detail b · what a machine is</div>
+
+    <section class="sec" id="machine">
+      <div>
+        <span class="lbl">what you get</span>
+        <h2>a machine is a computer that is only yours.</h2>
+        <p class="lead">on usectl a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes. you see a box with a slider.</p>
+        <p class="small">apps inside a machine can be web, worker or release. each has its own repo, branch, port, replicas and rollout. pr previews get their own namespace and url.</p>
+      </div>
+      <ol class="keys" aria-label="key to the drawing">
+        <li><span class="n" aria-hidden="true">1</span><h3>isolated by default</h3><p>its own network policy, its own quota, its own secrets. a neighbour cannot reach you and you cannot reach it.</p></li>
+        <li><span class="n" aria-hidden="true">2</span><h3>everything inside</h3><p>postgres, redis, s3, cron, domains and tls live in the machine, not in five other dashboards.</p></li>
+        <li><span class="n" aria-hidden="true">3</span><h3>one bill</h3><p>a machine's budget is shared by all its apps, addons and groups. adding a second app does not add a second bill.</p></li>
+        <li><span class="n" aria-hidden="true">4</span><h3>stage and prod</h3><p>split a machine into groups, each with its own namespace and its own database, on the same budget.</p></li>
+      </ol>
+    </section>
+
+    <div class="rule">detail c · parts list</div>
+
+    <section id="addons">
+      <div class="sec">
+        <div>
+          <span class="lbl">addons</span>
+          <h2>the stack, one toggle each.</h2>
+        </div>
+        <p class="lead" style="max-width:56ch;padding-top:6px">managed on shared platform instances, or dedicated in your own namespace with its own volume and size. attach to any app in one command.</p>
+      </div>
+      <ul class="parts" aria-label="addons, drawn as labeled parts">
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><ellipse cx="14" cy="7" rx="9" ry="3.5"/><path d="M5 7v14c0 1.9 4 3.5 9 3.5s9-1.6 9-3.5V7"/><path d="M5 14c0 1.9 4 3.5 9 3.5s9-1.6 9-3.5"/></svg></span>
+          <span class="pn"><b>p-01</b><span>postgres</span></span>
+          <p>managed or dedicated. pgvector and timescale on request. scheduled backups to a private bucket.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M14 3l10 5.5v11L14 25 4 19.5v-11z"/><path d="M4 8.5l10 5.5 10-5.5M14 14v11"/></svg></span>
+          <span class="pn"><b>p-02</b><span>redis</span></span>
+          <p>managed with a key prefix, or dedicated with aof and search modules.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M5 8h18l-2 16H7z"/><ellipse cx="14" cy="8" rx="9" ry="2.5"/><path d="M9 13h10"/></svg></span>
+          <span class="pn"><b>p-03</b><span>s3 storage</span></span>
+          <p>your own bucket and iam user on seaweedfs, with a cdn url.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M3 9h7l3 10 3-10h9M3 19h7M22 19h3"/><circle cx="14" cy="14" r="1.2"/></svg></span>
+          <span class="pn"><b>p-04</b><span>nats</span></span>
+          <p>jetstream on its own volume, websocket in.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M8 4c-2 5-2 11 0 16 2 4 10 4 12 0 2-5 2-11 0-16"/><path d="M8 4c2 3 10 3 12 0M8 20c2 3 10 3 12 0M14 4v20"/></svg></span>
+          <span class="pn"><b>p-05</b><span>mongodb</span></span>
+          <p>per machine database, or dedicated.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><rect x="4" y="5" width="20" height="18"/><path d="M4 11h20M4 17h20M11 5v18"/></svg></span>
+          <span class="pn"><b>p-06</b><span>sql server</span></span>
+          <p>for the apps that need it.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><circle cx="12" cy="12" r="7"/><path d="M17 17l7 7M9 12h6M12 9v6"/></svg></span>
+          <span class="pn"><b>p-07</b><span>meilisearch</span></span>
+          <p>search with its own persistent volume.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="10"/><path d="M14 8v6l4 3M14 2v2M26 14h-2M14 26v-2M2 14h2"/></svg></span>
+          <span class="pn"><b>p-08</b><span>cron</span></span>
+          <p>scheduled jobs from your app image, with run history.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M14 3l9 3v8c0 5-4 9-9 11-5-2-9-6-9-11V6z"/><circle cx="14" cy="12" r="2.5"/><path d="M14 14.5V19"/></svg></span>
+          <span class="pn"><b>p-09</b><span>oauth2 proxy</span></span>
+          <p>github or google login in front of any app, no code.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M4 24h20M4 24V6"/><path d="M6 19l5-7 4 4 6-9 2 3"/></svg></span>
+          <span class="pn"><b>p-10</b><span>grafana</span></span>
+          <p>dedicated per machine, wired read only to your own telemetry.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M14 4l11 19H3z"/><path d="M14 11v6M14 20v.5"/></svg></span>
+          <span class="pn"><b>p-11</b><span>glitchtip</span></span>
+          <p>sentry compatible error tracking, one dsn per environment.</p>
+        </li>
+        <li>
+          <span class="glyph" aria-hidden="true"><svg viewBox="0 0 28 28"><rect x="7" y="7" width="14" height="14"/><rect x="11" y="11" width="6" height="6"/><path d="M10 3v4M14 3v4M18 3v4M10 21v4M14 21v4M18 21v4M3 10h4M3 14h4M3 18h4M21 10h4M21 14h4M21 18h4"/></svg></span>
+          <span class="pn"><b>p-12</b><span>ai</span></span>
+          <p>an openai compatible endpoint in the cluster: qwen3-14b for chat, bge-m3 for embeddings, metered per machine.</p>
+        </li>
+      </ul>
+      <p class="foot" style="margin-top:10px">parts p-01 to p-12. each attaches to any app in one command.</p>
+    </section>
+
+    <div class="rule">detail d · the agent</div>
+
+    <section class="sec" id="agents">
+      <div>
+        <span class="lbl">built for agents</span>
+        <h2>your agent already knows how to use it.</h2>
+        <p class="lead">the cli is the product. one binary, every command with --json, clear errors an agent can act on. claude code, cursor, codex or a shell script: they all deploy the same way. there is an mcp server if you prefer tool calls.</p>
+        <p class="term-label" style="margin-top:26px">detail d.1 · an agent pod, from the cli</p>
+<pre class="term"><span class="p">$</span> usectl machines create radiodj --repo github.com/you/radiodj --postgres
+<span class="p">$</span> usectl addons add radiodj --type hermes
+<span class="k">✓</span> hermes agent pod running. telegram gateway connected.
+<span class="p">$</span> usectl logs radiodj --follow</pre>
+      </div>
+      <ol class="keys three" aria-label="three points about agents">
+        <li><span class="n" aria-hidden="true">1</span><h3>deploy from the chat</h3><p><code class="mono">usectl machines create</code>, <code class="mono">usectl deploy</code>, <code class="mono">usectl logs --follow</code>. no plugin needed.</p></li>
+        <li><span class="n" aria-hidden="true">2</span><h3>agents that live here</h3><p>add a hermes or openclaw pod to a machine and it runs 24/7 with its own memory, its own headless browser and a local model. one agent, one machine, its own walls.</p></li>
+        <li><span class="n" aria-hidden="true">3</span><h3>read what happened</h3><p>logs, metrics, traces and pod insights through the same cli, so the agent that deployed can also debug.</p></li>
+      </ol>
+    </section>
+
+    <div class="rule">detail e · plan view, two rooms</div>
+
+    <section id="modes">
+      <span class="lbl">one product, two rooms</span>
+      <h2>on our metal, or on yours.</h2>
+      <div class="rooms" aria-label="two rooms in plan">
+        <div class="room">
+          <p class="rn"><span>room a</span><span>falkenstein</span></p>
+          <h3>managed</h3>
+          <p>we run it. bare metal we own in falkenstein, kubernetes we operate, backups, ingress, tls and the 3am pager on us. you push git.</p>
+        </div>
+        <div class="room">
+          <p class="rn"><span>room b</span><span>your building</span></p>
+          <h3>self hosted</h3>
+          <p>you run it. the same platform on your own hardware, your data never leaves the building. <span class="k">self hosted usectl ships this month.</span></p>
+        </div>
+      </div>
+      <p class="rooms-note">same cli, same addons, same one command. the only choice is whose room the box stands in.</p>
+    </section>
+
+    <div class="rule">detail f · schedule of users</div>
+
+    <section id="for">
+      <span class="lbl">who it is for</span>
+      <h2>people who run many things.</h2>
+      <div class="cards">
+        <div class="card">
+          <p class="tn">type a</p>
+          <h3>software shops</h3>
+          <p>one machine per client. their own database, their own domain, their own bill you can pass through. hand them the keys when the engagement ends.</p>
+        </div>
+        <div class="card">
+          <p class="tn">type b</p>
+          <h3>agent builders</h3>
+          <p>one machine per client agent, with postgres, a browser and a local model inside. isolation at the namespace, not inside the prompt.</p>
+        </div>
+        <div class="card">
+          <p class="tn">type c</p>
+          <h3>self hosters</h3>
+          <p>the same box on your own hardware. one physical server becomes many isolated machines with their stacks.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="rule">detail g · the math</div>
+
+    <section class="math" id="math">
+      <div>
+        <h2>the math</h2>
+        <p class="math-intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+        <p class="many">ten client machines at 1 vcpu / 2 gb: $200 a month on usectl. about $400 on railway before storage.</p>
+        <p class="foot">railway shown at reserved equivalent. all prices list, september 2026.</p>
+      </div>
+      <div>
+        <ul class="ledger" aria-label="same box, list prices, september 2026">
+          <li class="ours">
+            <span class="what">usectl machine, everything in</span>
+            <span class="price">$40.20</span>
+            <span class="dim" style="--w:32%" aria-hidden="true"><b></b><i></i></span>
+          </li>
+          <li>
+            <span class="what">vercel pro + supabase pro + upstash + s3, one seat</span>
+            <span class="price">$60 and up, before bandwidth</span>
+            <span class="dim" style="--w:48%" aria-hidden="true"><b></b><i></i></span>
+          </li>
+          <li>
+            <span class="what">railway, same box, reserved</span>
+            <span class="price">about $80, plus egress</span>
+            <span class="dim" style="--w:64%" aria-hidden="true"><b></b><i></i></span>
+          </li>
+          <li>
+            <span class="what">render pro + postgres standard</span>
+            <span class="price">$125</span>
+            <span class="dim" style="--w:100%" aria-hidden="true"><b></b><i></i></span>
+          </li>
+        </ul>
+        <p class="foot" style="margin-top:10px">same box, list prices, sept 2026. orange dimension: monthly price, to scale against $125.</p>
+      </div>
+    </section>
+
+    <div class="rule">detail h · sequence of a deploy</div>
+
+    <section id="ship">
+      <span class="lbl">how it ships</span>
+      <h2>push git. get https.</h2>
+      <div class="seq-wrap">
+        <svg class="seq" viewBox="0 0 1180 340" role="img" aria-label="sequence diagram: you push git to usectl, usectl builds in the cluster, the app goes live at https, usectl keeps history and rolls back on 5xx">
+          <defs>
+            <marker id="sarr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 1 L10 5 L0 9 z" fill="#eef3fa"/>
+            </marker>
+            <marker id="sarr-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 1 L10 5 L0 9 z" fill="#E8734A"/>
+            </marker>
+          </defs>
+          <!-- lifeline heads -->
+          <g fill="none" stroke="#eef3fa" stroke-width="1.4">
+            <rect x="40" y="18" width="180" height="36"/>
+            <rect x="330" y="18" width="180" height="36"/>
+            <rect x="620" y="18" width="200" height="36"/>
+            <rect x="930" y="18" width="220" height="36"/>
+          </g>
+          <g font-size="11.5" fill="#eef3fa" text-anchor="middle" letter-spacing=".5">
+            <text x="130" y="41">you · git</text>
+            <text x="420" y="41">usectl</text>
+            <text x="720" y="41">cluster · kaniko</text>
+            <text x="1040" y="41">https://name.usectl.com</text>
+          </g>
+          <!-- lifelines -->
+          <g stroke="#9fbde0" stroke-width="1" stroke-dasharray="5 4" opacity=".8">
+            <line x1="130" y1="54" x2="130" y2="322"/>
+            <line x1="420" y1="54" x2="420" y2="322"/>
+            <line x1="720" y1="54" x2="720" y2="322"/>
+            <line x1="1040" y1="54" x2="1040" y2="322"/>
+          </g>
+          <!-- activation bars -->
+          <g fill="#1e3a5f" stroke="#9fbde0" stroke-width="1">
+            <rect x="415" y="90" width="10" height="216"/>
+            <rect x="715" y="138" width="10" height="72"/>
+            <rect x="1035" y="200" width="10" height="42"/>
+          </g>
+          <!-- 1: you -> usectl -->
+          <line x1="130" y1="96" x2="413" y2="96" stroke="#eef3fa" stroke-width="1.2" marker-end="url(#sarr)"/>
+          <circle cx="146" cy="80" r="8" fill="none" stroke="#E8734A"/>
+          <text x="146" y="83.5" font-size="9.5" fill="#E8734A" text-anchor="middle" font-weight="600">1</text>
+          <text x="162" y="84" font-size="11" fill="#eef3fa">connect a repo, or push git</text>
+          <!-- 2: usectl -> cluster -->
+          <line x1="425" y1="144" x2="713" y2="144" stroke="#eef3fa" stroke-width="1.2" marker-end="url(#sarr)"/>
+          <circle cx="441" cy="128" r="8" fill="none" stroke="#E8734A"/>
+          <text x="441" y="131.5" font-size="9.5" fill="#E8734A" text-anchor="middle" font-weight="600">2</text>
+          <text x="457" y="132" font-size="11" fill="#eef3fa" paint-order="stroke" stroke="#1e3a5f" stroke-width="5" stroke-linejoin="round">detect, then build with kaniko</text>
+          <!-- build return -->
+          <line x1="715" y1="184" x2="427" y2="184" stroke="#9fbde0" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#sarr)"/>
+          <text x="708" y="176" font-size="10" fill="#9fbde0" text-anchor="end" paint-order="stroke" stroke="#1e3a5f" stroke-width="5" stroke-linejoin="round">image built</text>
+          <!-- 3: cluster -> live -->
+          <line x1="725" y1="206" x2="1033" y2="206" stroke="#eef3fa" stroke-width="1.2" marker-end="url(#sarr)"/>
+          <circle cx="741" cy="190" r="8" fill="none" stroke="#E8734A"/>
+          <text x="741" y="193.5" font-size="9.5" fill="#E8734A" text-anchor="middle" font-weight="600">3</text>
+          <text x="757" y="194" font-size="11" fill="#eef3fa" paint-order="stroke" stroke="#1e3a5f" stroke-width="5" stroke-linejoin="round">live with a certificate</text>
+          <!-- live return to you -->
+          <line x1="1035" y1="238" x2="140" y2="238" stroke="#E8734A" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#sarr-o)"/>
+          <text x="1028" y="230" font-size="10" fill="#E8734A" text-anchor="end" letter-spacing=".5" paint-order="stroke" stroke="#1e3a5f" stroke-width="5" stroke-linejoin="round">tls issued · live at https://name.usectl.com</text>
+          <!-- 4: usectl self message -->
+          <path d="M425 268 H480 V300 H433" fill="none" stroke="#eef3fa" stroke-width="1.2" marker-end="url(#sarr)"/>
+          <circle cx="496" cy="284" r="8" fill="none" stroke="#E8734A"/>
+          <text x="496" y="287.5" font-size="9.5" fill="#E8734A" text-anchor="middle" font-weight="600">4</text>
+          <text x="512" y="288" font-size="11" fill="#eef3fa" paint-order="stroke" stroke="#1e3a5f" stroke-width="5" stroke-linejoin="round">keep history, watch for 5xx, roll back without a rebuild</text>
+          <!-- drawing number -->
+          <text x="1150" y="334" font-size="9.5" fill="#9fbde0" text-anchor="end" letter-spacing="1.5">fig. 02 · sequence · n.t.s.</text>
+        </svg>
+      </div>
+      <ol class="steps" aria-label="how it ships, in order">
+        <li>connect a repo through the github app, or push from the cli.</li>
+        <li>we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.</li>
+        <li>the app goes live at https://name.usectl.com with a certificate. add your own domain in one command.</li>
+        <li>every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.</li>
+      </ol>
+    </section>
+
+    <div class="rule">detail i · as built</div>
+
+    <section class="proof" id="proof">
+      <div>
+        <span class="lbl">proof</span>
+        <h2>customer zero</h2>
+      </div>
+      <div>
+        <p>systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+        <p>we built usectl because we needed it. every client we ship gets its own machine, and when it breaks at night it is our pager, not theirs.</p>
+      </div>
+    </section>
+
+    <div class="rule">detail j · notes</div>
+
+    <section id="faq">
+      <h2>questions people ask</h2>
+      <ul class="faq">
+        <li><p class="q">is a machine a vm?</p><p class="a">no. it is a kubernetes namespace with a network policy, a quota and its own secrets on nodes we operate. container isolation, not a microvm. we say that plainly because it matters for some workloads.</p></li>
+        <li><p class="q">can i leave?</p><p class="a">yes. your dockerfile, your postgres dump and your bucket run anywhere. if we disappeared tomorrow your stack still works.</p></li>
+        <li><p class="q">where is my data?</p><p class="a">on bare metal we own at hetzner in falkenstein, germany. with self hosted usectl, on your own hardware.</p></li>
+        <li><p class="q">what about backups?</p><p class="a">managed postgres is dumped nightly at the platform level. dedicated postgres gets scheduled backups to a private bucket only that database can reach.</p></li>
+        <li><p class="q">is there a bandwidth meter or a seat fee?</p><p class="a">no and no. the sticker is the ceiling.</p></li>
+        <li><p class="q">do i need docker?</p><p class="a">not for next.js, vite, node or static sites. for anything else, a dockerfile.</p></li>
+      </ul>
+    </section>
+
+    <div class="rule">detail k · issue for construction</div>
+
+    <section class="cta-box" id="cta">
+      <span class="dimtag" aria-hidden="true">30 days · 2 vcpu · 4 gb</span>
+      <div>
+        <h2>one box. many machines.</h2>
+        <p>30 days free, up to 2 vcpu and 4 gb. no card. delete it when you are done.</p>
+      </div>
+      <div class="ctas">
+        <a class="btn primary" href="https://manager.usectl.com">create a machine</a>
+        <a class="btn secondary" href="https://docs.usectl.com">read the docs</a>
+      </div>
+    </section>
+
+    <p class="closing">on our metal, <span class="k">or on yours.</span><br>self hosted usectl ships this month.</p>
+
+    <footer class="titleblock" aria-label="title block">
+      <div><span class="h">drawing</span><span class="v"><span class="mark">~*</span> usectl · one box, many machines</span></div>
+      <div><span class="h">drawn by</span><span class="v">built by systemctl · tbilisi · © 2026</span></div>
+      <div><span class="h">site</span><span class="v">falkenstein</span></div>
+      <div><span class="h">scale</span><span class="v">n.t.s.</span></div>
+      <div><span class="h">sheet</span><span class="v">03 · rev b</span></div>
+    </footer>
+  </div>
+</main>
+
+</body>
+</html>

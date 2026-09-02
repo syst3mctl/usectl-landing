@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- @site-head: shared head (gtag, charset, og/twitter, icons, manifest) injected from index.html by vite.config.js -->
+    <title>usectl · one box. many machines. · risograph</title>
+    <meta name="description" content="every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.">
+    <meta name="robots" content="noindex, follow">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --paper:#F1EADB;
+  --paper-2:#E9E0CC;
+  --orange:#FF5A1F;
+  --orange-soft:#FFB08F;
+  --orange-tint:#FFD9C6;
+  --blue:#1F6F8B;
+  --blue-soft:#9CC5D3;
+  --blue-tint:#CFE2E8;
+  --ink:#153845;
+  --overprint:#4A2A1C;
+  --white:#F8F3E8;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Work Sans","Helvetica Neue",Arial,sans-serif;
+  font-size:16px;
+  line-height:1.5;
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+  opacity:.28;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.1  0 0 0 0.6 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>");
+}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.mono{font-family:"Space Mono","Courier New",monospace}
+code{font-family:"Space Mono","Courier New",monospace;font-size:.9em;color:var(--blue);font-weight:700}
+
+.nav{
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:1040px;margin:0 auto;padding:16px 24px 0;
+  font-family:"Space Mono","Courier New",monospace;font-size:12px;color:var(--blue);
+}
+.nav a{text-decoration:none}
+.nav a:hover{text-decoration:underline}
+
+.page{max-width:1040px;margin:0 auto;padding:24px 24px 56px}
+
+/* misregistered display type: blue layer drawn under, orange on top, offset */
+.reg{position:relative;display:inline-block;color:var(--orange);mix-blend-mode:multiply}
+.reg::before{
+  content:attr(data-text);position:absolute;left:0;top:0;
+  transform:translate(-4px,3px);color:var(--blue);mix-blend-mode:multiply;z-index:-1;
+  pointer-events:none;
+}
+.reg.small::before{transform:translate(-2px,2px)}
+
+.masthead{
+  display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;
+  padding:8px 0 18px;border-bottom:4px solid var(--blue);
+}
+.mark{
+  width:64px;height:64px;background:#000;color:#E8734A;display:grid;place-items:center;
+  font-family:"Space Mono","Courier New",monospace;font-size:30px;font-weight:700;
+  transform:rotate(-3deg);
+}
+.eyebrow{
+  font-family:"Space Mono","Courier New",monospace;font-size:13px;color:var(--blue);margin:0;
+  letter-spacing:.02em;
+}
+
+.hero{
+  display:grid;grid-template-columns:1.15fr 1fr;gap:40px;align-items:start;
+  padding:36px 0 40px;
+}
+.hero > *{min-width:0}
+h1{
+  font-family:"Syne","Arial Black",Impact,sans-serif;font-weight:800;
+  font-size:clamp(56px,8.2vw,112px);line-height:.92;letter-spacing:-.03em;
+  margin:0 0 26px;text-wrap:balance;
+}
+h1 .reg{display:block}
+.sub{font-size:19px;line-height:1.45;max-width:30em;margin:0 0 28px;color:var(--ink)}
+.ctas{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
+.sticker{
+  display:inline-block;padding:14px 24px;text-decoration:none;
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:20px;letter-spacing:-.01em;
+  background:var(--orange);color:var(--white);
+  transform:rotate(-2deg);
+  box-shadow:6px 6px 0 var(--blue);
+  mix-blend-mode:multiply;
+}
+.sticker:hover{transform:rotate(-2deg) translate(-2px,-2px);box-shadow:8px 8px 0 var(--blue)}
+.ctanote{font-family:"Space Mono","Courier New",monospace;font-size:13px;color:var(--blue)}
+.docs{
+  font-family:"Space Mono","Courier New",monospace;font-size:14px;font-weight:700;
+  color:var(--blue);text-decoration:none;border-bottom:3px solid var(--orange);
+}
+.docs:hover{background:var(--orange-soft)}
+
+.termwrap{position:relative;transform:rotate(1.2deg)}
+.termwrap::before{
+  content:"";position:absolute;inset:-8px -8px -8px -8px;
+  background:var(--blue-soft);mix-blend-mode:multiply;transform:rotate(-1.6deg);z-index:0;
+}
+.termwrap.flip{transform:rotate(-1deg)}
+.termwrap.flip::before{transform:rotate(1.4deg);background:var(--orange-soft)}
+.term{
+  position:relative;z-index:1;margin:0;
+  background:var(--white);border:3px solid var(--blue);
+  padding:20px 22px;font-family:"Space Mono","Courier New",monospace;font-size:12.5px;line-height:1.7;
+  overflow-x:auto;white-space:pre;color:var(--ink);
+}
+.term .ok{color:var(--orange);font-weight:700}
+.term .p{color:var(--blue)}
+
+/* halftone band */
+.band{
+  height:26px;margin:0 0 6px;
+  background-image:radial-gradient(circle,var(--orange) 0 2.6px,transparent 2.7px);
+  background-size:9px 9px;
+  mix-blend-mode:multiply;
+}
+.band.blue{background-image:radial-gradient(circle,var(--blue) 0 2.2px,transparent 2.3px);background-size:9px 9px;margin:6px 0 0}
+
+/* the math */
+.math{padding:34px 0 16px}
+h2{
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;
+  font-size:clamp(44px,6vw,80px);line-height:.95;letter-spacing:-.03em;margin:0 0 20px;
+}
+.intro{font-size:19px;line-height:1.45;max-width:36em;margin:0 0 30px}
+.ledger{
+  list-style:none;margin:0;padding:0;
+  border-top:3px solid var(--blue);
+  font-family:"Space Mono","Courier New",monospace;font-variant-numeric:tabular-nums;
+}
+.ledger li{
+  display:grid;grid-template-columns:1fr auto;gap:16px;align-items:baseline;
+  padding:14px 0;border-bottom:2px dashed var(--blue);font-size:15px;
+}
+.ledger li .price{font-weight:700;font-size:20px;text-align:right;white-space:nowrap}
+.ledger li.ours{
+  background:var(--orange);color:var(--white);padding:16px 14px;margin:0 -14px;border-bottom:none;
+  mix-blend-mode:multiply;
+}
+.ledger li.ours .price{font-size:30px;font-family:"Syne","Arial Black",sans-serif;font-weight:800;letter-spacing:-.02em}
+.ledger li.ours .name{font-weight:700}
+.stampwrap{display:grid;grid-template-columns:1fr 280px;gap:36px;align-items:start}
+.stamp{
+  border:4px solid var(--orange);color:var(--orange);padding:18px 18px 16px;
+  transform:rotate(-4deg);mix-blend-mode:multiply;
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;text-align:center;
+  font-size:22px;line-height:1.1;letter-spacing:-.01em;
+  margin-top:24px;
+}
+.stamp .big{display:block;font-size:44px;letter-spacing:-.03em;margin:4px 0}
+.stamp small{display:block;font-family:"Space Mono","Courier New",monospace;font-weight:400;font-size:11px;letter-spacing:.06em;margin-top:8px;color:var(--blue)}
+.many{
+  margin:28px 0 0;padding:20px 22px;
+  background:var(--blue);color:var(--white);
+  font-size:18px;line-height:1.4;
+  mix-blend-mode:multiply;
+}
+.many b{color:var(--orange-soft);font-weight:600}
+.foot{font-family:"Space Mono","Courier New",monospace;font-size:12px;color:var(--blue);margin:14px 0 0}
+
+/* two ink blocks (modes) */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:40px 0 0}
+.duo > div{padding:30px 28px;font-size:18px;line-height:1.45}
+.duo .proof{background:var(--orange-soft);mix-blend-mode:multiply;color:var(--ink)}
+.duo .close{background:var(--blue-soft);mix-blend-mode:multiply;color:var(--ink)}
+.duo .close h3,.duo .proof h3{
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:28px;line-height:1;margin:0 0 14px;letter-spacing:-.02em;
+}
+.duo .proof h3{color:var(--orange)}
+.duo .close h3{color:var(--blue)}
+.duo p{margin:0}
+
+.colophon{
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  margin:36px 0 0;padding-top:16px;border-top:3px solid var(--blue);
+  font-family:"Space Mono","Courier New",monospace;font-size:12px;color:var(--blue);
+}
+
+/* zine sections */
+.zine{padding:40px 0 24px}
+.zine.math{padding-top:34px}
+.tag{
+  display:inline-block;font-family:"Space Mono","Courier New",monospace;font-size:12px;font-weight:700;
+  letter-spacing:.06em;color:var(--white);background:var(--blue);padding:5px 10px;
+  transform:rotate(-1.5deg);mix-blend-mode:multiply;margin:0 0 18px;
+}
+.tag.orange{background:var(--orange);transform:rotate(1deg)}
+h2.md{font-size:clamp(34px,4.4vw,58px);line-height:.98;max-width:14em}
+.lead{font-size:19px;line-height:1.45;max-width:36em;margin:0 0 30px}
+.fine{font-family:"Space Mono","Courier New",monospace;font-size:12.5px;line-height:1.6;color:var(--blue);margin:22px 0 0;max-width:60em}
+
+/* cut-out cards with misregistered numerals */
+.cuts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0;padding:0;list-style:none}
+.cuts li{
+  position:relative;background:var(--white);border:3px solid var(--blue);padding:22px 22px 22px 24px;
+  min-width:0;
+}
+.cuts li:nth-child(2){transform:rotate(.6deg)}
+.cuts li:nth-child(3){transform:rotate(-.5deg)}
+.cuts .n{
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:44px;line-height:1;letter-spacing:-.04em;
+  margin:0 0 10px;
+}
+.cuts h3{font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:22px;line-height:1.05;margin:0 0 8px;letter-spacing:-.02em;color:var(--blue)}
+.cuts p{margin:0;font-size:16px;line-height:1.45}
+
+/* addon tiles, alternating inks */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:0;padding:0;list-style:none;border:3px solid var(--blue)}
+.tiles li{
+  padding:18px 18px 20px;min-width:0;mix-blend-mode:multiply;
+  background:var(--orange-tint);
+}
+.tiles li:nth-child(6n+2),.tiles li:nth-child(6n+4),.tiles li:nth-child(6n+6){background:var(--blue-tint)}
+.tiles h3{font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:22px;line-height:1;margin:0 0 8px;letter-spacing:-.02em;color:var(--orange)}
+.tiles li:nth-child(6n+2) h3,.tiles li:nth-child(6n+4) h3,.tiles li:nth-child(6n+6) h3{color:var(--blue)}
+.tiles p{margin:0;font-size:15px;line-height:1.4}
+
+/* agents split */
+.split{display:grid;grid-template-columns:1.05fr 1fr;gap:44px;align-items:start}
+.split > *{min-width:0}
+.marks{margin:0;padding:0;list-style:none;border-top:3px solid var(--orange)}
+.marks li{padding:16px 0;border-bottom:2px dashed var(--orange);display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.marks .n{
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:30px;line-height:.9;letter-spacing:-.04em;
+}
+.marks h3{font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:20px;line-height:1.05;margin:2px 0 6px;letter-spacing:-.02em;color:var(--blue)}
+.marks p{margin:0;font-size:16px;line-height:1.45}
+
+.underline{font-size:18px;line-height:1.45;margin:22px 0 0;font-weight:500;color:var(--blue);max-width:40em}
+
+/* three stickers (who it is for) */
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:0;padding:0;list-style:none}
+.trio li{min-width:0;border-top:4px solid var(--blue);padding-top:16px}
+.trio li:nth-child(2){border-color:var(--orange)}
+.trio h3{
+  display:inline-block;font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:22px;line-height:1;letter-spacing:-.02em;
+  background:var(--blue);color:var(--white);padding:8px 12px;margin:0 0 14px;transform:rotate(-1.5deg);mix-blend-mode:multiply;
+}
+.trio li:nth-child(2) h3{background:var(--orange);transform:rotate(1deg)}
+.trio p{margin:0;font-size:16px;line-height:1.45}
+
+/* deploy steps */
+.steps{margin:0;padding:0;list-style:none;border-top:3px solid var(--blue)}
+.steps li{
+  display:grid;grid-template-columns:120px 1fr;gap:20px;align-items:center;
+  padding:18px 0;border-bottom:2px dashed var(--blue);font-size:18px;line-height:1.4;
+}
+.steps .n{
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:64px;line-height:.85;letter-spacing:-.05em;
+}
+.steps p{margin:0}
+
+/* proof, one full orange block */
+.zero{
+  background:var(--orange-soft);mix-blend-mode:multiply;color:var(--ink);
+  padding:32px 30px;margin:0;
+  display:grid;grid-template-columns:minmax(240px,340px) 1fr;gap:12px 36px;align-items:start;
+}
+.zero h2{font-size:clamp(34px,3.6vw,46px);margin:0;color:var(--orange)}
+.zero p{margin:0 0 14px;font-size:18px;line-height:1.45}
+.zero p:last-child{margin:0}
+
+/* questions */
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin:0;padding:0;list-style:none;border-top:3px solid var(--orange)}
+.qa li{padding:18px 0;border-bottom:2px dashed var(--orange)}
+.qa h3{font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:22px;line-height:1.05;margin:0 0 8px;letter-spacing:-.02em;color:var(--orange)}
+.qa p{margin:0;font-size:16px;line-height:1.45}
+
+/* final spread */
+.final{
+  display:grid;grid-template-columns:1.2fr 1fr;gap:36px;align-items:center;
+  margin:8px 0 0;padding:36px 0 8px;
+}
+.final > *{min-width:0}
+.final h2{margin-bottom:18px;font-size:clamp(40px,5vw,64px)}
+.final .line{font-size:19px;line-height:1.45;max-width:26em;margin:0 0 28px}
+.final .close{
+  background:var(--blue-soft);mix-blend-mode:multiply;color:var(--ink);
+  padding:28px;font-size:20px;line-height:1.4;font-weight:500;
+  transform:rotate(1deg);
+}
+.final .close b{display:block;font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:26px;color:var(--blue);margin:0 0 10px;letter-spacing:-.02em;line-height:1}
+
+@media (max-width:860px){
+  .hero,.stampwrap,.duo,.split,.qa,.final,.zero{grid-template-columns:1fr}
+  .termwrap{transform:none}
+  .stamp{margin-top:8px}
+  .cuts{grid-template-columns:1fr}
+  .tiles{grid-template-columns:1fr 1fr}
+  .tiles li:nth-child(n){background:var(--orange-tint)}
+  .tiles li:nth-child(even){background:var(--blue-tint)}
+  .tiles li:nth-child(n) h3{color:var(--orange)}
+  .tiles li:nth-child(even) h3{color:var(--blue)}
+  .trio{grid-template-columns:1fr}
+  .steps li{grid-template-columns:80px 1fr}
+  .steps .n{font-size:44px}
+  .zero h2{max-width:none}
+}
+@media (max-width:520px){
+  .tiles{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="variants">
+  <a href="/variants/">← all directions</a>
+  <span>08 · risograph</span>
+</nav>
+
+<main class="page">
+  <header class="masthead">
+    <div class="mark" aria-hidden="true">~*</div>
+    <p class="eyebrow">usectl · managed kubernetes on our own metal · falkenstein</p>
+  </header>
+
+  <section class="hero" id="hero">
+    <div>
+      <h1><span class="reg" data-text="one box.">one box.</span><span class="reg" data-text="many machines.">many machines.</span></h1>
+      <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+      <div class="ctas">
+        <a class="sticker" href="https://manager.usectl.com">create a machine</a>
+        <span class="ctanote">30 days free. no card.</span>
+        <a class="docs" href="https://docs.usectl.com">read the docs</a>
+      </div>
+    </div>
+    <div class="termwrap">
+      <pre class="term"><span class="p">$</span> usectl login
+<span class="p">$</span> usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3
+<span class="ok">✓</span> postgres ready. DATABASE_URL injected
+<span class="ok">✓</span> redis ready. REDIS_URL injected
+<span class="ok">✓</span> s3 ready. S3_BUCKET injected
+<span class="p">$</span> usectl deploy omnitech
+<span class="ok">✓</span> build 28s · tls issued · live at https://omnitech.usectl.com</pre>
+    </div>
+  </section>
+
+  <div class="band" aria-hidden="true"></div>
+  <div class="band blue" aria-hidden="true"></div>
+
+  <section class="zine" id="machine">
+    <span class="tag">what you get</span>
+    <h2 class="md"><span class="reg small" data-text="a machine is a computer that is only yours.">a machine is a computer that is only yours.</span></h2>
+    <p class="lead">on usectl a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes. you see a box with a slider.</p>
+    <ul class="cuts">
+      <li><div class="n"><span class="reg small" data-text="01">01</span></div><h3>isolated by default</h3><p>its own network policy, its own quota, its own secrets. a neighbour cannot reach you and you cannot reach it.</p></li>
+      <li><div class="n"><span class="reg small" data-text="02">02</span></div><h3>everything inside</h3><p>postgres, redis, s3, cron, domains and tls live in the machine, not in five other dashboards.</p></li>
+      <li><div class="n"><span class="reg small" data-text="03">03</span></div><h3>one bill</h3><p>a machine's budget is shared by all its apps, addons and groups. adding a second app does not add a second bill.</p></li>
+      <li><div class="n"><span class="reg small" data-text="04">04</span></div><h3>stage and prod</h3><p>split a machine into groups, each with its own namespace and its own database, on the same budget.</p></li>
+    </ul>
+    <p class="fine">apps inside a machine can be web, worker or release. each has its own repo, branch, port, replicas and rollout. pr previews get their own namespace and url.</p>
+  </section>
+
+  <div class="band blue" aria-hidden="true" style="margin:0 0 6px"></div>
+
+  <section class="zine" id="addons">
+    <span class="tag orange">addons</span>
+    <h2 class="md"><span class="reg small" data-text="the stack, one toggle each.">the stack, one toggle each.</span></h2>
+    <p class="lead">managed on shared platform instances, or dedicated in your own namespace with its own volume and size. attach to any app in one command.</p>
+    <ul class="tiles">
+      <li><h3>postgres</h3><p>managed or dedicated. pgvector and timescale on request. scheduled backups to a private bucket.</p></li>
+      <li><h3>redis</h3><p>managed with a key prefix, or dedicated with aof and search modules.</p></li>
+      <li><h3>s3 storage</h3><p>your own bucket and iam user on seaweedfs, with a cdn url.</p></li>
+      <li><h3>nats</h3><p>jetstream on its own volume, websocket in.</p></li>
+      <li><h3>mongodb</h3><p>per machine database, or dedicated.</p></li>
+      <li><h3>sql server</h3><p>for the apps that need it.</p></li>
+      <li><h3>meilisearch</h3><p>search with its own persistent volume.</p></li>
+      <li><h3>cron</h3><p>scheduled jobs from your app image, with run history.</p></li>
+      <li><h3>oauth2 proxy</h3><p>github or google login in front of any app, no code.</p></li>
+      <li><h3>grafana</h3><p>dedicated per machine, wired read only to your own telemetry.</p></li>
+      <li><h3>glitchtip</h3><p>sentry compatible error tracking, one dsn per environment.</p></li>
+      <li><h3>ai</h3><p>an openai compatible endpoint in the cluster: qwen3-14b for chat, bge-m3 for embeddings, metered per machine.</p></li>
+    </ul>
+  </section>
+
+  <div class="band" aria-hidden="true" style="margin:12px 0 0"></div>
+
+  <section class="zine" id="agents">
+    <span class="tag">built for agents</span>
+    <h2 class="md"><span class="reg small" data-text="your agent already knows how to use it.">your agent already knows how to use it.</span></h2>
+    <p class="lead">the cli is the product. one binary, every command with --json, clear errors an agent can act on. claude code, cursor, codex or a shell script: they all deploy the same way. there is an mcp server if you prefer tool calls.</p>
+    <div class="split">
+      <ul class="marks">
+        <li><div class="n"><span class="reg small" data-text="1">1</span></div><div><h3>deploy from the chat</h3><p><code>usectl machines create</code>, <code>usectl deploy</code>, <code>usectl logs --follow</code>. no plugin needed.</p></div></li>
+        <li><div class="n"><span class="reg small" data-text="2">2</span></div><div><h3>agents that live here</h3><p>add a hermes or openclaw pod to a machine and it runs 24/7 with its own memory, its own headless browser and a local model. one agent, one machine, its own walls.</p></div></li>
+        <li><div class="n"><span class="reg small" data-text="3">3</span></div><div><h3>read what happened</h3><p>logs, metrics, traces and pod insights through the same cli, so the agent that deployed can also debug.</p></div></li>
+      </ul>
+      <div class="termwrap flip">
+        <pre class="term"><span class="p">$</span> usectl machines create radiodj --repo github.com/you/radiodj --postgres
+<span class="p">$</span> usectl addons add radiodj --type hermes
+<span class="ok">✓</span> hermes agent pod running. telegram gateway connected.
+<span class="p">$</span> usectl logs radiodj --follow</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="zine" id="modes" style="padding-top:8px">
+    <span class="tag orange">one product, two rooms</span>
+    <h2 class="md"><span class="reg small" data-text="on our metal, or on yours.">on our metal, or on yours.</span></h2>
+    <div class="duo" style="margin-top:8px">
+      <div class="proof">
+        <h3>managed</h3>
+        <p>we run it. bare metal we own in falkenstein, kubernetes we operate, backups, ingress, tls and the 3am pager on us. you push git.</p>
+      </div>
+      <div class="close">
+        <h3>self hosted</h3>
+        <p>you run it. the same platform on your own hardware, your data never leaves the building. self hosted usectl ships this month.</p>
+      </div>
+    </div>
+    <p class="underline">same cli, same addons, same one command. the only choice is whose room the box stands in.</p>
+  </section>
+
+  <div class="band blue" aria-hidden="true" style="margin:24px 0 6px"></div>
+
+  <section class="zine" id="for">
+    <span class="tag">who it is for</span>
+    <h2 class="md"><span class="reg small" data-text="people who run many things.">people who run many things.</span></h2>
+    <ul class="trio">
+      <li><h3>software shops</h3><p>one machine per client. their own database, their own domain, their own bill you can pass through. hand them the keys when the engagement ends.</p></li>
+      <li><h3>agent builders</h3><p>one machine per client agent, with postgres, a browser and a local model inside. isolation at the namespace, not inside the prompt.</p></li>
+      <li><h3>self hosters</h3><p>the same box on your own hardware. one physical server becomes many isolated machines with their stacks.</p></li>
+    </ul>
+  </section>
+
+  <div class="band" aria-hidden="true" style="margin:16px 0 0"></div>
+  <div class="band blue" aria-hidden="true"></div>
+
+  <section class="zine math" id="math">
+    <h2><span class="reg small" data-text="the math">the math</span></h2>
+    <p class="intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+    <div class="stampwrap">
+      <div>
+        <ul class="ledger" aria-label="same box, list prices, sept 2026">
+          <li class="ours"><span class="name">usectl machine, everything in</span><span class="price">$40.20</span></li>
+          <li><span class="name">vercel pro + supabase pro + upstash + s3, one seat</span><span class="price">$60 and up, before bandwidth</span></li>
+          <li><span class="name">railway, same box, reserved</span><span class="price">about $80, plus egress</span></li>
+          <li><span class="name">render pro + postgres standard</span><span class="price">$125</span></li>
+        </ul>
+        <p class="foot">same box, list prices, sept 2026. railway shown at reserved equivalent. all prices list, september 2026.</p>
+      </div>
+      <div class="stamp" aria-hidden="true">
+        the sticker
+        <span class="big">$40.20</span>
+        is the ceiling
+        <small>2 vcpu / 4 gb / 20 gb</small>
+      </div>
+    </div>
+    <p class="many">ten client machines at 1 vcpu / 2 gb: <b>$200 a month on usectl.</b> about $400 on railway before storage.</p>
+  </section>
+
+  <section class="zine" id="ship">
+    <span class="tag orange">how it ships</span>
+    <h2 class="md"><span class="reg small" data-text="push git. get https.">push git. get https.</span></h2>
+    <ol class="steps">
+      <li><div class="n"><span class="reg small" data-text="1">1</span></div><p>connect a repo through the github app, or push from the cli.</p></li>
+      <li><div class="n"><span class="reg small" data-text="2">2</span></div><p>we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.</p></li>
+      <li><div class="n"><span class="reg small" data-text="3">3</span></div><p>the app goes live at https://name.usectl.com with a certificate. add your own domain in one command.</p></li>
+      <li><div class="n"><span class="reg small" data-text="4">4</span></div><p>every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.</p></li>
+    </ol>
+  </section>
+
+  <section class="zero" id="proof">
+    <h2>customer zero</h2>
+    <div>
+      <p>systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+      <p>we built usectl because we needed it. every client we ship gets its own machine, and when it breaks at night it is our pager, not theirs.</p>
+    </div>
+  </section>
+
+  <section class="zine" id="faq">
+    <span class="tag">questions</span>
+    <h2 class="md"><span class="reg small" data-text="questions people ask">questions people ask</span></h2>
+    <ul class="qa">
+      <li><h3>is a machine a vm?</h3><p>no. it is a kubernetes namespace with a network policy, a quota and its own secrets on nodes we operate. container isolation, not a microvm. we say that plainly because it matters for some workloads.</p></li>
+      <li><h3>can i leave?</h3><p>yes. your dockerfile, your postgres dump and your bucket run anywhere. if we disappeared tomorrow your stack still works.</p></li>
+      <li><h3>where is my data?</h3><p>on bare metal we own at hetzner in falkenstein, germany. with self hosted usectl, on your own hardware.</p></li>
+      <li><h3>what about backups?</h3><p>managed postgres is dumped nightly at the platform level. dedicated postgres gets scheduled backups to a private bucket only that database can reach.</p></li>
+      <li><h3>is there a bandwidth meter or a seat fee?</h3><p>no and no. the sticker is the ceiling.</p></li>
+      <li><h3>do i need docker?</h3><p>not for next.js, vite, node or static sites. for anything else, a dockerfile.</p></li>
+    </ul>
+  </section>
+
+  <div class="band" aria-hidden="true" style="margin:16px 0 0"></div>
+  <div class="band blue" aria-hidden="true"></div>
+
+  <section class="final" id="cta">
+    <div>
+      <h2><span class="reg" data-text="one box.">one box.</span><br><span class="reg" data-text="many machines.">many machines.</span></h2>
+      <p class="line">30 days free, up to 2 vcpu and 4 gb. no card. delete it when you are done.</p>
+      <div class="ctas">
+        <a class="sticker" href="https://manager.usectl.com">create a machine</a>
+        <a class="docs" href="https://docs.usectl.com">read the docs</a>
+      </div>
+    </div>
+    <div class="close">
+      <b>second edition</b>
+      on our metal, or on yours. self hosted usectl ships this month.
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <span>built by systemctl · tbilisi · © 2026</span>
+    <span>two inks: fluorescent orange + teal. printed on newsprint.</span>
+  </footer>
+</main>
+
+</body>
+</html>

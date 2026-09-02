@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TXPX5SYRNJ"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-TXPX5SYRNJ');
+    </script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="systemctl">
+    <meta name="theme-color" content="#11A32A">
+    <meta name="msapplication-TileImage" content="../img/fav.png">
+    <meta name="msapplication-TileColor" content="#11A32A">
+    <meta name="content-signal" content="search=yes, ai-train=yes, ai-input=yes">
+    <link rel="canonical" href="https://usectl.com/variants/10-machine-room.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://usectl.com/variants/10-machine-room.html">
+    <meta property="og:title" content="usectl · one box. many machines. · the machine room">
+    <meta property="og:description" content="every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.">
+    <meta property="og:image:alt" content="usectl · one box. many machines. · the machine room">
+    <meta name="twitter:url" content="https://usectl.com/variants/10-machine-room.html">
+    <meta name="twitter:title" content="usectl · one box. many machines. · the machine room">
+    <meta name="twitter:description" content="every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.">
+    <meta property="og:image" content="https://usectl.com/img/ogimage.jpeg">
+    <meta property="og:image:secure_url" content="https://usectl.com/img/ogimage.jpeg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1600">
+    <meta property="og:image:height" content="837">
+    <meta property="og:site_name" content="usectl">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://usectl.com/img/ogimage.jpeg">
+    <meta name="twitter:site" content="@usectl">
+    <meta name="twitter:creator" content="@usectl">
+    <link rel="icon" type="image/png" sizes="32x32" href="../img/fav.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../img/fav.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../img/fav.png">
+    <link rel="manifest" href="../site.webmanifest">
+    <title>usectl · one box. many machines. · the machine room</title>
+    <meta name="description" content="every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.">
+    <meta name="robots" content="noindex, follow">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Red+Hat+Text:wght@400;500&family=Red+Hat+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ground:#07090c; --fog:#0b1016;
+    --glass:rgba(10,13,18,.64); --glass-edge:rgba(214,226,240,.10);
+    --text:#e4e9ef; --muted:#8d98a8; --dim:#5e6875;
+    --orange:#E8734A; --orange-soft:rgba(232,115,74,.16);
+    --blue:#5AA6FF; --blue-soft:rgba(90,166,255,.14);
+    --hair:rgba(214,226,240,.08);
+    --display:"Chakra Petch","Bahnschrift","Segoe UI",system-ui,sans-serif;
+    --body:"Red Hat Text","Helvetica Neue",Arial,system-ui,sans-serif;
+    --mono:"Red Hat Mono","SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  html{color-scheme:dark}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+  #room{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;background:var(--ground);transition:opacity .7s ease}
+  html.past #room{opacity:.35}
+  html.past .hud,html.past .vignette{opacity:0}
+  .hud,.vignette{transition:opacity .7s ease}
+  .no-gl #room{display:none}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(120% 90% at 50% 50%,transparent 55%,rgba(0,0,0,.55) 100%)}
+  .no-gl .vignette{display:none}
+
+  /* projected labels */
+  #labels{position:fixed;inset:0;z-index:2;pointer-events:none}
+  .lbl{position:absolute;transform:translate(-50%,-50%);font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--muted);white-space:nowrap;opacity:0;transition:opacity .25s;padding:3px 7px;border:1px solid var(--hair);background:rgba(7,9,12,.55);border-radius:3px}
+  .lbl.on{opacity:1}
+  .lbl b{color:var(--orange);font-weight:500}
+  .lbl.blue b{color:var(--blue)}
+  .lbl.big{font-size:12.5px;color:var(--text);border-color:rgba(232,115,74,.4)}
+  .no-gl #labels{display:none}
+
+  .top{position:fixed;top:14px;left:18px;z-index:5;display:flex;gap:14px;align-items:baseline;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .top a{text-decoration:none;color:var(--muted)}
+  .top a:hover{color:var(--text)}
+  .top .tag{color:var(--dim)}
+  .hud{position:fixed;right:18px;bottom:16px;z-index:5;font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.04em;text-align:right;line-height:1.6;pointer-events:none}
+  .hud b{font-weight:500;color:var(--muted)}
+  .hud i{font-style:normal;color:var(--orange)}
+  .no-gl .hud{display:none}
+  .scrollhint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:5;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim);pointer-events:none;transition:opacity .4s}
+  .scrollhint.off{opacity:0}
+  .no-gl .scrollhint{display:none}
+
+  main{position:relative;z-index:3;width:min(1120px,calc(100% - 48px));margin:0 auto}
+  .stop{min-height:140vh;display:flex;align-items:flex-start;padding-top:12vh}
+  .stop.first{min-height:120vh;padding-top:10vh}
+  .stop.right{justify-content:flex-end}
+  .stop.last{min-height:130vh}
+  .no-gl .stop{min-height:0;padding-top:8vh}
+  .panel{position:sticky;top:9vh;width:min(560px,100%);background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(130%);backdrop-filter:blur(16px) saturate(130%);border:1px solid var(--glass-edge);border-radius:6px;padding:28px 32px 30px;box-shadow:0 30px 80px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.05)}
+  .no-gl .panel{position:static;background:rgba(14,18,24,.92)}
+  .panel.wide{width:min(700px,100%)}
+  .panel.term-panel{width:min(760px,100%)}
+  .rail{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--dim);margin-bottom:20px}
+  .rail .led{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 8px var(--orange);margin-right:8px;vertical-align:1px}
+  .rail .led.blue{background:var(--blue);box-shadow:0 0 8px var(--blue)}
+
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--muted);margin:0 0 16px}
+  .eyebrow .mark{color:var(--orange);font-weight:500}
+  h1{font-family:var(--display);font-weight:600;font-size:clamp(40px,5.2vw,62px);line-height:1.02;letter-spacing:-.01em;margin:0 0 18px;text-wrap:balance}
+  h1 .b{color:var(--blue)}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.2vw,38px);line-height:1.08;margin:0 0 12px;text-wrap:balance}
+  h2 .o{color:var(--orange)} h2 .b{color:var(--blue)}
+  .sub{font-size:17px;line-height:1.6;max-width:52ch;margin:0 0 24px}
+  p.body{margin:0 0 14px;max-width:54ch;color:var(--text)}
+  p.body em{font-style:normal;color:var(--muted)}
+  .ctas{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px}
+  .btn{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.02em;text-decoration:none;padding:12px 20px;border-radius:4px;border:1px solid transparent;display:inline-block}
+  .btn.primary{background:var(--orange);color:#120804;box-shadow:0 0 0 1px rgba(232,115,74,.35),0 0 28px rgba(232,115,74,.35)}
+  .btn.primary:hover{background:#f0845c}
+  .btn.ghost{border-color:rgba(214,226,240,.18);color:var(--text);background:rgba(255,255,255,.03)}
+  .btn.ghost:hover{border-color:var(--blue);color:#cfe3ff}
+  .note{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+  pre.term{font-family:var(--mono);font-size:13px;line-height:1.75;margin:0;white-space:pre;overflow-x:auto;color:#c9d3df;padding:2px 0 0}
+  pre.term .p{color:var(--blue)}
+  pre.term .ok{color:var(--orange)}
+  pre.term .u{color:#9fc4ff;text-decoration:underline;text-decoration-color:rgba(159,196,255,.4)}
+  pre.term .ln{display:block;transition:opacity .2s}
+  pre.term .ln.pending{opacity:.18}
+  .no-gl pre.term .ln.pending{opacity:1}
+
+  .intro{margin:0 0 18px;max-width:56ch}
+  .ledger{list-style:none;margin:0;padding:0;border-top:1px solid var(--hair);font-variant-numeric:tabular-nums}
+  .ledger li{display:grid;grid-template-columns:1fr auto;gap:8px 24px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--hair);font-size:15px}
+  .ledger .price{font-family:var(--mono);font-size:14px;color:var(--muted);white-space:nowrap;text-align:right}
+  .ledger li.us .price{color:var(--orange);font-weight:500;font-size:16px}
+  .many{margin:18px 0 10px;padding:12px 16px;border-left:2px solid var(--blue);background:var(--blue-soft);font-size:15px;line-height:1.55}
+  .many b{font-weight:500;color:#cfe3ff}
+  .foot{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin:0}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:16px}
+  .legend span::before{content:"";display:inline-block;width:9px;height:9px;border:1px solid var(--orange);margin-right:7px;vertical-align:-1px;background:var(--orange-soft)}
+  .legend span.b::before{border-color:var(--blue);background:var(--blue-soft)}
+  .legend span.g::before{border-color:var(--dim);background:transparent}
+
+  .end{display:grid;gap:16px;width:min(700px,100%);margin-top:46vh}
+  .no-gl .end{margin-top:0}
+  .end .panel{position:static}
+  .proof{font-size:16px;line-height:1.65;margin:0}
+  .proof b{font-weight:500;color:var(--orange)}
+  .closing{font-family:var(--display);font-weight:600;font-size:clamp(22px,2.6vw,30px);line-height:1.2;margin:0 0 6px}
+  .closing span{color:var(--blue)}
+  footer{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:center;padding:12px 0 24px}
+  footer .mark{color:var(--orange)}
+
+  /* the flat sections below the scene */
+  .after{display:grid;gap:22px;width:min(880px,100%);margin:0 auto;padding:14vh 0 0}
+  .no-gl .after{padding-top:6vh}
+  .after .panel{position:static;width:100%;top:auto}
+  .lead{font-size:16.5px;line-height:1.6;max-width:62ch;margin:0 0 20px;color:var(--text)}
+  .points{display:grid;grid-template-columns:1fr 1fr;gap:16px 26px;margin:0 0 18px}
+  .points div b{display:block;font-family:var(--display);font-weight:600;font-size:15.5px;margin-bottom:4px;color:var(--text)}
+  .points div b::before{content:"";display:inline-block;width:7px;height:7px;border:1px solid var(--orange);background:var(--orange-soft);margin-right:9px;vertical-align:1px}
+  .points div span{display:block;font-size:14.5px;line-height:1.55;color:var(--muted)}
+  .small{font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--dim);margin:0;max-width:70ch}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .card{border:1px solid var(--hair);border-radius:4px;padding:13px 14px 14px;background:rgba(255,255,255,.025)}
+  .card b{display:block;font-family:var(--mono);font-weight:500;font-size:12.5px;letter-spacing:.04em;color:var(--orange);margin-bottom:6px}
+  .card.b b{color:var(--blue)}
+  .card span{display:block;font-size:14px;line-height:1.5;color:var(--muted)}
+  .grid3.big .card{padding:16px 18px 18px}
+  .grid3.big .card b{font-family:var(--display);font-size:16px;letter-spacing:0;color:var(--text);margin-bottom:8px}
+  .grid3.big .card b::before{content:"";display:inline-block;width:7px;height:7px;border:1px solid var(--orange);background:var(--orange-soft);margin-right:9px;vertical-align:1px}
+  .grid3.big .card.b b::before{border-color:var(--blue);background:var(--blue-soft)}
+  .grid3.big .card span{font-size:14.5px}
+  code{font-family:var(--mono);font-size:.92em;color:#cfe3ff}
+  .after pre.term{margin-top:18px;padding:14px 16px;border:1px solid var(--hair);border-radius:4px;background:rgba(0,0,0,.28)}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px 26px;margin:0 0 18px}
+  .col{border-left:2px solid var(--orange);padding:2px 0 2px 16px}
+  .col.b{border-color:var(--blue)}
+  .col b{display:block;font-family:var(--display);font-weight:600;font-size:17px;margin-bottom:6px}
+  .col.b b{color:#cfe3ff}
+  .col span{display:block;font-size:15px;line-height:1.55;color:var(--muted)}
+  .under{margin:0;font-size:15px;color:var(--text)}
+  .steps{list-style:none;counter-reset:s;margin:0;padding:0;border-top:1px solid var(--hair)}
+  .steps li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:14px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--hair);font-size:15px;line-height:1.55}
+  .steps li::before{content:"0" counter(s);font-family:var(--mono);font-size:12.5px;color:var(--orange);letter-spacing:.04em}
+  .proof-more{margin:12px 0 0;font-size:15px;line-height:1.6;color:var(--muted);max-width:62ch}
+  .faq{margin:0;border-top:1px solid var(--hair)}
+  .faq dt{font-family:var(--display);font-weight:600;font-size:16.5px;margin:0;padding:14px 0 4px}
+  .faq dd{margin:0;padding:0 0 14px;color:var(--muted);font-size:15px;line-height:1.6;max-width:66ch;border-bottom:1px solid var(--hair)}
+  .faq dd:last-child{border-bottom:0}
+  .cta-panel{text-align:center;padding:40px 32px 42px}
+  .cta-panel .rail{justify-content:center}
+  .cta-panel h2{font-size:clamp(32px,4vw,48px);margin-bottom:10px}
+  .cta-panel .lead{margin:0 auto 24px}
+  .cta-panel .ctas{justify-content:center}
+  .after footer{padding:12px 0 40px}
+
+  @media (max-width:760px){.grid3{grid-template-columns:1fr 1fr}.cols2,.points{grid-template-columns:1fr}}
+  @media (max-width:640px){.panel{padding:22px 20px 24px}.stop{padding-top:10vh}.top .tag{display:none}.grid3{grid-template-columns:1fr}.cta-panel{padding:30px 20px}}
+  @media (prefers-reduced-motion:reduce){.lbl{transition:none}.scrollhint{display:none}#room,.hud,.vignette{transition:none}}
+</style>
+</head>
+<body>
+
+<canvas id="room" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div id="labels" aria-hidden="true"></div>
+
+<div class="top"><a href="/variants/">← all directions</a><span class="tag">10 · the machine room</span></div>
+<div class="hud" id="hud"><b id="hud1">1 physical box</b><br><span id="hud2">0 machines</span><br><i>~*</i> falkenstein</div>
+<div class="scrollhint" id="hint">scroll to open the box ↓</div>
+
+<main>
+  <section class="stop first" id="hero" data-stop="0">
+    <div class="panel">
+      <div class="rail"><span><span class="led"></span>rack a · unit 12</span><span>hetzner · fsn1</span></div>
+      <p class="eyebrow"><span class="mark">~*</span> usectl · managed kubernetes on our own metal · falkenstein</p>
+      <h1>one box.<br>many <span class="b">machines.</span></h1>
+      <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+      <div class="ctas">
+        <a class="btn primary" href="https://manager.usectl.com">create a machine</a>
+        <span class="note">30 days free. no card.</span>
+        <a class="btn ghost" href="https://docs.usectl.com">read the docs</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="stop right" data-stop="1">
+    <div class="panel">
+      <div class="rail"><span><span class="led blue"></span>the split</span><span>namespaces</span></div>
+      <h2>one server. <span class="o">every machine</span> its own walls.</h2>
+      <p class="body">each cube is a machine: its own kubernetes namespace, its own network policy, its own quota, its own postgres and domain. the air between them is real. a noisy neighbour cannot reach you, and you cannot reach it.</p>
+      <p class="body"><em>what you see is one physical server in falkenstein carrying many machines. that is the whole product.</em></p>
+      <div class="legend"><span>client machines</span><span class="b">agent machines</span><span class="g">free capacity</span></div>
+    </div>
+  </section>
+
+  <section class="stop" data-stop="2">
+    <div class="panel term-panel">
+      <div class="rail"><span><span class="led"></span>inside one machine</span><span>omnitech · 2 vcpu · 4 gb</span></div>
+      <h2>the lights come on <span class="b">in one command.</span></h2>
+<pre class="term" id="term"><span class="ln" data-at="0"><span class="p">$</span> usectl login</span><span class="ln" data-at="1"><span class="p">$</span> usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3</span><span class="ln" data-at="2"><span class="ok">✓</span> postgres ready. DATABASE_URL injected</span><span class="ln" data-at="3"><span class="ok">✓</span> redis ready. REDIS_URL injected</span><span class="ln" data-at="4"><span class="ok">✓</span> s3 ready. S3_BUCKET injected</span><span class="ln" data-at="5"><span class="p">$</span> usectl deploy omnitech</span><span class="ln" data-at="6"><span class="ok">✓</span> build 28s · tls issued · live at <span class="u">https://omnitech.usectl.com</span></span></pre>
+    </div>
+  </section>
+
+  <section class="stop right" id="math" data-stop="3">
+    <div class="panel wide">
+      <div class="rail"><span><span class="led"></span>the math</span><span>list prices · sept 2026</span></div>
+      <h2>the math</h2>
+      <p class="intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+      <ul class="ledger">
+        <li class="us"><span>usectl machine, everything in</span><span class="price">$40.20</span></li>
+        <li><span>vercel pro + supabase pro + upstash + s3, one seat</span><span class="price">$60 and up, before bandwidth</span></li>
+        <li><span>railway, same box, reserved</span><span class="price">about $80, plus egress</span></li>
+        <li><span>render pro + postgres standard</span><span class="price">$125</span></li>
+      </ul>
+      <div class="many">ten client machines at 1 vcpu / 2 gb: <b>$200 a month on usectl.</b> about $400 on railway before storage.</div>
+      <p class="foot">railway shown at reserved equivalent. all prices list, september 2026.</p>
+    </div>
+  </section>
+
+  <section class="stop last" data-stop="4">
+    <div class="end">
+      <div class="panel wide">
+        <div class="rail"><span><span class="led"></span>our metal</span><span><span class="led blue"></span>yours</span></div>
+        <h2 class="closing">on <span style="color:var(--orange)">our metal</span>, or on <span>yours</span>. self hosted usectl ships this month.</h2>
+        <p class="body">the same box, the same walls, the same one command. the only choice is whose room it stands in.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="after">
+    <section class="panel" id="machine">
+      <div class="rail"><span><span class="led"></span>what you get</span><span>one namespace · one bill</span></div>
+      <h2>a machine is a computer that is <span class="o">only yours.</span></h2>
+      <p class="lead">on usectl a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes. you see a box with a slider.</p>
+      <div class="points">
+        <div><b>isolated by default</b><span>its own network policy, its own quota, its own secrets. a neighbour cannot reach you and you cannot reach it.</span></div>
+        <div><b>everything inside</b><span>postgres, redis, s3, cron, domains and tls live in the machine, not in five other dashboards.</span></div>
+        <div><b>one bill</b><span>a machine's budget is shared by all its apps, addons and groups. adding a second app does not add a second bill.</span></div>
+        <div><b>stage and prod</b><span>split a machine into groups, each with its own namespace and its own database, on the same budget.</span></div>
+      </div>
+      <p class="small">apps inside a machine can be web, worker or release. each has its own repo, branch, port, replicas and rollout. pr previews get their own namespace and url.</p>
+    </section>
+
+    <section class="panel" id="addons">
+      <div class="rail"><span><span class="led"></span>addons</span><span>managed or dedicated</span></div>
+      <h2>the stack, <span class="b">one toggle each.</span></h2>
+      <p class="lead">managed on shared platform instances, or dedicated in your own namespace with its own volume and size. attach to any app in one command.</p>
+      <div class="grid3">
+        <div class="card"><b>postgres</b><span>managed or dedicated. pgvector and timescale on request. scheduled backups to a private bucket.</span></div>
+        <div class="card"><b>redis</b><span>managed with a key prefix, or dedicated with aof and search modules.</span></div>
+        <div class="card"><b>s3 storage</b><span>your own bucket and iam user on seaweedfs, with a cdn url.</span></div>
+        <div class="card"><b>nats</b><span>jetstream on its own volume, websocket in.</span></div>
+        <div class="card"><b>mongodb</b><span>per machine database, or dedicated.</span></div>
+        <div class="card"><b>sql server</b><span>for the apps that need it.</span></div>
+        <div class="card"><b>meilisearch</b><span>search with its own persistent volume.</span></div>
+        <div class="card"><b>cron</b><span>scheduled jobs from your app image, with run history.</span></div>
+        <div class="card"><b>oauth2 proxy</b><span>github or google login in front of any app, no code.</span></div>
+        <div class="card"><b>grafana</b><span>dedicated per machine, wired read only to your own telemetry.</span></div>
+        <div class="card"><b>glitchtip</b><span>sentry compatible error tracking, one dsn per environment.</span></div>
+        <div class="card b"><b>ai</b><span>an openai compatible endpoint in the cluster: qwen3-14b for chat, bge-m3 for embeddings, metered per machine.</span></div>
+      </div>
+    </section>
+
+    <section class="panel" id="agents">
+      <div class="rail"><span><span class="led blue"></span>built for agents</span><span>cli · --json · mcp</span></div>
+      <h2>your agent already knows <span class="b">how to use it.</span></h2>
+      <p class="lead">the cli is the product. one binary, every command with --json, clear errors an agent can act on. claude code, cursor, codex or a shell script: they all deploy the same way. there is an mcp server if you prefer tool calls.</p>
+      <div class="points">
+        <div><b>deploy from the chat</b><span><code>usectl machines create</code>, <code>usectl deploy</code>, <code>usectl logs --follow</code>. no plugin needed.</span></div>
+        <div><b>agents that live here</b><span>add a hermes or openclaw pod to a machine and it runs 24/7 with its own memory, its own headless browser and a local model. one agent, one machine, its own walls.</span></div>
+        <div><b>read what happened</b><span>logs, metrics, traces and pod insights through the same cli, so the agent that deployed can also debug.</span></div>
+      </div>
+<pre class="term"><span class="ln"><span class="p">$</span> usectl machines create radiodj --repo github.com/you/radiodj --postgres</span><span class="ln"><span class="p">$</span> usectl addons add radiodj --type hermes</span><span class="ln"><span class="ok">✓</span> hermes agent pod running. telegram gateway connected.</span><span class="ln"><span class="p">$</span> usectl logs radiodj --follow</span></pre>
+    </section>
+
+    <section class="panel" id="modes">
+      <div class="rail"><span><span class="led"></span>one product, two rooms</span><span><span class="led blue"></span>self hosted ships this month</span></div>
+      <h2>on <span class="o">our metal</span>, or on <span class="b">yours.</span></h2>
+      <div class="cols2">
+        <div class="col"><b>managed</b><span>we run it. bare metal we own in falkenstein, kubernetes we operate, backups, ingress, tls and the 3am pager on us. you push git.</span></div>
+        <div class="col b"><b>self hosted</b><span>you run it. the same platform on your own hardware, your data never leaves the building. self hosted usectl ships this month.</span></div>
+      </div>
+      <p class="under">same cli, same addons, same one command. the only choice is whose room the box stands in.</p>
+    </section>
+
+    <section class="panel" id="for">
+      <div class="rail"><span><span class="led"></span>who it is for</span><span>many things, many machines</span></div>
+      <h2>people who run <span class="o">many things.</span></h2>
+      <div class="grid3 big">
+        <div class="card"><b>software shops</b><span>one machine per client. their own database, their own domain, their own bill you can pass through. hand them the keys when the engagement ends.</span></div>
+        <div class="card b"><b>agent builders</b><span>one machine per client agent, with postgres, a browser and a local model inside. isolation at the namespace, not inside the prompt.</span></div>
+        <div class="card"><b>self hosters</b><span>the same box on your own hardware. one physical server becomes many isolated machines with their stacks.</span></div>
+      </div>
+    </section>
+
+    <section class="panel" id="ship">
+      <div class="rail"><span><span class="led"></span>how it ships</span><span>github app · kaniko · tls</span></div>
+      <h2>push git. <span class="b">get https.</span></h2>
+      <ol class="steps">
+        <li>connect a repo through the github app, or push from the cli.</li>
+        <li>we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.</li>
+        <li>the app goes live at https://name.usectl.com with a certificate. add your own domain in one command.</li>
+        <li>every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.</li>
+      </ol>
+    </section>
+
+    <section class="panel" id="proof">
+      <div class="rail"><span><span class="led"></span>customer zero</span><span>systemctl · tbilisi</span></div>
+      <h2>customer <span class="o">zero</span></h2>
+      <p class="proof"><b>systemctl</b> runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+      <p class="proof-more">we built usectl because we needed it. every client we ship gets its own machine, and when it breaks at night it is our pager, not theirs.</p>
+    </section>
+
+    <section class="panel" id="faq">
+      <div class="rail"><span><span class="led blue"></span>faq</span><span>plain answers</span></div>
+      <h2>questions <span class="b">people ask</span></h2>
+      <dl class="faq">
+        <dt>is a machine a vm?</dt>
+        <dd>no. it is a kubernetes namespace with a network policy, a quota and its own secrets on nodes we operate. container isolation, not a microvm. we say that plainly because it matters for some workloads.</dd>
+        <dt>can i leave?</dt>
+        <dd>yes. your dockerfile, your postgres dump and your bucket run anywhere. if we disappeared tomorrow your stack still works.</dd>
+        <dt>where is my data?</dt>
+        <dd>on bare metal we own at hetzner in falkenstein, germany. with self hosted usectl, on your own hardware.</dd>
+        <dt>what about backups?</dt>
+        <dd>managed postgres is dumped nightly at the platform level. dedicated postgres gets scheduled backups to a private bucket only that database can reach.</dd>
+        <dt>is there a bandwidth meter or a seat fee?</dt>
+        <dd>no and no. the sticker is the ceiling.</dd>
+        <dt>do i need docker?</dt>
+        <dd>not for next.js, vite, node or static sites. for anything else, a dockerfile.</dd>
+      </dl>
+    </section>
+
+    <section class="panel cta-panel" id="cta">
+      <div class="rail"><span><span class="led"></span>rack a · unit 12</span><span>hetzner · fsn1</span></div>
+      <h2>one box. many <span class="b">machines.</span></h2>
+      <p class="lead">30 days free, up to 2 vcpu and 4 gb. no card. delete it when you are done.</p>
+      <div class="ctas">
+        <a class="btn primary" href="https://manager.usectl.com">create a machine</a>
+        <a class="btn ghost" href="https://docs.usectl.com">read the docs</a>
+      </div>
+    </section>
+
+    <footer><span class="mark">~*</span> built by systemctl · tbilisi · © 2026</footer>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var canvas = document.getElementById('room');
+  var termLines = Array.prototype.slice.call(document.querySelectorAll('#term .ln'));
+  function noGl(){ document.documentElement.classList.add('no-gl'); }
+  if (typeof THREE === 'undefined') { noGl(); return; }
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:false, powerPreference:'high-performance'}); }
+  catch(e){ noGl(); return; }
+  if (!renderer.getContext()) { noGl(); return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 1.5));
+
+  // ---------- scene ----------
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x07090c);
+  scene.fog = new THREE.FogExp2(0x0b1016, 0.055);
+  var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
+
+  scene.add(new THREE.AmbientLight(0x8091a8, 0.6));
+  var key = new THREE.PointLight(0xE8734A, 1.5, 40, 2); key.position.set(6,7,6); scene.add(key);
+  var fill = new THREE.PointLight(0x5AA6FF, 0.9, 40, 2); fill.position.set(-7,4,-3); scene.add(fill);
+  var rim = new THREE.DirectionalLight(0xbfd2ea, 0.35); rim.position.set(-3,8,-6); scene.add(rim);
+
+  // floor grid
+  var grid = new THREE.GridHelper(80, 80, 0x1c2531, 0x121922); grid.position.y = -3.2; scene.add(grid);
+  // faint back wall of racks (atmosphere only)
+  (function(){
+    var geo = new THREE.BoxGeometry(0.9, 4.2, 1.0);
+    var mat = new THREE.MeshStandardMaterial({color:0x10151c, roughness:.85, metalness:.3});
+    var n = 60, m = new THREE.InstancedMesh(geo, mat, n), o = new THREE.Object3D();
+    for (var i=0;i<n;i++){ var side = i%2?1:-1; var k = Math.floor(i/2); o.position.set(side*(9+ (k%3)*1.1), -1.1, -6 - k*1.3); o.updateMatrix(); m.setMatrixAt(i, o.matrix); }
+    scene.add(m);
+    // leds on them
+    var cnt = 700, pos = new Float32Array(cnt*3), col = new Float32Array(cnt*3), ph = new Float32Array(cnt);
+    for (var j=0;j<cnt;j++){ var s = j%2?1:-1; var kk = Math.floor(Math.random()*30); pos[j*3]= s*(8.5+(kk%3)*1.1); pos[j*3+1] = -3+Math.random()*3.8; pos[j*3+2] = -6 - kk*1.3 + (Math.random()-.5)*.8; var b = Math.random()<.6; col[j*3]= b?0.35:0.91; col[j*3+1]= b?0.65:0.45; col[j*3+2]= b?1:0.29; ph[j]=Math.random()*6.28; }
+    var g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3)); g.setAttribute('phase', new THREE.BufferAttribute(ph,1));
+    var pm = new THREE.ShaderMaterial({transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, uniforms:{t:{value:0}},
+      vertexShader:'attribute float phase; attribute vec3 color; varying vec3 vC; varying float vA; uniform float t; void main(){ vC=color; vA = 0.55+0.45*sin(t*1.7+phase*3.0); vec4 mv = modelViewMatrix*vec4(position,1.0); gl_PointSize = 2.6 * (28.0/-mv.z); gl_Position = projectionMatrix*mv; }',
+      fragmentShader:'varying vec3 vC; varying float vA; void main(){ float d = length(gl_PointCoord-0.5); if(d>0.5) discard; gl_FragColor = vec4(vC, vA*(1.0-d*1.6)); }'});
+    var pts = new THREE.Points(g, pm); scene.add(pts); scene.userData.leds = pm;
+  })();
+
+  // ---------- the box and its machines ----------
+  var NX=6, NY=4, NZ=3, N=NX*NY*NZ;           // 72 machines in the box
+  var cell = 0.72, gapClosed = 0.02, gapOpen = 0.36;
+  var cubeGeo = new THREE.BoxGeometry(cell, cell, cell);
+  var cubeMat = new THREE.MeshStandardMaterial({color:0xffffff, roughness:.35, metalness:.25, transparent:true, opacity:.92, emissive:0x0b0f14});
+  var cubes = new THREE.InstancedMesh(cubeGeo, cubeMat, N);
+  var edgeGeo = new THREE.BoxGeometry(cell*1.01, cell*1.01, cell*1.01);
+  var edgeMat = new THREE.MeshBasicMaterial({color:0x0c1219, wireframe:true, transparent:true, opacity:.35});
+  var edges = new THREE.InstancedMesh(edgeGeo, edgeMat, N);
+  var group = new THREE.Group(); group.add(cubes); group.add(edges); scene.add(group);
+
+  // machine roles: client (orange tint), agent (blue tint), free (grey)
+  var roles = [], named = {};
+  var names = [
+    {i: idx(1,2,1), t:'omnitech', role:'client'},
+    {i: idx(4,2,1), t:'clinic', role:'client'},
+    {i: idx(2,1,0), t:'ev-charging', role:'client'},
+    {i: idx(0,3,2), t:'radiodj', role:'agent'},
+    {i: idx(5,0,2), t:'hermes', role:'agent'},
+    {i: idx(3,3,0), t:'shop', role:'client'}
+  ];
+  function idx(x,y,z){ return (z*NY + y)*NX + x; }
+  for (var i=0;i<N;i++){ var r = Math.random(); roles[i] = r<0.55?'client':(r<0.72?'agent':'free'); }
+  names.forEach(function(n){ roles[n.i]=n.role; named[n.i]=n; });
+  var FOCUS = names[0].i;
+  var cClient = new THREE.Color(0x6a5a52), cAgent = new THREE.Color(0x4a5f7c), cFree = new THREE.Color(0x2a3038);
+  var cClientHot = new THREE.Color(0xE8734A), cAgentHot = new THREE.Color(0x5AA6FF);
+  var tmp = new THREE.Object3D(), tmpC = new THREE.Color();
+
+  // outer box frame
+  function boxSize(gap){ return new THREE.Vector3(NX*cell+(NX-1)*gap, NY*cell+(NY-1)*gap, NZ*cell+(NZ-1)*gap); }
+  var frameGeo = new THREE.BoxGeometry(1,1,1);
+  var frame = new THREE.LineSegments(new THREE.EdgesGeometry(frameGeo), new THREE.LineBasicMaterial({color:0xE8734A, transparent:true, opacity:.75}));
+  scene.add(frame);
+  var frame2 = new THREE.LineSegments(new THREE.EdgesGeometry(frameGeo), new THREE.LineBasicMaterial({color:0x5AA6FF, transparent:true, opacity:0}));
+  scene.add(frame2);
+  var cubes2 = new THREE.InstancedMesh(cubeGeo, cubeMat.clone(), N); cubes2.material.opacity=0; cubes2.visible=false; scene.add(cubes2);
+
+  // addon lights inside the focused machine
+  var addonCols = [0xE8734A, 0xE8734A, 0xE8734A, 0x5AA6FF];
+  var addons = [], addonGeo = new THREE.SphereGeometry(0.055, 12, 12);
+  for (var a=0;a<4;a++){ var mm = new THREE.Mesh(addonGeo, new THREE.MeshBasicMaterial({color:addonCols[a]})); mm.visible=false; scene.add(mm); addons.push(mm); }
+  var addonLight = new THREE.PointLight(0xE8734A, 0, 3, 2); scene.add(addonLight);
+
+  // ten small cubes for the math
+  var tenGeo = new THREE.BoxGeometry(0.3,0.3,0.3);
+  var ten = new THREE.InstancedMesh(tenGeo, new THREE.MeshStandardMaterial({color:0xE8734A, emissive:0xE8734A, emissiveIntensity:.35, roughness:.4, transparent:true, opacity:0}), 10);
+  ten.visible=false; scene.add(ten);
+
+  // ---------- labels ----------
+  var labelWrap = document.getElementById('labels'), labelEls = {};
+  Object.keys(named).forEach(function(k){ var n = named[k]; var el = document.createElement('div'); el.className = 'lbl' + (n.role==='agent'?' blue':''); el.innerHTML = '<b>'+(n.role==='agent'?'agent':'machine')+'</b> · '+n.t; labelWrap.appendChild(el); labelEls[k]=el; });
+  var boxLabel = document.createElement('div'); boxLabel.className='lbl big'; boxLabel.innerHTML='<b>1 physical server</b> · hetzner ax162 · falkenstein'; labelWrap.appendChild(boxLabel);
+  var ourLabel = document.createElement('div'); ourLabel.className='lbl big'; ourLabel.innerHTML='<b>our metal</b> · falkenstein'; labelWrap.appendChild(ourLabel);
+  var yourLabel = document.createElement('div'); yourLabel.className='lbl big blue'; yourLabel.innerHTML='<b>yours</b> · self hosted'; labelWrap.appendChild(yourLabel);
+  var addonLabels = ['postgres','redis','s3','app'].map(function(t,i){ var el=document.createElement('div'); el.className='lbl'+(i===3?' blue':''); el.innerHTML='<b>'+t+'</b>'; labelWrap.appendChild(el); return el; });
+  var tenLabel = document.createElement('div'); tenLabel.className='lbl big'; tenLabel.innerHTML='<b>10 machines</b> · $200 a month'; labelWrap.appendChild(tenLabel);
+  var v3 = new THREE.Vector3();
+  function place(el, worldPos, on, dy){
+    if (!on){ el.classList.remove('on'); return; }
+    v3.copy(worldPos).project(camera);
+    if (v3.z > 1){ el.classList.remove('on'); return; }
+    var x = (v3.x*0.5+0.5)*window.innerWidth, y = (-v3.y*0.5+0.5)*window.innerHeight + (dy||0);
+    el.style.transform = 'translate(-50%,-50%) translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
+    el.classList.add('on');
+  }
+
+  // ---------- timeline ----------
+  function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+  function span(p,a,b){ return clamp((p-a)/(b-a), 0, 1); }
+  function ease(t){ return t<.5 ? 2*t*t : -1+(4-2*t)*t; }
+  function lerp(a,b,t){ return a+(b-a)*t; }
+
+  var hud1 = document.getElementById('hud1'), hud2 = document.getElementById('hud2'), hint = document.getElementById('hint');
+  var target = {pos:new THREE.Vector3(0,1.2,11), look:new THREE.Vector3(0,0,0)};
+  var camPos = target.pos.clone(), camLook = target.look.clone();
+  var focusWorld = new THREE.Vector3();
+  var machinesOpen = 0;
+
+  function layout(p, t){
+    // phases
+    var split = ease(span(p, .14, .40));            // 0 closed -> 1 open
+    var dive  = ease(span(p, .42, .60));            // fly into focus cube
+    var math  = ease(span(p, .62, .80));            // ten cubes
+    var two   = ease(span(p, .82, .98));            // two boxes
+    var gap = lerp(gapClosed, gapOpen, split);
+    var bs = boxSize(gap);
+    var spin = reduced ? 0 : t*0.08;
+
+    // second box offset for the final scene
+    var sep = lerp(0, bs.x*0.5 + 4.6, two);
+    var heroShift = lerp(3.4, 0, split);
+    group.position.set(heroShift - sep, 0, 0); group.rotation.y = spin*(1-two) + (-0.25)*two;
+    machinesOpen = Math.round(split*N);
+
+    for (var z=0; z<NZ; z++) for (var y=0; y<NY; y++) for (var x=0; x<NX; x++){
+      var i = idx(x,y,z);
+      var px = (x-(NX-1)/2)*(cell+gap), py = (y-(NY-1)/2)*(cell+gap), pz = (z-(NZ-1)/2)*(cell+gap);
+      // during the dive, other cubes fade out a bit; the focus cube scales up and centers
+      var isF = (i===FOCUS);
+      var s = 1;
+      if (isF){ s = lerp(1, 6.5, dive); }
+      else { s = lerp(1, 0.001, dive*0.999 + 0); s = lerp(s, 1, math); }
+      var ox = isF ? lerp(px, 0, dive) : px, oy = isF ? lerp(py, 0, dive) : py, oz = isF ? lerp(pz, 0, dive) : pz;
+      if (isF && math>0){ ox = lerp(0, px, math); oy = lerp(0, py, math); oz = lerp(0, pz, math); s = lerp(6.5, 1, math); }
+      tmp.position.set(ox,oy,oz); tmp.rotation.set(0,0,0); tmp.scale.set(s,s,s); tmp.updateMatrix();
+      cubes.setMatrixAt(i, tmp.matrix); edges.setMatrixAt(i, tmp.matrix);
+      // colors: closed box is uniform cold steel; roles show as it opens
+      var role = roles[i];
+      var base = role==='client'?cClient:(role==='agent'?cAgent:cFree);
+      var hot = role==='client'?cClientHot:(role==='agent'?cAgentHot:cFree);
+      tmpC.copy(new THREE.Color(0x4d5661)).lerp(base, split);
+      if (named[i]) tmpC.lerp(hot, split*0.55);
+      if (isF) tmpC.lerp(new THREE.Color(0x141a22), dive*0.9);   // becomes a dark glass room when we are inside
+      cubes.setColorAt(i, tmpC);
+      if (isF){ focusWorld.set(ox,oy,oz).applyMatrix4(group.matrixWorld); }
+    }
+    cubes.instanceMatrix.needsUpdate = true; edges.instanceMatrix.needsUpdate = true;
+    if (cubes.instanceColor) cubes.instanceColor.needsUpdate = true;
+    cubeMat.opacity = lerp(lerp(0.92, 0.55, dive*(1-math)), 0.5, math*(1-two));
+
+    // frame follows the box
+    frame.scale.set(bs.x+0.25, bs.y+0.25, bs.z+0.25); frame.position.copy(group.position); frame.rotation.copy(group.rotation);
+    frame.material.opacity = lerp(0.75, 0.0, dive)*(1-math) + 0.75*math;
+    // second box
+    var showTwo = two>0.001;
+    frame2.visible = showTwo; cubes2.visible = showTwo;
+    if (showTwo){
+      frame2.scale.copy(frame.scale); frame2.position.set(sep,0,0); frame2.rotation.set(0, 0.25, 0); frame2.material.opacity = 0.75*two;
+      cubes2.position.copy(frame2.position); cubes2.rotation.copy(frame2.rotation); cubes2.material.opacity = 0.92*two;
+      for (var j=0;j<N;j++){ cubes.getMatrixAt(j, tmp.matrix); tmp.matrix.decompose(tmp.position,tmp.quaternion,tmp.scale); tmp.updateMatrix(); cubes2.setMatrixAt(j, tmp.matrix); cubes.getColorAt(j, tmpC); cubes2.setColorAt(j, tmpC.lerp(cAgentHot, 0.15)); }
+      cubes2.instanceMatrix.needsUpdate = true; if (cubes2.instanceColor) cubes2.instanceColor.needsUpdate = true;
+    }
+
+    // addons inside the focus cube, lit in step with the terminal
+    var lit = dive>0.15 ? span(p, .46, .585) : 0;     // 0..1 across the terminal lines
+    var lineCount = Math.floor(lit*7.999);
+    termLines.forEach(function(el, k){ if (reduced) return; el.classList.toggle('pending', k > lineCount); });
+    var slots = [[-0.9,-0.6,0.4],[0.9,-0.6,0.2],[0,-0.6,-1.0],[0,0.7,0]];
+    var ons = [lineCount>=2, lineCount>=3, lineCount>=4, lineCount>=6];
+    var anyOn = false;
+    for (var a=0;a<4;a++){
+      var on = dive>0.6 && math<0.2 && ons[a]; addons[a].visible = on; anyOn = anyOn||on;
+      addons[a].position.set(slots[a][0], slots[a][1] + (reduced?0:Math.sin(t*1.3+a)*0.04), slots[a][2]).applyMatrix4(group.matrixWorld);
+      var sc = on ? (a===3?1.8:1.3) : 0.001; addons[a].scale.set(sc,sc,sc);
+      place(addonLabels[a], addons[a].position, on, -18);
+    }
+    addonLight.position.copy(focusWorld); addonLight.intensity = anyOn ? 1.6*(1-math) : 0;
+
+    // ten small cubes for the math, in a row in front of the box
+    ten.visible = math>0.001;
+    if (ten.visible){
+      ten.material.opacity = math;
+      for (var q=0;q<10;q++){ tmp.position.set(-2.4+(q-4.5)*0.42, -1.4, 5.6); tmp.rotation.set(0, spin, 0); var ss = lerp(0.001,1,math); tmp.scale.set(ss,ss,ss); tmp.updateMatrix(); ten.setMatrixAt(q, tmp.matrix); }
+      ten.instanceMatrix.needsUpdate = true;
+      ten.visible = math > 0.001 && two < 0.6;
+    }
+    place(tenLabel, new THREE.Vector3(-2.4,-1.4,5.6), ten.visible && math>0.5, -48);
+
+    // camera keyframes
+    var closed = {pos:[1.2,1.6,11.5], look:[2.6,0,0]};
+    var open   = {pos:[6.5,3.2,10.5], look:[0,0.2,0]};
+    var inside = {pos:[0,0.2,2.6], look:[0,0,0]};
+    var mathv  = {pos:[-1.4,0.4,17], look:[-1.0,-1.0,0]};
+    var twov   = {pos:[0,1.5,23], look:[0,-1.2,0]};
+    var kp = closed.pos.slice(), kl = closed.look.slice();
+    function mix(k, w){ for (var i=0;i<3;i++){ kp[i] = lerp(kp[i], k.pos[i], w); kl[i] = lerp(kl[i], k.look[i], w); } }
+    mix(open, split); mix(inside, dive); mix(mathv, math); mix(twov, two);
+    if (dive>0 && math<1){ kl[0]=lerp(kl[0], focusWorld.x, dive*(1-math)); kl[1]=lerp(kl[1], focusWorld.y, dive*(1-math)); kl[2]=lerp(kl[2], focusWorld.z, dive*(1-math)); kp[0]+=focusWorld.x*dive*(1-math); kp[1]+=focusWorld.y*dive*(1-math); kp[2]+=focusWorld.z*dive*(1-math); }
+    target.pos.set(kp[0],kp[1],kp[2]); target.look.set(kl[0],kl[1],kl[2]);
+
+    // labels on named machines: visible when open, hidden while inside or in the last scene
+    var showNames = split>0.6 && dive<0.3 && two<0.3;
+    Object.keys(named).forEach(function(k){ cubes.getMatrixAt(+k, tmp.matrix); tmp.matrix.decompose(tmp.position,tmp.quaternion,tmp.scale); v3.copy(tmp.position).applyMatrix4(group.matrixWorld); place(labelEls[k], v3, showNames, -22); });
+    place(boxLabel, new THREE.Vector3(group.position.x, bs.y/2+0.9, 0), p<0.13, 0);
+    place(ourLabel, new THREE.Vector3(-sep, bs.y/2+1.0, 0), two>0.5, 0);
+    place(yourLabel, new THREE.Vector3(sep, bs.y/2+1.0, 0), two>0.5, 0);
+
+    // hud + hint
+    var mc = dive>0.5 && math<0.5 ? 1 : (two>0.5 ? N*2 : machinesOpen);
+    hud1.textContent = two>0.5 ? '2 physical servers' : '1 physical server';
+    hud2.textContent = (dive>0.5 && math<0.5) ? 'inside · omnitech' : (mc + ' machines');
+    hint.classList.toggle('off', p>0.05);
+  }
+
+  // ---------- scroll + loop ----------
+  var progress = 0, autoT = 0;
+  var stops = document.querySelectorAll('.stop'), lastStop = stops[stops.length-1], root = document.documentElement;
+  function sceneEnd(){ return lastStop.getBoundingClientRect().bottom + window.scrollY; }
+  function readScroll(){
+    var h = sceneEnd() - window.innerHeight; progress = h>0 ? clamp(window.scrollY/h, 0, 1) : 0;
+    root.classList.toggle('past', window.scrollY > h + window.innerHeight*0.35);
+  }
+  window.addEventListener('scroll', readScroll, {passive:true});
+  function resize(){ var w = window.innerWidth, h = window.innerHeight; renderer.setSize(w,h,false); camera.aspect = w/h; camera.updateProjectionMatrix(); readScroll(); }
+  window.addEventListener('resize', resize); resize();
+
+  var clock = new THREE.Clock();
+  function frameLoop(){
+    var t = clock.getElapsedTime();
+    scene.userData.leds.uniforms.t.value = reduced ? 0 : t;
+    var p = progress;
+    if (reduced){ /* still scroll driven, no ambient motion */ }
+    layout(p, t);
+    var k = reduced ? 1 : 0.08;
+    camPos.lerp(target.pos, k); camLook.lerp(target.look, k);
+    camera.position.copy(camPos); camera.lookAt(camLook);
+    renderer.render(scene, camera);
+    requestAnimationFrame(frameLoop);
+  }
+  layout(0, 0); camPos.copy(target.pos); camLook.copy(target.look);
+  frameLoop();
+})();
+</script>
+
+</body>
+</html>

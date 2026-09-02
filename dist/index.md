@@ -2,26 +2,11 @@
 
 > One flat price. No bandwidth bills.
 
-usectl is a managed deployment platform. You configure a server on a slider (vCPU, RAM, storage), and we spin up a managed project with your full stack inside: app, database, cache, workers, PR previews. Everything runs on a flat monthly bill.
+usectl is a managed deployment platform. Create a machine, and we spin up a managed project with your full stack inside: app, database, cache, workers, PR previews. Everything runs on a flat monthly bill.
 
 We run on our own bare metal at Hetzner, not on AWS or Google Cloud. That's why the pricing stays flat, and the only surprises are features we add for free.
 
-## Pricing
-
-The bill is computed from a transparent formula:
-
-- **vCPU**: $10 per vCPU per month
-- **RAM**: $5 per GB RAM per month
-- **Object storage**: $0.01 per GB per month
-
-Example configurations:
-
-- 1 vCPU / 2 GB / 10 GB = **$20.10/month**
-- 2 vCPU / 4 GB / 50 GB = **$40.50/month**
-- 4 vCPU / 8 GB / 200 GB = **$82/month**
-- 8 vCPU / 16 GB / 500 GB = **$165/month**
-
-### What's included in every project
+## What's included in every project
 
 - Managed PostgreSQL with automatic backups and point-in-time recovery
 - S3-compatible object storage (SeaweedFS)
@@ -36,13 +21,9 @@ Example configurations:
 - One-click rollback to any previous deploy
 - CLI, web dashboard, and MCP server
 
-### Trial
+## Enterprise
 
-First project free for 30 days on any configuration up to 4 vCPU / 8 GB RAM. No credit card required.
-
-### Enterprise
-
-Configurations above 16 vCPU / 64 GB RAM / 500 GB storage, dedicated hardware, SLAs, or compliance add-ons are available as custom deals. Contact support@usectl.com.
+Custom configurations, dedicated hardware, SLAs, or compliance add-ons are available as custom deals. Contact support@usectl.com.
 
 ## How to deploy
 
