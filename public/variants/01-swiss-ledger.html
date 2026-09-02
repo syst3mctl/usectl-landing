@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>usectl · swiss ledger</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<!--
+  01 swiss ledger. direction: typographic, paper and ink, brand orange #E8734A used exactly once per screen as the signal (mark, price, cta). palette: paper #F2F1EC, ink #16150F, grey #6E6C63, hairline #C7C5BB.
+  type: archivo (variable width, set narrow for the headline and normal for body) for all reading text, ibm plex mono for the terminal, ledger figures and labels. tabular figures everywhere digits meet a column.
+  layout: 12 column grid on a 1280 max measure with visible hairlines between columns in the hero, the math as a ruled ledger table with a debit style amount column and a running comparison. no cards, no shadows, only rules.
+-->
+<style>
+  :root {
+    --paper: #F2F1EC;
+    --paper-2: #E9E8E1;
+    --ink: #16150F;
+    --ink-2: #6E6C63;
+    --rule: #C7C5BB;
+    --rule-strong: #16150F;
+    --signal: #E8734A;
+    --signal-ink: #FFFFFF;
+    --font-sans: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #151410;
+      --paper-2: #1D1C17;
+      --ink: #ECEAE2;
+      --ink-2: #9A978C;
+      --rule: #34322B;
+      --rule-strong: #ECEAE2;
+      --signal: #EE8A66;
+      --signal-ink: #151410;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #151410;
+    --paper-2: #1D1C17;
+    --ink: #ECEAE2;
+    --ink-2: #9A978C;
+    --rule: #34322B;
+    --rule-strong: #ECEAE2;
+    --signal: #EE8A66;
+    --signal-ink: #151410;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    font-variation-settings: "wdth" 100;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+
+  .sl-page { max-width: 1280px; margin: 0 auto; padding: 0 32px 64px; }
+
+  /* top bar */
+  .sl-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 18px 0 14px; border-bottom: 1px solid var(--rule-strong);
+    font-family: var(--font-mono); font-size: 12px; color: var(--ink-2);
+  }
+  .sl-top a { text-decoration: none; }
+  .sl-top a:hover { color: var(--ink); text-decoration: underline; }
+  .sl-top .sl-mark { color: var(--signal); font-weight: 500; font-size: 14px; }
+
+  /* hero grid */
+  .sl-hero {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 24px;
+    padding-top: 40px;
+    position: relative;
+  }
+  .sl-eyebrow {
+    grid-column: 1 / 13;
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em;
+    color: var(--ink-2); margin: 0 0 56px;
+  }
+  .sl-eyebrow b { color: var(--ink); font-weight: 500; }
+  .sl-h1 {
+    grid-column: 1 / 10;
+    margin: 0;
+    font-size: clamp(60px, 8.4vw, 120px);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    font-weight: 500;
+    font-variation-settings: "wdth" 80;
+    text-wrap: balance;
+  }
+  .sl-h1 .dot { color: var(--signal); }
+  .sl-lead {
+    grid-column: 1 / 7;
+    margin: 48px 0 0;
+    font-size: 21px; line-height: 1.4;
+    max-width: 34em;
+    text-wrap: pretty;
+  }
+  .sl-ctas {
+    grid-column: 8 / 13;
+    margin-top: 48px;
+    align-self: end;
+    display: flex; flex-direction: column; gap: 12px;
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 16px;
+  }
+  .sl-btn {
+    display: inline-flex; align-items: center; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 14px; font-weight: 500;
+    text-decoration: none; padding: 14px 16px;
+    border: 1px solid var(--ink);
+    gap: 24px;
+  }
+  .sl-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .sl-btn.primary:hover { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); }
+  .sl-btn.secondary:hover { background: var(--paper-2); }
+  .sl-btn span:last-child { opacity: 0.7; }
+  .sl-note { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); margin: 0; }
+
+  /* terminal */
+  .sl-term {
+    grid-column: 1 / 13;
+    margin-top: 72px;
+    border-top: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule-strong);
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 24px;
+  }
+  .sl-term-label {
+    grid-column: 1 / 3;
+    padding: 20px 0;
+    font-family: var(--font-mono); font-size: 12px; color: var(--ink-2);
+    border-right: 1px solid var(--rule);
+  }
+  .sl-term-label span { display: block; }
+  .sl-term-label .n { color: var(--ink); }
+  .sl-term pre {
+    grid-column: 3 / 13;
+    margin: 0; padding: 20px 0 20px 0;
+    font-family: var(--font-mono); font-size: 14px; line-height: 1.75;
+    overflow-x: auto;
+    color: var(--ink);
+  }
+  .sl-term pre .p { color: var(--ink-2); }
+  .sl-term pre .ok { color: var(--signal); }
+  .sl-term pre .u { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* section header pattern */
+  .sl-sec {
+    display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px;
+    padding-top: 96px;
+  }
+  .sl-sec-h {
+    grid-column: 1 / 3;
+    margin: 0;
+    font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); letter-spacing: 0.04em;
+    padding-top: 6px;
+  }
+  .sl-sec-h b { display: block; color: var(--ink); font-weight: 500; font-size: 12px; }
+  .sl-sec-body { grid-column: 3 / 13; }
+  .sl-h2 {
+    margin: 0 0 20px; font-size: 44px; line-height: 1; letter-spacing: -0.03em;
+    font-weight: 500; font-variation-settings: "wdth" 84;
+  }
+  .sl-intro { margin: 0; font-size: 19px; line-height: 1.45; max-width: 36em; text-wrap: pretty; }
+
+  /* ledger table */
+  .sl-ledger-wrap { overflow-x: auto; margin-top: 40px; }
+  .sl-ledger {
+    width: 100%; border-collapse: collapse;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+  }
+  .sl-ledger caption {
+    text-align: left; font-family: var(--font-mono); font-size: 12px; color: var(--ink-2);
+    padding: 0 0 10px; caption-side: top;
+  }
+  .sl-ledger th, .sl-ledger td { padding: 14px 0; text-align: left; vertical-align: baseline; }
+  .sl-ledger thead th {
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--ink-2);
+    letter-spacing: 0.04em; border-bottom: 1px solid var(--rule-strong); padding-top: 0;
+  }
+  .sl-ledger tbody tr { border-bottom: 1px solid var(--rule); }
+  .sl-ledger tbody tr:last-child { border-bottom: 1px solid var(--rule-strong); }
+  .sl-ledger td.idx, .sl-ledger th.idx { width: 3.5em; font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+  .sl-ledger td.item { padding-right: 24px; }
+  .sl-ledger td.item small { display: block; color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+  .sl-ledger td.amt, .sl-ledger th.amt {
+    text-align: right; font-family: var(--font-mono); white-space: nowrap; width: 1%;
+    padding-left: 32px;
+  }
+  .sl-ledger td.amt { font-size: 17px; font-weight: 500; }
+  .sl-ledger td.amt small { display: block; font-size: 12px; font-weight: 400; color: var(--ink-2); }
+  .sl-ledger tr.us td.amt { color: var(--signal); }
+  .sl-ledger tr.us td.item { font-weight: 600; }
+  .sl-ledger td.bar { width: 26%; padding-left: 32px; padding-right: 0; }
+  .sl-bar { display: block; height: 6px; background: var(--ink); width: 100%; }
+  .sl-bar.b2 { width: 50%; }
+  .sl-bar.b3 { width: 66%; }
+  .sl-bar.b1 { width: 32%; background: var(--signal); }
+  .sl-bar.b2, .sl-bar.b3, .sl-bar.b4 { background: var(--ink-2); }
+
+  .sl-many {
+    margin: 32px 0 0; padding: 20px 0 0;
+    display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: baseline;
+    font-size: 17px; max-width: 100%;
+  }
+  .sl-many .k { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); letter-spacing: 0.04em; }
+  .sl-many p { margin: 0; }
+  .sl-many .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 12px; border-top: 1px solid var(--rule); padding-top: 12px; }
+  .sl-many .pair div { font-family: var(--font-mono); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .sl-many .pair div b { display: block; font-size: 28px; font-weight: 500; letter-spacing: -0.02em; }
+  .sl-many .pair div:first-child b { color: var(--signal); }
+  .sl-many .pair div span { color: var(--ink-2); font-size: 12px; }
+  .sl-foot { margin: 20px 0 0; font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+
+  /* proof + closing */
+  .sl-proof { font-size: 21px; line-height: 1.4; margin: 0; max-width: 34em; text-wrap: pretty; }
+  .sl-proof b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .sl-close {
+    margin: 0; font-size: clamp(32px, 4vw, 52px); line-height: 1.05; letter-spacing: -0.03em;
+    font-weight: 500; font-variation-settings: "wdth" 82; text-wrap: balance;
+  }
+  .sl-close .dot { color: var(--signal); }
+
+  .sl-footer {
+    margin-top: 96px; padding-top: 16px; border-top: 1px solid var(--rule-strong);
+    display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+    font-family: var(--font-mono); font-size: 12px; color: var(--ink-2);
+  }
+  .sl-footer .sl-mark { color: var(--signal); }
+
+  @media (max-width: 900px) {
+    .sl-page { padding: 0 20px 48px; }
+    .sl-h1 { grid-column: 1 / 13; }
+    .sl-lead { grid-column: 1 / 13; margin-top: 32px; }
+    .sl-ctas { grid-column: 1 / 13; margin-top: 28px; }
+    .sl-term-label { grid-column: 1 / 13; border-right: 0; border-bottom: 1px solid var(--rule); padding: 12px 0; display: flex; gap: 16px; }
+    .sl-term pre { grid-column: 1 / 13; }
+    .sl-sec-h { grid-column: 1 / 13; margin-bottom: 16px; }
+    .sl-sec-body { grid-column: 1 / 13; }
+    .sl-ledger td.bar { display: none; }
+    .sl-many { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sl-btn { transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sl-page">
+  <header class="sl-top">
+    <div><a href="./index.html">← all directions</a> &nbsp;·&nbsp; 01 · swiss ledger</div>
+    <div><span class="sl-mark">~*</span> usectl</div>
+  </header>
+
+  <section class="sl-hero" aria-labelledby="sl-headline">
+    <p class="sl-eyebrow"><b>usectl</b> · managed kubernetes on our own metal · falkenstein</p>
+    <h1 class="sl-h1" id="sl-headline">one box<span class="dot">.</span><br>many machines<span class="dot">.</span></h1>
+    <p class="sl-lead">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+    <div class="sl-ctas">
+      <a class="sl-btn primary" href="#create"><span>create a machine</span><span>→</span></a>
+      <a class="sl-btn secondary" href="#docs"><span>read the docs</span><span>↗</span></a>
+      <p class="sl-note">30 days free. no card.</p>
+    </div>
+
+    <div class="sl-term">
+      <div class="sl-term-label"><span class="n">terminal</span><span>usectl cli</span></div>
+<pre><span class="p">$</span> usectl login
+<span class="p">$</span> usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3
+<span class="ok">✓</span> postgres ready. DATABASE_URL injected
+<span class="ok">✓</span> redis ready. REDIS_URL injected
+<span class="ok">✓</span> s3 ready. S3_BUCKET injected
+<span class="p">$</span> usectl deploy omnitech
+<span class="ok">✓</span> build 28s · tls issued · live at <span class="u">https://omnitech.usectl.com</span></pre>
+    </div>
+  </section>
+
+  <section class="sl-sec" aria-labelledby="sl-math">
+    <p class="sl-sec-h"><b>the math</b>list prices, sept 2026</p>
+    <div class="sl-sec-body">
+      <h2 class="sl-h2" id="sl-math">the math</h2>
+      <p class="sl-intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+
+      <div class="sl-ledger-wrap">
+        <table class="sl-ledger">
+          <caption>ledger · same box, list prices, sept 2026</caption>
+          <thead>
+            <tr>
+              <th class="idx">no.</th>
+              <th>item</th>
+              <th class="bar" aria-hidden="true"></th>
+              <th class="amt">monthly</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="us">
+              <td class="idx">1</td>
+              <td class="item">usectl machine, everything in</td>
+              <td class="bar"><span class="sl-bar b1"></span></td>
+              <td class="amt">$40.20</td>
+            </tr>
+            <tr>
+              <td class="idx">2</td>
+              <td class="item">vercel pro + supabase pro + upstash + s3, one seat</td>
+              <td class="bar"><span class="sl-bar b2"></span></td>
+              <td class="amt">$60 and up<small>before bandwidth</small></td>
+            </tr>
+            <tr>
+              <td class="idx">3</td>
+              <td class="item">railway, same box, reserved</td>
+              <td class="bar"><span class="sl-bar b3"></span></td>
+              <td class="amt">about $80<small>plus egress</small></td>
+            </tr>
+            <tr>
+              <td class="idx">4</td>
+              <td class="item">render pro + postgres standard</td>
+              <td class="bar"><span class="sl-bar b4"></span></td>
+              <td class="amt">$125</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sl-many">
+        <div>
+          <div class="k">many machines</div>
+          <p>ten client machines at 1 vcpu / 2 gb: $200 a month on usectl. about $400 on railway before storage.</p>
+        </div>
+        <div class="pair">
+          <div><b>$200</b><span>usectl, ten machines</span></div>
+          <div><b>~$400</b><span>railway, before storage</span></div>
+        </div>
+      </div>
+      <p class="sl-foot">railway shown at reserved equivalent. all prices list, september 2026.</p>
+    </div>
+  </section>
+
+  <section class="sl-sec" aria-label="proof">
+    <p class="sl-sec-h"><b>in use</b>systemctl, tbilisi</p>
+    <div class="sl-sec-body">
+      <p class="sl-proof">systemctl runs its own <b>9</b> person software shop on usectl: <b>133</b> deployments, an ev charging platform with <b>16</b> services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+    </div>
+  </section>
+
+  <section class="sl-sec" aria-label="closing">
+    <p class="sl-sec-h"><b>self hosted</b>ships this month</p>
+    <div class="sl-sec-body">
+      <p class="sl-close">on our metal, or on yours<span class="dot">.</span> self hosted usectl ships this month<span class="dot">.</span></p>
+    </div>
+  </section>
+
+  <footer class="sl-footer">
+    <div><span class="sl-mark">~*</span> built by systemctl · tbilisi · © 2026</div>
+    <div>01 · swiss ledger</div>
+  </footer>
+</div>
+
+</body>
+</html>

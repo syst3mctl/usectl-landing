@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>usectl rack label</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@300;400;500&display=swap">
+<!-- 04 rack label. direction: industrial rack front, matte dark grey panels with riveted borders, dymo tape labels, u-height ticks, the math as an etched spec plate. palette: panel #2a2c2f, deep #1c1d1f, steel edge #4a4d52, tape black #101112 with white embossed text, brand orange #E8734A as the one orange tape, hazard stripe #f2c400 on black as a thin accent. type: barlow condensed for labels and headings, barlow for body, monospace fallback stack for the terminal. single theme by choice: a rack front is dark. -->
+<style>
+  :root{
+    --panel:#2a2c2f;
+    --panel-2:#232527;
+    --deep:#1c1d1f;
+    --steel:#4a4d52;
+    --steel-hi:#6a6e74;
+    --text:#e9e7e2;
+    --muted:#a3a49f;
+    --tape:#101112;
+    --tape-text:#f4f2ec;
+    --orange:#E8734A;
+    --orange-ink:#1a1210;
+    --hazard:#f2c400;
+    --cond:"Barlow Condensed","Arial Narrow","Roboto Condensed",Impact,sans-serif;
+    --body:"Barlow","Helvetica Neue",Arial,sans-serif;
+    --mono:"JetBrains Mono","IBM Plex Mono","SFMono-Regular",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--deep);
+    color:var(--text);
+    font-family:var(--body);
+    font-weight:300;
+    font-size:16px;
+    line-height:1.55;
+    overflow-x:hidden;
+  }
+  a{color:var(--text)}
+  a:focus-visible{outline:2px solid var(--hazard);outline-offset:3px}
+  .nav{
+    position:absolute;top:12px;left:16px;z-index:3;
+    display:flex;gap:16px;align-items:baseline;
+    font-family:var(--cond);font-size:13px;letter-spacing:.08em;color:var(--muted);
+  }
+  .nav a{color:var(--muted);text-decoration:none}
+  .nav a:hover{color:var(--text)}
+
+  .rack{
+    max-width:1240px;margin:44px auto 40px;padding:0 20px;
+    display:grid;grid-template-columns:34px minmax(0,1fr) 34px;gap:0;
+  }
+  /* rails with u ticks */
+  .rail{
+    background:linear-gradient(90deg,var(--steel) 0,var(--steel-hi) 40%,var(--steel) 100%);
+    position:relative;
+    background-image:
+      repeating-linear-gradient(180deg,transparent 0 21px,rgba(0,0,0,.55) 21px 22px, transparent 22px 44px),
+      linear-gradient(90deg,#3f4247 0,#5b5f65 45%,#3f4247 100%);
+  }
+  .rail::before{
+    content:"";position:absolute;top:0;bottom:0;left:50%;width:9px;margin-left:-4.5px;
+    background:repeating-linear-gradient(180deg,transparent 0 6px,#1a1b1d 6px 15px,transparent 15px 22px);
+    border-radius:3px;
+  }
+  .rail-l::after,.rail-r::after{
+    content:"";position:absolute;top:0;bottom:0;width:0;
+    border-left:1px solid rgba(255,255,255,.08);right:-1px;
+  }
+  .rail-r::after{left:-1px;right:auto}
+  /* u labels */
+  .u{
+    position:absolute;left:0;right:0;text-align:center;
+    font-family:var(--cond);font-size:9px;letter-spacing:.05em;color:#c9cbcd;
+    transform:translateY(-50%);
+    background:var(--steel);padding:1px 0;
+  }
+
+  .stack{display:flex;flex-direction:column;gap:6px;background:var(--deep);padding:6px 6px}
+
+  .panel{
+    background:
+      linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0) 30%,rgba(0,0,0,.12)),
+      var(--panel);
+    border:1px solid #16171a;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -1px 0 rgba(0,0,0,.6);
+    position:relative;
+    padding:34px 40px 34px 44px;
+  }
+  /* rivets */
+  .panel::before,.panel::after,
+  .panel .rv::before,.panel .rv::after{
+    content:"";position:absolute;width:9px;height:9px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#8a8e94,#3a3d41 60%,#1d1e20);
+    box-shadow:0 1px 1px rgba(0,0,0,.7),inset 0 0 0 1px rgba(0,0,0,.4);
+  }
+  .panel::before{top:9px;left:9px}
+  .panel::after{top:9px;right:9px}
+  .panel .rv::before{bottom:9px;left:9px}
+  .panel .rv::after{bottom:9px;right:9px}
+  .panel .rv{position:absolute;inset:0;pointer-events:none}
+
+  /* hazard stripe */
+  .hazard{
+    height:6px;
+    background:repeating-linear-gradient(135deg,var(--hazard) 0 12px,#111 12px 24px);
+    border-top:1px solid #000;border-bottom:1px solid #000;
+  }
+
+  /* dymo tape */
+  .tape{
+    display:inline-block;
+    font-family:var(--cond);font-weight:600;letter-spacing:.14em;
+    background:var(--tape);color:var(--tape-text);
+    padding:5px 12px 4px;
+    font-size:12px;line-height:1.3;
+    box-shadow:0 1px 0 rgba(255,255,255,.08),0 2px 3px rgba(0,0,0,.6);
+    text-shadow:0 1px 0 rgba(0,0,0,.6),0 -1px 0 rgba(255,255,255,.14);
+    border-radius:1px;
+    position:relative;
+    transform:rotate(-.4deg);
+  }
+  .tape.orange{background:var(--orange);color:var(--orange-ink);text-shadow:0 1px 0 rgba(255,255,255,.28),0 -1px 0 rgba(0,0,0,.25)}
+  .tape.white{background:#e8e6df;color:#141414;text-shadow:0 1px 0 rgba(255,255,255,.7),0 -1px 0 rgba(0,0,0,.15)}
+  .tape.big{font-size:clamp(40px,5.2vw,76px);letter-spacing:.04em;padding:6px 22px 2px;line-height:1;font-weight:700;max-width:100%;overflow-wrap:anywhere}
+  .tape.mark{font-family:var(--mono);text-transform:none;letter-spacing:0;font-weight:700}
+  .tape.lower{text-transform:none;letter-spacing:.06em}
+
+  .eyebrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 26px}
+  .eyebrow .tape{transform:rotate(.3deg)}
+
+  .hero{
+    display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:start;
+  }
+  h1{margin:0 0 24px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;min-width:0;max-width:100%}
+  h1 .tape:nth-child(2){transform:rotate(.5deg)}
+  .sub{max-width:48ch;font-size:18px;font-weight:300;margin:0 0 28px;color:var(--text)}
+  .ctas{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px;margin:0}
+  .btn{
+    font-family:var(--cond);font-weight:600;letter-spacing:.12em;font-size:15px;
+    padding:12px 20px 11px;text-decoration:none;
+    border:1px solid var(--steel-hi);color:var(--text);
+    background:linear-gradient(180deg,#3a3d42,#2b2d31);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 2px rgba(0,0,0,.5);
+  }
+  .btn:hover{background:linear-gradient(180deg,#44474d,#303338)}
+  .btn.primary{
+    background:var(--orange);color:var(--orange-ink);border-color:#f19a7a;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 2px 2px rgba(0,0,0,.5);
+  }
+  .btn.primary:hover{background:#f0845e}
+  .cta-note{font-family:var(--cond);font-size:13px;letter-spacing:.1em;color:var(--muted)}
+
+  /* terminal as a recessed display */
+  .display{
+    background:#0d0e10;
+    border:1px solid #000;
+    box-shadow:inset 0 0 0 1px #2c2f33,inset 0 6px 16px rgba(0,0,0,.8);
+    padding:18px 20px;
+    position:relative;
+  }
+  .display .tape{position:absolute;top:-12px;left:14px;transform:rotate(-1deg)}
+  .term{
+    margin:0;font-family:var(--mono);font-size:12px;line-height:1.75;color:#d9dad6;
+    white-space:pre;overflow-x:auto;
+  }
+  .term .k{color:var(--orange)}
+  .term .p{color:#7c7f85}
+  .leds{display:flex;gap:8px;margin:14px 0 0;align-items:center;font-family:var(--cond);font-size:11px;letter-spacing:.12em;color:var(--muted)}
+  .led{width:8px;height:8px;border-radius:50%;background:#2f8f4e;box-shadow:0 0 6px #35b35e;display:inline-block}
+  .led.o{background:var(--orange);box-shadow:0 0 6px var(--orange)}
+  .led.off{background:#3a3d41;box-shadow:none}
+  @media (prefers-reduced-motion:no-preference){
+    .led.blink{animation:blink 1.6s steps(1) infinite}
+    @keyframes blink{50%{opacity:.25}}
+  }
+
+  /* spec plate */
+  .math-panel{padding:38px 40px 40px 44px}
+  .math-head{display:flex;align-items:center;gap:16px;margin:0 0 20px;flex-wrap:wrap}
+  h2{
+    font-family:var(--cond);font-weight:700;letter-spacing:.06em;
+    font-size:44px;line-height:1;margin:0;
+  }
+  .math-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:36px;align-items:start}
+  .intro{max-width:46ch;font-size:17px;margin:0 0 22px}
+  .many{
+    margin:0;font-size:17px;max-width:46ch;
+    padding:14px 16px;border-left:4px solid var(--orange);background:rgba(0,0,0,.18);
+  }
+  .foot{font-family:var(--cond);font-size:12px;letter-spacing:.08em;color:var(--muted);margin:16px 0 0}
+  .plate{
+    background:
+      linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,0) 40%,rgba(0,0,0,.15)),
+      #8f9297;
+    color:#141517;
+    border:1px solid #5c6066;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.35),0 3px 6px rgba(0,0,0,.6);
+    padding:18px 20px 34px;
+    position:relative;
+    font-family:var(--cond);
+  }
+  .plate::before,.plate::after,.plate .sc::before,.plate .sc::after{
+    content:"";position:absolute;width:7px;height:7px;border-radius:50%;
+    background:radial-gradient(circle at 40% 35%,#d7d9dc,#6c7075 65%,#3a3d41);
+    box-shadow:0 1px 1px rgba(0,0,0,.5);
+  }
+  .plate::before{top:6px;left:6px}.plate::after{top:6px;right:6px}
+  .plate .sc{position:absolute;inset:0;pointer-events:none}
+  .plate .sc::before{bottom:6px;left:6px}.plate .sc::after{bottom:6px;right:6px}
+  .plate-title{
+    display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+    border-bottom:2px solid #2c2e31;padding:0 0 8px;margin:0 0 4px;
+    font-weight:700;letter-spacing:.14em;font-size:14px;
+  }
+  .plate-title small{font-weight:600;font-size:11px;letter-spacing:.12em;color:#3a3d41}
+  .plate table{width:100%;border-collapse:collapse;font-size:16px}
+  .plate td{padding:9px 0;border-bottom:1px solid rgba(0,0,0,.28);vertical-align:baseline}
+  .plate td.price{text-align:right;white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em;padding-left:16px}
+  .plate tr:last-child td{border-bottom:0}
+  .plate tr.ours td{font-weight:700}
+  .plate tr.ours td.price{color:#a9401c}
+  .plate td.what{font-weight:500;letter-spacing:.02em}
+  .plate .stamp{
+    position:absolute;right:16px;bottom:14px;
+    font-size:10px;letter-spacing:.16em;color:#3a3d41;font-weight:600;
+  }
+
+  .proof-panel{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start;padding-top:30px;padding-bottom:30px}
+  .proof-panel p{margin:0;max-width:64ch;font-size:17px}
+  .closing-panel{padding-top:30px;padding-bottom:30px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+  .closing-panel .line{font-family:var(--cond);font-weight:600;font-size:30px;line-height:1.1;letter-spacing:.02em;margin:0}
+  .closing-panel .line .o{color:var(--orange)}
+
+  .footer-panel{
+    padding:14px 40px 14px 44px;
+    display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+    font-family:var(--cond);font-size:13px;letter-spacing:.1em;color:var(--muted);
+  }
+  .footer-panel .mark{font-family:var(--mono);color:var(--orange);font-weight:700;text-transform:none;letter-spacing:0}
+  .vent{
+    flex:1;height:10px;min-width:60px;
+    background:repeating-linear-gradient(90deg,#141517 0 3px,transparent 3px 8px);
+    opacity:.8;
+  }
+
+  @media (max-width:900px){
+    .rack{grid-template-columns:22px minmax(0,1fr) 22px}
+    .u{display:none}
+    .panel,.math-panel{padding:28px 22px 28px 26px}
+    .hero,.math-grid{grid-template-columns:1fr;gap:28px}
+    .footer-panel{padding:14px 22px}
+    .tape.big{font-size:clamp(36px,11vw,60px)}
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="./index.html">← all directions</a>
+  <span>04 · rack label</span>
+</div>
+
+<div class="rack">
+  <div class="rail rail-l" aria-hidden="true">
+  </div>
+
+  <main class="stack">
+    <div class="hazard" aria-hidden="true"></div>
+
+    <section class="panel">
+      <span class="rv" aria-hidden="true"></span>
+      <div class="eyebrow">
+        <span class="tape orange mark">~*</span>
+        <span class="tape lower">usectl · managed kubernetes on our own metal · falkenstein</span>
+      </div>
+      <div class="hero">
+        <div>
+          <h1>
+            <span class="tape white big">one box.</span>
+            <span class="tape big">many machines.</span>
+          </h1>
+          <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+          <div class="ctas">
+            <a class="btn primary" href="#">create a machine</a>
+            <a class="btn" href="#">read the docs</a>
+            <span class="cta-note">30 days free. no card.</span>
+          </div>
+        </div>
+        <div>
+          <div class="display">
+            <span class="tape">console · tty0</span>
+<pre class="term"><span class="p">$</span> usectl login
+<span class="p">$</span> usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3
+<span class="k">✓</span> postgres ready. DATABASE_URL injected
+<span class="k">✓</span> redis ready. REDIS_URL injected
+<span class="k">✓</span> s3 ready. S3_BUCKET injected
+<span class="p">$</span> usectl deploy omnitech
+<span class="k">✓</span> build 28s · tls issued · live at https://omnitech.usectl.com</pre>
+          </div>
+          <div class="leds" aria-hidden="true">
+            <span class="led"></span> pwr
+            <span class="led blink"></span> net
+            <span class="led o"></span> deploy
+            <span class="led off"></span> fault
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel math-panel">
+      <span class="rv" aria-hidden="true"></span>
+      <div class="math-head">
+        <h2>the math</h2>
+        <span class="tape">spec plate · same box · list prices · sept 2026</span>
+      </div>
+      <div class="math-grid">
+        <div>
+          <p class="intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+          <p class="many">ten client machines at 1 vcpu / 2 gb: $200 a month on usectl. about $400 on railway before storage.</p>
+          <p class="foot">railway shown at reserved equivalent. all prices list, september 2026.</p>
+        </div>
+        <div class="plate">
+          <span class="sc" aria-hidden="true"></span>
+          <div class="plate-title"><span>monthly · same box</span><small>list prices, sept 2026</small></div>
+          <table>
+            <tbody>
+              <tr class="ours"><td class="what">usectl machine, everything in</td><td class="price">$40.20</td></tr>
+              <tr><td class="what">vercel pro + supabase pro + upstash + s3, one seat</td><td class="price">$60 and up, before bandwidth</td></tr>
+              <tr><td class="what">railway, same box, reserved</td><td class="price">about $80, plus egress</td></tr>
+              <tr><td class="what">render pro + postgres standard</td><td class="price">$125</td></tr>
+            </tbody>
+          </table>
+          <span class="stamp" aria-hidden="true">2 vcpu · 4 gb · 20 gb</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel proof-panel">
+      <span class="rv" aria-hidden="true"></span>
+      <span class="tape">as built</span>
+      <p>systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+    </section>
+
+    <section class="panel closing-panel">
+      <span class="rv" aria-hidden="true"></span>
+      <span class="tape orange">self hosted</span>
+      <p class="line">on our metal, <span class="o">or on yours.</span> self hosted usectl ships this month.</p>
+    </section>
+
+    <footer class="panel footer-panel">
+      <span class="rv" aria-hidden="true"></span>
+      <span><span class="mark">~*</span>&nbsp; built by systemctl · tbilisi · © 2026</span>
+      <span class="vent" aria-hidden="true"></span>
+      <span>rack 04</span>
+    </footer>
+
+    <div class="hazard" aria-hidden="true"></div>
+  </main>
+
+  <div class="rail rail-r" aria-hidden="true">
+  </div>
+</div>
+
+</body>
+</html>

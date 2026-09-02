@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>usectl datasheet</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<!--
+07 spec sheet. direction: a hardware component datasheet, white paper, hairline rules, part numbers, revision block, small-caps section labels, a css barcode. palette: paper #ffffff, ink #14171c, rule #d3d7dc, muted #5f6773, brand orange #E8734A used only for the ordering-information row and the cta. type: ibm plex sans for body, ibm plex mono for part numbers, figures and the terminal.
+plan: color = paper/ink/rule/muted/accent tokens, dark theme is a dark datasheet (ink on charcoal) not an inversion. type = plex sans 15/22 body, plex mono for anything numeric, small caps labels at 11px with 0.14em tracking. layout = 1120px sheet with a document header, a two column features + typical application block, then numbered datasheet sections and a specifications table, ordering information, revision history, footer barcode.
+-->
+<style>
+:root{
+  --paper:#ffffff;
+  --sheet:#ffffff;
+  --ink:#14171c;
+  --ink-2:#3a4048;
+  --muted:#5f6773;
+  --rule:#d3d7dc;
+  --rule-strong:#14171c;
+  --row:#f5f6f8;
+  --accent:#E8734A;
+  --accent-ink:#ffffff;
+  --code-bg:#f5f6f8;
+  --ok:#2f7d4f;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141618;
+    --sheet:#1b1e22;
+    --ink:#e9ebee;
+    --ink-2:#c3c7cd;
+    --muted:#8e959f;
+    --rule:#33383f;
+    --rule-strong:#e9ebee;
+    --row:#20242a;
+    --accent:#ee8660;
+    --accent-ink:#141618;
+    --code-bg:#121417;
+    --ok:#6cc48f;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141618;
+  --sheet:#1b1e22;
+  --ink:#e9ebee;
+  --ink-2:#c3c7cd;
+  --muted:#8e959f;
+  --rule:#33383f;
+  --rule-strong:#e9ebee;
+  --row:#20242a;
+  --accent:#ee8660;
+  --accent-ink:#141618;
+  --code-bg:#121417;
+  --ok:#6cc48f;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.mono{font-family:"IBM Plex Mono","SFMono-Regular",Menlo,Consolas,monospace}
+.nav{
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:1120px;margin:0 auto;padding:14px 24px 0;
+  font-family:"IBM Plex Mono",Menlo,monospace;font-size:12px;color:var(--muted);
+}
+.nav a{text-decoration:none}
+.nav a:hover{color:var(--ink)}
+.sheet{
+  max-width:1120px;margin:16px auto 48px;padding:0 24px 40px;
+  background:var(--sheet);
+}
+.label{
+  font-variant-caps:all-small-caps;
+  letter-spacing:.14em;
+  font-size:13px;
+  font-weight:600;
+  color:var(--muted);
+}
+.num{font-family:"IBM Plex Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+
+/* document header */
+.dochead{
+  display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;
+  border-bottom:2px solid var(--rule-strong);padding:22px 0 16px;
+}
+.dochead .mark{
+  font-family:"IBM Plex Mono",Menlo,monospace;font-size:28px;font-weight:500;line-height:1;
+  display:inline-flex;align-items:center;gap:12px;
+}
+.dochead .mark .glyph{
+  display:inline-grid;place-items:center;width:44px;height:44px;background:#000;color:#E8734A;
+  font-size:22px;letter-spacing:-.02em;
+}
+.dochead .eyebrow{margin:14px 0 0;font-size:13px;color:var(--muted);font-family:"IBM Plex Mono",Menlo,monospace}
+.revblock{
+  display:grid;grid-template-columns:auto auto;gap:4px 18px;
+  font-family:"IBM Plex Mono",Menlo,monospace;font-size:12px;
+  border:1px solid var(--rule);padding:10px 14px;
+}
+.revblock dt{color:var(--muted);margin:0}
+.revblock dd{margin:0;text-align:right}
+
+/* hero block */
+.hero{
+  display:grid;grid-template-columns:1.15fr 1fr;gap:48px;
+  padding:32px 0;border-bottom:1px solid var(--rule);
+}
+.hero > *{min-width:0}
+h1{
+  font-size:clamp(38px,4.6vw,56px);line-height:1.02;letter-spacing:-.025em;font-weight:500;
+  margin:0 0 18px;text-wrap:balance;
+}
+.sub{font-size:17px;line-height:1.5;color:var(--ink-2);max-width:34em;margin:0 0 24px}
+.ctas{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.btn{
+  display:inline-block;padding:10px 18px;text-decoration:none;font-weight:500;
+  font-family:"IBM Plex Mono",Menlo,monospace;font-size:14px;
+  background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);
+}
+.btn:hover{filter:brightness(.95)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule-strong)}
+.ctanote{font-size:13px;color:var(--muted);font-family:"IBM Plex Mono",Menlo,monospace}
+.features{
+  margin:28px 0 0;padding:0;list-style:none;
+  display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;font-size:14px;color:var(--ink-2);
+}
+.features li{padding-left:14px;position:relative}
+.features li:not(.label)::before{content:"";position:absolute;left:0;top:.62em;width:6px;height:6px;background:var(--ink)}
+.features .label{display:block;grid-column:1/-1;margin-bottom:4px}
+
+.term{
+  background:var(--code-bg);border:1px solid var(--rule);
+  padding:18px 20px;font-family:"IBM Plex Mono",Menlo,monospace;font-size:13px;line-height:1.65;
+  overflow-x:auto;margin:0;white-space:pre;color:var(--ink);
+}
+.term .ok{color:var(--ok)}
+.term .p{color:var(--muted)}
+.figcap{
+  display:flex;justify-content:space-between;gap:12px;
+  font-family:"IBM Plex Mono",Menlo,monospace;font-size:12px;color:var(--muted);margin:8px 0 0;
+}
+
+/* sections */
+.sec{padding:30px 0;border-bottom:1px solid var(--rule)}
+.sec-head{display:flex;align-items:baseline;gap:16px;margin:0 0 16px}
+.sec-head .n{font-family:"IBM Plex Mono",Menlo,monospace;font-size:13px;color:var(--muted);min-width:2.2em}
+.sec-head h2{margin:0;font-size:22px;font-weight:500;letter-spacing:-.01em}
+.sec-head .label{margin-left:auto}
+.intro{max-width:64em;margin:0 0 22px;color:var(--ink-2);font-size:16px}
+
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--rule)}
+thead th{
+  font-variant-caps:all-small-caps;letter-spacing:.12em;font-size:13px;font-weight:600;color:var(--muted);
+  border-bottom:1px solid var(--rule-strong);
+}
+tbody tr:nth-child(even) td{background:var(--row)}
+td.pn,th.pn{font-family:"IBM Plex Mono",Menlo,monospace;font-size:13px;white-space:nowrap}
+td.val{font-family:"IBM Plex Mono",Menlo,monospace;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+th.val{text-align:right}
+tr.hl td{background:var(--accent);color:var(--accent-ink)}
+tr.hl td.pn{font-weight:500}
+.note{font-size:12.5px;color:var(--muted);margin:12px 0 0;font-family:"IBM Plex Mono",Menlo,monospace}
+.multi{
+  margin:22px 0 0;padding:14px 16px;border:1px solid var(--rule);
+  display:grid;grid-template-columns:auto 1fr;gap:6px 20px;align-items:baseline;font-size:15px;
+}
+.multi .label{align-self:baseline}
+
+.specs{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.specs dl{margin:0;display:grid;grid-template-columns:1fr auto;font-size:14px}
+.specs dt{padding:8px 0;border-bottom:1px solid var(--rule);color:var(--muted)}
+.specs dd{margin:0;padding:8px 0;border-bottom:1px solid var(--rule);text-align:right;font-family:"IBM Plex Mono",Menlo,monospace;font-size:13px}
+
+.proof{font-size:16px;max-width:58em;margin:0;color:var(--ink-2)}
+.closing{font-size:20px;font-weight:500;margin:0;letter-spacing:-.01em}
+
+/* revision history */
+.revs{font-family:"IBM Plex Mono",Menlo,monospace;font-size:12.5px;width:100%;min-width:0}
+.revs th,.revs td{padding:7px 10px}
+
+/* footer with barcode */
+.foot{
+  display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;padding:26px 0 0;
+  font-family:"IBM Plex Mono",Menlo,monospace;font-size:12px;color:var(--muted);
+}
+.barcode{
+  display:inline-block;height:44px;width:230px;
+  background:repeating-linear-gradient(90deg,
+    var(--ink) 0 2px,transparent 2px 4px,
+    var(--ink) 4px 5px,transparent 5px 8px,
+    var(--ink) 8px 11px,transparent 11px 12px,
+    var(--ink) 12px 13px,transparent 13px 16px,
+    var(--ink) 16px 18px,transparent 18px 19px,
+    var(--ink) 19px 22px,transparent 22px 25px,
+    var(--ink) 25px 26px,transparent 26px 28px,
+    var(--ink) 28px 31px,transparent 31px 32px,
+    var(--ink) 32px 33px,transparent 33px 36px);
+}
+.barcode-wrap{text-align:right}
+.barcode-wrap .code{display:block;letter-spacing:.3em;color:var(--ink);margin-top:4px}
+
+@media (max-width:860px){
+  .hero,.specs{grid-template-columns:1fr}
+  .dochead{grid-template-columns:1fr}
+  .features{grid-template-columns:1fr}
+  .foot{grid-template-columns:1fr}
+  .barcode-wrap{text-align:left}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="variants">
+  <a href="./index.html">← all directions</a>
+  <span>07 · spec sheet</span>
+</nav>
+
+<main class="sheet">
+  <header class="dochead">
+    <div>
+      <div class="mark"><span class="glyph" aria-hidden="true">~*</span><span>usectl</span></div>
+      <p class="eyebrow">usectl · managed kubernetes on our own metal · falkenstein</p>
+    </div>
+    <dl class="revblock" aria-label="document block">
+      <dt>document</dt><dd>ds-usectl-machine</dd>
+      <dt>revision</dt><dd>2026.09</dd>
+      <dt>status</dt><dd>production</dd>
+      <dt>site</dt><dd>fsn1, falkenstein</dd>
+    </dl>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>one box. many machines.</h1>
+      <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+      <div class="ctas">
+        <a class="btn" href="#">create a machine</a>
+        <span class="ctanote">30 days free. no card.</span>
+        <a class="btn ghost" href="#">read the docs</a>
+      </div>
+      <ul class="features">
+        <li class="label" style="padding-left:0">features</li>
+        <li>kubernetes namespace per machine</li>
+        <li>hetzner bare metal, falkenstein</li>
+        <li>cli first, mcp server included</li>
+        <li>postgres, redis, s3, nats, mongo, mssql</li>
+        <li>meilisearch, cron, oauth2 proxy</li>
+        <li>grafana and glitchtip addons</li>
+        <li>agent pods: hermes, openclaw, headless browser</li>
+        <li>local qwen3-14b</li>
+      </ul>
+    </div>
+    <figure style="margin:0">
+      <pre class="term"><span class="p">$</span> usectl login
+<span class="p">$</span> usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3
+<span class="ok">✓</span> postgres ready. DATABASE_URL injected
+<span class="ok">✓</span> redis ready. REDIS_URL injected
+<span class="ok">✓</span> s3 ready. S3_BUCKET injected
+<span class="p">$</span> usectl deploy omnitech
+<span class="ok">✓</span> build 28s · tls issued · live at https://omnitech.usectl.com</pre>
+      <figcaption class="figcap"><span>figure 1. typical application</span><span>cli, one machine, three addons</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="sec" id="math">
+    <div class="sec-head">
+      <span class="n">1.</span>
+      <h2>the math</h2>
+      <span class="label">ordering information</span>
+    </div>
+    <p class="intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="pn">part number</th>
+            <th>configuration</th>
+            <th>included</th>
+            <th class="val">list price, monthly</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="hl">
+            <td class="pn">usectl-m-2c4g</td>
+            <td>usectl machine, everything in</td>
+            <td>2 vcpu / 4 gb / 20 gb, postgres, redis, s3, cron, domains, tls, unlimited seats</td>
+            <td class="val">$40.20</td>
+          </tr>
+          <tr>
+            <td class="pn">ref-a</td>
+            <td>vercel pro + supabase pro + upstash + s3, one seat</td>
+            <td>same box, assembled from four vendors</td>
+            <td class="val">$60 and up, before bandwidth</td>
+          </tr>
+          <tr>
+            <td class="pn">ref-b</td>
+            <td>railway, same box, reserved</td>
+            <td>same box</td>
+            <td class="val">about $80, plus egress</td>
+          </tr>
+          <tr>
+            <td class="pn">ref-c</td>
+            <td>render pro + postgres standard</td>
+            <td>same box</td>
+            <td class="val">$125</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">same box, list prices, sept 2026. railway shown at reserved equivalent. all prices list, september 2026.</p>
+    <div class="multi">
+      <span class="label">many machines</span>
+      <p style="margin:0">ten client machines at 1 vcpu / 2 gb: $200 a month on usectl. about $400 on railway before storage.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <span class="n">2.</span>
+      <h2>specifications</h2>
+      <span class="label">per machine</span>
+    </div>
+    <div class="specs">
+      <dl>
+        <dt>isolation</dt><dd>kubernetes namespace</dd>
+        <dt>compute</dt><dd>hetzner bare metal</dd>
+        <dt>site</dt><dd>falkenstein, de</dd>
+        <dt>interface</dt><dd>cli, mcp</dd>
+        <dt>ingress</dt><dd>domain, tls issued</dd>
+        <dt>seats</dt><dd>unlimited</dd>
+      </dl>
+      <dl>
+        <dt>datastores</dt><dd>postgres, redis, s3, nats, mongo, mssql</dd>
+        <dt>search</dt><dd>meilisearch</dd>
+        <dt>scheduling</dt><dd>cron</dd>
+        <dt>auth</dt><dd>oauth2 proxy</dd>
+        <dt>observability</dt><dd>grafana, glitchtip</dd>
+        <dt>agents</dt><dd>hermes, openclaw, browser, qwen3-14b</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <span class="n">3.</span>
+      <h2>reference design</h2>
+      <span class="label">in production</span>
+    </div>
+    <p class="proof">systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <span class="n">4.</span>
+      <h2>availability</h2>
+      <span class="label">revision history</span>
+    </div>
+    <p class="closing">on our metal, or on yours. self hosted usectl ships this month.</p>
+    <div class="tablewrap" style="margin-top:18px">
+      <table class="revs">
+        <thead><tr><th>rev</th><th>date</th><th>change</th></tr></thead>
+        <tbody>
+          <tr><td>2026.09</td><td>september 2026</td><td>list prices as of september 2026. self hosted usectl ships this month.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div>built by systemctl · tbilisi · © 2026</div>
+    <div class="barcode-wrap">
+      <span class="barcode" aria-hidden="true"></span>
+      <span class="code">usectl-m-2c4g</span>
+    </div>
+  </footer>
+</main>
+
+</body>
+</html>

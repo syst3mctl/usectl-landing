@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<!-- 05 quiet dark. direction: near-black with a warm undertone, small type, generous whitespace, one desaturated clay accent (#b8907a, a dusty departure from brand #E8734A), css grain via svg turbulence. type: manrope body + dm mono terminal. single theme, dark committed. -->
+<title>usectl · quiet dark</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap">
+<style>
+  :root{
+    --bg:#141210;
+    --bg-2:#181512;
+    --line:#292420;
+    --line-soft:#1f1b18;
+    --text:#d6cec3;
+    --text-2:#9a9084;
+    --muted:#6b6259;
+    --accent:#b8907a;
+    --accent-soft:#5a473d;
+    --font-sans:"Manrope",ui-sans-serif,system-ui,"Helvetica Neue",Arial,sans-serif;
+    --font-mono:"DM Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-sans);
+    font-size:14px;
+    line-height:1.7;
+    font-weight:400;
+    -webkit-font-smoothing:antialiased;
+    letter-spacing:.005em;
+    position:relative;
+    min-height:100%;
+  }
+  /* grain: fixed layer of svg turbulence, very low opacity */
+  body::before{
+    content:"";
+    position:absolute;inset:0;
+    pointer-events:none;
+    z-index:0;
+    opacity:.055;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .88 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size:220px 220px;
+  }
+  .page{position:relative;z-index:1}
+  a{color:inherit;text-decoration:none}
+  a:focus-visible,button:focus-visible{outline:1px solid var(--accent);outline-offset:4px;border-radius:2px}
+
+  .topbar{
+    position:absolute;top:0;left:0;right:0;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:22px 28px;
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.02em;
+  }
+  .topbar a{color:var(--muted);transition:color .3s}
+  .topbar a:hover{color:var(--text-2)}
+  .topbar .label{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.04em}
+
+  .col{
+    width:min(600px,calc(100% - 56px));
+    margin:0 auto;
+  }
+
+  /* hero */
+  .hero{padding:168px 0 150px}
+  .mark{
+    font-family:var(--font-mono);
+    font-size:15px;
+    color:var(--accent);
+    margin:0 0 66px;
+    letter-spacing:-.02em;
+  }
+  .eyebrow{
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.04em;
+    margin:0 0 30px;
+  }
+  h1{
+    font-size:34px;
+    line-height:1.2;
+    font-weight:500;
+    letter-spacing:-.025em;
+    margin:0 0 30px;
+    color:var(--text);
+    text-wrap:balance;
+  }
+  .sub{
+    font-size:15px;
+    line-height:1.75;
+    color:var(--text-2);
+    margin:0 0 46px;
+    max-width:520px;
+    font-weight:300;
+  }
+  .ctas{display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin:0 0 84px}
+  .btn{
+    display:inline-block;
+    font-size:13px;
+    font-weight:500;
+    padding:10px 16px;
+    border:1px solid var(--accent-soft);
+    color:var(--text);
+    border-radius:2px;
+    transition:border-color .3s,color .3s;
+  }
+  .btn:hover{border-color:var(--accent);color:#fff}
+  .cta-note{font-size:11.5px;color:var(--muted)}
+  .link{
+    font-size:13px;color:var(--text-2);
+    border-bottom:1px solid var(--line);
+    padding-bottom:1px;
+    transition:color .3s,border-color .3s;
+  }
+  .link:hover{color:var(--text);border-color:var(--text-2)}
+
+  .term{
+    font-family:var(--font-mono);
+    font-size:12px;
+    line-height:1.85;
+    color:var(--text-2);
+    font-weight:300;
+    border-top:1px solid var(--line-soft);
+    padding-top:26px;
+    overflow-x:auto;
+    white-space:pre;
+    margin:0;
+  }
+  .term .p{color:var(--muted)}
+  .term .ok{color:var(--accent)}
+  .term .cmd{color:var(--text)}
+  .term .cur{
+    display:inline-block;width:6px;height:13px;
+    background:var(--accent);vertical-align:-2px;margin-left:2px;
+    animation:blink 1.4s steps(1) infinite;
+  }
+  @keyframes blink{50%{opacity:0}}
+  @media (prefers-reduced-motion:reduce){.term .cur{animation:none}}
+
+  /* section rhythm */
+  .rule{height:1px;background:var(--line-soft);width:min(600px,calc(100% - 56px));margin:0 auto}
+  .section{padding:120px 0}
+  .h2{
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.06em;
+    margin:0 0 38px;
+    font-weight:500;
+  }
+  .intro{
+    font-size:15px;
+    line-height:1.75;
+    color:var(--text);
+    margin:0 0 58px;
+    font-weight:300;
+  }
+
+  /* ledger with thin bars */
+  .ledger{margin:0 0 54px;padding:0;list-style:none;display:grid;gap:22px}
+  .row{display:grid;grid-template-columns:1fr auto;gap:14px 24px;align-items:baseline}
+  .row .name{font-size:13px;color:var(--text-2);font-weight:400}
+  .row .price{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    color:var(--text-2);
+    font-variant-numeric:tabular-nums;
+    text-align:right;
+    white-space:nowrap;
+  }
+  .row.us .name,.row.us .price{color:var(--text)}
+  .row .bar{
+    grid-column:1 / -1;
+    height:1px;background:var(--line);
+    position:relative;
+  }
+  .row .bar i{
+    position:absolute;left:0;top:-1px;height:3px;
+    background:var(--line);width:var(--w);
+  }
+  .row.us .bar i{background:var(--accent)}
+
+  .many{
+    font-size:14px;
+    color:var(--text-2);
+    margin:0 0 20px;
+    padding-left:18px;
+    border-left:1px solid var(--accent-soft);
+    font-weight:300;
+  }
+  .foot{font-size:11px;color:var(--muted);margin:0}
+
+  .proof{font-size:14px;line-height:1.8;color:var(--text-2);font-weight:300;margin:0}
+  .close{
+    font-size:20px;line-height:1.45;font-weight:400;
+    letter-spacing:-.015em;color:var(--text);margin:0;text-wrap:balance;
+  }
+  .close em{font-style:normal;color:var(--accent)}
+
+  footer{
+    padding:0 0 60px;
+    font-size:11px;color:var(--muted);
+    display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  }
+  footer .m{font-family:var(--font-mono);color:var(--accent-soft)}
+
+  @media (max-width:560px){
+    .hero{padding:140px 0 110px}
+    h1{font-size:28px}
+    .section{padding:90px 0}
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <nav class="topbar">
+    <a href="./index.html">← all directions</a>
+    <span class="label">05 · quiet dark</span>
+  </nav>
+
+  <header class="hero">
+    <div class="col">
+      <p class="mark" aria-label="usectl mark">~*</p>
+      <p class="eyebrow">usectl · managed kubernetes on our own metal · falkenstein</p>
+      <h1>one box. many machines.</h1>
+      <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+      <div class="ctas">
+        <a class="btn" href="#">create a machine</a>
+        <span class="cta-note">30 days free. no card.</span>
+        <a class="link" href="#">read the docs</a>
+      </div>
+      <pre class="term" aria-label="terminal session"><span class="p">$</span> <span class="cmd">usectl login</span>
+<span class="p">$</span> <span class="cmd">usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3</span>
+<span class="ok">✓</span> postgres ready. DATABASE_URL injected
+<span class="ok">✓</span> redis ready. REDIS_URL injected
+<span class="ok">✓</span> s3 ready. S3_BUCKET injected
+<span class="p">$</span> <span class="cmd">usectl deploy omnitech</span>
+<span class="ok">✓</span> build 28s · tls issued · live at https://omnitech.usectl.com<span class="cur" aria-hidden="true"></span></pre>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <section class="section" id="math">
+    <div class="col">
+      <p class="h2">the math</p>
+      <p class="intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+
+      <ul class="ledger" aria-label="same box, list prices, sept 2026">
+        <li class="row us">
+          <span class="name">usectl machine, everything in</span>
+          <span class="price">$40.20</span>
+          <span class="bar" aria-hidden="true"><i style="--w:32.2%"></i></span>
+        </li>
+        <li class="row">
+          <span class="name">vercel pro + supabase pro + upstash + s3, one seat</span>
+          <span class="price">$60 and up, before bandwidth</span>
+          <span class="bar" aria-hidden="true"><i style="--w:48%"></i></span>
+        </li>
+        <li class="row">
+          <span class="name">railway, same box, reserved</span>
+          <span class="price">about $80, plus egress</span>
+          <span class="bar" aria-hidden="true"><i style="--w:64%"></i></span>
+        </li>
+        <li class="row">
+          <span class="name">render pro + postgres standard</span>
+          <span class="price">$125</span>
+          <span class="bar" aria-hidden="true"><i style="--w:100%"></i></span>
+        </li>
+      </ul>
+
+      <p class="many">ten client machines at 1 vcpu / 2 gb: $200 a month on usectl. about $400 on railway before storage.</p>
+      <p class="foot">railway shown at reserved equivalent. all prices list, september 2026.</p>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section class="section">
+    <div class="col">
+      <p class="proof">systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section class="section">
+    <div class="col">
+      <p class="close">on our metal, or on yours. <em>self hosted usectl ships this month.</em></p>
+    </div>
+  </section>
+
+  <footer class="col">
+    <span>built by systemctl · tbilisi · © 2026</span>
+    <span class="m">~*</span>
+  </footer>
+</div>
+
+</body>
+</html>

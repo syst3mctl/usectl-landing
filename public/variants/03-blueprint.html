@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>usectl blueprint</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Public+Sans:wght@300;400;500&display=swap">
+<!-- 03 blueprint. direction: a drafting sheet, one physical box containing many namespaces drawn as line-work on drafting blue. palette: ground #1e3a5f, line white #eef3fa, pale line #9fbde0, faint grid, brand orange #E8734A kept only for dimension callouts. type: azeret mono for labels, callouts and the terminal, public sans light for body. single theme by choice: a blueprint is blue. -->
+<style>
+  :root{
+    --bp-ground:#1e3a5f;
+    --bp-ground-deep:#182f4e;
+    --bp-line:#eef3fa;
+    --bp-pale:#9fbde0;
+    --bp-faint:rgba(238,243,250,.09);
+    --bp-grid:rgba(238,243,250,.07);
+    --bp-grid-major:rgba(238,243,250,.13);
+    --bp-callout:#E8734A;
+    --bp-callout-ink:#1a2a40;
+    --mono:"Azeret Mono","IBM Plex Mono","SFMono-Regular",Menlo,Consolas,monospace;
+    --sans:"Public Sans","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bp-ground);
+    color:var(--bp-line);
+    font-family:var(--sans);
+    font-weight:300;
+    font-size:16px;
+    line-height:1.55;
+    background-image:
+      linear-gradient(var(--bp-grid-major) 1px,transparent 1px),
+      linear-gradient(90deg,var(--bp-grid-major) 1px,transparent 1px),
+      linear-gradient(var(--bp-grid) 1px,transparent 1px),
+      linear-gradient(90deg,var(--bp-grid) 1px,transparent 1px);
+    background-size:120px 120px,120px 120px,24px 24px,24px 24px;
+    overflow-x:hidden;
+  }
+  a{color:var(--bp-line)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--bp-callout);outline-offset:3px}
+  .nav{
+    position:absolute;top:14px;left:18px;
+    display:flex;gap:18px;align-items:baseline;
+    font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--bp-pale);
+    z-index:2;
+  }
+  .nav a{color:var(--bp-pale);text-decoration:none;border-bottom:1px solid transparent}
+  .nav a:hover{border-bottom-color:var(--bp-pale)}
+  .sheet{
+    max-width:1320px;
+    margin:44px auto 40px;
+    padding:0 20px;
+  }
+  .frame{
+    border:1.5px solid var(--bp-line);
+    outline:1px solid var(--bp-faint);
+    outline-offset:6px;
+    padding:48px 56px 0;
+    position:relative;
+  }
+  .frame::before,.frame::after{
+    content:"";position:absolute;width:14px;height:14px;
+    border:1px solid var(--bp-pale);
+  }
+  .frame::before{top:-8px;left:-8px;border-right:0;border-bottom:0}
+  .frame::after{bottom:-8px;right:-8px;border-left:0;border-top:0}
+  .mono{font-family:var(--mono)}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+    color:var(--bp-pale);margin:0 0 22px;
+  }
+  .eyebrow .mark{color:var(--bp-callout);font-weight:600}
+  .hero{
+    display:grid;
+    grid-template-columns:minmax(0,5fr) minmax(0,7fr);
+    gap:48px;
+    align-items:start;
+  }
+  h1{
+    font-family:var(--mono);font-weight:500;
+    font-size:clamp(34px,4.2vw,56px);line-height:1.08;letter-spacing:-.02em;
+    margin:0 0 22px;text-wrap:balance;
+  }
+  .sub{max-width:44ch;font-size:17px;margin:0 0 30px;color:var(--bp-line)}
+  .ctas{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;margin:0 0 34px}
+  .btn{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    padding:12px 18px;text-decoration:none;
+    border:1.5px solid var(--bp-line);color:var(--bp-line);
+    position:relative;
+  }
+  .btn.primary{background:var(--bp-callout);border-color:var(--bp-callout);color:var(--bp-callout-ink);font-weight:600}
+  .btn.primary:hover{background:#f08b66;border-color:#f08b66}
+  .btn.secondary:hover{background:var(--bp-faint)}
+  .cta-note{font-family:var(--mono);font-size:11px;color:var(--bp-pale);letter-spacing:.04em}
+  .term{
+    font-family:var(--mono);font-size:12.5px;line-height:1.7;
+    border:1px solid var(--bp-pale);
+    padding:16px 18px;margin:0;
+    overflow-x:auto;white-space:pre;
+    background:var(--bp-ground-deep);
+    position:relative;
+  }
+  .term .k{color:var(--bp-callout)}
+  .term .p{color:var(--bp-pale)}
+  .term-label{
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--bp-pale);
+    margin:0 0 6px;
+  }
+  /* diagram */
+  .drawing{min-width:0}
+  .drawing svg{width:100%;height:auto;display:block}
+  .drawing text{font-family:var(--mono)}
+  .dimnote{
+    font-family:var(--mono);font-size:11px;color:var(--bp-pale);letter-spacing:.04em;
+    margin:8px 0 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  /* section rule */
+  .rule{
+    display:flex;align-items:center;gap:16px;margin:64px 0 28px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--bp-pale);
+  }
+  .rule::before,.rule::after{content:"";flex:1;border-top:1px solid var(--bp-faint)}
+  .rule::before{flex:0 0 40px}
+  h2{
+    font-family:var(--mono);font-weight:500;font-size:30px;letter-spacing:-.01em;margin:0 0 14px;
+  }
+  .math{
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:start;
+  }
+  .math-intro{max-width:44ch;font-size:16.5px;margin:0 0 22px}
+  .ledger{
+    list-style:none;margin:0;padding:0;
+    font-family:var(--mono);font-size:13px;
+  }
+  .ledger li{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;
+    gap:10px 20px;align-items:baseline;
+    padding:14px 0;
+    border-top:1px solid var(--bp-faint);
+  }
+  .ledger li:last-child{border-bottom:1px solid var(--bp-faint)}
+  .ledger .what{color:var(--bp-line)}
+  .ledger .price{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--bp-pale)}
+  .ledger li.ours .price{color:var(--bp-callout);font-weight:600}
+  .ledger li.ours .what{font-weight:500}
+  /* dimension bar: a real dimension line for the price */
+  .dim{
+    display:block;height:14px;position:relative;margin-top:8px;
+  }
+  .dim::before{
+    content:"";position:absolute;left:0;right:0;top:7px;border-top:1px solid var(--bp-pale);
+  }
+  .dim::after{
+    content:"";position:absolute;left:0;top:2px;bottom:2px;border-left:1px solid var(--bp-pale);
+  }
+  .dim i{position:absolute;right:0;top:2px;bottom:2px;border-right:1px solid var(--bp-pale)}
+  .dim b{position:absolute;top:7px;height:0;left:0;border-top:1.5px solid var(--bp-callout);width:var(--w)}
+  .many{
+    margin:26px 0 0;font-size:16px;max-width:60ch;
+    padding-left:16px;border-left:1.5px solid var(--bp-callout);
+  }
+  .foot{font-family:var(--mono);font-size:11px;color:var(--bp-pale);margin:16px 0 0;letter-spacing:.02em}
+  .proof{
+    margin:54px 0 0;
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;
+    align-items:start;
+  }
+  .proof p{margin:0;max-width:58ch;font-size:16.5px}
+  .proof .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--bp-pale)}
+  .closing{
+    margin:44px 0 0;
+    font-family:var(--mono);font-size:22px;font-weight:500;line-height:1.35;letter-spacing:-.01em;
+    max-width:30ch;
+  }
+  .closing .k{color:var(--bp-callout)}
+  /* title block: the drafting flourish */
+  .titleblock{
+    margin:56px -56px 0;
+    border-top:1.5px solid var(--bp-line);
+    display:grid;
+    grid-template-columns:2fr 1.2fr 1fr 1fr 1fr;
+    font-family:var(--mono);font-size:11px;letter-spacing:.04em;
+  }
+  .titleblock > div{
+    padding:10px 14px 12px;border-right:1px solid var(--bp-faint);
+    display:flex;flex-direction:column;gap:6px;min-width:0;
+  }
+  .titleblock > div:last-child{border-right:0}
+  .titleblock .h{font-size:9.5px;letter-spacing:.14em;color:var(--bp-pale)}
+  .titleblock .v{color:var(--bp-line);font-size:12px;overflow-wrap:anywhere}
+  .titleblock .v .mark{color:var(--bp-callout);font-weight:600}
+  @media (max-width:900px){
+    .frame{padding:40px 24px 0}
+    .hero,.math,.proof{grid-template-columns:1fr;gap:32px}
+    .titleblock{margin:48px -24px 0;grid-template-columns:1fr 1fr}
+    .titleblock > div:nth-child(2n){border-right:0}
+    .titleblock > div{border-bottom:1px solid var(--bp-faint)}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .btn{transition:background .15s ease}
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="./index.html">← all directions</a>
+  <span>03 · blueprint</span>
+</div>
+
+<main class="sheet">
+  <div class="frame">
+    <p class="eyebrow"><span class="mark">~*</span> usectl · managed kubernetes on our own metal · falkenstein</p>
+
+    <section class="hero">
+      <div>
+        <h1>one box.<br>many machines.</h1>
+        <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+        <div class="ctas">
+          <a class="btn primary" href="#">create a machine</a>
+          <a class="btn secondary" href="#">read the docs</a>
+          <span class="cta-note">30 days free. no card.</span>
+        </div>
+        <p class="term-label">detail a · the cli</p>
+<pre class="term"><span class="p">$</span> usectl login
+<span class="p">$</span> usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3
+<span class="k">✓</span> postgres ready. DATABASE_URL injected
+<span class="k">✓</span> redis ready. REDIS_URL injected
+<span class="k">✓</span> s3 ready. S3_BUCKET injected
+<span class="p">$</span> usectl deploy omnitech
+<span class="k">✓</span> build 28s · tls issued · live at https://omnitech.usectl.com</pre>
+      </div>
+
+      <figure class="drawing" style="margin:0">
+        <svg viewBox="0 0 720 560" role="img" aria-label="line drawing of one physical box containing four isolated namespaces: omnitech, clinic, ev-charging and agent, each with its own postgres, redis, s3 and domain">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M0 1 L10 5 L0 9 z" fill="#E8734A"/>
+            </marker>
+            <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#9fbde0" stroke-width=".7" opacity=".55"/>
+            </pattern>
+          </defs>
+
+          <!-- outer box, the physical machine -->
+          <g fill="none" stroke="#eef3fa" stroke-width="1.6">
+            <rect x="80" y="88" width="560" height="384"/>
+            <!-- isometric top face suggestion -->
+            <path d="M80 88 L124 52 L684 52 L640 88" stroke-width="1.2"/>
+            <path d="M684 52 L684 436 L640 472" stroke-width="1.2"/>
+            <line x1="640" y1="88" x2="684" y2="52" stroke-width="1.2"/>
+          </g>
+          <!-- hidden edges, dashed -->
+          <g fill="none" stroke="#9fbde0" stroke-width=".9" stroke-dasharray="5 4" opacity=".7">
+            <path d="M80 472 L124 436 L684 436"/>
+            <line x1="124" y1="52" x2="124" y2="436"/>
+          </g>
+          <!-- top face hatch -->
+          <path d="M80 88 L124 52 L684 52 L640 88 z" fill="url(#hatch)" stroke="none"/>
+
+          <!-- box label -->
+          <text x="96" y="114" font-size="11" fill="#9fbde0" letter-spacing="1.5">hetzner bare metal · falkenstein</text>
+          <text x="96" y="130" font-size="10" fill="#9fbde0">kubernetes · one node · many namespaces</text>
+
+          <!-- namespaces: 2 x 2 grid -->
+          <g id="ns" font-size="10" stroke-width="1.2">
+            <!-- omnitech -->
+            <g transform="translate(104,150)">
+              <rect width="248" height="140" fill="none" stroke="#eef3fa"/>
+              <text x="10" y="18" font-size="12" fill="#eef3fa" font-weight="600">omnitech</text>
+              <text x="10" y="32" fill="#9fbde0">namespace · 2 vcpu / 4 gb / 20 gb</text>
+              <g fill="none" stroke="#9fbde0">
+                <rect x="10" y="46" width="70" height="34"/><text x="16" y="67" fill="#eef3fa" stroke="none">postgres</text>
+                <rect x="89" y="46" width="70" height="34"/><text x="95" y="67" fill="#eef3fa" stroke="none">redis</text>
+                <rect x="168" y="46" width="70" height="34"/><text x="174" y="67" fill="#eef3fa" stroke="none">s3</text>
+                <rect x="10" y="90" width="149" height="34"/><text x="16" y="111" fill="#eef3fa" stroke="none">omnitech.usectl.com</text>
+                <rect x="168" y="90" width="70" height="34" stroke-dasharray="3 3"/><text x="174" y="111" fill="#9fbde0" stroke="none">agent</text>
+              </g>
+            </g>
+            <!-- clinic -->
+            <g transform="translate(368,150)">
+              <rect width="248" height="140" fill="none" stroke="#eef3fa"/>
+              <text x="10" y="18" font-size="12" fill="#eef3fa" font-weight="600">clinic</text>
+              <text x="10" y="32" fill="#9fbde0">namespace · postgres · oauth2 proxy</text>
+              <g fill="none" stroke="#9fbde0">
+                <rect x="10" y="46" width="70" height="34"/><text x="16" y="67" fill="#eef3fa" stroke="none">postgres</text>
+                <rect x="89" y="46" width="70" height="34"/><text x="95" y="67" fill="#eef3fa" stroke="none">s3</text>
+                <rect x="168" y="46" width="70" height="34"/><text x="174" y="67" fill="#eef3fa" stroke="none">oauth2</text>
+                <rect x="10" y="90" width="149" height="34"/><text x="16" y="111" fill="#eef3fa" stroke="none">clinic.usectl.com</text>
+                <rect x="168" y="90" width="70" height="34"/><text x="174" y="111" fill="#eef3fa" stroke="none">cron</text>
+              </g>
+            </g>
+            <!-- ev-charging -->
+            <g transform="translate(104,306)">
+              <rect width="248" height="140" fill="none" stroke="#eef3fa"/>
+              <text x="10" y="18" font-size="12" fill="#eef3fa" font-weight="600">ev-charging</text>
+              <text x="10" y="32" fill="#9fbde0">namespace · 16 services</text>
+              <g fill="none" stroke="#9fbde0">
+                <rect x="10" y="46" width="70" height="34"/><text x="16" y="67" fill="#eef3fa" stroke="none">postgres</text>
+                <rect x="89" y="46" width="70" height="34"/><text x="95" y="67" fill="#eef3fa" stroke="none">nats</text>
+                <rect x="168" y="46" width="70" height="34"/><text x="174" y="67" fill="#eef3fa" stroke="none">redis</text>
+                <rect x="10" y="90" width="70" height="34"/><text x="16" y="111" fill="#eef3fa" stroke="none">grafana</text>
+                <rect x="89" y="90" width="70" height="34"/><text x="95" y="111" fill="#eef3fa" stroke="none">glitchtip</text>
+                <rect x="168" y="90" width="70" height="34"/><text x="174" y="111" fill="#eef3fa" stroke="none">s3</text>
+              </g>
+            </g>
+            <!-- agent -->
+            <g transform="translate(368,306)">
+              <rect width="248" height="140" fill="none" stroke="#eef3fa"/>
+              <text x="10" y="18" font-size="12" fill="#eef3fa" font-weight="600">agent</text>
+              <text x="10" y="32" fill="#9fbde0">namespace · agent pods</text>
+              <g fill="none" stroke="#9fbde0">
+                <rect x="10" y="46" width="70" height="34"/><text x="16" y="67" fill="#eef3fa" stroke="none">hermes</text>
+                <rect x="89" y="46" width="70" height="34"/><text x="95" y="67" fill="#eef3fa" stroke="none">openclaw</text>
+                <rect x="168" y="46" width="70" height="34"/><text x="174" y="67" fill="#eef3fa" stroke="none">browser</text>
+                <rect x="10" y="90" width="149" height="34"/><text x="16" y="111" fill="#eef3fa" stroke="none">local qwen3-14b</text>
+                <rect x="168" y="90" width="70" height="34"/><text x="174" y="111" fill="#eef3fa" stroke="none">redis</text>
+              </g>
+            </g>
+          </g>
+
+          <!-- dimension: bottom, width of box -->
+          <g stroke="#E8734A" stroke-width="1" fill="none">
+            <line x1="80" y1="486" x2="80" y2="512"/>
+            <line x1="640" y1="486" x2="640" y2="512"/>
+            <line x1="82" y1="504" x2="638" y2="504" marker-start="url(#arr)" marker-end="url(#arr)"/>
+          </g>
+          <rect x="292" y="495" width="136" height="18" fill="#1e3a5f"/>
+          <text x="360" y="508" font-size="10.5" fill="#E8734A" text-anchor="middle" letter-spacing="1">one physical box</text>
+
+          <!-- dimension: left, height, namespace isolation -->
+          <g stroke="#E8734A" stroke-width="1" fill="none">
+            <line x1="66" y1="150" x2="40" y2="150"/>
+            <line x1="66" y1="446" x2="40" y2="446"/>
+            <line x1="48" y1="152" x2="48" y2="444" marker-start="url(#arr)" marker-end="url(#arr)"/>
+          </g>
+          <text transform="translate(38,298) rotate(-90)" font-size="10.5" fill="#E8734A" text-anchor="middle" letter-spacing="1">isolated namespaces</text>
+
+          <!-- callout: one flat price -->
+          <g stroke="#E8734A" stroke-width="1" fill="none">
+            <line x1="520" y1="70" x2="580" y2="28"/>
+            <circle cx="520" cy="70" r="2.5" fill="#E8734A" stroke="none"/>
+          </g>
+          <text x="584" y="26" font-size="10.5" fill="#E8734A" letter-spacing="1">one flat price</text>
+
+          <!-- callout: tls + domain, leader runs in the gap between the namespace rows -->
+          <g stroke="#E8734A" stroke-width="1" fill="none">
+            <line x1="180" y1="262" x2="180" y2="298"/>
+            <line x1="180" y1="298" x2="704" y2="298"/>
+            <circle cx="180" cy="262" r="2.5" fill="#E8734A" stroke="none"/>
+          </g>
+          <text x="704" y="293" font-size="10.5" fill="#E8734A" text-anchor="end" letter-spacing="1">domain + tls per namespace</text>
+
+          <!-- drawing number -->
+          <text x="640" y="548" font-size="9.5" fill="#9fbde0" text-anchor="end" letter-spacing="1.5">fig. 01 · n.t.s.</text>
+        </svg>
+        <figcaption class="dimnote">
+          <span>section through one machine</span>
+          <span>dashed: hidden edge · hatched: top face</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <div class="rule">detail b · the math</div>
+
+    <section class="math">
+      <div>
+        <h2>the math</h2>
+        <p class="math-intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+        <p class="many">ten client machines at 1 vcpu / 2 gb: $200 a month on usectl. about $400 on railway before storage.</p>
+        <p class="foot">railway shown at reserved equivalent. all prices list, september 2026.</p>
+      </div>
+      <div>
+        <ul class="ledger" aria-label="same box, list prices, september 2026">
+          <li class="ours">
+            <span class="what">usectl machine, everything in</span>
+            <span class="price">$40.20</span>
+            <span class="dim" style="--w:32%" aria-hidden="true"><b></b><i></i></span>
+          </li>
+          <li>
+            <span class="what">vercel pro + supabase pro + upstash + s3, one seat</span>
+            <span class="price">$60 and up, before bandwidth</span>
+            <span class="dim" style="--w:48%" aria-hidden="true"><b></b><i></i></span>
+          </li>
+          <li>
+            <span class="what">railway, same box, reserved</span>
+            <span class="price">about $80, plus egress</span>
+            <span class="dim" style="--w:64%" aria-hidden="true"><b></b><i></i></span>
+          </li>
+          <li>
+            <span class="what">render pro + postgres standard</span>
+            <span class="price">$125</span>
+            <span class="dim" style="--w:100%" aria-hidden="true"><b></b><i></i></span>
+          </li>
+        </ul>
+        <p class="foot" style="margin-top:10px">same box, list prices, sept 2026. orange dimension: monthly price, to scale against $125.</p>
+      </div>
+    </section>
+
+    <section class="proof">
+      <div class="lbl">detail c · as built</div>
+      <p>systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+    </section>
+
+    <p class="closing">on our metal, <span class="k">or on yours.</span><br>self hosted usectl ships this month.</p>
+
+    <footer class="titleblock" aria-label="title block">
+      <div><span class="h">drawing</span><span class="v"><span class="mark">~*</span> usectl · one box, many machines</span></div>
+      <div><span class="h">drawn by</span><span class="v">built by systemctl · tbilisi · © 2026</span></div>
+      <div><span class="h">site</span><span class="v">falkenstein</span></div>
+      <div><span class="h">scale</span><span class="v">n.t.s.</span></div>
+      <div><span class="h">sheet</span><span class="v">03 · rev a</span></div>
+    </footer>
+  </div>
+</main>
+
+</body>
+</html>

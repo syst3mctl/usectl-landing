@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<!-- 06 poster brutalist. direction: two-tone poster, brand orange #E8734A + black, swapped by theme (orange paper / black ink in light, black paper / orange ink in dark). hard edges, thick rules, price set at poster scale. type: anton display at enormous size, archivo for running text, ibm plex mono for the footnote terminal. -->
+<title>usectl · poster brutalist</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+  :root{
+    --paper:#E8734A;
+    --ink:#0b0b0b;
+    --ink-2:color-mix(in srgb, #0b0b0b 72%, #E8734A);
+    --font-display:"Anton","Impact","Arial Narrow Bold","Helvetica Neue",Arial,sans-serif;
+    --font-body:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    --rule:4px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#0b0b0b;
+      --ink:#E8734A;
+      --ink-2:color-mix(in srgb, #E8734A 72%, #0b0b0b);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0b0b0b;
+    --ink:#E8734A;
+    --ink-2:color-mix(in srgb, #E8734A 72%, #0b0b0b);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
+  a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+  .display{font-family:var(--font-display);font-weight:400;letter-spacing:-.01em;line-height:.88}
+
+  .wrap{border-top:var(--rule) solid var(--ink);border-bottom:var(--rule) solid var(--ink)}
+  .pad{padding:0 clamp(16px,3vw,44px)}
+
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:12px;letter-spacing:.06em;font-weight:500;
+    padding-top:12px;padding-bottom:12px;
+    border-bottom:1px solid var(--ink);
+  }
+  .topbar .label{font-family:var(--font-mono);font-size:11px}
+
+  .eyebrow{
+    background:var(--ink);color:var(--paper);
+    font-size:13px;letter-spacing:.14em;font-weight:600;
+    padding:10px clamp(16px,3vw,44px);
+    display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    margin:0;
+  }
+  .eyebrow .mark{font-family:var(--font-mono);font-weight:400;letter-spacing:0;font-size:14px}
+
+  /* hero */
+  .hero{padding-top:28px;padding-bottom:0;border-bottom:var(--rule) solid var(--ink)}
+  h1{
+    margin:0;
+    font-size:clamp(84px,14vw,210px);
+    line-height:.86;
+    text-wrap:balance;
+    margin-left:-.03em;
+    word-break:break-word;
+  }
+  h1 .line{display:block}
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.2fr 1fr;
+    gap:0;
+    border-top:var(--rule) solid var(--ink);
+    margin-top:32px;
+  }
+  .hero-grid > *{padding:26px clamp(16px,3vw,44px) 30px 0}
+  .hero-grid > * + *{border-left:var(--rule) solid var(--ink);padding-left:clamp(16px,3vw,44px);padding-right:0}
+  .sub{
+    font-size:clamp(18px,2vw,24px);line-height:1.3;font-weight:500;margin:0;
+    text-wrap:pretty;
+    max-width:30ch;
+  }
+  .ctas{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+  .btn{
+    display:inline-block;
+    background:var(--ink);color:var(--paper);
+    font-family:var(--font-display);
+    font-size:clamp(28px,3.4vw,44px);
+    line-height:1;
+    padding:14px 22px 12px;
+    transition:transform .12s ease;
+  }
+  .btn:hover{transform:translate(-3px,-3px);box-shadow:3px 3px 0 var(--ink-2)}
+  @media (prefers-reduced-motion:reduce){.btn{transition:none}.btn:hover{transform:none}}
+  .cta-note{font-size:13px;letter-spacing:.06em;font-weight:600}
+  .link{
+    font-size:16px;font-weight:600;
+    border-bottom:3px solid var(--ink);
+    padding-bottom:2px;
+  }
+
+  /* terminal as footnote */
+  .term-wrap{
+    border-top:1px solid var(--ink);
+    padding-top:12px;padding-bottom:14px;
+    display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;
+  }
+  .term-label{font-size:10px;letter-spacing:.12em;font-weight:600;padding-top:2px;white-space:nowrap}
+  .term{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    line-height:1.55;
+    margin:0;
+    white-space:pre;
+    overflow-x:auto;
+    color:var(--ink);
+  }
+
+  /* the math */
+  .math{padding-top:26px;padding-bottom:0}
+  .h2{font-size:13px;letter-spacing:.14em;font-weight:600;margin:0 0 6px}
+  .price-poster{
+    display:grid;grid-template-columns:auto 1fr;gap:0 clamp(16px,3vw,44px);align-items:end;
+    border-bottom:var(--rule) solid var(--ink);
+    padding-bottom:14px;
+  }
+  .price-poster .big{
+    font-size:clamp(110px,22vw,320px);
+    line-height:.85;
+    margin-left:-.02em;
+    font-variant-numeric:tabular-nums;
+  }
+  .price-poster .side{
+    padding-bottom:10px;
+  }
+  .price-poster .side .display{font-size:clamp(32px,5vw,72px);margin:0 0 12px}
+  .intro{font-size:clamp(16px,1.6vw,20px);line-height:1.35;font-weight:500;margin:0;max-width:36ch;text-wrap:pretty}
+
+  .ledger{list-style:none;margin:0;padding:0}
+  .ledger li{
+    display:grid;grid-template-columns:1fr auto;gap:12px 24px;align-items:baseline;
+    border-bottom:var(--rule) solid var(--ink);
+    padding:16px 0 14px;
+  }
+  .ledger .name{font-size:clamp(16px,1.9vw,24px);font-weight:600;line-height:1.2}
+  .ledger .price{
+    font-family:var(--font-display);
+    font-size:clamp(34px,5vw,74px);
+    line-height:.9;
+    text-align:right;
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+  .ledger .price small{
+    display:block;
+    font-family:var(--font-body);
+    font-size:12px;font-weight:600;letter-spacing:.06em;
+    margin-top:6px;
+  }
+  .ledger li.us{background:var(--ink);color:var(--paper);padding-left:clamp(16px,3vw,44px);padding-right:clamp(16px,3vw,44px);margin:0 calc(-1 * clamp(16px,3vw,44px))}
+
+  .many{
+    padding:26px 0 22px;
+    border-bottom:var(--rule) solid var(--ink);
+    display:grid;grid-template-columns:auto 1fr;gap:0 clamp(16px,3vw,44px);align-items:center;
+  }
+  .many .n{font-size:clamp(72px,14vw,200px);line-height:.85;margin-left:-.02em}
+  .many p{margin:0;font-size:clamp(18px,2.2vw,30px);line-height:1.25;font-weight:600;max-width:24ch;text-wrap:pretty}
+  .foot{font-size:11px;letter-spacing:.06em;font-weight:500;margin:0;padding:10px 0 12px}
+
+  /* proof + close */
+  .proof{
+    background:var(--ink);color:var(--paper);
+    padding:22px clamp(16px,3vw,44px);
+    font-size:clamp(16px,1.7vw,22px);line-height:1.35;font-weight:500;
+    margin:0;
+    text-wrap:pretty;
+  }
+  .close{
+    padding-top:26px;padding-bottom:26px;
+    border-top:var(--rule) solid var(--ink);
+  }
+  .close .display{font-size:clamp(48px,8.5vw,124px);margin:0;text-wrap:balance}
+  .close .display span{display:block}
+  footer{
+    border-top:var(--rule) solid var(--ink);
+    padding-top:12px;padding-bottom:14px;
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    font-size:12px;letter-spacing:.08em;font-weight:600;
+  }
+  footer .mark{font-family:var(--font-mono);letter-spacing:0;font-weight:400}
+
+  @media (max-width:760px){
+    .hero-grid{grid-template-columns:1fr}
+    .hero-grid > * + *{border-left:0;border-top:var(--rule) solid var(--ink);padding-left:0}
+    .price-poster{grid-template-columns:1fr}
+    .many{grid-template-columns:1fr;gap:12px}
+    .term-wrap{grid-template-columns:1fr;gap:8px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="topbar pad">
+    <a href="./index.html">← all directions</a>
+    <span class="label">06 · poster brutalist</span>
+  </nav>
+
+  <p class="eyebrow"><span>usectl · managed kubernetes on our own metal · falkenstein</span><span class="mark">~*</span></p>
+
+  <header class="hero pad">
+    <h1 class="display"><span class="line">one box.</span><span class="line">many machines.</span></h1>
+    <div class="hero-grid">
+      <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+      <div class="ctas">
+        <a class="btn" href="#">create a machine</a>
+        <span class="cta-note">30 days free. no card.</span>
+        <a class="link" href="#">read the docs</a>
+      </div>
+    </div>
+    <div class="term-wrap">
+      <span class="term-label">how it goes</span>
+<pre class="term" aria-label="terminal session">$ usectl login
+$ usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3
+✓ postgres ready. DATABASE_URL injected
+✓ redis ready. REDIS_URL injected
+✓ s3 ready. S3_BUCKET injected
+$ usectl deploy omnitech
+✓ build 28s · tls issued · live at https://omnitech.usectl.com</pre>
+    </div>
+  </header>
+
+  <section class="math pad" id="math">
+    <p class="h2">the math</p>
+    <div class="price-poster">
+      <div class="big display">$40.20</div>
+      <div class="side">
+        <p class="display">a month.</p>
+        <p class="intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+      </div>
+    </div>
+
+    <ul class="ledger" aria-label="same box, list prices, sept 2026">
+      <li class="us">
+        <span class="name">usectl machine, everything in</span>
+        <span class="price">$40.20</span>
+      </li>
+      <li>
+        <span class="name">vercel pro + supabase pro + upstash + s3, one seat</span>
+        <span class="price">$60<small>and up, before bandwidth</small></span>
+      </li>
+      <li>
+        <span class="name">railway, same box, reserved</span>
+        <span class="price">about $80<small>plus egress</small></span>
+      </li>
+      <li>
+        <span class="name">render pro + postgres standard</span>
+        <span class="price">$125</span>
+      </li>
+    </ul>
+
+    <div class="many">
+      <div class="n display">$200</div>
+      <p>ten client machines at 1 vcpu / 2 gb: $200 a month on usectl. about $400 on railway before storage.</p>
+    </div>
+    <p class="foot">railway shown at reserved equivalent. all prices list, september 2026.</p>
+  </section>
+
+  <p class="proof">systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+
+  <section class="close pad">
+    <p class="display"><span>on our metal, or on yours.</span><span>self hosted usectl ships this month.</span></p>
+  </section>
+
+  <footer class="pad">
+    <span>built by systemctl · tbilisi · © 2026</span>
+    <span class="mark">~*</span>
+  </footer>
+</div>
+
+</body>
+</html>

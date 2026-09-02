@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>usectl, bauhaus</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap">
+<!--
+  09 bauhaus geometric. direction: a 1923 exhibition poster for a hosting product. palette: warm white paper #F3EDE1, ink #1B1916, muted primaries red #C4473A / blue #2F5D9B / yellow #E2B33F, brand orange #E8734A kept as the usectl block. type: familjen grotesk for display and body, dm mono for labels and the terminal.
+  plan: hero is two columns, words left, a composed poster right: one black box holding four namespaces drawn as circle, square, bar and half circle with a diagonal band crossing them.
+  the math is a bar chart of stacked blocks, height encodes list price, an open dashed block on top marks "and up" pricing. ten small orange squares versus twenty yellow ones for the many machines line, one square per $20.
+-->
+<style>
+  :root{
+    --paper:#F3EDE1;
+    --paper-2:#EAE2D3;
+    --ink:#1B1916;
+    --ink-2:#4A453D;
+    --ink-3:#7A7366;
+    --line:#1B1916;
+    --hair:#CFC6B4;
+    --red:#C4473A;
+    --blue:#2F5D9B;
+    --yellow:#E2B33F;
+    --orange:#E8734A;
+    --on-color:#F3EDE1;
+    --on-yellow:#1B1916;
+    --term-bg:#1B1916;
+    --term-fg:#F3EDE1;
+    --term-ok:#E2B33F;
+    --focus:#2F5D9B;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1A1815;
+      --paper-2:#242119;
+      --ink:#F1EADC;
+      --ink-2:#C9C0AE;
+      --ink-3:#8E867A;
+      --line:#F1EADC;
+      --hair:#3B372F;
+      --red:#D45A4C;
+      --blue:#4C7BBE;
+      --yellow:#E8BC52;
+      --orange:#EE7F58;
+      --on-color:#1A1815;
+      --on-yellow:#1A1815;
+      --term-bg:#0F0E0C;
+      --term-fg:#F1EADC;
+      --term-ok:#E8BC52;
+      --focus:#E8BC52;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#1A1815;
+    --paper-2:#242119;
+    --ink:#F1EADC;
+    --ink-2:#C9C0AE;
+    --ink-3:#8E867A;
+    --line:#F1EADC;
+    --hair:#3B372F;
+    --red:#D45A4C;
+    --blue:#4C7BBE;
+    --yellow:#E8BC52;
+    --orange:#EE7F58;
+    --on-color:#1A1815;
+    --on-yellow:#1A1815;
+    --term-bg:#0F0E0C;
+    --term-fg:#F1EADC;
+    --term-ok:#E8BC52;
+    --focus:#E8BC52;
+  }
+
+  *,*::before,*::after{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Familjen Grotesk","Helvetica Neue",Arial,sans-serif;
+    font-size:17px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .mono{font-family:"DM Mono","JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  a{color:inherit}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  h1,h2,h3{margin:0;text-wrap:balance}
+  p{margin:0}
+
+  .wrap{width:min(1180px,calc(100% - 64px));margin:0 auto}
+
+  /* top bar */
+  .top{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:22px 0 0;
+    font-family:"DM Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.04em;color:var(--ink-3)
+  }
+  .top a{text-decoration:none;color:var(--ink-3)}
+  .top a:hover{color:var(--ink)}
+  .top .tag{display:flex;align-items:center;gap:10px}
+  .top .tag i{display:inline-block;width:8px;height:8px;background:var(--red)}
+  .top .tag i:nth-child(2){background:var(--yellow);border-radius:50%}
+  .top .tag i:nth-child(3){background:var(--blue);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid var(--blue);background:none}
+
+  /* brand row */
+  .brand{
+    display:flex;align-items:center;gap:14px;
+    margin-top:44px;
+  }
+  .mark{
+    width:44px;height:44px;background:#1B1916;color:#E8734A;
+    display:grid;place-items:center;
+    font-family:"DM Mono",ui-monospace,monospace;font-size:22px;font-weight:500;line-height:1;
+    letter-spacing:-.05em;
+  }
+  .brand .name{font-weight:600;font-size:20px;letter-spacing:-.01em}
+
+  /* hero */
+  .hero{
+    display:grid;
+    grid-template-columns:minmax(0,7fr) minmax(0,5fr);
+    gap:56px;
+    align-items:start;
+    margin-top:56px;
+    padding-bottom:64px;
+    border-bottom:2px solid var(--line);
+  }
+  .eyebrow{
+    font-family:"DM Mono",ui-monospace,monospace;
+    font-size:12.5px;letter-spacing:.06em;color:var(--ink-2);
+    display:flex;align-items:center;gap:12px;
+  }
+  .eyebrow::before{content:"";width:34px;height:2px;background:var(--red)}
+  h1{
+    margin-top:26px;
+    font-size:clamp(56px,7.4vw,104px);
+    line-height:.92;
+    font-weight:700;
+    letter-spacing:-.035em;
+  }
+  h1 .hl{color:var(--blue)}
+  .sub{
+    margin-top:30px;
+    font-size:20px;line-height:1.45;
+    max-width:34em;color:var(--ink-2);
+  }
+  .ctas{display:flex;align-items:center;gap:22px;margin-top:38px;flex-wrap:wrap}
+  .btn{
+    display:inline-flex;align-items:center;gap:12px;
+    text-decoration:none;font-weight:600;font-size:17px;
+    padding:15px 22px 15px 18px;
+    background:var(--ink);color:var(--paper);
+    border:2px solid var(--ink);
+  }
+  .btn .sq{width:12px;height:12px;background:var(--orange);flex:none}
+  .btn:hover{background:var(--orange);border-color:var(--orange);color:var(--on-color)}
+  .btn:hover .sq{background:var(--ink)}
+  .cta-note{font-family:"DM Mono",ui-monospace,monospace;font-size:12.5px;color:var(--ink-3)}
+  .btn-2{
+    text-decoration:none;font-weight:600;font-size:17px;
+    border-bottom:2px solid var(--ink);padding-bottom:2px;
+  }
+  .btn-2:hover{border-color:var(--blue);color:var(--blue)}
+
+  .poster{position:relative;margin-top:8px}
+  .poster svg{display:block;width:100%;height:auto}
+  .poster .cap{
+    margin-top:12px;
+    font-family:"DM Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.04em;color:var(--ink-3);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+
+  /* terminal */
+  .term-row{
+    display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:56px;
+    margin-top:0;
+  }
+  .term{
+    grid-column:1 / -1;
+    margin-top:-2px;
+    background:var(--term-bg);color:var(--term-fg);
+    font-family:"DM Mono","JetBrains Mono",ui-monospace,monospace;
+    font-size:14px;line-height:1.75;
+    padding:26px 28px;
+    overflow-x:auto;
+    position:relative;
+  }
+  .term::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:10px;
+    background:linear-gradient(var(--red) 0 33.3%,var(--yellow) 33.3% 66.6%,var(--blue) 66.6% 100%);
+  }
+  .term pre{margin:0;padding-left:8px;white-space:pre;font:inherit}
+  .term .ok{color:var(--term-ok)}
+  .term .pr{color:var(--orange)}
+
+  /* the math */
+  .math{padding:88px 0 72px}
+  .sec{
+    display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:56px;align-items:end;
+  }
+  .sec h2{
+    font-size:clamp(44px,5.4vw,72px);line-height:.95;font-weight:700;letter-spacing:-.03em;
+    display:flex;align-items:center;gap:18px;
+  }
+  .sec h2::before{content:"";width:.62em;height:.62em;border-radius:50%;background:var(--yellow);flex:none}
+  .sec .intro{font-size:20px;line-height:1.45;color:var(--ink-2);max-width:34em}
+  .sec .intro b{color:var(--ink);font-weight:600}
+
+  .chart-wrap{margin-top:56px;overflow-x:auto}
+  .chart{
+    min-width:760px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:28px;
+    align-items:end;
+    border-bottom:2px solid var(--line);
+    padding:0 8px;
+    --unit:2.6px;                /* px per dollar; $125 = 325px */
+  }
+  .col{display:grid;grid-template-rows:auto auto 1fr;align-items:end;min-height:calc(125 * var(--unit) + 96px)}
+  .col .price{
+    font-family:"DM Mono",ui-monospace,monospace;font-size:26px;font-weight:500;letter-spacing:-.02em;
+    font-variant-numeric:tabular-nums;line-height:1;align-self:end;margin-bottom:10px;
+  }
+  .col .price small{display:block;font-size:12px;letter-spacing:.03em;color:var(--ink-3);margin-top:6px;font-weight:400}
+  .col .open{
+    height:56px;border:2px dashed var(--ink-3);border-bottom:0;margin:0 0 0;
+    font-family:"DM Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:var(--ink-3);
+    display:flex;align-items:flex-end;padding:0 0 6px 10px;
+  }
+  .col .open.none{border:0;height:0;padding:0}
+  .col .bar{
+    height:calc(var(--v) * var(--unit));
+    position:relative;
+    transform-origin:bottom;
+    animation:grow .7s cubic-bezier(.2,.7,.2,1) both;
+  }
+  .col:nth-child(2) .bar{animation-delay:.08s}
+  .col:nth-child(3) .bar{animation-delay:.16s}
+  .col:nth-child(4) .bar{animation-delay:.24s}
+  @keyframes grow{from{transform:scaleY(.001)}to{transform:scaleY(1)}}
+  @media (prefers-reduced-motion:reduce){.col .bar{animation:none}}
+  .bar.u{background:var(--orange)}
+  .bar.v{background:var(--blue)}
+  .bar.r{background:var(--yellow)}
+  .bar.n{background:var(--red)}
+  .bar .ins{
+    position:absolute;left:12px;top:12px;right:12px;
+    font-family:"DM Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.04em;line-height:1.5;
+    color:var(--on-color);
+  }
+  .bar.r .ins{color:var(--on-yellow)}
+  .bar.u .ins{color:var(--on-color)}
+  .bar.u::after{
+    content:"";position:absolute;right:12px;bottom:12px;width:16px;height:16px;border-radius:50%;background:var(--paper);
+  }
+  .labels{
+    min-width:760px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:28px;padding:14px 8px 0;
+  }
+  .labels div{font-size:15px;line-height:1.4;font-weight:500}
+  .labels div span{display:block;font-family:"DM Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.04em;color:var(--ink-3);font-weight:400;margin-top:2px}
+
+  /* many machines */
+  .many{
+    margin-top:64px;
+    display:grid;grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:56px;align-items:center;
+    padding-top:40px;border-top:1px solid var(--hair);
+  }
+  .many p{font-size:20px;line-height:1.45;color:var(--ink-2);max-width:34em}
+  .many p b{color:var(--ink);font-weight:600}
+  .tens{display:flex;align-items:flex-end;gap:28px;flex-wrap:wrap}
+  .ten{display:grid;grid-template-columns:repeat(5,36px);gap:8px}
+  .ten i{display:block;width:36px;height:36px;background:var(--orange)}
+  .ten i:nth-child(3n){border-radius:50%}
+  .twenty{display:grid;grid-template-columns:repeat(5,36px);gap:8px}
+  .twenty i{display:block;width:36px;height:36px;background:var(--yellow)}
+  .twenty i:nth-child(4n+1){border-radius:50%}
+  .tens .k{font-family:"DM Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.04em;color:var(--ink-3);margin-top:10px}
+  .tens > div{display:flex;flex-direction:column}
+  .tens .vs{font-family:"DM Mono",ui-monospace,monospace;font-size:13px;color:var(--ink-3);align-self:center;padding-bottom:26px}
+  .foot{margin-top:28px;font-family:"DM Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.03em;color:var(--ink-3)}
+
+  /* proof + closing */
+  .proof{
+    border-top:2px solid var(--line);
+    padding:64px 0;
+    display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:56px;
+  }
+  .proof .glyphs{display:flex;gap:10px;align-items:flex-start}
+  .proof .glyphs i{display:block;width:40px;height:40px}
+  .proof .glyphs i:nth-child(1){background:var(--red)}
+  .proof .glyphs i:nth-child(2){background:var(--blue);border-radius:50%}
+  .proof .glyphs i:nth-child(3){width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-bottom:40px solid var(--yellow)}
+  .proof p{font-size:24px;line-height:1.35;letter-spacing:-.01em;max-width:30em}
+  .proof p b{font-weight:600}
+  .closing{
+    background:var(--ink);color:var(--paper);
+    padding:56px 0;
+    position:relative;overflow:hidden;
+  }
+  .closing::before{
+    content:"";position:absolute;right:-6%;top:-40%;width:34%;height:180%;
+    background:var(--orange);transform:rotate(-22deg);opacity:.95;
+  }
+  .closing .wrap{position:relative;display:flex;justify-content:space-between;align-items:center;gap:40px;flex-wrap:wrap}
+  .closing p{font-size:clamp(28px,3.4vw,44px);line-height:1.1;font-weight:700;letter-spacing:-.025em;max-width:18em}
+  .closing .btn{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+  .closing .btn .sq{background:var(--ink)}
+  .closing .btn:hover{background:var(--ink);color:var(--paper);border-color:var(--paper)}
+  .closing .btn:hover .sq{background:var(--orange)}
+  footer{
+    padding:26px 0 40px;
+    font-family:"DM Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.04em;color:var(--ink-3);
+    display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  }
+
+  @media (max-width:980px){
+    .hero,.sec,.many,.proof,.term-row{grid-template-columns:1fr;gap:36px}
+    .poster{max-width:520px}
+    .closing::before{width:60%;right:-30%}
+  }
+  @media (max-width:640px){
+    .wrap{width:calc(100% - 40px)}
+    body{font-size:16px}
+    .sub,.sec .intro,.many p{font-size:18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <a href="./index.html">← all directions</a>
+    <span class="tag"><i></i><i></i><i></i> 09 · bauhaus geometric</span>
+  </div>
+
+  <div class="brand">
+    <div class="mark" aria-hidden="true">~*</div>
+    <span class="name">usectl</span>
+  </div>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">usectl · managed kubernetes on our own metal · falkenstein</p>
+      <h1>one box.<br><span class="hl">many machines.</span></h1>
+      <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+      <div class="ctas">
+        <a class="btn" href="https://usectl.com/signup"><span class="sq"></span>create a machine</a>
+        <span class="cta-note">30 days free. no card.</span>
+        <a class="btn-2" href="https://usectl.com/docs">read the docs</a>
+      </div>
+    </div>
+
+    <div class="poster" aria-label="one box holding four namespaces: omnitech, clinic, ev-charging, agent">
+      <svg viewBox="0 0 520 560" role="img">
+        <title>one box, four namespaces</title>
+        <!-- the box -->
+        <rect x="10" y="10" width="500" height="500" fill="none" stroke="var(--line)" stroke-width="4"/>
+        <!-- diagonal band -->
+        <polygon points="10,510 10,430 510,10 510,90" fill="var(--ink)"/>
+        <!-- omnitech: circle -->
+        <circle cx="160" cy="150" r="110" fill="var(--orange)"/>
+        <!-- clinic: square -->
+        <rect x="320" y="300" width="170" height="170" fill="var(--blue)"/>
+        <!-- ev-charging: bar with 16 dots -->
+        <rect x="330" y="30" width="150" height="70" fill="var(--yellow)"/>
+        <g fill="var(--ink)">
+          <circle cx="344" cy="52" r="5"/><circle cx="362" cy="52" r="5"/><circle cx="380" cy="52" r="5"/><circle cx="398" cy="52" r="5"/>
+          <circle cx="416" cy="52" r="5"/><circle cx="434" cy="52" r="5"/><circle cx="452" cy="52" r="5"/><circle cx="470" cy="52" r="5"/>
+          <circle cx="344" cy="78" r="5"/><circle cx="362" cy="78" r="5"/><circle cx="380" cy="78" r="5"/><circle cx="398" cy="78" r="5"/>
+          <circle cx="416" cy="78" r="5"/><circle cx="434" cy="78" r="5"/><circle cx="452" cy="78" r="5"/><circle cx="470" cy="78" r="5"/>
+        </g>
+        <!-- agent: half circle -->
+        <path d="M40 470 A100 100 0 0 1 240 470 Z" fill="var(--red)"/>
+        <!-- taxi: small yellow square in the band -->
+        <rect x="248" y="248" width="36" height="36" fill="var(--yellow)"/>
+        <!-- labels -->
+        <g font-family="DM Mono, ui-monospace, monospace" font-size="12" letter-spacing=".06em">
+          <text x="60" y="284" fill="var(--ink)">omnitech</text>
+          <text x="320" y="292" fill="var(--ink)">clinic</text>
+          <text x="318" y="46" fill="var(--ink)" text-anchor="end">ev-charging</text>
+          <text x="318" y="64" fill="var(--ink)" text-anchor="end">16 services</text>
+          <text x="40" y="500" fill="var(--paper)">agent</text>
+          <text x="20" y="540" fill="var(--ink-3)">1 physical box · falkenstein</text>
+          <text x="500" y="540" fill="var(--ink-3)" text-anchor="end">n namespaces</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="term">
+<pre>$ usectl login
+$ usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3
+<span class="ok">✓</span> postgres ready. DATABASE_URL injected
+<span class="ok">✓</span> redis ready. REDIS_URL injected
+<span class="ok">✓</span> s3 ready. S3_BUCKET injected
+$ usectl deploy omnitech
+<span class="ok">✓</span> build 28s · tls issued · live at <span class="pr">https://omnitech.usectl.com</span></pre>
+    </div>
+  </section>
+
+  <section class="math">
+    <div class="sec">
+      <h2>the math</h2>
+      <p class="intro">a 2 vcpu / 4 gb / 20 gb machine is <b>$40.20 a month</b>. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart" role="img" aria-label="ledger, same box, list prices, september 2026. usectl machine, everything in, $40.20. vercel pro plus supabase pro plus upstash plus s3, one seat, $60 and up before bandwidth. railway, same box, reserved, about $80 plus egress. render pro plus postgres standard, $125.">
+        <div class="col" style="--v:40.2">
+          <div class="price">$40.20<small>the ceiling</small></div>
+          <div class="open none"></div>
+          <div class="bar u"><div class="ins">usectl</div></div>
+        </div>
+        <div class="col" style="--v:60">
+          <div class="price">$60<small>and up, before bandwidth</small></div>
+          <div class="open">bandwidth</div>
+          <div class="bar v"><div class="ins">vercel + supabase<br>+ upstash + s3</div></div>
+        </div>
+        <div class="col" style="--v:80">
+          <div class="price">about $80<small>plus egress</small></div>
+          <div class="open">egress</div>
+          <div class="bar r"><div class="ins">railway</div></div>
+        </div>
+        <div class="col" style="--v:125">
+          <div class="price">$125<small>&nbsp;</small></div>
+          <div class="open none"></div>
+          <div class="bar n"><div class="ins">render</div></div>
+        </div>
+      </div>
+      <div class="labels">
+        <div>usectl machine, everything in<span>$40.20</span></div>
+        <div>vercel pro + supabase pro + upstash + s3, one seat<span>$60 and up, before bandwidth</span></div>
+        <div>railway, same box, reserved<span>about $80, plus egress</span></div>
+        <div>render pro + postgres standard<span>$125</span></div>
+      </div>
+    </div>
+
+    <div class="many">
+      <div class="tens" aria-hidden="true">
+        <div>
+          <div class="ten"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <span class="k">ten machines · $200</span>
+        </div>
+        <span class="vs">vs</span>
+        <div>
+          <div class="twenty"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <span class="k">railway · about $400</span>
+        </div>
+      </div>
+      <p>ten client machines at 1 vcpu / 2 gb: <b>$200 a month on usectl</b>. about $400 on railway before storage.</p>
+    </div>
+    <p class="foot">railway shown at reserved equivalent. all prices list, september 2026.</p>
+  </section>
+
+  <section class="proof">
+    <div class="glyphs" aria-hidden="true"><i></i><i></i><i></i></div>
+    <p>systemctl runs its own 9 person software shop on usectl: <b>133 deployments</b>, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+  </section>
+</div>
+
+<section class="closing">
+  <div class="wrap">
+    <p>on our metal, or on yours. self hosted usectl ships this month.</p>
+    <a class="btn" href="https://usectl.com/signup"><span class="sq"></span>create a machine</a>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <span>built by systemctl · tbilisi · © 2026</span>
+    <span>~* usectl</span>
+  </footer>
+</div>
+
+</body>
+</html>

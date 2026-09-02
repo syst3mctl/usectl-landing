@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>usectl · terminal, alive</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<!--
+  02 terminal, alive. direction: the whole page is one wide terminal session, dark and single theme by choice (a screen is a screen in daylight too). palette: screen #0B0C0E, phosphor #D9DBD4, dim #6E727A, rule #2A2D33, accent #E8734A used for the prompt, the checks, the price and the cursor.
+  type: jetbrains mono for everything, 15px running text, the headline set in the same face at 88px bold so it reads like a banner printed by the shell.
+  layout: full width column at 1360 max, sections opened by ascii box rules that are real characters measured to the container width, the terminal block types itself on load, a pod list with a live session clock and pulsing status dots below it, the math as a ledger with dot leaders.
+-->
+<style>
+  :root {
+    --screen: #0B0C0E;
+    --screen-2: #111317;
+    --fg: #D9DBD4;
+    --dim: #6E727A;
+    --rule: #2A2D33;
+    --accent: #E8734A;
+    --accent-ink: #0B0C0E;
+    --ok: #E8734A;
+    --font-mono: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--screen);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 15px;
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  ::selection { background: var(--accent); color: var(--accent-ink); }
+
+  .ta-page { max-width: 1360px; margin: 0 auto; padding: 20px 32px 56px; }
+
+  .ta-top {
+    display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+    color: var(--dim); font-size: 13px;
+  }
+  .ta-top a { text-decoration: none; }
+  .ta-top a:hover { color: var(--fg); text-decoration: underline; }
+  .ta-top .mark { color: var(--accent); font-weight: 700; }
+  .ta-clock { color: var(--dim); }
+  .ta-clock b { color: var(--fg); font-weight: 500; }
+
+  /* ascii rules: filled by script, fallback is a css border */
+  .ta-rule {
+    color: var(--rule); white-space: nowrap; overflow: hidden;
+    margin: 40px 0 24px; line-height: 1.2; user-select: none;
+  }
+  .ta-rule .t { color: var(--dim); }
+  .ta-rule .t b { color: var(--fg); font-weight: 500; }
+
+  .ta-eyebrow { margin: 0 0 40px; color: var(--dim); }
+  .ta-eyebrow b { color: var(--fg); font-weight: 500; }
+  .ta-eyebrow .p { color: var(--accent); }
+
+  .ta-h1 {
+    margin: 0;
+    font-size: clamp(44px, 6.4vw, 88px);
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .ta-h1 .dot { color: var(--accent); }
+  .ta-cursor {
+    display: inline-block; width: 0.55em; height: 0.95em; vertical-align: -0.1em;
+    background: var(--accent); margin-left: 0.1em;
+  }
+  .ta-lead {
+    margin: 32px 0 0; max-width: 70ch; font-size: 17px; line-height: 1.6; text-wrap: pretty;
+  }
+
+  .ta-ctas { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 32px; }
+  .ta-btn {
+    text-decoration: none; padding: 10px 18px; border: 1px solid var(--fg);
+    font-weight: 500; font-size: 15px; white-space: nowrap;
+  }
+  .ta-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+  .ta-btn.primary:hover { background: var(--fg); border-color: var(--fg); }
+  .ta-btn.secondary:hover { background: var(--screen-2); }
+  .ta-note { color: var(--dim); font-size: 13px; margin: 0; }
+
+  /* the typed terminal */
+  .ta-term {
+    margin-top: 48px; border: 1px solid var(--rule); background: var(--screen-2);
+    overflow-x: auto;
+  }
+  .ta-term-bar {
+    display: flex; justify-content: space-between; gap: 16px;
+    padding: 8px 16px; border-bottom: 1px solid var(--rule); color: var(--dim); font-size: 13px;
+  }
+  .ta-term-bar .mark { color: var(--accent); }
+  .ta-term pre {
+    margin: 0; padding: 18px 20px 20px; font-family: inherit; font-size: 15px; line-height: 1.75;
+    min-height: calc(7 * 1.75 * 15px + 38px); white-space: pre;
+  }
+  .ta-term pre .p { color: var(--accent); }
+  .ta-term pre .ok { color: var(--ok); }
+  .ta-term pre .d { color: var(--dim); }
+  .ta-term pre .u { text-decoration: underline; text-underline-offset: 3px; }
+  .ta-term pre .cur { display: inline-block; width: 0.6em; height: 1.1em; vertical-align: -0.2em; background: var(--accent); }
+
+  /* pod list */
+  .ta-pods-wrap { overflow-x: auto; margin-top: 24px; }
+  .ta-pods { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+  .ta-pods th, .ta-pods td { text-align: left; padding: 6px 24px 6px 0; }
+  .ta-pods thead th { color: var(--dim); font-weight: 400; border-bottom: 1px solid var(--rule); }
+  .ta-pods td.ns { color: var(--dim); }
+  .ta-pods td.st { color: var(--fg); }
+  .ta-pods td:last-child, .ta-pods th:last-child { padding-right: 0; }
+  .ta-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); margin-right: 10px; vertical-align: 1px;
+  }
+  .ta-pods tbody tr.new td { color: var(--dim); }
+  .ta-pods tbody tr.new td.st { color: var(--fg); }
+  .ta-pods-foot { color: var(--dim); font-size: 13px; margin: 12px 0 0; }
+
+  /* the math */
+  .ta-h2 { margin: 0 0 12px; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .ta-h2 .p { color: var(--accent); }
+  .ta-intro { margin: 0; max-width: 72ch; font-size: 16px; text-wrap: pretty; }
+
+  .ta-ledger { margin: 32px 0 0; padding: 0; list-style: none; max-width: 92ch; }
+  .ta-ledger li {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 0 10px;
+    padding: 8px 0; font-size: 15px;
+  }
+  .ta-ledger li .lead { border-bottom: 1px dotted var(--dim); height: 0.9em; opacity: 0.8; min-width: 24px; }
+  .ta-ledger li .amt { text-align: right; white-space: nowrap; }
+  .ta-ledger li .amt small { color: var(--dim); font-size: 13px; }
+  .ta-ledger li.us .item { font-weight: 700; }
+  .ta-ledger li.us .amt { color: var(--accent); font-weight: 700; }
+  .ta-ledger li.head { color: var(--dim); font-size: 13px; padding-bottom: 4px; border-bottom: 1px solid var(--rule); }
+  .ta-ledger li.head .lead { border: 0; }
+
+  .ta-many { margin: 28px 0 0; max-width: 92ch; padding-top: 16px; border-top: 1px solid var(--rule); }
+  .ta-many p { margin: 0; }
+  .ta-many .k { color: var(--dim); font-size: 13px; }
+  .ta-many .k .p { color: var(--accent); }
+  .ta-foot { margin: 16px 0 0; color: var(--dim); font-size: 13px; }
+
+  .ta-proof { margin: 0; max-width: 78ch; font-size: 16px; text-wrap: pretty; }
+  .ta-proof b { color: var(--accent); font-weight: 700; }
+  .ta-close { margin: 0; font-size: clamp(24px, 3vw, 40px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; text-wrap: balance; }
+  .ta-close .dot { color: var(--accent); }
+
+  .ta-footer {
+    margin-top: 48px; color: var(--dim); font-size: 13px;
+    display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .ta-footer .mark { color: var(--accent); font-weight: 700; }
+  .ta-footer .prompt { color: var(--fg); }
+  .ta-footer .prompt .p { color: var(--accent); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ta-cursor, .ta-term pre .cur, .ta-footer .cur { animation: ta-blink 1.05s steps(1, end) infinite; }
+    .ta-dot { animation: ta-pulse 2.4s ease-in-out infinite; }
+    .ta-pods tbody tr:nth-child(2n) .ta-dot { animation-delay: 0.8s; }
+    .ta-pods tbody tr:nth-child(3n) .ta-dot { animation-delay: 1.5s; }
+    .ta-btn { transition: background-color 140ms ease, border-color 140ms ease; }
+  }
+  @keyframes ta-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  @keyframes ta-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  @media (max-width: 720px) {
+    .ta-page { padding: 16px 18px 40px; }
+    .ta-ledger li { grid-template-columns: 1fr auto; }
+    .ta-ledger li .lead { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ta-page">
+  <header class="ta-top">
+    <div><a href="./index.html">← all directions</a> &nbsp;·&nbsp; 02 · terminal, alive</div>
+    <div class="ta-clock"><span class="mark">~*</span> usectl &nbsp;·&nbsp; session <b id="ta-clock">00:00:00</b></div>
+  </header>
+
+  <div class="ta-rule" data-title="hero" aria-hidden="true">┌─ <span class="t"><b>usectl</b> · fsn1 · falkenstein</span> ─┐</div>
+
+  <section aria-labelledby="ta-headline">
+    <p class="ta-eyebrow"><span class="p">$</span> <b>usectl</b> · managed kubernetes on our own metal · falkenstein</p>
+    <h1 class="ta-h1" id="ta-headline">one box<span class="dot">.</span><br>many machines<span class="dot">.</span><span class="ta-cursor" aria-hidden="true"></span></h1>
+    <p class="ta-lead">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+    <div class="ta-ctas">
+      <a class="ta-btn primary" href="#create">[ create a machine ]</a>
+      <a class="ta-btn secondary" href="#docs">[ read the docs ]</a>
+      <p class="ta-note">30 days free. no card.</p>
+    </div>
+
+    <div class="ta-term">
+      <div class="ta-term-bar"><span><span class="mark">~*</span> usectl · zsh</span><span id="ta-term-state">typing</span></div>
+<pre id="ta-term" aria-live="polite"><span class="p">$</span> usectl login
+<span class="p">$</span> usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3
+<span class="ok">✓</span> postgres ready. DATABASE_URL injected
+<span class="ok">✓</span> redis ready. REDIS_URL injected
+<span class="ok">✓</span> s3 ready. S3_BUCKET injected
+<span class="p">$</span> usectl deploy omnitech
+<span class="ok">✓</span> build 28s · tls issued · live at <span class="u">https://omnitech.usectl.com</span>
+<span class="p">$</span> <span class="cur" aria-hidden="true"></span></pre>
+    </div>
+
+    <div class="ta-pods-wrap">
+      <table class="ta-pods" id="ta-pods">
+        <caption class="ta-pods-foot" style="caption-side:top;text-align:left;margin:0 0 8px"><span class="p" style="color:var(--accent)">$</span> usectl machines ps --all</caption>
+        <thead>
+          <tr><th>machine</th><th>pod</th><th>status</th><th>addons</th><th>node</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="ns">ev-charging</td><td>api</td><td class="st"><span class="ta-dot"></span>running</td><td>postgres · redis · nats · grafana</td><td>fsn1-metal</td></tr>
+          <tr><td class="ns">ev-charging</td><td>billing</td><td class="st"><span class="ta-dot"></span>running</td><td>postgres · cron</td><td>fsn1-metal</td></tr>
+          <tr><td class="ns">taxi</td><td>dispatch</td><td class="st"><span class="ta-dot"></span>running</td><td>postgres · redis · mongo</td><td>fsn1-metal</td></tr>
+          <tr><td class="ns">clinic</td><td>web</td><td class="st"><span class="ta-dot"></span>running</td><td>postgres · s3 · oauth2 proxy</td><td>fsn1-metal</td></tr>
+          <tr><td class="ns">shop</td><td>storefront</td><td class="st"><span class="ta-dot"></span>running</td><td>postgres · redis · meilisearch · s3</td><td>fsn1-metal</td></tr>
+          <tr><td class="ns">socials</td><td>agent-hermes</td><td class="st"><span class="ta-dot"></span>running</td><td>qwen3-14b · headless browser</td><td>fsn1-metal</td></tr>
+          <tr><td class="ns">socials</td><td>agent-openclaw</td><td class="st"><span class="ta-dot"></span>running</td><td>mcp · glitchtip</td><td>fsn1-metal</td></tr>
+          <tr class="new" id="ta-pod-new" hidden><td class="ns">omnitech</td><td>shop</td><td class="st"><span class="ta-dot"></span><span id="ta-pod-new-st">creating</span></td><td>postgres · redis · s3</td><td>fsn1-metal</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="ta-pods-foot">each machine is an isolated kubernetes namespace on hetzner bare metal in falkenstein. the list above is what our own shop looks like.</p>
+  </section>
+
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>the math</b> · list prices, sept 2026</span> ─┤</div>
+
+  <section aria-labelledby="ta-math">
+    <h2 class="ta-h2" id="ta-math"><span class="p">$</span> the math</h2>
+    <p class="ta-intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+
+    <ul class="ta-ledger">
+      <li class="head"><span class="item">same box, list prices, sept 2026</span><span class="lead"></span><span class="amt">per month</span></li>
+      <li class="us"><span class="item">usectl machine, everything in</span><span class="lead"></span><span class="amt">$40.20</span></li>
+      <li><span class="item">vercel pro + supabase pro + upstash + s3, one seat</span><span class="lead"></span><span class="amt">$60 and up <small>before bandwidth</small></span></li>
+      <li><span class="item">railway, same box, reserved</span><span class="lead"></span><span class="amt">about $80 <small>plus egress</small></span></li>
+      <li><span class="item">render pro + postgres standard</span><span class="lead"></span><span class="amt">$125</span></li>
+    </ul>
+
+    <div class="ta-many">
+      <p class="k"><span class="p">$</span> usectl machines create --count 10 --size 1x2</p>
+      <p>ten client machines at 1 vcpu / 2 gb: $200 a month on usectl. about $400 on railway before storage.</p>
+    </div>
+    <p class="ta-foot"># railway shown at reserved equivalent. all prices list, september 2026.</p>
+  </section>
+
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>in use</b> · systemctl, tbilisi</span> ─┤</div>
+
+  <section aria-label="proof">
+    <p class="ta-proof">systemctl runs its own <b>9</b> person software shop on usectl: <b>133</b> deployments, an ev charging platform with <b>16</b> services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+  </section>
+
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>self hosted</b> · ships this month</span> ─┤</div>
+
+  <section aria-label="closing">
+    <p class="ta-close">on our metal, or on yours<span class="dot">.</span> self hosted usectl ships this month<span class="dot">.</span></p>
+  </section>
+
+  <div class="ta-rule" aria-hidden="true">└─ <span class="t">end of session</span> ─┘</div>
+
+  <footer class="ta-footer">
+    <div><span class="mark">~*</span> built by systemctl · tbilisi · © 2026</div>
+    <div class="prompt"><span class="p">$</span> <span class="cur ta-cursor" aria-hidden="true"></span></div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ascii rules measured to the container */
+  var rules = Array.prototype.slice.call(document.querySelectorAll('.ta-rule'));
+  var specs = rules.map(function (el) {
+    var open = el.textContent.trim().charAt(0);
+    var close = el.textContent.trim().slice(-1);
+    var title = el.querySelector('.t');
+    return { el: el, open: open, close: close, title: title ? title.cloneNode(true) : null };
+  });
+  function charWidth(el) {
+    var s = document.createElement('span');
+    s.textContent = '─'.repeat(50);
+    s.style.visibility = 'hidden'; s.style.whiteSpace = 'nowrap'; s.style.position = 'absolute';
+    el.appendChild(s);
+    var w = s.getBoundingClientRect().width / 50;
+    el.removeChild(s);
+    return w || 9;
+  }
+  function drawRules() {
+    specs.forEach(function (sp) {
+      var el = sp.el;
+      var total = Math.floor(el.clientWidth / charWidth(el));
+      var titleLen = sp.title ? sp.title.textContent.length : 0;
+      var lead = 2;
+      var tail = Math.max(2, total - lead - titleLen - 4);
+      el.textContent = '';
+      el.appendChild(document.createTextNode(sp.open + '─'.repeat(lead) + ' '));
+      if (sp.title) el.appendChild(sp.title.cloneNode(true));
+      el.appendChild(document.createTextNode(' ' + '─'.repeat(tail) + sp.close));
+    });
+  }
+  drawRules();
+  window.addEventListener('resize', drawRules);
+
+  /* session clock */
+  var clock = document.getElementById('ta-clock');
+  var start = Date.now();
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function tick() {
+    var s = Math.floor((Date.now() - start) / 1000);
+    clock.textContent = pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60);
+  }
+  tick();
+  if (!reduce) setInterval(tick, 1000);
+
+  /* typed terminal: final state is already in the dom, replay it as typing */
+  var pre = document.getElementById('ta-term');
+  var state = document.getElementById('ta-term-state');
+  var newPod = document.getElementById('ta-pod-new');
+  var newPodSt = document.getElementById('ta-pod-new-st');
+  function finish() {
+    state.textContent = 'live';
+    newPod.hidden = false;
+    newPodSt.textContent = 'running';
+    newPod.className = '';
+  }
+  if (reduce) { finish(); return; }
+
+  var finalNodes = Array.prototype.slice.call(pre.childNodes);
+  var lines = [];
+  var cur = [];
+  finalNodes.forEach(function (n) {
+    if (n.nodeType === 3 && n.textContent.indexOf('\n') !== -1) {
+      var parts = n.textContent.split('\n');
+      parts.forEach(function (p, i) {
+        if (i > 0) { lines.push(cur); cur = []; }
+        if (p) cur.push(document.createTextNode(p));
+      });
+    } else cur.push(n);
+  });
+  if (cur.length) lines.push(cur);
+
+  pre.textContent = '';
+  var cursor = document.createElement('span');
+  cursor.className = 'cur'; cursor.setAttribute('aria-hidden', 'true');
+  pre.appendChild(cursor);
+  state.textContent = 'typing';
+
+  function isPrompt(line) { return line[0] && line[0].nodeType === 1 && line[0].className === 'p'; }
+
+  function typeLine(line, done) {
+    var nodes = line.filter(function (n) { return !(n.nodeType === 1 && n.className === 'cur'); })
+      .map(function (n) { return n.cloneNode(true); });
+    var i = 0;
+    function nextNode() {
+      if (i >= nodes.length) return done();
+      var n = nodes[i++];
+      if (n.nodeType === 3 || (n.nodeType === 1 && n.className === 'u')) {
+        var text = n.textContent;
+        var shell = n.nodeType === 1 ? n : null;
+        if (shell) { shell.textContent = ''; pre.insertBefore(shell, cursor); }
+        var j = 0; var holder = shell || document.createTextNode('');
+        if (!shell) pre.insertBefore(holder, cursor);
+        (function step() {
+          if (j >= text.length) return nextNode();
+          holder.textContent += text.charAt(j++);
+          setTimeout(step, 14 + Math.random() * 22);
+        })();
+      } else {
+        pre.insertBefore(n, cursor);
+        nextNode();
+      }
+    }
+    nextNode();
+  }
+
+  var li = 0;
+  function nextLine() {
+    if (li >= lines.length) { finish(); return; }
+    var line = lines[li++];
+    var last = li === lines.length;
+    if (isPrompt(line)) {
+      typeLine(line, function () {
+        if (!last) pre.insertBefore(document.createTextNode('\n'), cursor);
+        setTimeout(nextLine, last ? 0 : 260);
+      });
+    } else {
+      var isCreate = li === 3;
+      if (isCreate) { newPod.hidden = false; }
+      setTimeout(function () {
+        line.forEach(function (n) { pre.insertBefore(n.cloneNode(true), cursor); });
+        pre.insertBefore(document.createTextNode('\n'), cursor);
+        nextLine();
+      }, 320 + Math.random() * 200);
+    }
+  }
+  setTimeout(nextLine, 400);
+})();
+</script>
+
+</body>
+</html>

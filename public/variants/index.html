@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>usectl in ten directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f4f3ef;--ink:#1a1a18;--muted:#6a6963;--line:#dcdad3;--accent:#E8734A;--hover:#eae8e1}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141413;--ink:#ecebe6;--muted:#9a998f;--line:#2b2b28;--accent:#E8734A;--hover:#1e1e1c}}
+:root[data-theme="dark"]{--bg:#141413;--ink:#ecebe6;--muted:#9a998f;--line:#2b2b28;--accent:#E8734A;--hover:#1e1e1c}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:720px;margin:0 auto;padding:64px 20px 96px}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.eyebrow b{color:var(--accent);font-weight:500}
+h1{font-size:30px;font-weight:600;margin:10px 0 6px;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 36px}
+ol{list-style:none;padding:0;margin:0;border-top:1px solid var(--line)}
+li a{display:grid;grid-template-columns:3ch 1fr auto;gap:0 22px;align-items:start;padding:18px 8px;border-bottom:1px solid var(--line);color:inherit;text-decoration:none;margin:0 -8px}
+li a:hover,li a:focus-visible{background:var(--hover);outline:none}
+li a:focus-visible .t{text-decoration:underline}
+.n{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;color:var(--muted);font-size:14px;padding-top:3px}
+.t{font-weight:600}
+.d{color:var(--muted);font-size:14px;margin-top:2px;max-width:56ch}
+.arr{color:var(--muted);padding-top:2px}
+.pick .t::after{content:" · showpiece";font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:400;font-size:12px;color:var(--accent)}
+.foot{color:var(--muted);font-size:13px;margin-top:36px;max-width:60ch}
+.foot code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow"><b>~*</b> usectl · design directions · sept 2026</div>
+<h1>hero + "the math" in ten directions</h1>
+<p class="sub">same words, different art direction. open each, compare, pick one.</p>
+<ol>
+<li><a href="01-swiss-ledger.html"><span class="n">01</span><span><div class="t">swiss ledger</div><div class="d">off-white paper, ink black, brand orange as the one signal. hairline grid, the math as a ruled ledger with tabular figures.</div></span><span class="arr">→</span></a></li>
+<li><a href="02-terminal-alive.html"><span class="n">02</span><span><div class="t">terminal, alive</div><div class="d">dark, one monospace face. the session types itself, a pod list fills in as the deploy lands, blinking cursor, ascii rules.</div></span><span class="arr">→</span></a></li>
+<li><a href="03-blueprint.html"><span class="n">03</span><span><div class="t">blueprint</div><div class="d">drafting blue, white line-work, faint grid. one physical box drawn in isometric with its namespaces inside and dimension callouts for the prices.</div></span><span class="arr">→</span></a></li>
+<li><a href="04-rack-label.html"><span class="n">04</span><span><div class="t">rack label</div><div class="d">industrial. steel rails, u ticks, riveted panels, headlines on dymo tape, hazard stripe, the math as an etched spec plate.</div></span><span class="arr">→</span></a></li>
+<li><a href="05-quiet-dark.html"><span class="n">05</span><span><div class="t">quiet dark</div><div class="d">warm near-black, grain, one dusty accent, small type and a lot of nothing. prices as hairline bars.</div></span><span class="arr">→</span></a></li>
+<li><a href="06-poster-brutalist.html"><span class="n">06</span><span><div class="t">poster brutalist</div><div class="d">two-tone orange and black, condensed display type at poster size, hard edges. $40.20 is the poster; the terminal is the footnote.</div></span><span class="arr">→</span></a></li>
+<li><a href="07-spec-sheet.html"><span class="n">07</span><span><div class="t">spec sheet</div><div class="d">a hardware datasheet. revision block, part numbers, numbered sections, ordering information table, a barcode in the footer.</div></span><span class="arr">→</span></a></li>
+<li><a href="08-risograph.html"><span class="n">08</span><span><div class="t">risograph</div><div class="d">two-ink print on newsprint: fluorescent orange over teal, multiply overprint, misregistered headlines, halftone bands, a tilted sticker cta.</div></span><span class="arr">→</span></a></li>
+<li><a href="09-bauhaus.html"><span class="n">09</span><span><div class="t">bauhaus geometric</div><div class="d">muted primaries on warm white. one black box holding four namespaces as shapes, cut by a diagonal band. prices as block heights.</div></span><span class="arr">→</span></a></li>
+<li class="pick"><a href="10-machine-room.html"><span class="n">10</span><span><div class="t">the machine room</div><div class="d">webgl. one physical server floats in the room and splits into many isolated machines as you scroll. fly into one and the lights come on with the terminal; ten cubes for the math; two boxes at the end, our metal and yours.</div></span><span class="arr">→</span></a></li>
+</ol>
+<p class="foot">every page carries the same copy from the positioning memo: <code>one box. many machines.</code> plus the price ledger at list prices, september 2026. built by systemctl · tbilisi.</p>
+</main>
+
+</body>
+</html>

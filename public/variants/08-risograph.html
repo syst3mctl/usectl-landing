@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>usectl riso print</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap">
+<!--
+08 risograph. direction: a two-ink riso zine page, fluorescent orange (brand #E8734A pushed to a printer's fluorescent #FF5A1F) plus teal-blue (#1F6F8B) overprinted with multiply, on warm newsprint (#F1EADB). single theme on purpose: it is a print. type: syne 800 display with misregistered second ink, work sans body, space mono for the terminal and ledger.
+plan: color = paper #F1EADB, orange ink #FF5A1F, blue ink #1F6F8B, overprint (orange x blue) dark brown-black, ink-black text is the blue ink at full density. type = syne for headline and section heads, work sans 16/24 body, space mono 13 for the terminal. layout = 1040px page with two-ink duotone blocks, the ledger set as a stamped price table, halftone dot fills, a hand-cut sticker as the cta. grain via svg fractal noise data uri over everything.
+-->
+<style>
+:root{
+  --paper:#F1EADB;
+  --paper-2:#E9E0CC;
+  --orange:#FF5A1F;
+  --orange-soft:#FFB08F;
+  --blue:#1F6F8B;
+  --blue-soft:#9CC5D3;
+  --ink:#153845;
+  --overprint:#4A2A1C;
+  --white:#F8F3E8;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Work Sans","Helvetica Neue",Arial,sans-serif;
+  font-size:16px;
+  line-height:1.5;
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+}
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+  opacity:.28;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.1  0 0 0 0.6 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>");
+}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.mono{font-family:"Space Mono","Courier New",monospace}
+
+.nav{
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:1040px;margin:0 auto;padding:16px 24px 0;
+  font-family:"Space Mono","Courier New",monospace;font-size:12px;color:var(--blue);
+}
+.nav a{text-decoration:none}
+.nav a:hover{text-decoration:underline}
+
+.page{max-width:1040px;margin:0 auto;padding:24px 24px 56px}
+
+/* misregistered display type: blue layer drawn under, orange on top, offset */
+.reg{position:relative;display:inline-block;color:var(--orange);mix-blend-mode:multiply}
+.reg::before{
+  content:attr(data-text);position:absolute;left:0;top:0;
+  transform:translate(-4px,3px);color:var(--blue);mix-blend-mode:multiply;z-index:-1;
+  pointer-events:none;
+}
+.reg.small::before{transform:translate(-2px,2px)}
+
+.masthead{
+  display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;
+  padding:8px 0 18px;border-bottom:4px solid var(--blue);
+}
+.mark{
+  width:64px;height:64px;background:#000;color:#E8734A;display:grid;place-items:center;
+  font-family:"Space Mono","Courier New",monospace;font-size:30px;font-weight:700;
+  transform:rotate(-3deg);
+}
+.eyebrow{
+  font-family:"Space Mono","Courier New",monospace;font-size:13px;color:var(--blue);margin:0;
+  letter-spacing:.02em;
+}
+
+.hero{
+  display:grid;grid-template-columns:1.15fr 1fr;gap:40px;align-items:start;
+  padding:36px 0 40px;
+}
+.hero > *{min-width:0}
+h1{
+  font-family:"Syne","Arial Black",Impact,sans-serif;font-weight:800;
+  font-size:clamp(56px,8.2vw,112px);line-height:.92;letter-spacing:-.03em;
+  margin:0 0 26px;text-wrap:balance;
+}
+h1 .reg{display:block}
+.sub{font-size:19px;line-height:1.45;max-width:30em;margin:0 0 28px;color:var(--ink)}
+.ctas{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
+.sticker{
+  display:inline-block;padding:14px 24px;text-decoration:none;
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:20px;letter-spacing:-.01em;
+  background:var(--orange);color:var(--white);
+  transform:rotate(-2deg);
+  box-shadow:6px 6px 0 var(--blue);
+  mix-blend-mode:multiply;
+}
+.sticker:hover{transform:rotate(-2deg) translate(-2px,-2px);box-shadow:8px 8px 0 var(--blue)}
+.ctanote{font-family:"Space Mono","Courier New",monospace;font-size:13px;color:var(--blue)}
+.docs{
+  font-family:"Space Mono","Courier New",monospace;font-size:14px;font-weight:700;
+  color:var(--blue);text-decoration:none;border-bottom:3px solid var(--orange);
+}
+.docs:hover{background:var(--orange-soft)}
+
+.termwrap{position:relative;transform:rotate(1.2deg)}
+.termwrap::before{
+  content:"";position:absolute;inset:-8px -8px -8px -8px;
+  background:var(--blue-soft);mix-blend-mode:multiply;transform:rotate(-1.6deg);z-index:0;
+}
+.term{
+  position:relative;z-index:1;margin:0;
+  background:var(--white);border:3px solid var(--blue);
+  padding:20px 22px;font-family:"Space Mono","Courier New",monospace;font-size:12.5px;line-height:1.7;
+  overflow-x:auto;white-space:pre;color:var(--ink);
+}
+.term .ok{color:var(--orange);font-weight:700}
+.term .p{color:var(--blue)}
+
+/* halftone band */
+.band{
+  height:26px;margin:0 0 6px;
+  background-image:radial-gradient(circle,var(--orange) 0 2.6px,transparent 2.7px);
+  background-size:9px 9px;
+  mix-blend-mode:multiply;
+}
+.band.blue{background-image:radial-gradient(circle,var(--blue) 0 2.2px,transparent 2.3px);background-size:9px 9px;margin:6px 0 0}
+
+/* the math */
+.math{padding:34px 0 16px}
+h2{
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;
+  font-size:clamp(44px,6vw,80px);line-height:.95;letter-spacing:-.03em;margin:0 0 20px;
+}
+.intro{font-size:19px;line-height:1.45;max-width:36em;margin:0 0 30px}
+.ledger{
+  list-style:none;margin:0;padding:0;
+  border-top:3px solid var(--blue);
+  font-family:"Space Mono","Courier New",monospace;font-variant-numeric:tabular-nums;
+}
+.ledger li{
+  display:grid;grid-template-columns:1fr auto;gap:16px;align-items:baseline;
+  padding:14px 0;border-bottom:2px dashed var(--blue);font-size:15px;
+}
+.ledger li .price{font-weight:700;font-size:20px;text-align:right;white-space:nowrap}
+.ledger li.ours{
+  background:var(--orange);color:var(--white);padding:16px 14px;margin:0 -14px;border-bottom:none;
+  mix-blend-mode:multiply;
+}
+.ledger li.ours .price{font-size:30px;font-family:"Syne","Arial Black",sans-serif;font-weight:800;letter-spacing:-.02em}
+.ledger li.ours .name{font-weight:700}
+.stampwrap{display:grid;grid-template-columns:1fr 280px;gap:36px;align-items:start}
+.stamp{
+  border:4px solid var(--orange);color:var(--orange);padding:18px 18px 16px;
+  transform:rotate(-4deg);mix-blend-mode:multiply;
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;text-align:center;
+  font-size:22px;line-height:1.1;letter-spacing:-.01em;
+  margin-top:24px;
+}
+.stamp .big{display:block;font-size:44px;letter-spacing:-.03em;margin:4px 0}
+.stamp small{display:block;font-family:"Space Mono","Courier New",monospace;font-weight:400;font-size:11px;letter-spacing:.06em;margin-top:8px;color:var(--blue)}
+.many{
+  margin:28px 0 0;padding:20px 22px;
+  background:var(--blue);color:var(--white);
+  font-size:18px;line-height:1.4;
+  mix-blend-mode:multiply;
+}
+.many b{color:var(--orange-soft);font-weight:600}
+.foot{font-family:"Space Mono","Courier New",monospace;font-size:12px;color:var(--blue);margin:14px 0 0}
+
+/* proof + closing, two ink blocks */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:40px 0 0}
+.duo > div{padding:30px 28px;font-size:18px;line-height:1.45}
+.duo .proof{background:var(--orange-soft);mix-blend-mode:multiply;color:var(--ink)}
+.duo .close{background:var(--blue-soft);mix-blend-mode:multiply;color:var(--ink)}
+.duo .close h3,.duo .proof h3{
+  font-family:"Syne","Arial Black",sans-serif;font-weight:800;font-size:28px;line-height:1;margin:0 0 14px;letter-spacing:-.02em;
+}
+.duo .proof h3{color:var(--orange)}
+.duo .close h3{color:var(--blue)}
+.duo p{margin:0}
+
+.colophon{
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  margin:36px 0 0;padding-top:16px;border-top:3px solid var(--blue);
+  font-family:"Space Mono","Courier New",monospace;font-size:12px;color:var(--blue);
+}
+
+@media (max-width:860px){
+  .hero,.stampwrap,.duo{grid-template-columns:1fr}
+  .termwrap{transform:none}
+  .stamp{margin-top:8px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="variants">
+  <a href="./index.html">← all directions</a>
+  <span>08 · risograph</span>
+</nav>
+
+<main class="page">
+  <header class="masthead">
+    <div class="mark" aria-hidden="true">~*</div>
+    <p class="eyebrow">usectl · managed kubernetes on our own metal · falkenstein</p>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1><span class="reg" data-text="one box.">one box.</span><span class="reg" data-text="many machines.">many machines.</span></h1>
+      <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+      <div class="ctas">
+        <a class="sticker" href="#">create a machine</a>
+        <span class="ctanote">30 days free. no card.</span>
+        <a class="docs" href="#">read the docs</a>
+      </div>
+    </div>
+    <div class="termwrap">
+      <pre class="term"><span class="p">$</span> usectl login
+<span class="p">$</span> usectl machines create omnitech --repo github.com/you/shop --postgres --redis --s3
+<span class="ok">✓</span> postgres ready. DATABASE_URL injected
+<span class="ok">✓</span> redis ready. REDIS_URL injected
+<span class="ok">✓</span> s3 ready. S3_BUCKET injected
+<span class="p">$</span> usectl deploy omnitech
+<span class="ok">✓</span> build 28s · tls issued · live at https://omnitech.usectl.com</pre>
+    </div>
+  </section>
+
+  <div class="band" aria-hidden="true"></div>
+  <div class="band blue" aria-hidden="true"></div>
+
+  <section class="math" id="math">
+    <h2><span class="reg small" data-text="the math">the math</span></h2>
+    <p class="intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+    <div class="stampwrap">
+      <div>
+        <ul class="ledger" aria-label="same box, list prices, sept 2026">
+          <li class="ours"><span class="name">usectl machine, everything in</span><span class="price">$40.20</span></li>
+          <li><span class="name">vercel pro + supabase pro + upstash + s3, one seat</span><span class="price">$60 and up, before bandwidth</span></li>
+          <li><span class="name">railway, same box, reserved</span><span class="price">about $80, plus egress</span></li>
+          <li><span class="name">render pro + postgres standard</span><span class="price">$125</span></li>
+        </ul>
+        <p class="foot">same box, list prices, sept 2026. railway shown at reserved equivalent. all prices list, september 2026.</p>
+      </div>
+      <div class="stamp" aria-hidden="true">
+        the sticker
+        <span class="big">$40.20</span>
+        is the ceiling
+        <small>2 vcpu / 4 gb / 20 gb</small>
+      </div>
+    </div>
+    <p class="many">ten client machines at 1 vcpu / 2 gb: <b>$200 a month on usectl.</b> about $400 on railway before storage.</p>
+  </section>
+
+  <section class="duo">
+    <div class="proof">
+      <h3>in print</h3>
+      <p>systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+    </div>
+    <div class="close">
+      <h3>second edition</h3>
+      <p>on our metal, or on yours. self hosted usectl ships this month.</p>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <span>built by systemctl · tbilisi · © 2026</span>
+    <span>two inks: fluorescent orange + teal. printed on newsprint.</span>
+  </footer>
+</main>
+
+</body>
+</html>
