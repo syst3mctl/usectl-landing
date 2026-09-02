@@ -163,6 +163,80 @@
   .ta-footer .prompt { color: var(--fg); }
   .ta-footer .prompt .p { color: var(--accent); }
 
+  /* section blocks styled as shell output */
+  .ta-sec { max-width: 100%; }
+  .ta-lead2 { margin: 0; max-width: 78ch; font-size: 16px; text-wrap: pretty; }
+  .ta-lead2 code, .ta-man code, .ta-cells code { font-family: inherit; color: var(--fg); background: var(--screen-2); padding: 1px 5px; border: 1px solid var(--rule); }
+
+  /* man page */
+  .ta-man { margin: 28px 0 0; max-width: 100ch; }
+  .ta-man .sec { color: var(--dim); font-size: 13px; margin: 18px 0 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .ta-man .sec:first-child { margin-top: 0; }
+  .ta-man dl { margin: 0; padding-left: 4ch; }
+  .ta-man dt { font-weight: 700; color: var(--fg); }
+  .ta-man dt .p { color: var(--accent); font-weight: 400; }
+  .ta-man dd { margin: 0 0 12px 4ch; max-width: 76ch; text-wrap: pretty; }
+  .ta-man dd:last-child { margin-bottom: 0; }
+  .ta-man p { margin: 0; padding-left: 4ch; max-width: 80ch; color: var(--fg); text-wrap: pretty; }
+  .ta-man p.dim { color: var(--dim); }
+
+  /* ls style cells: addons, modes, cards */
+  .ta-cells {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px;
+    background: var(--rule); border: 1px solid var(--rule); margin-top: 24px;
+  }
+  .ta-cells.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ta-cells > div { background: var(--screen); padding: 16px 18px 18px; }
+  .ta-cells .n { display: block; font-weight: 700; margin-bottom: 6px; }
+  .ta-cells .n:before { content: "drwxr-x--- "; color: var(--dim); font-weight: 400; }
+  .ta-cells .n:after { content: "/"; color: var(--accent); }
+  .ta-cells .n.big { font-size: 20px; margin-bottom: 10px; }
+  .ta-cells .n.big:before { content: ""; }
+  .ta-cells p { margin: 0; font-size: 14px; color: var(--fg); text-wrap: pretty; line-height: 1.6; }
+  .ta-cells.two p, .ta-cells.cards p { font-size: 15px; }
+  .ta-cells .k { color: var(--dim); font-size: 13px; display: block; margin-bottom: 8px; }
+  .ta-cells .k .p { color: var(--accent); }
+  .ta-under { margin: 16px 0 0; max-width: 80ch; }
+  .ta-under .p { color: var(--accent); }
+
+  /* static code block: same frame as the typed terminal, no typing */
+  .ta-term.static pre { min-height: 0; }
+
+  /* numbered log: how it ships */
+  .ta-log { list-style: none; margin: 24px 0 0; padding: 0; max-width: 92ch; }
+  .ta-log li { display: grid; grid-template-columns: 6ch 1fr; gap: 0 12px; padding: 10px 0; border-bottom: 1px dotted var(--rule); font-size: 15px; }
+  .ta-log li:last-child { border-bottom: 0; }
+  .ta-log .step { color: var(--accent); font-weight: 700; white-space: nowrap; }
+  .ta-log .step small { color: var(--dim); font-weight: 400; }
+  .ta-log p { margin: 0; max-width: 76ch; text-wrap: pretty; }
+  .ta-log p .u { text-decoration: underline; text-underline-offset: 3px; }
+  .ta-log .done { margin: 12px 0 0; color: var(--dim); font-size: 13px; }
+  .ta-log .done .ok { color: var(--accent); }
+
+  /* faq as a q/a transcript */
+  .ta-faq { margin: 24px 0 0; max-width: 92ch; }
+  .ta-faq > div { padding: 12px 0; border-bottom: 1px dotted var(--rule); }
+  .ta-faq > div:last-child { border-bottom: 0; }
+  .ta-faq dt { font-weight: 700; margin: 0; }
+  .ta-faq dt:before { content: "? "; color: var(--accent); font-weight: 400; }
+  .ta-faq dd { margin: 4px 0 0 2ch; max-width: 78ch; text-wrap: pretty; }
+  .ta-faq dd:before { content: "> "; color: var(--dim); }
+  .ta-faq dd b { color: var(--accent); font-weight: 700; }
+
+  /* final cta */
+  .ta-cta .ta-h1 { font-size: clamp(36px, 5vw, 64px); }
+  .ta-cta .ta-lead { margin-top: 20px; }
+
+  @media (max-width: 900px) {
+    .ta-cells { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ta-cells.two, .ta-cells.cards { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .ta-cells { grid-template-columns: 1fr; }
+    .ta-man dl, .ta-man p { padding-left: 2ch; }
+    .ta-man dd { margin-left: 2ch; }
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     .ta-cursor, .ta-term pre .cur, .ta-footer .cur { animation: ta-blink 1.05s steps(1, end) infinite; }
     .ta-dot { animation: ta-pulse 2.4s ease-in-out infinite; }
@@ -190,13 +264,13 @@
 
   <div class="ta-rule" data-title="hero" aria-hidden="true">┌─ <span class="t"><b>usectl</b> · fsn1 · falkenstein</span> ─┐</div>
 
-  <section aria-labelledby="ta-headline">
+  <section id="hero" aria-labelledby="ta-headline">
     <p class="ta-eyebrow"><span class="p">$</span> <b>usectl</b> · managed kubernetes on our own metal · falkenstein</p>
     <h1 class="ta-h1" id="ta-headline">one box<span class="dot">.</span><br>many machines<span class="dot">.</span><span class="ta-cursor" aria-hidden="true"></span></h1>
     <p class="ta-lead">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
     <div class="ta-ctas">
-      <a class="ta-btn primary" href="#create">[ create a machine ]</a>
-      <a class="ta-btn secondary" href="#docs">[ read the docs ]</a>
+      <a class="ta-btn primary" href="https://manager.usectl.com">[ create a machine ]</a>
+      <a class="ta-btn secondary" href="https://docs.usectl.com">[ read the docs ]</a>
       <p class="ta-note">30 days free. no card.</p>
     </div>
 
@@ -233,9 +307,118 @@
     <p class="ta-pods-foot">each machine is an isolated kubernetes namespace on hetzner bare metal in falkenstein. the list above is what our own shop looks like.</p>
   </section>
 
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>what you get</b> · man usectl-machine</span> ─┤</div>
+
+  <section class="ta-sec" id="machine" aria-labelledby="ta-machine">
+    <h2 class="ta-h2" id="ta-machine"><span class="p">$</span> man usectl-machine</h2>
+    <p class="ta-lead2">a machine is a computer that is only yours.</p>
+    <div class="ta-man">
+      <p class="sec">description</p>
+      <p>on usectl a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes. you see a box with a slider.</p>
+      <p class="sec">properties</p>
+      <dl>
+        <dt><span class="p">1.</span> isolated by default</dt>
+        <dd>its own network policy, its own quota, its own secrets. a neighbour cannot reach you and you cannot reach it.</dd>
+        <dt><span class="p">2.</span> everything inside</dt>
+        <dd>postgres, redis, s3, cron, domains and tls live in the machine, not in five other dashboards.</dd>
+        <dt><span class="p">3.</span> one bill</dt>
+        <dd>a machine's budget is shared by all its apps, addons and groups. adding a second app does not add a second bill.</dd>
+        <dt><span class="p">4.</span> stage and prod</dt>
+        <dd>split a machine into groups, each with its own namespace and its own database, on the same budget.</dd>
+      </dl>
+      <p class="sec">notes</p>
+      <p class="dim">apps inside a machine can be web, worker or release. each has its own repo, branch, port, replicas and rollout. pr previews get their own namespace and url.</p>
+    </div>
+  </section>
+
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>addons</b> · usectl addons list</span> ─┤</div>
+
+  <section class="ta-sec" id="addons" aria-labelledby="ta-addons">
+    <h2 class="ta-h2" id="ta-addons"><span class="p">$</span> the stack, one toggle each.</h2>
+    <p class="ta-lead2">managed on shared platform instances, or dedicated in your own namespace with its own volume and size. attach to any app in one command.</p>
+    <p class="ta-under"><span class="p">$</span> usectl addons list <span style="color:var(--dim)"># 12 total</span></p>
+    <div class="ta-cells">
+      <div><b class="n">postgres</b><p>managed or dedicated. pgvector and timescale on request. scheduled backups to a private bucket.</p></div>
+      <div><b class="n">redis</b><p>managed with a key prefix, or dedicated with aof and search modules.</p></div>
+      <div><b class="n">s3 storage</b><p>your own bucket and iam user on seaweedfs, with a cdn url.</p></div>
+      <div><b class="n">nats</b><p>jetstream on its own volume, websocket in.</p></div>
+      <div><b class="n">mongodb</b><p>per machine database, or dedicated.</p></div>
+      <div><b class="n">sql server</b><p>for the apps that need it.</p></div>
+      <div><b class="n">meilisearch</b><p>search with its own persistent volume.</p></div>
+      <div><b class="n">cron</b><p>scheduled jobs from your app image, with run history.</p></div>
+      <div><b class="n">oauth2 proxy</b><p>github or google login in front of any app, no code.</p></div>
+      <div><b class="n">grafana</b><p>dedicated per machine, wired read only to your own telemetry.</p></div>
+      <div><b class="n">glitchtip</b><p>sentry compatible error tracking, one dsn per environment.</p></div>
+      <div><b class="n">ai</b><p>an openai compatible endpoint in the cluster: qwen3-14b for chat, bge-m3 for embeddings, metered per machine.</p></div>
+    </div>
+  </section>
+
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>built for agents</b> · cli first, mcp if you prefer</span> ─┤</div>
+
+  <section class="ta-sec" id="agents" aria-labelledby="ta-agents">
+    <h2 class="ta-h2" id="ta-agents"><span class="p">$</span> your agent already knows how to use it.</h2>
+    <p class="ta-lead2">the cli is the product. one binary, every command with --json, clear errors an agent can act on. claude code, cursor, codex or a shell script: they all deploy the same way. there is an mcp server if you prefer tool calls.</p>
+    <div class="ta-man">
+      <dl>
+        <dt><span class="p">1.</span> deploy from the chat</dt>
+        <dd><code>usectl machines create</code>, <code>usectl deploy</code>, <code>usectl logs --follow</code>. no plugin needed.</dd>
+        <dt><span class="p">2.</span> agents that live here</dt>
+        <dd>add a hermes or openclaw pod to a machine and it runs 24/7 with its own memory, its own headless browser and a local model. one agent, one machine, its own walls.</dd>
+        <dt><span class="p">3.</span> read what happened</dt>
+        <dd>logs, metrics, traces and pod insights through the same cli, so the agent that deployed can also debug.</dd>
+      </dl>
+    </div>
+    <div class="ta-term static">
+      <div class="ta-term-bar"><span><span class="mark">~*</span> usectl · agent session</span><span>live</span></div>
+<pre><span class="p">$</span> usectl machines create radiodj --repo github.com/you/radiodj --postgres
+<span class="p">$</span> usectl addons add radiodj --type hermes
+<span class="ok">✓</span> hermes agent pod running. telegram gateway connected.
+<span class="p">$</span> usectl logs radiodj --follow</pre>
+    </div>
+  </section>
+
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>one product, two rooms</b> · managed, self hosted</span> ─┤</div>
+
+  <section class="ta-sec" id="modes" aria-labelledby="ta-modes">
+    <h2 class="ta-h2" id="ta-modes"><span class="p">$</span> on our metal, or on yours.</h2>
+    <p class="ta-under" style="margin-top:0"><span class="p">$</span> ls /rooms</p>
+    <div class="ta-cells two">
+      <div>
+        <b class="n big">managed</b>
+        <p>we run it. bare metal we own in falkenstein, kubernetes we operate, backups, ingress, tls and the 3am pager on us. you push git.</p>
+      </div>
+      <div>
+        <b class="n big">self hosted</b>
+        <p>you run it. the same platform on your own hardware, your data never leaves the building. self hosted usectl ships this month.</p>
+      </div>
+    </div>
+    <p class="ta-under">same cli, same addons, same one command. the only choice is whose room the box stands in.</p>
+  </section>
+
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>who it is for</b> · people who run many things</span> ─┤</div>
+
+  <section class="ta-sec" id="for" aria-labelledby="ta-for">
+    <h2 class="ta-h2" id="ta-for"><span class="p">$</span> people who run many things.</h2>
+    <p class="ta-under" style="margin-top:0"><span class="p">$</span> ls /users</p>
+    <div class="ta-cells cards">
+      <div>
+        <b class="n big">software shops</b>
+        <p>one machine per client. their own database, their own domain, their own bill you can pass through. hand them the keys when the engagement ends.</p>
+      </div>
+      <div>
+        <b class="n big">agent builders</b>
+        <p>one machine per client agent, with postgres, a browser and a local model inside. isolation at the namespace, not inside the prompt.</p>
+      </div>
+      <div>
+        <b class="n big">self hosters</b>
+        <p>the same box on your own hardware. one physical server becomes many isolated machines with their stacks.</p>
+      </div>
+    </div>
+  </section>
+
   <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>the math</b> · list prices, sept 2026</span> ─┤</div>
 
-  <section aria-labelledby="ta-math">
+  <section id="math" aria-labelledby="ta-math">
     <h2 class="ta-h2" id="ta-math"><span class="p">$</span> the math</h2>
     <p class="ta-intro">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
 
@@ -254,16 +437,55 @@
     <p class="ta-foot"># railway shown at reserved equivalent. all prices list, september 2026.</p>
   </section>
 
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>how it ships</b> · push git, get https</span> ─┤</div>
+
+  <section class="ta-sec" id="ship" aria-labelledby="ta-ship">
+    <h2 class="ta-h2" id="ta-ship"><span class="p">$</span> push git. get https.</h2>
+    <ol class="ta-log">
+      <li><span class="step">[1<small>/4</small>]</span><p>connect a repo through the github app, or push from the cli.</p></li>
+      <li><span class="step">[2<small>/4</small>]</span><p>we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.</p></li>
+      <li><span class="step">[3<small>/4</small>]</span><p>the app goes live at <span class="u">https://name.usectl.com</span> with a certificate. add your own domain in one command.</p></li>
+      <li><span class="step">[4<small>/4</small>]</span><p>every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.</p></li>
+    </ol>
+  </section>
+
   <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>in use</b> · systemctl, tbilisi</span> ─┤</div>
 
-  <section aria-label="proof">
+  <section class="ta-sec" id="proof" aria-labelledby="ta-proof">
+    <h2 class="ta-h2" id="ta-proof"><span class="p">$</span> customer zero</h2>
     <p class="ta-proof">systemctl runs its own <b>9</b> person software shop on usectl: <b>133</b> deployments, an ev charging platform with <b>16</b> services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+    <p class="ta-proof" style="margin-top:14px">we built usectl because we needed it. every client we ship gets its own machine, and when it breaks at night it is our pager, not theirs.</p>
   </section>
 
   <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>self hosted</b> · ships this month</span> ─┤</div>
 
   <section aria-label="closing">
     <p class="ta-close">on our metal, or on yours<span class="dot">.</span> self hosted usectl ships this month<span class="dot">.</span></p>
+  </section>
+
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>faq</b> · questions people ask</span> ─┤</div>
+
+  <section class="ta-sec" id="faq" aria-labelledby="ta-faq">
+    <h2 class="ta-h2" id="ta-faq"><span class="p">$</span> questions people ask</h2>
+    <dl class="ta-faq">
+      <div><dt>is a machine a vm?</dt><dd><b>no.</b> it is a kubernetes namespace with a network policy, a quota and its own secrets on nodes we operate. container isolation, not a microvm. we say that plainly because it matters for some workloads.</dd></div>
+      <div><dt>can i leave?</dt><dd><b>yes.</b> your dockerfile, your postgres dump and your bucket run anywhere. if we disappeared tomorrow your stack still works.</dd></div>
+      <div><dt>where is my data?</dt><dd>on bare metal we own at hetzner in falkenstein, germany. with self hosted usectl, on your own hardware.</dd></div>
+      <div><dt>what about backups?</dt><dd>managed postgres is dumped nightly at the platform level. dedicated postgres gets scheduled backups to a private bucket only that database can reach.</dd></div>
+      <div><dt>is there a bandwidth meter or a seat fee?</dt><dd><b>no and no.</b> the sticker is the ceiling.</dd></div>
+      <div><dt>do i need docker?</dt><dd>not for next.js, vite, node or static sites. for anything else, a dockerfile.</dd></div>
+    </dl>
+  </section>
+
+  <div class="ta-rule" aria-hidden="true">├─ <span class="t"><b>create a machine</b> · 30 days free</span> ─┤</div>
+
+  <section class="ta-sec ta-cta" id="cta" aria-labelledby="ta-cta-h">
+    <h2 class="ta-h1" id="ta-cta-h">one box<span class="dot">.</span> many machines<span class="dot">.</span></h2>
+    <p class="ta-lead">30 days free, up to 2 vcpu and 4 gb. no card. delete it when you are done.</p>
+    <div class="ta-ctas">
+      <a class="ta-btn primary" href="https://manager.usectl.com">[ create a machine ]</a>
+      <a class="ta-btn secondary" href="https://docs.usectl.com">[ read the docs ]</a>
+    </div>
   </section>
 
   <div class="ta-rule" aria-hidden="true">└─ <span class="t">end of session</span> ─┘</div>

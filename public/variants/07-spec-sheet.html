@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <!--
 07 spec sheet. direction: a hardware component datasheet, white paper, hairline rules, part numbers, revision block, small-caps section labels, a css barcode. palette: paper #ffffff, ink #14171c, rule #d3d7dc, muted #5f6773, brand orange #E8734A used only for the ordering-information row and the cta. type: ibm plex sans for body, ibm plex mono for part numbers, figures and the terminal.
-plan: color = paper/ink/rule/muted/accent tokens, dark theme is a dark datasheet (ink on charcoal) not an inversion. type = plex sans 15/22 body, plex mono for anything numeric, small caps labels at 11px with 0.14em tracking. layout = 1120px sheet with a document header, a two column features + typical application block, then numbered datasheet sections and a specifications table, ordering information, revision history, footer barcode.
+plan: color = paper/ink/rule/muted/accent tokens, dark theme is a dark datasheet (ink on charcoal) not an inversion. type = plex sans 15/22 body, plex mono for anything numeric, small caps labels at 11px with 0.14em tracking. layout = 1120px sheet with a document header, a two column features + typical application block, then ten numbered datasheet sections: parameters grid, addon specifications table, agent interface with figure 2, operating modes, applications, ordering information (the math), deploy sequence, reference design, application notes (faq), ordering and availability with revision history, footer barcode.
 -->
 <style>
 :root{
@@ -87,6 +87,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   color:var(--muted);
 }
 .num{font-family:"IBM Plex Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+code{font-family:"IBM Plex Mono",Menlo,monospace;font-size:.92em;background:var(--code-bg);padding:1px 5px;border:1px solid var(--rule)}
 
 /* document header */
 .dochead{
@@ -186,6 +187,59 @@ tr.hl td.pn{font-weight:500}
 .proof{font-size:16px;max-width:58em;margin:0;color:var(--ink-2)}
 .closing{font-size:20px;font-weight:500;margin:0;letter-spacing:-.01em}
 
+/* parameter cells: numbered cells in a ruled grid (machine points, modes, applications) */
+.params{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--rule);border-left:0;margin:0;padding:0;list-style:none;
+}
+.params.two{grid-template-columns:1fr 1fr}
+.params.three{grid-template-columns:repeat(3,1fr)}
+.params > li{padding:16px 18px 18px;border-left:1px solid var(--rule);min-width:0}
+.params .k{display:block;font-family:"IBM Plex Mono",Menlo,monospace;font-size:12px;color:var(--muted);margin:0 0 8px}
+.params h3{margin:0 0 6px;font-size:15px;font-weight:600;letter-spacing:-.005em}
+.params p{margin:0;font-size:14px;color:var(--ink-2)}
+.params.two h3{font-size:18px;font-weight:500}
+.params.two p{font-size:15px}
+
+/* two column split: text and figure */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.split > *{min-width:0}
+.plist{margin:0;padding:0;list-style:none;border-top:1px solid var(--rule)}
+.plist li{display:grid;grid-template-columns:2.6em 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.plist .k{font-family:"IBM Plex Mono",Menlo,monospace;font-size:12px;color:var(--muted);padding-top:3px}
+.plist h3{margin:0 0 4px;font-size:15px;font-weight:600}
+.plist p{margin:0;font-size:14px;color:var(--ink-2)}
+
+/* deploy sequence: a timing-diagram style step list */
+.steps{margin:0;padding:0;list-style:none;counter-reset:step;border-top:1px solid var(--rule-strong)}
+.steps li{
+  counter-increment:step;
+  display:grid;grid-template-columns:110px 1fr;gap:24px;align-items:baseline;
+  padding:14px 0;border-bottom:1px solid var(--rule);font-size:15px;
+}
+.steps li::before{
+  content:"step " counter(step);
+  font-family:"IBM Plex Mono",Menlo,monospace;font-size:12.5px;color:var(--muted);
+}
+.steps li span{color:var(--ink-2)}
+.steps li b{font-weight:600;color:var(--ink)}
+
+/* application notes */
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin:0;padding:0;list-style:none}
+.notes li{padding:14px 0;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:4.2em 1fr;gap:12px}
+.notes .k{font-family:"IBM Plex Mono",Menlo,monospace;font-size:12px;color:var(--muted);padding-top:3px}
+.notes h3{margin:0 0 4px;font-size:15px;font-weight:600}
+.notes p{margin:0;font-size:14px;color:var(--ink-2)}
+
+/* ordering block */
+.order{
+  display:grid;grid-template-columns:1fr auto;gap:24px 40px;align-items:center;
+  border:1px solid var(--rule-strong);padding:22px 24px;
+}
+.order h3{margin:0 0 6px;font-size:clamp(26px,3vw,34px);font-weight:500;letter-spacing:-.02em;line-height:1.1}
+.order p{margin:0;color:var(--ink-2);font-size:15px}
+.order .ctas{justify-content:flex-end}
+
 /* revision history */
 .revs{font-family:"IBM Plex Mono",Menlo,monospace;font-size:12.5px;width:100%;min-width:0}
 .revs th,.revs td{padding:7px 10px}
@@ -212,11 +266,19 @@ tr.hl td.pn{font-weight:500}
 .barcode-wrap .code{display:block;letter-spacing:.3em;color:var(--ink);margin-top:4px}
 
 @media (max-width:860px){
-  .hero,.specs{grid-template-columns:1fr}
+  .hero,.specs,.split,.notes,.order{grid-template-columns:1fr}
   .dochead{grid-template-columns:1fr}
   .features{grid-template-columns:1fr}
   .foot{grid-template-columns:1fr}
   .barcode-wrap{text-align:left}
+  .params,.params.three{grid-template-columns:1fr 1fr}
+  .params > li{border-top:1px solid var(--rule)}
+  .params{border-top:0}
+  .order .ctas{justify-content:flex-start}
+}
+@media (max-width:520px){
+  .params,.params.two,.params.three{grid-template-columns:1fr}
+  .steps li{grid-template-columns:1fr;gap:4px}
 }
 @media (prefers-reduced-motion: reduce){
   *{transition:none!important;animation:none!important}
@@ -244,14 +306,14 @@ tr.hl td.pn{font-weight:500}
     </dl>
   </header>
 
-  <section class="hero">
+  <section class="hero" id="hero">
     <div>
       <h1>one box. many machines.</h1>
       <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
       <div class="ctas">
-        <a class="btn" href="#">create a machine</a>
+        <a class="btn" href="https://manager.usectl.com">create a machine</a>
         <span class="ctanote">30 days free. no card.</span>
-        <a class="btn ghost" href="#">read the docs</a>
+        <a class="btn ghost" href="https://docs.usectl.com">read the docs</a>
       </div>
       <ul class="features">
         <li class="label" style="padding-left:0">features</li>
@@ -277,9 +339,108 @@ tr.hl td.pn{font-weight:500}
     </figure>
   </section>
 
-  <section class="sec" id="math">
+  <section class="sec" id="machine">
     <div class="sec-head">
       <span class="n">1.</span>
+      <h2>a machine is a computer that is only yours.</h2>
+      <span class="label">what you get</span>
+    </div>
+    <p class="intro">on usectl a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes. you see a box with a slider.</p>
+    <ul class="params">
+      <li><span class="k">1.1</span><h3>isolated by default</h3><p>its own network policy, its own quota, its own secrets. a neighbour cannot reach you and you cannot reach it.</p></li>
+      <li><span class="k">1.2</span><h3>everything inside</h3><p>postgres, redis, s3, cron, domains and tls live in the machine, not in five other dashboards.</p></li>
+      <li><span class="k">1.3</span><h3>one bill</h3><p>a machine's budget is shared by all its apps, addons and groups. adding a second app does not add a second bill.</p></li>
+      <li><span class="k">1.4</span><h3>stage and prod</h3><p>split a machine into groups, each with its own namespace and its own database, on the same budget.</p></li>
+    </ul>
+    <p class="note">apps inside a machine can be web, worker or release. each has its own repo, branch, port, replicas and rollout. pr previews get their own namespace and url.</p>
+  </section>
+
+  <section class="sec" id="addons">
+    <div class="sec-head">
+      <span class="n">2.</span>
+      <h2>the stack, one toggle each.</h2>
+      <span class="label">specifications · addons</span>
+    </div>
+    <p class="intro">managed on shared platform instances, or dedicated in your own namespace with its own volume and size. attach to any app in one command.</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="pn">part number</th>
+            <th>addon</th>
+            <th>description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="pn">add-pg</td><td>postgres</td><td>managed or dedicated. pgvector and timescale on request. scheduled backups to a private bucket.</td></tr>
+          <tr><td class="pn">add-redis</td><td>redis</td><td>managed with a key prefix, or dedicated with aof and search modules.</td></tr>
+          <tr><td class="pn">add-s3</td><td>s3 storage</td><td>your own bucket and iam user on seaweedfs, with a cdn url.</td></tr>
+          <tr><td class="pn">add-nats</td><td>nats</td><td>jetstream on its own volume, websocket in.</td></tr>
+          <tr><td class="pn">add-mongo</td><td>mongodb</td><td>per machine database, or dedicated.</td></tr>
+          <tr><td class="pn">add-mssql</td><td>sql server</td><td>for the apps that need it.</td></tr>
+          <tr><td class="pn">add-meili</td><td>meilisearch</td><td>search with its own persistent volume.</td></tr>
+          <tr><td class="pn">add-cron</td><td>cron</td><td>scheduled jobs from your app image, with run history.</td></tr>
+          <tr><td class="pn">add-oauth2</td><td>oauth2 proxy</td><td>github or google login in front of any app, no code.</td></tr>
+          <tr><td class="pn">add-grafana</td><td>grafana</td><td>dedicated per machine, wired read only to your own telemetry.</td></tr>
+          <tr><td class="pn">add-glitchtip</td><td>glitchtip</td><td>sentry compatible error tracking, one dsn per environment.</td></tr>
+          <tr><td class="pn">add-ai</td><td>ai</td><td>an openai compatible endpoint in the cluster: qwen3-14b for chat, bge-m3 for embeddings, metered per machine.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="sec" id="agents">
+    <div class="sec-head">
+      <span class="n">3.</span>
+      <h2>your agent already knows how to use it.</h2>
+      <span class="label">built for agents</span>
+    </div>
+    <p class="intro">the cli is the product. one binary, every command with --json, clear errors an agent can act on. claude code, cursor, codex or a shell script: they all deploy the same way. there is an mcp server if you prefer tool calls.</p>
+    <div class="split">
+      <ul class="plist">
+        <li><span class="k">3.1</span><div><h3>deploy from the chat</h3><p><code>usectl machines create</code>, <code>usectl deploy</code>, <code>usectl logs --follow</code>. no plugin needed.</p></div></li>
+        <li><span class="k">3.2</span><div><h3>agents that live here</h3><p>add a hermes or openclaw pod to a machine and it runs 24/7 with its own memory, its own headless browser and a local model. one agent, one machine, its own walls.</p></div></li>
+        <li><span class="k">3.3</span><div><h3>read what happened</h3><p>logs, metrics, traces and pod insights through the same cli, so the agent that deployed can also debug.</p></div></li>
+      </ul>
+      <figure style="margin:0">
+        <pre class="term"><span class="p">$</span> usectl machines create radiodj --repo github.com/you/radiodj --postgres
+<span class="p">$</span> usectl addons add radiodj --type hermes
+<span class="ok">✓</span> hermes agent pod running. telegram gateway connected.
+<span class="p">$</span> usectl logs radiodj --follow</pre>
+        <figcaption class="figcap"><span>figure 2. agent interface</span><span>one machine, one agent pod</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="sec" id="modes">
+    <div class="sec-head">
+      <span class="n">4.</span>
+      <h2>on our metal, or on yours.</h2>
+      <span class="label">one product, two rooms</span>
+    </div>
+    <ul class="params two">
+      <li><span class="k">4.1 · mode a</span><h3>managed</h3><p>we run it. bare metal we own in falkenstein, kubernetes we operate, backups, ingress, tls and the 3am pager on us. you push git.</p></li>
+      <li><span class="k">4.2 · mode b</span><h3>self hosted</h3><p>you run it. the same platform on your own hardware, your data never leaves the building. self hosted usectl ships this month.</p></li>
+    </ul>
+    <p class="note">same cli, same addons, same one command. the only choice is whose room the box stands in.</p>
+  </section>
+
+  <section class="sec" id="for">
+    <div class="sec-head">
+      <span class="n">5.</span>
+      <h2>people who run many things.</h2>
+      <span class="label">who it is for</span>
+    </div>
+    <ul class="params three">
+      <li><span class="k">5.1</span><h3>software shops</h3><p>one machine per client. their own database, their own domain, their own bill you can pass through. hand them the keys when the engagement ends.</p></li>
+      <li><span class="k">5.2</span><h3>agent builders</h3><p>one machine per client agent, with postgres, a browser and a local model inside. isolation at the namespace, not inside the prompt.</p></li>
+      <li><span class="k">5.3</span><h3>self hosters</h3><p>the same box on your own hardware. one physical server becomes many isolated machines with their stacks.</p></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="math">
+    <div class="sec-head">
+      <span class="n">6.</span>
       <h2>the math</h2>
       <span class="label">ordering information</span>
     </div>
@@ -329,48 +490,63 @@ tr.hl td.pn{font-weight:500}
     </div>
   </section>
 
-  <section class="sec">
+  <section class="sec" id="ship">
     <div class="sec-head">
-      <span class="n">2.</span>
-      <h2>specifications</h2>
-      <span class="label">per machine</span>
+      <span class="n">7.</span>
+      <h2>push git. get https.</h2>
+      <span class="label">how it ships · deploy sequence</span>
     </div>
-    <div class="specs">
-      <dl>
-        <dt>isolation</dt><dd>kubernetes namespace</dd>
-        <dt>compute</dt><dd>hetzner bare metal</dd>
-        <dt>site</dt><dd>falkenstein, de</dd>
-        <dt>interface</dt><dd>cli, mcp</dd>
-        <dt>ingress</dt><dd>domain, tls issued</dd>
-        <dt>seats</dt><dd>unlimited</dd>
-      </dl>
-      <dl>
-        <dt>datastores</dt><dd>postgres, redis, s3, nats, mongo, mssql</dd>
-        <dt>search</dt><dd>meilisearch</dd>
-        <dt>scheduling</dt><dd>cron</dd>
-        <dt>auth</dt><dd>oauth2 proxy</dd>
-        <dt>observability</dt><dd>grafana, glitchtip</dd>
-        <dt>agents</dt><dd>hermes, openclaw, browser, qwen3-14b</dd>
-      </dl>
-    </div>
+    <ol class="steps">
+      <li><span>connect a repo through the github app, or push from the cli.</span></li>
+      <li><span>we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.</span></li>
+      <li><span>the app goes live at https://name.usectl.com with a certificate. add your own domain in one command.</span></li>
+      <li><span>every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.</span></li>
+    </ol>
   </section>
 
-  <section class="sec">
+  <section class="sec" id="proof">
     <div class="sec-head">
-      <span class="n">3.</span>
-      <h2>reference design</h2>
-      <span class="label">in production</span>
+      <span class="n">8.</span>
+      <h2>customer zero</h2>
+      <span class="label">reference design · in production</span>
     </div>
     <p class="proof">systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+    <p class="proof" style="margin-top:12px">we built usectl because we needed it. every client we ship gets its own machine, and when it breaks at night it is our pager, not theirs.</p>
   </section>
 
-  <section class="sec">
+  <section class="sec" id="faq">
     <div class="sec-head">
-      <span class="n">4.</span>
-      <h2>availability</h2>
-      <span class="label">revision history</span>
+      <span class="n">9.</span>
+      <h2>questions people ask</h2>
+      <span class="label">application notes</span>
     </div>
-    <p class="closing">on our metal, or on yours. self hosted usectl ships this month.</p>
+    <ul class="notes">
+      <li><span class="k">an-1</span><div><h3>is a machine a vm?</h3><p>no. it is a kubernetes namespace with a network policy, a quota and its own secrets on nodes we operate. container isolation, not a microvm. we say that plainly because it matters for some workloads.</p></div></li>
+      <li><span class="k">an-2</span><div><h3>can i leave?</h3><p>yes. your dockerfile, your postgres dump and your bucket run anywhere. if we disappeared tomorrow your stack still works.</p></div></li>
+      <li><span class="k">an-3</span><div><h3>where is my data?</h3><p>on bare metal we own at hetzner in falkenstein, germany. with self hosted usectl, on your own hardware.</p></div></li>
+      <li><span class="k">an-4</span><div><h3>what about backups?</h3><p>managed postgres is dumped nightly at the platform level. dedicated postgres gets scheduled backups to a private bucket only that database can reach.</p></div></li>
+      <li><span class="k">an-5</span><div><h3>is there a bandwidth meter or a seat fee?</h3><p>no and no. the sticker is the ceiling.</p></div></li>
+      <li><span class="k">an-6</span><div><h3>do i need docker?</h3><p>not for next.js, vite, node or static sites. for anything else, a dockerfile.</p></div></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="cta">
+    <div class="sec-head">
+      <span class="n">10.</span>
+      <h2>ordering</h2>
+      <span class="label">availability · revision history</span>
+    </div>
+    <div class="order">
+      <div>
+        <h3>one box. many machines.</h3>
+        <p>30 days free, up to 2 vcpu and 4 gb. no card. delete it when you are done.</p>
+      </div>
+      <div class="ctas">
+        <a class="btn" href="https://manager.usectl.com">create a machine</a>
+        <a class="btn ghost" href="https://docs.usectl.com">read the docs</a>
+      </div>
+    </div>
+    <p class="closing" style="margin-top:22px">on our metal, or on yours. self hosted usectl ships this month.</p>
     <div class="tablewrap" style="margin-top:18px">
       <table class="revs">
         <thead><tr><th>rev</th><th>date</th><th>change</th></tr></thead>

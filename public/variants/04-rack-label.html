@@ -244,8 +244,124 @@
     opacity:.8;
   }
 
+  /* ---- new panels ---- */
+  .panel-head{display:flex;align-items:center;gap:16px;margin:0 0 18px;flex-wrap:wrap}
+  .panel-head h2{font-size:38px}
+  .lead{max-width:60ch;font-size:17px;margin:0 0 26px}
+  .etch{
+    font-family:var(--cond);font-size:13px;letter-spacing:.08em;color:var(--muted);
+    margin:22px 0 0;max-width:80ch;line-height:1.5;
+  }
+  .etch::before{content:"";display:inline-block;width:26px;height:1px;background:var(--steel-hi);vertical-align:middle;margin-right:10px}
+  .split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:36px;align-items:start}
+  /* toggle ports: a row of switches on the front panel */
+  .ports{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .ports li{
+    background:rgba(0,0,0,.22);border:1px solid #17181b;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    padding:14px 16px 16px 18px;
+    display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;align-items:center;
+  }
+  .ports .sw{
+    grid-row:1 / span 2;
+    width:16px;height:30px;border-radius:3px;
+    background:linear-gradient(180deg,#3d4045,#202225);
+    border:1px solid #101112;position:relative;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .ports .sw::after{
+    content:"";position:absolute;left:2px;right:2px;top:2px;height:12px;border-radius:2px;
+    background:linear-gradient(180deg,#f4a382,var(--orange));box-shadow:0 1px 2px rgba(0,0,0,.6);
+  }
+  .ports h3{font-family:var(--cond);font-weight:600;letter-spacing:.08em;font-size:17px;margin:0;line-height:1.1}
+  .ports p{margin:0;font-size:15px;color:var(--text)}
+  .ports.one{grid-template-columns:1fr}
+  .ports code{font-family:var(--mono);font-size:13px;color:#d9dad6}
+  /* addons as 1u rack units */
+  .units{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px}
+  .unit{
+    display:grid;grid-template-columns:22px 128px minmax(0,1fr) 22px;gap:0 12px;align-items:center;
+    min-height:52px;padding:8px 8px;
+    background:linear-gradient(180deg,#303236,#26282b);
+    border:1px solid #131416;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -1px 0 rgba(0,0,0,.5),0 1px 0 rgba(0,0,0,.4);
+  }
+  .unit .ear{
+    width:22px;height:34px;position:relative;
+    background:linear-gradient(90deg,#4a4d52,#3a3d41);border:1px solid #151618;
+  }
+  .unit .ear::before,.unit .ear::after{
+    content:"";position:absolute;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#8a8e94,#26282b 70%);
+  }
+  .unit .ear::before{top:4px}.unit .ear::after{bottom:4px}
+  .unit .tape{font-size:11.5px;letter-spacing:.12em;padding:4px 10px 3px;transform:rotate(-.3deg);white-space:nowrap;justify-self:start;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  .unit p{margin:0;font-size:14px;line-height:1.4;color:var(--text)}
+  .unit .un{font-family:var(--cond);font-size:9px;letter-spacing:.1em;color:var(--muted);text-align:right;margin-top:2px}
+  .units-foot{display:flex;justify-content:space-between;gap:16px;margin:18px 0 0;font-family:var(--cond);font-size:12px;letter-spacing:.1em;color:var(--muted);flex-wrap:wrap}
+  /* bays: sub-panels for the two rooms and the three cards */
+  .bays{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .bays.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .bay{
+    background:rgba(0,0,0,.22);border:1px solid #17181b;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+    padding:24px 22px 24px;min-width:0;
+    display:flex;flex-direction:column;gap:12px;align-items:flex-start;
+  }
+  .bay h3{font-family:var(--cond);font-weight:700;letter-spacing:.06em;font-size:30px;line-height:1;margin:0}
+  .bay p{margin:0;font-size:16px;max-width:48ch}
+  .bay .o{color:var(--orange)}
+  /* ship: a numbered patch sequence */
+  .seq{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;position:relative;counter-reset:s}
+  .seq::before{
+    content:"";position:absolute;left:0;right:0;top:20px;height:4px;
+    background:linear-gradient(180deg,#0d0e10,#2c2f33);border:1px solid #000;
+  }
+  .seq li{position:relative;padding:54px 20px 6px 0;counter-increment:s;min-width:0;font-size:15px}
+  .seq li::before{
+    content:"0" counter(s);
+    position:absolute;top:2px;left:0;
+    font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:.14em;
+    background:var(--tape);color:var(--tape-text);padding:8px 12px 7px;line-height:1;
+    box-shadow:0 1px 0 rgba(255,255,255,.08),0 2px 3px rgba(0,0,0,.6);
+    text-shadow:0 1px 0 rgba(0,0,0,.6),0 -1px 0 rgba(255,255,255,.14);
+  }
+  .seq li:last-child::before{background:var(--orange);color:var(--orange-ink);text-shadow:0 1px 0 rgba(255,255,255,.28),0 -1px 0 rgba(0,0,0,.25)}
+  .seq li::after{
+    content:"";position:absolute;top:14px;left:58px;width:10px;height:10px;border-radius:50%;
+    background:#2f8f4e;box-shadow:0 0 6px #35b35e;border:1px solid #0b2a14;
+  }
+  .seq li:last-child::after{background:var(--orange);box-shadow:0 0 6px var(--orange);border-color:#4a1e0e}
+  .seq li .t{font-family:var(--cond);font-weight:600;letter-spacing:.08em;font-size:16px;display:block;margin:0 0 6px;color:var(--text)}
+  /* faq: label strips */
+  .faq{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px}
+  .faq li{background:rgba(0,0,0,.22);border:1px solid #17181b;padding:16px 18px 18px;min-width:0}
+  .faq h3{font-family:var(--cond);font-weight:600;letter-spacing:.08em;font-size:18px;line-height:1.1;margin:0 0 8px}
+  .faq h3::before{content:"q";display:inline-block;font-size:11px;letter-spacing:.14em;background:var(--tape);color:var(--tape-text);padding:3px 7px 2px;margin-right:10px;vertical-align:2px}
+  .faq p{margin:0;font-size:15px;max-width:56ch}
+  /* final cta panel */
+  .cta-panel{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px;align-items:center;padding-top:40px;padding-bottom:40px}
+  .cta-panel h2{display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin:0 0 18px;font-size:inherit;letter-spacing:0}
+  .cta-panel .tape.big{font-size:clamp(34px,4.4vw,64px)}
+  .cta-panel .line{margin:0;font-size:17px;max-width:44ch}
+  .cta-panel .ctas{justify-content:flex-start}
+
+  @media (max-width:1000px){
+    .units{grid-template-columns:1fr}
+    .seq{grid-template-columns:1fr 1fr}
+    .seq::before{display:none}
+    .seq li{padding-right:0;padding-left:0}
+    .bays.three{grid-template-columns:1fr}
+  }
   @media (max-width:900px){
     .rack{grid-template-columns:22px minmax(0,1fr) 22px}
+    .split,.bays,.ports,.faq,.cta-panel{grid-template-columns:1fr}
+    .unit{grid-template-columns:22px minmax(0,1fr) 22px;grid-template-rows:auto auto;gap:6px 12px}
+    .unit .tape{grid-column:2}
+    .unit p{grid-column:2}
+    .unit .ear{grid-row:1 / span 2}
+    .unit .un{grid-column:3}
+    .seq{grid-template-columns:1fr}
     .u{display:none}
     .panel,.math-panel{padding:28px 22px 28px 26px}
     .hero,.math-grid{grid-template-columns:1fr;gap:28px}
@@ -268,7 +384,7 @@
   <main class="stack">
     <div class="hazard" aria-hidden="true"></div>
 
-    <section class="panel">
+    <section class="panel" id="hero">
       <span class="rv" aria-hidden="true"></span>
       <div class="eyebrow">
         <span class="tape orange mark">~*</span>
@@ -282,8 +398,8 @@
           </h1>
           <p class="sub">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
           <div class="ctas">
-            <a class="btn primary" href="#">create a machine</a>
-            <a class="btn" href="#">read the docs</a>
+            <a class="btn primary" href="https://manager.usectl.com">create a machine</a>
+            <a class="btn" href="https://docs.usectl.com">read the docs</a>
             <span class="cta-note">30 days free. no card.</span>
           </div>
         </div>
@@ -308,7 +424,127 @@
       </div>
     </section>
 
-    <section class="panel math-panel">
+    <section class="panel" id="machine">
+      <span class="rv" aria-hidden="true"></span>
+      <div class="panel-head">
+        <span class="tape">what you get</span>
+        <h2>a machine is a computer that is only yours.</h2>
+      </div>
+      <div class="split">
+        <div>
+          <p class="lead">on usectl a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes. you see a box with a slider.</p>
+          <p class="etch">apps inside a machine can be web, worker or release. each has its own repo, branch, port, replicas and rollout. pr previews get their own namespace and url.</p>
+        </div>
+        <ul class="ports" aria-label="four points">
+          <li><span class="sw" aria-hidden="true"></span><h3>isolated by default</h3><p>its own network policy, its own quota, its own secrets. a neighbour cannot reach you and you cannot reach it.</p></li>
+          <li><span class="sw" aria-hidden="true"></span><h3>everything inside</h3><p>postgres, redis, s3, cron, domains and tls live in the machine, not in five other dashboards.</p></li>
+          <li><span class="sw" aria-hidden="true"></span><h3>one bill</h3><p>a machine's budget is shared by all its apps, addons and groups. adding a second app does not add a second bill.</p></li>
+          <li><span class="sw" aria-hidden="true"></span><h3>stage and prod</h3><p>split a machine into groups, each with its own namespace and its own database, on the same budget.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel" id="addons">
+      <span class="rv" aria-hidden="true"></span>
+      <div class="panel-head">
+        <span class="tape">addons</span>
+        <h2>the stack, one toggle each.</h2>
+      </div>
+      <p class="lead">managed on shared platform instances, or dedicated in your own namespace with its own volume and size. attach to any app in one command.</p>
+      <ul class="units" aria-label="addons, as rack units">
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">postgres</span><p>managed or dedicated. pgvector and timescale on request. scheduled backups to a private bucket.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">redis</span><p>managed with a key prefix, or dedicated with aof and search modules.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">s3 storage</span><p>your own bucket and iam user on seaweedfs, with a cdn url.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">nats</span><p>jetstream on its own volume, websocket in.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">mongodb</span><p>per machine database, or dedicated.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">sql server</span><p>for the apps that need it.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">meilisearch</span><p>search with its own persistent volume.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">cron</span><p>scheduled jobs from your app image, with run history.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">oauth2 proxy</span><p>github or google login in front of any app, no code.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">grafana</span><p>dedicated per machine, wired read only to your own telemetry.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape">glitchtip</span><p>sentry compatible error tracking, one dsn per environment.</p><span class="un" aria-hidden="true">1u</span></li>
+        <li class="unit"><span class="ear" aria-hidden="true"></span><span class="tape orange">ai</span><p>an openai compatible endpoint in the cluster: qwen3-14b for chat, bge-m3 for embeddings, metered per machine.</p><span class="un" aria-hidden="true">1u</span></li>
+      </ul>
+      <div class="units-foot" aria-hidden="true"><span>12 units · one toggle each</span><span>attach with usectl addons add</span></div>
+    </section>
+
+    <section class="panel" id="agents">
+      <span class="rv" aria-hidden="true"></span>
+      <div class="panel-head">
+        <span class="tape">built for agents</span>
+        <h2>your agent already knows how to use it.</h2>
+      </div>
+      <div class="split">
+        <div>
+          <p class="lead">the cli is the product. one binary, every command with --json, clear errors an agent can act on. claude code, cursor, codex or a shell script: they all deploy the same way. there is an mcp server if you prefer tool calls.</p>
+          <ul class="ports one" aria-label="three points">
+            <li><span class="sw" aria-hidden="true"></span><h3>deploy from the chat</h3><p><code>usectl machines create</code>, <code>usectl deploy</code>, <code>usectl logs --follow</code>. no plugin needed.</p></li>
+            <li><span class="sw" aria-hidden="true"></span><h3>agents that live here</h3><p>add a hermes or openclaw pod to a machine and it runs 24/7 with its own memory, its own headless browser and a local model. one agent, one machine, its own walls.</p></li>
+            <li><span class="sw" aria-hidden="true"></span><h3>read what happened</h3><p>logs, metrics, traces and pod insights through the same cli, so the agent that deployed can also debug.</p></li>
+          </ul>
+        </div>
+        <div>
+          <div class="display">
+            <span class="tape">console · tty1 · agent</span>
+<pre class="term"><span class="p">$</span> usectl machines create radiodj --repo github.com/you/radiodj --postgres
+<span class="p">$</span> usectl addons add radiodj --type hermes
+<span class="k">✓</span> hermes agent pod running. telegram gateway connected.
+<span class="p">$</span> usectl logs radiodj --follow</pre>
+          </div>
+          <div class="leds" aria-hidden="true">
+            <span class="led"></span> pwr
+            <span class="led blink"></span> agent
+            <span class="led o"></span> telegram
+            <span class="led off"></span> fault
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="modes">
+      <span class="rv" aria-hidden="true"></span>
+      <div class="panel-head">
+        <span class="tape">one product, two rooms</span>
+        <h2>on our metal, or on yours.</h2>
+      </div>
+      <div class="bays">
+        <div class="bay">
+          <span class="tape">managed</span>
+          <h3>we run it.</h3>
+          <p>bare metal we own in falkenstein, kubernetes we operate, backups, ingress, tls and the 3am pager on us. you push git.</p>
+        </div>
+        <div class="bay">
+          <span class="tape orange">self hosted</span>
+          <h3>you run it.</h3>
+          <p>the same platform on your own hardware, your data never leaves the building. <span class="o">self hosted usectl ships this month.</span></p>
+        </div>
+      </div>
+      <p class="etch">same cli, same addons, same one command. the only choice is whose room the box stands in.</p>
+    </section>
+
+    <section class="panel" id="for">
+      <span class="rv" aria-hidden="true"></span>
+      <div class="panel-head">
+        <span class="tape">who it is for</span>
+        <h2>people who run many things.</h2>
+      </div>
+      <div class="bays three">
+        <div class="bay">
+          <span class="tape">software shops</span>
+          <p>one machine per client. their own database, their own domain, their own bill you can pass through. hand them the keys when the engagement ends.</p>
+        </div>
+        <div class="bay">
+          <span class="tape">agent builders</span>
+          <p>one machine per client agent, with postgres, a browser and a local model inside. isolation at the namespace, not inside the prompt.</p>
+        </div>
+        <div class="bay">
+          <span class="tape">self hosters</span>
+          <p>the same box on your own hardware. one physical server becomes many isolated machines with their stacks.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel math-panel" id="math">
       <span class="rv" aria-hidden="true"></span>
       <div class="math-head">
         <h2>the math</h2>
@@ -336,10 +572,59 @@
       </div>
     </section>
 
-    <section class="panel proof-panel">
+    <section class="panel" id="ship">
+      <span class="rv" aria-hidden="true"></span>
+      <div class="panel-head">
+        <span class="tape">how it ships</span>
+        <h2>push git. get https.</h2>
+      </div>
+      <ol class="seq" aria-label="how it ships, in order">
+        <li><span class="t">connect</span>connect a repo through the github app, or push from the cli.</li>
+        <li><span class="t">build</span>we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.</li>
+        <li><span class="t">live</span>the app goes live at https://name.usectl.com with a certificate. add your own domain in one command.</li>
+        <li><span class="t">history</span>every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.</li>
+      </ol>
+    </section>
+
+    <section class="panel proof-panel" id="proof">
       <span class="rv" aria-hidden="true"></span>
       <span class="tape">as built</span>
-      <p>systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+      <div>
+        <h2 style="font-size:30px;margin:0 0 12px">customer zero</h2>
+        <p>systemctl runs its own 9 person software shop on usectl: 133 deployments, an ev charging platform with 16 services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+        <p style="margin-top:14px">we built usectl because we needed it. every client we ship gets its own machine, and when it breaks at night it is our pager, not theirs.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="faq">
+      <span class="rv" aria-hidden="true"></span>
+      <div class="panel-head">
+        <span class="tape">faq</span>
+        <h2>questions people ask</h2>
+      </div>
+      <ul class="faq">
+        <li><h3>is a machine a vm?</h3><p>no. it is a kubernetes namespace with a network policy, a quota and its own secrets on nodes we operate. container isolation, not a microvm. we say that plainly because it matters for some workloads.</p></li>
+        <li><h3>can i leave?</h3><p>yes. your dockerfile, your postgres dump and your bucket run anywhere. if we disappeared tomorrow your stack still works.</p></li>
+        <li><h3>where is my data?</h3><p>on bare metal we own at hetzner in falkenstein, germany. with self hosted usectl, on your own hardware.</p></li>
+        <li><h3>what about backups?</h3><p>managed postgres is dumped nightly at the platform level. dedicated postgres gets scheduled backups to a private bucket only that database can reach.</p></li>
+        <li><h3>is there a bandwidth meter or a seat fee?</h3><p>no and no. the sticker is the ceiling.</p></li>
+        <li><h3>do i need docker?</h3><p>not for next.js, vite, node or static sites. for anything else, a dockerfile.</p></li>
+      </ul>
+    </section>
+
+    <section class="panel cta-panel" id="cta">
+      <span class="rv" aria-hidden="true"></span>
+      <div>
+        <h2>
+          <span class="tape white big">one box.</span>
+          <span class="tape big">many machines.</span>
+        </h2>
+        <p class="line">30 days free, up to 2 vcpu and 4 gb. no card. delete it when you are done.</p>
+      </div>
+      <div class="ctas">
+        <a class="btn primary" href="https://manager.usectl.com">create a machine</a>
+        <a class="btn" href="https://docs.usectl.com">read the docs</a>
+      </div>
     </section>
 
     <section class="panel closing-panel">
