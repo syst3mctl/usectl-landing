@@ -15,9 +15,28 @@ function cssPreloadPlugin() {
   };
 }
 
+// Plugin: dev-only directory index for folders under public/.
+// Cloudflare Pages serves /variants/ -> /variants/index.html in production;
+// the vite dev server does not, so mirror that here.
+function publicDirIndexPlugin() {
+  return {
+    name: 'public-dir-index',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use((req, _res, next) => {
+        const [path, query] = req.url.split('?');
+        if (/^\/variants\/?$/.test(path)) {
+          req.url = '/variants/index.html' + (query ? '?' + query : '');
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
   base: './',
-  plugins: [cssPreloadPlugin()],
+  plugins: [cssPreloadPlugin(), publicDirIndexPlugin()],
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
