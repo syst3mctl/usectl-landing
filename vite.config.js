@@ -25,7 +25,14 @@ function publicDirIndexPlugin() {
     configureServer(server) {
       server.middlewares.use((req, _res, next) => {
         const [path, query] = req.url.split('?');
-        if (/^\/variants\/?$/.test(path)) {
+        if (path === '/variants') {
+          // trailing slash so relative links inside the page resolve, like production
+          _res.statusCode = 301;
+          _res.setHeader('Location', '/variants/' + (query ? '?' + query : ''));
+          _res.end();
+          return;
+        }
+        if (path === '/variants/') {
           req.url = '/variants/index.html' + (query ? '?' + query : '');
         }
         next();
