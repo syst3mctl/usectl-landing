@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:rgb(30,29,29);color:#fff;font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:#11A32A;text-decoration:none}
+  a:hover{color:#35E055}
+  @keyframes ucBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  .uc-beats{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  /* reserve the site-list column so the centred copy can never enter it */
+  @media (min-width:761px){
+    .uc-hero{ padding-right:300px !important; }
+  }
+  @media (max-width:760px){
+    .uc-term{ flex-direction:column !important; }
+    .uc-term > div:first-child{ border-right:0 !important; border-bottom:1px solid rgba(100,116,136,.22); }
+    .uc-term{left:14px !important;right:14px !important;bottom:14px !important;width:auto !important}
+  }
+  @media (max-width:900px){
+    .uc-grid{ grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+    .uc-grid.two{ grid-template-columns:minmax(0,1fr) !important; }
+    .uc-many{ grid-template-columns:minmax(0,1fr) !important; }
+    .uc-faq-row{ grid-template-columns:minmax(0,1fr) !important; row-gap:7px; }
+    .uc-bar{ display:none !important; }
+    #cta{ grid-template-columns:minmax(0,1fr) !important; row-gap:26px; }
+    .uc-sec{ grid-template-columns:minmax(0,1fr) !important; row-gap:18px; }
+    .uc-sec li{ grid-template-columns:2.6em minmax(0,1fr) !important; row-gap:6px; }
+    .uc-sec li p:last-child{ grid-column:2; }
+    .uc-term-row{ grid-template-columns:minmax(0,1fr) !important; }
+    .uc-term-row > div{ border-right:0 !important; border-bottom:1px solid rgba(100,116,136,.18); padding:12px 0 !important; display:flex; gap:14px; }
+    .uc-scene-wrap{height:auto !important}
+    .uc-scene-sticky{position:static !important;height:auto !important;padding:0 !important}
+    .uc-scene-cols{grid-template-columns:minmax(0,1fr) !important}
+    .uc-beats{position:static;width:auto;height:auto;clip-path:none;white-space:normal}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .uc-scene-wrap{height:auto !important}
+    .uc-scene-sticky{position:static !important;height:auto !important}
+    .uc-beats{position:static;width:auto;height:auto;clip-path:none;white-space:normal}
+  }
+  @media (max-width:560px){
+    .uc-grid{ grid-template-columns:minmax(0,1fr) !important; }
+  }
+</style>
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+</helmet>
+
+<div style="background:#0b0d0c">
+
+  <section id="machine-room" class="uc-scene-wrap" style="position:relative;height:470vh">
+    <div class="uc-scene-sticky" style="position:sticky;top:0;height:100vh;overflow:hidden;background:#0b0d0c">
+      <canvas ref="{{ canvasRef }}" role="img" aria-label="{{ ariaLabel }}" onPointerDown="{{ onDown }}" style="position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;touch-action:pan-y"></canvas>
+
+      <div class="uc-pins" style="opacity:{{ pinsOpacity }};visibility:{{ pinsVis }};position:absolute;inset:0;z-index:1;pointer-events:none">
+        <sc-for list="{{ pins }}" as="pin" hint-placeholder-count="3">
+          <span data-pin="{{ pin.id }}" style="position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:block;width:9px;height:9px;background:{{ pin.edge }};box-shadow:0 0 0 3px rgba(6,16,10,.85)"></span>
+        </sc-for>
+      </div>
+
+      <div class="uc-sites" style="opacity:{{ pinsOpacity }};visibility:{{ pinsVis }};pointer-events:{{ pinsHit }};position:absolute;right:30px;bottom:30px;z-index:4;display:flex;flex-direction:column;gap:8px;font-family:'JetBrains Mono',monospace">
+        <div style="display:flex;align-items:center;gap:14px;padding-bottom:4px">
+          <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8fae99">pick a site</span>
+          <span style="flex:1"></span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:10.5px;color:#8fae99"><span style="display:block;width:8px;height:8px;background:#e6ede8"></span>hetzner locations</span>
+        </div>
+        <sc-for list="{{ pins }}" as="pin" hint-placeholder-count="3">
+          <button onClick="{{ pin.go }}" disabled="{{ pin.disabled }}" aria-disabled="{{ pin.disabled }}" aria-label="{{ pin.aria }}" style="display:flex;align-items:center;gap:12px;min-width:230px;text-align:left;cursor:{{ pin.cursor }};background:#06100a;border:1px solid {{ pin.rowEdge }};border-left:3px solid {{ pin.edge }};padding:11px 14px">
+            <span style="display:block;width:8px;height:8px;background:{{ pin.edge }}"></span>
+            <span style="display:block">
+              <span style="display:block;font-size:13px;font-weight:500;color:{{ pin.rowInk }}">{{ pin.name }}</span>
+              <span style="display:block;font-size:11px;color:{{ pin.subInk }};margin-top:2px">{{ pin.sub }}</span>
+            </span>
+            <span style="flex:1"></span>
+            <span style="display:block;font-size:11px;color:{{ pin.subInk }}">{{ pin.cta }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div class="uc-hero" style="position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:radial-gradient(ellipse 60% 42% at 50% 50%, rgba(7,12,9,.94) 0%, rgba(7,12,9,.82) 55%, rgba(7,12,9,0) 100%);gap:18px;padding:0 30px;pointer-events:none;z-index:2;opacity:{{ heroOpacity }};visibility:{{ heroVis }}">
+        <p style="font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1vw,13px);letter-spacing:.04em;color:#D6F7DC"><b style="font-weight:500;color:#fff">usectl</b> · we run the metal · falkenstein</p>
+        <h1 style="font-size:clamp(34px,6vw,86px);line-height:.94;font-weight:700;letter-spacing:-.035em;text-shadow:0 2px 24px rgba(0,0,0,.9)">one box<span style="color:#11A32A">.</span><br>many machines<span style="color:#11A32A">.</span></h1>
+        <p style="font-size:clamp(15px,1.5vw,21px);line-height:1.4;max-width:34em;color:#fff;text-wrap:pretty;text-shadow:0 2px 18px rgba(0,0,0,.9)">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
+        <div style="display:flex;align-items:center;gap:18px;margin-top:6px;pointer-events:auto">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8fae99">pick a site to go inside →</span>
+          <button onClick="{{ skipGo }}" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#D6F7DC;background:none;border:0;border-bottom:1px solid rgba(214,247,220,.35);padding:0 0 2px;cursor:pointer">or read the details ↓</button>
+        </div>
+      </div>
+
+      <div style="position:absolute;left:0;top:0;right:0;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;padding:26px 30px;pointer-events:none;opacity:{{ roomOpacity }}">
+        <h2 style="font-size:clamp(22px,2.2vw,32px);font-weight:700;letter-spacing:-.02em;text-shadow:0 2px 12px rgba(0,0,0,.8)">a machine is a computer that is only yours.</h2>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8fae99">one namespace, one bill · scroll to run it</p>
+        <span style="flex:1"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:#8fae99;text-transform:uppercase">rack a · unit 12 · hetzner fsn1</span>
+      </div>
+
+      <div class="uc-term" style="opacity:{{ roomOpacity }};visibility:{{ roomVis }};pointer-events:{{ roomHit }};position:absolute;left:26px;right:26px;bottom:22px;z-index:5;background:rgba(8,10,14,.86);backdrop-filter:blur(6px);border:1px solid rgba(100,116,136,.28);border-radius:12px;display:flex;align-items:stretch;overflow:hidden">
+
+        <div style="flex:1.35;min-width:0;display:flex;flex-direction:column;border-right:1px solid rgba(100,116,136,.22)">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1px solid rgba(100,116,136,.22)">
+            <span style="width:8px;height:8px;border-radius:50%;background:#ff5f57"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#febc2e"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#28c840"></span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#8fae99;margin-left:4px">usectl cli · omnitech</span>
+          </div>
+          <div style="flex:1;padding:10px 13px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;display:flex;flex-direction:column;min-height:84px">
+            <sc-for list="{{ termLines }}" as="l" hint-placeholder-count="4">
+              <div style="color:{{ l.c }};white-space:pre-wrap;word-break:break-word">{{ l.t }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;padding:11px 15px 12px;gap:10px">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8fae99;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ beatKicker }}</div>
+            <p style="margin-top:5px;font-size:13.5px;line-height:1.45;color:#fff;text-wrap:pretty">{{ beatLesson }}</p>
+          </div>
+
+          <div>
+            <div style="display:flex;align-items:baseline;gap:10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#8fae99">
+              <span style="letter-spacing:.08em;text-transform:uppercase">machine budget</span>
+              <span style="flex:1"></span>
+              <span style="color:{{ quotaInk }};white-space:nowrap">{{ quotaLabel }}</span>
+            </div>
+            <span style="display:block;height:7px;margin-top:6px;background:#131a16">
+              <span style="display:block;height:7px;width:{{ quotaPct }};background:{{ quotaInk }}"></span>
+            </span>
+            <div style="display:flex;align-items:center;gap:9px;margin-top:11px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#8fae99;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ beatCaption }}</span>
+              <span style="flex:1"></span>
+              <div style="display:flex;gap:4px;flex:none">
+                <sc-for list="{{ pips }}" as="pip" hint-placeholder-count="6">
+                  <button onClick="{{ pip.go }}" aria-label="{{ pip.label }}" style="border:0;background:none;padding:9px 2px;cursor:pointer;display:block;line-height:0">
+                    <span style="display:block;width:18px;height:5px;border-radius:3px;background:{{ pip.bg }}"></span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="uc-beats">
+        <h3>1 · Machine</h3>
+        <pre>$ usectl machines create my-app --vcpu 2 --ram 4 --storage 10
+✓ namespace created</pre>
+        <p>A machine is a namespace and a quota. It holds no code.</p>
+        <h3>2 · Pod</h3>
+        <pre>$ usectl machines pods create my-app web \
+    --repo github.com/you/your-saas --port 3000
+✓ build complete (28s)</pre>
+        <p>A pod is one workload. Three repos means three blades.</p>
+        <h3>3 · Addons</h3>
+        <pre>$ usectl machines addons add my-app --type database
+$ usectl machines addons add my-app --type cache
+$ usectl machines addons add my-app --type worker
+$ usectl machines pods attach-addon my-app web database cache worker</pre>
+        <p>Provisioned is not attached. Three addons mean three attach calls.</p>
+        <h3>4 · Domain</h3>
+        <pre>$ usectl machines pods set my-app web domain=my-app
+✓ live at https://my-app.usectl.com</pre>
+        <p>No domain, no route. Everything else is reachable only from inside.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="agents" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px" class="uc-sec">
+    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">built for agents</b>cli first, mcp if you prefer</p>
+    <div>
+      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">your agent already knows how to use it.</h2>
+      <p style="margin:0;font-size:17px;line-height:1.45;max-width:36em;color:rgba(255,255,255,.8);text-wrap:pretty">the cli is the product. one binary, every command with --json, clear errors an agent can act on. claude code, cursor, codex or a shell script: they all deploy the same way. there is an mcp server if you prefer tool calls.</p>
+
+      <ol style="list-style:none;margin:34px 0 0;padding:0;border-top:1px solid rgba(100,116,136,.35)">
+          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">1</span>
+            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">deploy from the chat</p>
+            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty"><code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#8fae99">usectl machines create</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#8fae99">usectl deploy</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#8fae99">usectl logs --follow</code>. no plugin needed.</p>
+          </li>
+          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">2</span>
+            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">agents that live here</p>
+            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">add a hermes or openclaw pod to a machine and it runs 24/7 with its own memory, its own headless browser and a local model. one agent, one machine, its own walls.</p>
+          </li>
+          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">3</span>
+            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">read what happened</p>
+            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">logs, metrics, traces and pod insights through the same cli, so the agent that deployed can also debug.</p>
+          </li>
+      </ol>
+
+      <div style="margin-top:34px;display:grid;grid-template-columns:minmax(0,2.4fr) minmax(0,9fr);column-gap:26px;border-top:1px solid rgba(100,116,136,.35);border-bottom:1px solid rgba(100,116,136,.35)" class="uc-term-row">
+        <div style="padding:18px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;border-right:1px solid rgba(100,116,136,.18)"><span style="display:block;color:#fff">terminal</span><span style="display:block">agent session</span></div>
+        <pre style="margin:0;padding:18px 0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;overflow-x:auto;color:rgba(255,255,255,.88)"><span style="color:#8fae99">$</span> usectl machines create radiodj --repo github.com/you/radiodj --postgres
+<span style="color:#8fae99">$</span> usectl addons add radiodj --type hermes
+<span style="color:#11A32A">✓</span> hermes agent pod running. telegram gateway connected.
+<span style="color:#8fae99">$</span> usectl logs radiodj --follow</pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="machine" style="max-width:1180px;margin:0 auto;padding:88px 26px 100px;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px" class="uc-sec">
+    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">what you get</b>one namespace, one bill</p>
+    <div>
+      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">a machine is a computer that is only yours.</h2>
+      <p style="margin:0;font-size:17px;line-height:1.45;max-width:36em;color:rgba(255,255,255,.8);text-wrap:pretty">on usectl a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes. you see a box with a slider.</p>
+
+      <ol style="list-style:none;margin:34px 0 0;padding:0;border-top:1px solid rgba(100,116,136,.35)">
+          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">1</span>
+            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">isolated by default</p>
+            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">its own network policy, its own quota, its own secrets. a neighbour cannot reach you and you cannot reach it.</p>
+          </li>
+          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">2</span>
+            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">everything inside</p>
+            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">postgres, redis, s3, cron, domains and tls live in the machine, not in five other dashboards.</p>
+          </li>
+          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">3</span>
+            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">one bill</p>
+            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">a machine’s budget is shared by all its apps, addons and groups. adding a second app does not add a second bill.</p>
+          </li>
+          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">4</span>
+            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">stage and prod</p>
+            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">split a machine into groups, each with its own namespace and its own database, on the same budget.</p>
+          </li>
+      </ol>
+      <p style="margin:18px 0 0;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.6;color:#8fae99;max-width:60em">apps inside a machine can be web, worker or release. each has its own repo, branch, port, replicas and rollout. pr previews get their own namespace and url.</p>
+    </div>
+  </section>
+
+  <section id="addons" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
+    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">addons</b>12 lines, one toggle each</p>
+    <div>
+      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">the stack, one toggle each.</h2>
+      <p style="margin:0;font-size:17px;line-height:1.45;max-width:36em;color:rgba(255,255,255,.8);text-wrap:pretty">managed on shared platform instances, or dedicated in your own namespace with its own volume and size. attach to any app in one command.</p>
+      <div class="uc-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:rgba(100,116,136,.28);border-top:1px solid rgba(100,116,136,.35);border-bottom:1px solid rgba(100,116,136,.35);margin-top:34px">
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>postgres</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">managed or dedicated. pgvector and timescale on request. scheduled backups to a private bucket.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>redis</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">managed with a key prefix, or dedicated with aof and search modules.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>s3 storage</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">your own bucket and iam user on seaweedfs, with a cdn url.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>nats</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">jetstream on its own volume, websocket in.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>mongodb</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">per machine database, or dedicated.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>sql server</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">for the apps that need it.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>meilisearch</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">search with its own persistent volume.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>cron</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">scheduled jobs from your app image, with run history.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>oauth2 proxy</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">github or google login in front of any app, no code.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>grafana</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">dedicated per machine, wired read only to your own telemetry.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>glitchtip</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">sentry compatible error tracking, one dsn per environment.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
+          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>ai</b>
+          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">an openai compatible endpoint in the cluster: qwen3-14b for chat, bge-m3 for embeddings, metered per machine.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="modes" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
+    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">one product, two rooms</b>managed, self hosted</p>
+    <div>
+      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">on our metal, or on yours.</h2>
+      <div class="uc-grid two" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:rgba(100,116,136,.28);border-top:1px solid rgba(100,116,136,.35);border-bottom:1px solid rgba(100,116,136,.35);margin-top:34px">
+        <div style="background:rgb(30,29,29);padding:22px 26px 26px">
+          <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em;margin-bottom:14px">a · we run it</span>
+          <h3 style="margin:0 0 12px;font-size:26px;line-height:1;letter-spacing:-.025em;font-weight:600">managed<span style="color:#11A32A">.</span></h3>
+          <p style="margin:0;font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.8);text-wrap:pretty">we run it. bare metal we own in falkenstein, kubernetes we operate, backups, ingress, tls and the 3am pager on us. you push git.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:22px 26px 26px">
+          <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em;margin-bottom:14px">b · you run it</span>
+          <h3 style="margin:0 0 12px;font-size:26px;line-height:1;letter-spacing:-.025em;font-weight:600">self hosted<span style="color:#11A32A">.</span></h3>
+          <p style="margin:0;font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.8);text-wrap:pretty">you run it. the same platform on your own hardware, your data never leaves the building. self hosted usectl ships this month.</p>
+        </div>
+      </div>
+      <p style="margin:20px 0 0;font-size:16px;line-height:1.45;max-width:40em;color:rgba(255,255,255,.82)">same cli, same addons, same one command. the only choice is whose room the box stands in.</p>
+    </div>
+  </section>
+
+  <section id="for" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
+    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">who it is for</b>three kinds of many</p>
+    <div>
+      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">people who run many things.</h2>
+      <div class="uc-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:rgba(100,116,136,.28);border-top:1px solid rgba(100,116,136,.35);border-bottom:1px solid rgba(100,116,136,.35);margin-top:34px">
+        <div style="background:rgb(30,29,29);padding:22px 26px 26px">
+          <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em;margin-bottom:14px">software shops</span>
+
+          <p style="margin:0;font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.8);text-wrap:pretty">one machine per client. their own database, their own domain, their own bill you can pass through. hand them the keys when the engagement ends.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:22px 26px 26px">
+          <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em;margin-bottom:14px">agent builders</span>
+
+          <p style="margin:0;font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.8);text-wrap:pretty">one machine per client agent, with postgres, a browser and a local model inside. isolation at the namespace, not inside the prompt.</p>
+        </div>
+        <div style="background:rgb(30,29,29);padding:22px 26px 26px">
+          <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em;margin-bottom:14px">self hosters</span>
+
+          <p style="margin:0;font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.8);text-wrap:pretty">the same box on your own hardware. one physical server becomes many isolated machines with their stacks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="math" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
+    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">the math</b>list prices, sept 2026</p>
+    <div>
+      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">the math</h2>
+      <p style="margin:0;font-size:17px;line-height:1.45;max-width:36em;color:rgba(255,255,255,.8);text-wrap:pretty">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
+      <div style="overflow-x:auto;margin-top:34px">
+        <table style="width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums">
+          <caption style="text-align:left;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding:0 0 10px">ledger · same box, list prices, sept 2026</caption>
+          <thead><tr style="border-bottom:1px solid rgba(100,116,136,.35)">
+            <th style="text-align:left;padding:0 0 11px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#8fae99;letter-spacing:.04em">no.</th>
+            <th style="text-align:left;padding:0 0 11px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#8fae99;letter-spacing:.04em">item</th>
+            <th class="uc-bar" aria-hidden="true"></th>
+            <th style="text-align:right;padding:0 0 11px 28px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#8fae99;letter-spacing:.04em">monthly</th>
+          </tr></thead>
+          <tbody>
+          <tr style="border-bottom:1px solid rgba(100,116,136,.18)">
+            <td style="padding:13px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;width:3.5em;vertical-align:baseline">1</td>
+            <td style="padding:13px 24px 13px 0;font-size:14.5px;vertical-align:baseline;font-weight:600;color:#fff">usectl machine, everything in</td>
+            <td class="uc-bar" style="width:26%;padding:13px 0 13px 28px;vertical-align:middle"><span style="display:block;height:6px;width:32%;background:#11A32A"></span></td>
+            <td style="padding:13px 0 13px 28px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap;font-size:15.5px;font-weight:500;vertical-align:baseline;color:#35E055">$40.20</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(100,116,136,.18)">
+            <td style="padding:13px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;width:3.5em;vertical-align:baseline">2</td>
+            <td style="padding:13px 24px 13px 0;font-size:14.5px;vertical-align:baseline;color:rgba(255,255,255,.82)">vercel pro + supabase pro + upstash + s3, one seat</td>
+            <td class="uc-bar" style="width:26%;padding:13px 0 13px 28px;vertical-align:middle"><span style="display:block;height:6px;width:50%;background:#5f6c66"></span></td>
+            <td style="padding:13px 0 13px 28px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap;font-size:15.5px;font-weight:500;vertical-align:baseline;color:#fff">$60 and up<small style="display:block;font-size:11.5px;font-weight:400;color:#8fae99">before bandwidth</small></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(100,116,136,.18)">
+            <td style="padding:13px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;width:3.5em;vertical-align:baseline">3</td>
+            <td style="padding:13px 24px 13px 0;font-size:14.5px;vertical-align:baseline;color:rgba(255,255,255,.82)">railway, same box, reserved</td>
+            <td class="uc-bar" style="width:26%;padding:13px 0 13px 28px;vertical-align:middle"><span style="display:block;height:6px;width:66%;background:#5f6c66"></span></td>
+            <td style="padding:13px 0 13px 28px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap;font-size:15.5px;font-weight:500;vertical-align:baseline;color:#fff">about $80<small style="display:block;font-size:11.5px;font-weight:400;color:#8fae99">plus egress</small></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(100,116,136,.18)">
+            <td style="padding:13px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;width:3.5em;vertical-align:baseline">4</td>
+            <td style="padding:13px 24px 13px 0;font-size:14.5px;vertical-align:baseline;color:rgba(255,255,255,.82)">render pro + postgres standard</td>
+            <td class="uc-bar" style="width:26%;padding:13px 0 13px 28px;vertical-align:middle"><span style="display:block;height:6px;width:100%;background:#5f6c66"></span></td>
+            <td style="padding:13px 0 13px 28px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap;font-size:15.5px;font-weight:500;vertical-align:baseline;color:#fff">$125</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:30px;padding-top:20px;border-top:1px solid rgba(100,116,136,.18);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:26px;align-items:baseline" class="uc-many">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em">many machines</div>
+          <p style="margin:8px 0 0;font-size:16px;line-height:1.45;color:rgba(255,255,255,.82);text-wrap:pretty">ten client machines at 1 vcpu / 2 gb: $200 a month on usectl. about $400 on railway before storage.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;border-top:1px solid rgba(100,116,136,.18);padding-top:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums"><b style="display:block;font-size:26px;font-weight:600;letter-spacing:-.02em;color:#35E055">$200</b><span style="font-size:11.5px;color:#8fae99">usectl, ten machines</span></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums"><b style="display:block;font-size:26px;font-weight:600;letter-spacing:-.02em;color:#fff">~$400</b><span style="font-size:11.5px;color:#8fae99">railway, before storage</span></div>
+        </div>
+      </div>
+      <p style="margin:18px 0 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99">railway shown at reserved equivalent. all prices list, september 2026.</p>
+    </div>
+  </section>
+
+  <section id="ship" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
+    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">how it ships</b>four steps, in order</p>
+    <div>
+      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">push git. get https.</h2>
+      <ol style="list-style:none;margin:30px 0 0;padding:0;border-top:1px solid rgba(100,116,136,.35)">
+          <li style="display:grid;grid-template-columns:3.2em minmax(0,1fr);column-gap:22px;padding:20px 0;border-bottom:1px solid rgba(100,116,136,.18);align-items:baseline">
+            <span style="font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1;color:#fff">1<span style="color:#11A32A">.</span></span>
+            <p style="margin:0;font-size:17px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.82);text-wrap:pretty">connect a repo through the github app, or push from the cli.</p>
+          </li>
+          <li style="display:grid;grid-template-columns:3.2em minmax(0,1fr);column-gap:22px;padding:20px 0;border-bottom:1px solid rgba(100,116,136,.18);align-items:baseline">
+            <span style="font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1;color:#fff">2<span style="color:#11A32A">.</span></span>
+            <p style="margin:0;font-size:17px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.82);text-wrap:pretty">we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.</p>
+          </li>
+          <li style="display:grid;grid-template-columns:3.2em minmax(0,1fr);column-gap:22px;padding:20px 0;border-bottom:1px solid rgba(100,116,136,.18);align-items:baseline">
+            <span style="font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1;color:#fff">3<span style="color:#11A32A">.</span></span>
+            <p style="margin:0;font-size:17px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.82);text-wrap:pretty">the app goes live at <code style="font-family:'JetBrains Mono',monospace;font-size:15px;color:#8fae99">https://name.usectl.com</code> with a certificate. add your own domain in one command.</p>
+          </li>
+          <li style="display:grid;grid-template-columns:3.2em minmax(0,1fr);column-gap:22px;padding:20px 0;border-bottom:1px solid rgba(100,116,136,.18);align-items:baseline">
+            <span style="font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1;color:#fff">4<span style="color:#11A32A">.</span></span>
+            <p style="margin:0;font-size:17px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.82);text-wrap:pretty">every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.</p>
+          </li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="proof" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
+    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">in use</b>systemctl, tbilisi</p>
+    <div>
+      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">customer zero</h2>
+      <p style="margin:0;font-size:19px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.85);text-wrap:pretty">systemctl runs its own <b style="font-weight:600;color:#fff">9</b> person software shop on usectl: <b style="font-weight:600;color:#fff">133</b> deployments, an ev charging platform with <b style="font-weight:600;color:#fff">16</b> services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
+      <p style="margin:18px 0 0;font-size:19px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.85);text-wrap:pretty">we built usectl because we needed it. every client we ship gets its own machine, and when it breaks at night it is our pager, not theirs.</p>
+    </div>
+  </section>
+
+  <section id="closing" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
+    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">self hosted</b>ships this month</p>
+    <div>
+      <p style="margin:0;font-size:clamp(24px,3.4vw,46px);line-height:1.05;letter-spacing:-.03em;font-weight:600;text-wrap:balance">on our metal, or on yours<span style="color:#11A32A">.</span> self hosted usectl ships this month<span style="color:#11A32A">.</span></p>
+    </div>
+  </section>
+
+  <section id="faq" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
+    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">faq</b>six questions</p>
+    <div>
+      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">questions people ask</h2>
+      <dl style="margin:32px 0 0;border-top:1px solid rgba(100,116,136,.35)">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
+          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">is a machine a vm?</dt>
+          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty"><b style="font-weight:600;color:#fff">no.</b> it is a kubernetes namespace with a network policy, a quota and its own secrets on nodes we operate. container isolation, not a microvm. we say that plainly because it matters for some workloads.</dd>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
+          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">can i leave?</dt>
+          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty"><b style="font-weight:600;color:#fff">yes.</b> your dockerfile, your postgres dump and your bucket run anywhere. if we disappeared tomorrow your stack still works.</dd>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
+          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">where is my data?</dt>
+          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty">on bare metal we own at hetzner in falkenstein, germany. with self hosted usectl, on your own hardware.</dd>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
+          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">what about backups?</dt>
+          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty">managed postgres is dumped nightly at the platform level. dedicated postgres gets scheduled backups to a private bucket only that database can reach.</dd>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
+          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">is there a bandwidth meter or a seat fee?</dt>
+          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty"><b style="font-weight:600;color:#fff">no and no.</b> the sticker is the ceiling.</dd>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
+          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">do i need docker?</dt>
+          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty">not for next.js, vite, node or static sites. for anything else, a dockerfile.</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section id="cta" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:96px 26px 0;display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);column-gap:26px;align-items:end">
+    <div>
+      <h2 style="margin:0;font-size:clamp(34px,5.6vw,80px);line-height:.94;letter-spacing:-.035em;font-weight:700">one box<span style="color:#11A32A">.</span><br>many machines<span style="color:#11A32A">.</span></h2>
+      <p style="margin:26px 0 0;font-size:17px;line-height:1.45;max-width:40em;color:rgba(255,255,255,.82)">30 days free, up to 2 vcpu and 4 gb. no card. delete it when you are done.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px;border-top:1px solid rgba(100,116,136,.35);padding-top:15px">
+      <a href="https://manager.usectl.com" style="display:inline-flex;align-items:center;justify-content:space-between;gap:24px;font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:500;padding:13px 16px;border:1px solid #11A32A;background:#11A32A;color:#08130a" style-hover="background:#35E055;border-color:#35E055"><span>create a machine</span><span style="opacity:.7">→</span></a>
+      <a href="https://docs.usectl.com" style="display:inline-flex;align-items:center;justify-content:space-between;gap:24px;font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:500;padding:13px 16px;border:1px solid rgba(100,116,136,.45);background:transparent;color:#fff" style-hover="background:rgba(255,255,255,.05)"><span>read the docs</span><span style="opacity:.7">↗</span></a>
+    </div>
+  </section>
+
+  <footer style="max-width:1180px;margin:0 auto;padding:80px 26px 44px">
+    <div style="border-top:1px solid rgba(100,116,136,.35);padding-top:16px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99">
+      <div><span style="color:#11A32A">~*</span> built by systemctl · tbilisi · © 2026</div>
+      <div style="display:flex;gap:20px"><a href="https://docs.usectl.com">documentation</a><a href="https://github.com/syst3mctl/">github</a><a href="/llms.txt">llms.txt</a></div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;shotPod&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Laptop screenshots&quot;},&quot;shotAddons&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Laptop screenshots&quot;},&quot;shotDomain&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Laptop screenshots&quot;},&quot;dyingLight&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Room&quot;},&quot;neighbourRacks&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:3,&quot;min&quot;:0,&quot;max&quot;:3,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Room&quot;},&quot;dragEnabled&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Devo&quot;},&quot;cableHold&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.62,&quot;min&quot;:0.2,&quot;max&quot;:0.9,&quot;step&quot;:0.02,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Devo&quot;}}">
+class Component extends DCLogic {
+  canvasRef = React.createRef();
+  state = { beat: 0, typed: 0, tick: 0, mapT: 0, stage: 'map' };
+
+  // ---------------- devo grid engine (ported from devo.states) ----------------
+  componentDidMount(){ this.boot(); }
+  // The runtime can hot-swap this class after first paint, so the render loop must not
+  // belong to any one instance: it is a single global interval that always drives the
+  // most recently rendered instance and re-acquires the canvas from the DOM each tick.
+  boot(){
+    window.__ucRoom = this;
+    if(!this._init){
+      this._init = true;
+      this._p = 0; this._lastMove = 0; this._tick = 0; this._lastTick = 0;
+      this._drag = null; this._seq = null; this._dirty = true; this._cellFor = 0;
+      setTimeout(()=>this.typeBeat(this.state.beat || 0), 0);
+    }
+    // Bind on EVERY boot: boot runs from renderVals, so an unmount that tore the
+    // listeners down — or a class hot-swap that cleared our timers — is always
+    // repaired by the next render of the live instance.
+    this.unbind();
+    this._onMove = (e) => this.pointerMove(e);
+    this._onUp = () => this.pointerUp();
+    this._onScroll = () => { const c = window.__ucRoom || this; c.frame(Date.now()); };
+    window.addEventListener('pointermove', this._onMove);
+    window.addEventListener('pointerup', this._onUp);
+    window.addEventListener('resize', this._onScroll);
+    // Scroll can reach us on window, on document (capture, since scroll does not
+    // bubble) or on whichever ancestor the host actually scrolls.
+    window.addEventListener('scroll', this._onScroll, { passive:true });
+    document.addEventListener('scroll', this._onScroll, { passive:true, capture:true });
+    this._scrollers = [];
+    let n = document.getElementById('machine-room');
+    while(n && n !== document.body){
+      const ov = getComputedStyle(n).overflowY;
+      if(ov === 'auto' || ov === 'scroll'){ n.addEventListener('scroll', this._onScroll, { passive:true }); this._scrollers.push(n); }
+      n = n.parentElement;
+    }
+    this._bound = true;
+    // Recreate the timer unconditionally — a stale global id must never block it.
+    clearInterval(window.__ucRoomTimer);
+    window.__ucRoomTimer = this._timer = setInterval(()=>{ const c = window.__ucRoom; if(c) c.frame(Date.now()); }, 80);
+    // rAF where it is available; harmless where the host suspends it.
+    if(window.__ucRoomRaf) cancelAnimationFrame(window.__ucRoomRaf);
+    const pump = () => { const c = window.__ucRoom; if(c) c.frame(Date.now()); window.__ucRoomRaf = requestAnimationFrame(pump); };
+    window.__ucRoomRaf = requestAnimationFrame(pump);
+    this.frame(Date.now());
+  }
+  unbind(){
+    if(!this._bound) return;
+    window.removeEventListener('pointermove', this._onMove);
+    window.removeEventListener('pointerup', this._onUp);
+    window.removeEventListener('scroll', this._onScroll);
+    window.removeEventListener('resize', this._onScroll);
+    document.removeEventListener('scroll', this._onScroll, true);
+    (this._scrollers||[]).forEach(n=>n.removeEventListener('scroll', this._onScroll));
+    this._scrollers = [];
+    this._bound = false;
+  }
+  componentWillUnmount(){
+    this.unbind();
+    clearInterval(this._typer); clearInterval(this._seqT);
+    this.lockScroll(false);
+    if(window.__ucRoom === this) window.__ucRoom = null;
+  }
+
+  // One timer owns sizing, scroll position, frame cadence and painting. Nothing is
+  // cached across ticks, so a node replaced mid-stream can never freeze the scene.
+  frame(ts){
+    const cv = this.canvasRef.current || document.querySelector('#machine-room canvas');
+    const sec = document.getElementById('machine-room');
+    if(!cv || !sec) return;
+    const boxW = cv.parentElement ? cv.parentElement.clientWidth : 0;
+    const boxH = cv.parentElement ? cv.parentElement.clientHeight : 0;
+    const key = boxW + 'x' + boxH;
+    if(boxW && key !== this._cellFor){ this._cellFor = key; this.sizeCanvas(boxW, boxH); this._dirty = true; }
+    const r = sec.getBoundingClientRect();
+    const onScreen = r.bottom > -200 && r.top < window.innerHeight + 200;
+    if(!onScreen && !this._drag && !this._seq) return;
+    const range = sec.offsetHeight - window.innerHeight;
+    // The lead-in is click-driven, not scroll-driven: while it is on screen the page
+    // does not scroll at all, and scroll only takes over once we are inside the room.
+    if(this.state.stage === 'map' && this.skipMap()){ this._mp = 1; this.lockScroll(false); this.setState({ stage:'room', mapT:1 }); }
+    if(this.state.stage !== 'room'){
+      this.stepFlight();
+      this._p = 0;
+      if(this._dirty){ this._dirty = false; this.draw(); }
+      return;
+    }
+    const p = range > 0 ? Math.max(0, Math.min(1, (-r.top) / range)) : 0;
+    if(Math.abs(p - this._p) > 0.0002){
+      this._p = p; this._lastMove = Date.now(); this._dirty = true;
+      const beat = Math.min(5, Math.floor(p * 6));
+      if(beat !== this.state.beat){ this.setState({ beat }); this.typeBeat(beat); }
+    }
+    const srcs=[this.props.shotPod, this.props.shotAddons, this.props.shotDomain].filter(Boolean);
+    if(srcs.length){
+      this._imgs = this._imgs || {};
+      srcs.forEach(u=>{ if(!this._imgs[u]){ const im=new Image(); im.onload=()=>{ this._dirty=true; }; im.src=u; this._imgs[u]=im; } });
+    }
+    if(ts - this._lastTick >= 380){ this._lastTick = ts; this._tick++; this._dirty = true; }
+    if(this._dirty){ this._dirty = false; this.draw(); }
+  }
+
+  sizeCanvas(boxW, boxH){
+    const cv = this.canvasRef.current || document.querySelector('#machine-room canvas'); if(!cv) return;
+    const par = cv.parentElement;
+    const w = boxW || (par ? par.clientWidth : 1200);
+    const h = boxH || (par ? par.clientHeight : 700);
+    // Fractional cell: flooring to whole pixels made GW*cell narrower than the box,
+    // and the 100%/100% element then stretched only the x axis. Deriving the cell from
+    // the box and the row count from the cell keeps pixels square.
+    const cell = Math.max(1.5, w / this.GW);
+    this._cell = cell;
+    this.GH = Math.max(120, Math.min(420, Math.round(h / cell)));
+    this.HZ = Math.round(this.GH * 0.46);
+    this.F = 36 * this.GH / 88;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = this.GW * cell * dpr; cv.height = this.GH * cell * dpr;
+    cv.style.width = '100%'; cv.style.height = '100%';
+    cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
+  }
+
+  typeBeat(beat){
+    clearInterval(this._typer);
+    const total = this.BEATS[beat].lines.reduce((n,l)=>n + l[0].length, 0);
+    this.setState({ typed: 0 });
+    this._typer = setInterval(()=>{
+      const next = this.state.typed + 2;
+      if(next >= total){ clearInterval(this._typer); this.setState({ typed: total }); }
+      else this.setState({ typed: next });
+    }, 60);
+  }
+  goBeat(i){
+    const s = document.getElementById('machine-room'); if(!s) return;
+    const range = s.offsetHeight - window.innerHeight;
+    const top = s.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top: top + range * ((i + 0.45) / 6), behavior:'smooth' });
+  }
+
+  onDown = (e) => {
+    if(this.props.dragEnabled === false) return;
+    const cv = this.canvasRef.current; if(!cv) return;
+    const r = cv.getBoundingClientRect();
+    const scale = r.width / (this.GW * (this._cell||5));
+    const lx = (e.clientX - r.left) / scale, ly = (e.clientY - r.top) / scale;
+    const b = this.devoBox();
+    if(lx > b.x - 20 && lx < b.x + b.w + 20 && ly > b.y - 8 && ly < b.y + b.h + 8){
+      this._drag = { cx: lx, cy: ly, dir: 0, last: lx };
+      clearInterval(this._seqT); this._seq = null; this._dirty = true;
+    }
+  };
+  pointerMove(e){
+    if(!this._drag) return;
+    const cv = this.canvasRef.current; if(!cv) return;
+    const r = cv.getBoundingClientRect();
+    const scale = r.width / (this.GW * (this._cell||5));
+    const lx = (e.clientX - r.left) / scale, ly = (e.clientY - r.top) / scale;
+    const d = lx - this._drag.last;
+    this._drag.dir = Math.abs(d) < 0.6 ? 0 : (d > 0 ? 1 : -1);
+    this._drag.last = lx; this._drag.cx = lx; this._drag.cy = ly;
+    this._dirty = true;
+  }
+  pointerUp(){
+    if(!this._drag) return;
+    const cell = this._cell || 5;
+    const restX = Math.max(10, Math.min(this.GW - 50, Math.round(this._drag.cx / cell) - 20));
+    this._drag = null;
+    this._seq = { i: 0, x: restX };
+    clearInterval(this._seqT);
+    this._seqT = setInterval(()=>{
+      if(!this._seq){ clearInterval(this._seqT); return; }
+      this._seq.i++;
+      if(this._seq.i > 7){ clearInterval(this._seqT); this._seq = null; }
+      this._dirty = true;
+    }, 380);
+    this._dirty = true;
+  }
+
+  // dark plate + bright monospace tag: pod and addon names must read at a glance
+  plate(ctx,x,y,w,h,text,col,px){
+    const s=this._cell||5;
+    this.R(ctx,x,y,w,h,'#060c08');
+    this.R(ctx,x,y,w,1,'#1d2a22');
+    ctx.fillStyle=col;
+    ctx.font='600 '+px+"px 'JetBrains Mono', monospace";
+    ctx.textBaseline='middle';
+    ctx.fillText(text, (x+2)*s, (y+h/2)*s);
+    ctx.textBaseline='alphabetic';
+  }
+  // Falkenstein, Saxony — Hetzner FSN1
+  FSN = { lon: 12.3713, lat: 50.4779 };
+  MASK_W = 720; MASK_H = 360;
+  // Falkenstein is the site we run on today; the others are Hetzner regions, flagged
+  // as planned rather than claimed as live.
+  PINS = [
+    { id:'fsn1', name:'falkenstein', sub:'fsn1 · our metal', lon:12.3713, lat:50.4779, live:true,  side:'right', stalk:26 },
+    { id:'nbg1', name:'nuremberg',   sub:'nbg1 · planned',   lon:11.0767, lat:49.4521, live:false, side:'left',  stalk:74 },
+    { id:'hel1', name:'helsinki',    sub:'hel1 · planned',   lon:24.9384, lat:60.1699, live:false, side:'right', stalk:26 }
+  ];
+  // Evaluated per call against the CURRENT scene box: caching this at boot froze the
+  // decision while the frame was still narrow and silently skipped the whole lead-in.
+  skipMap(){
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduced) return true;
+    const cv = this.canvasRef.current || document.querySelector('#machine-room canvas');
+    const w = cv && cv.parentElement ? cv.parentElement.clientWidth : 0;
+    if(!w) return false;   // unknown width is not a reason to skip
+    return w <= 760;
+  }
+  lockScroll(on){
+    const h = document.documentElement;
+    if(on){ h.style.overflow = 'hidden'; }
+    else if(h.style.overflow === 'hidden'){ h.style.overflow = ''; }
+  }
+  flyTo(pin){
+    if(this.state.stage !== 'map') return;
+    if(!pin.live) return;   // planned sites are not destinations: we do not fake a room
+    this._pin = pin; this._flyFrom = Date.now();
+    this.setState({ stage:'flying' });
+    this._dirty = true;
+  }
+  stepFlight(){
+    if(this.state.stage === 'flying'){
+      const t = Math.min(1, (Date.now() - this._flyFrom) / 2100);
+      this._mp = t; this._dirty = true;
+      const stepped = Math.round(t * 20) / 20;
+      if(stepped !== this.state.mapT) this.setState({ mapT: stepped });
+      if(t >= 1){
+        this.lockScroll(false);
+        const sec = document.getElementById('machine-room');
+        if(sec) window.scrollTo(0, sec.getBoundingClientRect().top + window.scrollY);
+        this.setState({ stage:'room' });
+      }
+    } else {
+      this._mp = 0;
+      this.lockScroll(true);
+    }
+    this.placePins();
+  }
+  // pins are DOM buttons, so their labels are real text rather than canvas strings
+  placePins(){
+    const cv = this.canvasRef.current || document.querySelector('#machine-room canvas');
+    if(!cv) return;
+    const view = this.mapView(this._mp == null ? 0 : this._mp);
+    const r = cv.getBoundingClientRect();
+    document.querySelectorAll('.uc-pins [data-pin]').forEach(el=>{
+      const pin = this.PINS.filter(q=>q.id === el.getAttribute('data-pin'))[0];
+      if(!pin) return;
+      const x = (0.5 + (pin.lon - view.clon) / view.span) * r.width;
+      const y = (0.5 - (pin.lat - view.clat) / view.latSpan) * r.height;
+      el.style.left = Math.round(x) + 'px';
+      el.style.top = Math.round(y) + 'px';
+      const off = x < -40 || x > r.width + 40 || y < -40 || y > r.height + 40;
+      el.style.display = off ? 'none' : 'block';
+    });
+  }
+  // Single source of truth for the camera, so the canvas and the DOM pins agree and
+  // the chosen pin stays dead centre as the zoom closes in.
+  mapView(mp){
+    const GW = this.GW, GH = this.GH;
+    const span0 = Math.max(360, 172 * GW / GH), span1 = 0.5;
+    const t = mp < 0.9 ? mp / 0.9 : 1;
+    const ease = t * t * (3 - 2 * t);
+    const span = span0 * Math.pow(span1 / span0, ease);
+    const target = this._pin || this.PINS[0];
+    // The centre is derived from the CURRENT span, not from eased time: a linear pan
+    // against an exponential zoom throws the target off screen mid-flight. This keeps
+    // the chosen site within a few percent of dead centre the whole way in.
+    const k = Math.pow((span - span1) / (span0 - span1), 2.5);
+    const clon = target.lon - target.lon * k;
+    const clat = target.lat - target.lat * k;
+    return { span, latSpan: span * GH / GW, clon, clat, ease };
+  }
+  // Real Natural Earth geometry  // Real Natural Earth geometry, rasterised once into an equirectangular land mask;
+  // the scene then samples that mask per dot, so the map shares the room's cell grid.
+  loadMask(){
+    if(this._maskState) return;
+    this._maskState = 'loading';
+    const go = () => {
+      if(!window.d3 || !window.topojson){ setTimeout(go, 120); return; }
+      fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')
+        .then(r=>r.json()).then(topo=>{
+          const land = window.topojson.feature(topo, topo.objects.countries);
+          const cv = document.createElement('canvas');
+          cv.width = this.MASK_W; cv.height = this.MASK_H;
+          const c2 = cv.getContext('2d');
+          const proj = window.d3.geoEquirectangular()
+            .scale(this.MASK_W / (2 * Math.PI)).translate([this.MASK_W/2, this.MASK_H/2]);
+          const pathGen = window.d3.geoPath(proj, c2);
+          c2.fillStyle = '#fff'; c2.beginPath(); pathGen(land); c2.fill();
+          const px = c2.getImageData(0,0,this.MASK_W,this.MASK_H).data;
+          const m = new Uint8Array(this.MASK_W * this.MASK_H);
+          for(let i=0;i<m.length;i++) m[i] = px[i*4+3] > 40 && px[i*4] > 100 ? 1 : 0;
+          this._mask = m;
+          // Countries where Hetzner has locations, rasterised into their own mask so
+          // they read brighter than the rest of the land — neutral, never the live green.
+          const want = { '276':1, '246':1, '840':1, '702':1 };
+          const hzFeats = { type:'FeatureCollection',
+            features: land.features.filter(ft=>want[String(ft.id)]) };
+          c2.clearRect(0,0,this.MASK_W,this.MASK_H);
+          c2.fillStyle = '#fff'; c2.beginPath(); pathGen(hzFeats); c2.fill();
+          const hpx = c2.getImageData(0,0,this.MASK_W,this.MASK_H).data;
+          const h = new Uint8Array(this.MASK_W * this.MASK_H);
+          for(let i=0;i<h.length;i++) h[i] = hpx[i*4+3] > 40 && hpx[i*4] > 100 ? 1 : 0;
+          this._hz = h;
+          this._maskState = 'ready'; this._dirty = true;
+        }).catch(()=>{ this._maskState = 'failed'; });
+    };
+    go();
+  }
+  isHetzner(lon,lat){
+    if(!this._hz) return false;
+    let x = Math.round((lon + 180) / 360 * this.MASK_W);
+    const y = Math.round((90 - lat) / 180 * this.MASK_H);
+    if(y < 0 || y >= this.MASK_H) return false;
+    x = ((x % this.MASK_W) + this.MASK_W) % this.MASK_W;
+    return this._hz[y * this.MASK_W + x] === 1;
+  }
+  isLand(lon,lat){
+    if(!this._mask) return false;
+    let x = Math.round((lon + 180) / 360 * this.MASK_W);
+    const y = Math.round((90 - lat) / 180 * this.MASK_H);
+    if(y < 0 || y >= this.MASK_H) return false;
+    x = ((x % this.MASK_W) + this.MASK_W) % this.MASK_W;
+    return this._mask[y * this.MASK_W + x] === 1;
+  }
+  drawMap(ctx, mp){
+    const s = this._cell || 5, GW = this.GW, GH = this.GH;
+    const v = this.mapView(mp);
+    const fadeT = Math.max(0, Math.min(1, (mp - 0.26) / 0.46));
+    const alpha = 1 - fadeT * fadeT * (3 - 2 * fadeT);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = '#0b0d0c'; ctx.fillRect(0,0,GW*s,GH*s);
+    ctx.globalAlpha = alpha * 0.92;
+    if(alpha <= 0.01){ ctx.restore(); return; }
+    // sparser grid as we close in, so the dots thin out instead of merging into a wall
+    const step = v.span > 60 ? 2 : v.span > 12 ? 3 : v.span > 3 ? 5 : 8;
+    const base = [], hot = [];
+    for(let j=0;j<GH;j+=step){
+      const lat = v.clat + (GH/2 - j) / GH * v.latSpan;
+      if(lat > 89 || lat < -89) continue;
+      for(let i=0;i<GW;i+=step){
+        const lon = v.clon + (i - GW/2) / GW * v.span;
+        if(!this.isLand(lon, lat)) continue;
+        (this.isHetzner(lon, lat) ? hot : base).push([i, j]);
+      }
+    }
+    ctx.fillStyle = '#5f6c66';
+    base.forEach(q=>ctx.fillRect(q[0]*s, q[1]*s, s, s));
+    ctx.fillStyle = '#e6ede8';
+    hot.forEach(q=>ctx.fillRect(q[0]*s, q[1]*s, s, s));
+    ctx.restore();
+  }
+  R(ctx,x,y,w,h,c){ const s=this._cell||5; ctx.fillStyle=c; ctx.fillRect(Math.round(x)*s, Math.round(y)*s, Math.round(w)*s, Math.round(h)*s); }
+  // ---------------- room geometry: real perspective projection ----------------
+  GW = 420; GH = 132;
+  F = 36; HZ = 38; EYE = 4.0; CH = 17; AISLE = 22; ZFAR = 34;
+  RZ = 14; RD = 3.5; RX0 = 3.5; RX1 = 13.5; RH = 15.5;   // hero rack: depth, x-span, height
+  DZ = 10.5; DSCALE = 1.12;                                          // devo's depth in the aisle
+  PAL = { D:'#11A32A', S:'#11A32A', G:'#11A32A', L:'#11A32A', K:'#05100a', E:'#35E055', W:'#D6F7DC', R:'#ff5a52', F:'#f97316', H:'#8a93a0', h:'#5d6570' };
+
+  BEATS = [
+    { kicker:'what you get · one namespace, one bill',
+      caption:'devo waves you over · the bays are empty',
+      lesson:'a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes.',
+      speech:['come here —','i have something to show you'], quota:0,
+      lines:[['$ usectl login','rgba(255,255,255,.85)'],['$ usectl machines create omnitech \\','rgba(255,255,255,.85)'],['    --repo github.com/you/shop','rgba(255,255,255,.6)']] },
+    { kicker:'managed addons · down the aisle',
+      caption:'slices of a shared instance · nothing from your budget',
+      lesson:'managed addons are logically isolated databases, queues and buckets carved out of shared platform instances. they consume none of your machine\u2019s resources.',
+      quota:0,
+      lines:[['$ usectl machines addons add omnitech \\','rgba(255,255,255,.85)'],['    --type postgres --managed','rgba(255,255,255,.6)'],['✓ postgres ready. DATABASE_URL injected','#11A32A'],['✓ 0 vcpu · 0 gb from your budget','#8fae99']] },
+    { kicker:'dedicated addons · in your rack',
+      caption:'own namespace, own volume · draws on your budget',
+      lesson:'dedicated addons run inside your own namespace with their own persistent volume, and draw directly from your machine\u2019s vcpu and ram.',
+      quota:0.25,
+      lines:[['$ usectl machines addons add omnitech \\','rgba(255,255,255,.85)'],['    --type postgres --dedicated','rgba(255,255,255,.6)'],['✓ statefulset + pvc in your namespace','#11A32A'],['⚠ 0.5 vcpu · 1 gb from your budget','#FEBC2E']] },
+    { kicker:'how it ships · four steps, in order',
+      caption:'built in the cluster with kaniko',
+      lesson:'we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.',
+      quota:0.25,
+      lines:[['$ usectl deploy omnitech','rgba(255,255,255,.85)'],['⋯ building in the cluster...','#FEBC2E']] },
+    { kicker:'push git. get https.',
+      caption:'tls issued · live',
+      lesson:'every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.',
+      quota:0.25,
+      lines:[['✓ build 28s · tls issued · live at','#11A32A'],['  https://omnitech.usectl.com','#ffffff']] },
+    { kicker:'known limits · we say it plainly',
+      caption:'node-bound disk · single-replica streams',
+      lesson:'a dedicated addon\u2019s volume is local-path: it pins that pod to one node\u2019s disk and cannot reschedule if the host goes down. dedicated nats streams default to one replica unless your client asks for three.',
+      quota:0.25,
+      lines:[['$ usectl machines addons inspect omnitech postgres','rgba(255,255,255,.85)'],['  volume: local-path · node-bound','#FEBC2E'],['  reschedule: no, if that disk goes down','#FEBC2E']] }
+  ];
+  // Managed addons live in a shared platform rack down the aisle; dedicated ones bolt
+  // into the machine's own rack. Timings sit inside the beat whose copy describes them.
+  SHARED = [0.19, 0.23, 0.27];
+  ADDONS = [
+    { tag:'postgres', at:0.35,  live:0.375, cable:0.42 },
+    { tag:'redis',    at:0.395, live:0.420, cable:0.45 },
+    { tag:'nats',     at:0.440, live:0.465, cable:0.49 }
+  ];
+  SCHED = { blade: 0.52, bladeDur: 0.10, built: 0.60, uplink: 0.69, limits: 0.84 };
+
+  // pinhole camera: world (x right, y up from floor, z into the room) -> screen cells
+  cam(){ return this._p * 2.6; }
+  proj(x,y,z){ const k = this.F / Math.max(0.9, z); return [ this.GW/2 + x*k, this.HZ - (y - this.EYE)*k ]; }
+  quad(ctx,pts,col){ const s=this._cell||5; ctx.fillStyle=col; ctx.beginPath();
+    pts.forEach((q,i)=>{ const X=Math.round(q[0])*s, Y=Math.round(q[1])*s; if(i) ctx.lineTo(X,Y); else ctx.moveTo(X,Y); });
+    ctx.closePath(); ctx.fill(); }
+  seg(ctx,A,B,col){ const s=this._cell||5; ctx.fillStyle=col;
+    let x0=Math.round(A[0]), y0=Math.round(A[1]); const x1=Math.round(B[0]), y1=Math.round(B[1]);
+    const dx=Math.abs(x1-x0), dy=Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1;
+    let err=dx-dy, n=0;
+    while(n++ < 2000){ if(x0>-2&&x0<this.GW+2&&y0>-2&&y0<this.GH+2) ctx.fillRect(x0*s,y0*s,s,s);
+      if(x0===x1&&y0===y1) break; const e2=2*err;
+      if(e2>-dy){ err-=dy; x0+=sx; } if(e2<dx){ err+=dx; y0+=sy; } } }
+
+  // ---------------- devo: a box-built 3D model, posed by joint angles ----------------
+  // Local space: origin between the feet, +y up, -z toward the camera. Every part is a
+  // box; faces are shaded by orientation and painter-sorted with the rest of the model.
+  SH = {
+    body:  { top:'#1cc93e', front:'#11A32A', side:'#0d7a20', back:'#0a5a17', bottom:'#084712' },
+    dark:  { top:'#0a1410', front:'#05100a', side:'#040c08', back:'#030907', bottom:'#020604' },
+    eye:   { top:'#7dffa6', front:'#35E055', side:'#22b843', back:'#189033', bottom:'#189033' },
+    metal: { top:'#a8b0bb', front:'#8a93a0', side:'#5d6570', back:'#464d56', bottom:'#3a4048' }
+  };
+  FACES = [[0,1,3,2],[4,6,7,5],[0,4,5,1],[2,3,7,6],[0,2,6,4],[1,5,7,3]];
+
+  corners(cx,cy,cz,w,h,d){ const X=w/2, Y=h/2, Z=d/2, o=[];
+    for(let i=0;i<8;i++) o.push([cx+((i&4)?X:-X), cy+((i&1)?Y:-Y), cz+((i&2)?Z:-Z)]);
+    return o; }
+  rotX(p,ang,pv){ const c=Math.cos(ang), s=Math.sin(ang), y=p[1]-pv[1], z=p[2]-pv[2];
+    return [p[0], pv[1]+y*c-z*s, pv[2]+y*s+z*c]; }
+  rotZ(p,ang,pv){ const c=Math.cos(ang), s=Math.sin(ang), x=p[0]-pv[0], y=p[1]-pv[1];
+    return [pv[0]+x*c-y*s, pv[1]+x*s+y*c, p[2]]; }
+  rotY(p,ang){ const c=Math.cos(ang), s=Math.sin(ang);
+    return [p[0]*c-p[2]*s, p[1], p[0]*s+p[2]*c]; }
+
+  // Where a hand lands after its joint rotations — the laptop is placed from this,
+  // so the hold can never drift away from the hands again.
+  handPos(sx, arm, ty){
+    const A=arm||{}, pv=[sx, ty+1.0, 0], side=sx<0?-1:1;
+    let o=[sx, ty-1.5, 0];
+    if(A.roll) o=this.rotZ(o, A.roll*side, pv);
+    if(A.pitch) o=this.rotX(o, A.pitch, pv);
+    return o;
+  }
+  // pose -> list of boxes in local space, each already joint-rotated
+  devoParts(q){
+    const P=[], put=(sh,cx,cy,cz,w,h,d,jr)=>{
+      let c=this.corners(cx,cy,cz,w,h,d);
+      if(jr) c=c.map(pt=>{ let o=pt;
+        if(jr.rz) o=this.rotZ(o,jr.rz,jr.pv);
+        if(jr.rx) o=this.rotX(o,jr.rx,jr.pv);
+        return o; });
+      P.push({ sh, c });
+    };
+    const crouch=q.crouch||0, hipY=2.5-crouch*0.9;
+    // legs + feet
+    [[-0.8,'l'],[0.8,'r']].forEach(([lx,side],i)=>{
+      const pitch=(side==='l'?q.legL:q.legR)||0, pv=[lx,hipY,0];
+      put(this.SH.body, lx, hipY/2+0.25, 0, 0.85, hipY-0.2, 0.95, { rx:pitch, pv });
+      put(this.SH.dark, lx, 0.22, 0.25, 1.05, 0.45, 1.4, { rx:pitch, pv });
+    });
+    // torso + chest panel + leds
+    const ty=hipY+1.45;
+    put(this.SH.body, 0, ty, 0, 3.1, 2.7, 1.9);
+    put(this.SH.dark, 0, ty+0.1, -1.02, 1.9, 1.1, 0.12);
+    [-0.55,0,0.55].forEach((ex,i)=>{ if((this._tick||0)%3===i) put(this.SH.eye, ex, ty+0.1, -1.12, 0.28, 0.28, 0.1); });
+    // head, visor, eyes, antenna
+    const hy=ty+2.75;
+    put(this.SH.body, 0, hy, 0, 3.5, 2.9, 2.9);
+    put(this.SH.dark, 0, hy+0.15, -1.48, 2.2, 1.15, 0.14);
+    const blink=(this._tick||0)%7===6;
+    [-0.72,0.72].forEach(ex=> put(this.SH.eye, ex, hy+0.15, -1.62, blink?0.55:0.5, blink?0.14:0.5, 0.12));
+    put(this.SH.body, -1.0, hy+1.75, 0, 0.22, 1.4, 0.22);
+    put(this.SH.eye, -1.0, hy+2.55, 0, 0.4, 0.4, 0.4);
+    // laptop: held open in the left hand once he is at the rack
+    if(q.laptop){
+      const hand=this.handPos(1.8, q.armR, ty);
+      const lx=hand[0]-1.05, ly=hand[1]+0.2, lz=hand[2]-0.1;
+      const hinge=[lx, ly, lz+0.56];
+      const tilt=22*Math.PI/180;
+      const lyaw=Math.PI;
+      // turn the whole laptop toward the camera about its own base centre
+      const turn=(pt)=>{ const o=this.rotY([pt[0]-lx, pt[1], pt[2]-lz], lyaw); return [o[0]+lx, o[1], o[2]+lz]; };
+      const rotLid=(pt)=>turn(this.rotX(pt, tilt, hinge));
+      P.push({ sh:this.SH.metal, c:this.corners(lx, ly, lz, 1.6, 0.16, 1.15).map(turn) });
+      P.push({ sh:this.SH.dark, c:this.corners(lx, ly+0.1, lz-0.14, 1.25, 0.03, 0.7).map(turn) });
+      const lidC=[lx, ly+0.62, lz+0.54];
+      const lidBox=this.corners(lidC[0], lidC[1], lidC[2], 1.6, 1.2, 0.11).map(rotLid);
+      P.push({ sh:this.SH.metal, c:lidBox });
+      const sx=0.68, sTop=ly+1.14, sBot=ly+0.2, sz=lz+0.5;
+      this._screenLocal = [
+        rotLid([lx-sx, sTop, sz]),
+        rotLid([lx+sx, sTop, sz]),
+        rotLid([lx-sx, sBot, sz])
+      ];
+    } else { this._screenLocal = null; }
+    // arms: shoulder pivot, upper arm hangs then rotates
+    [['l',-1.8,q.armL],['r',1.8,q.armR]].forEach(([side,sx,arm])=>{
+      const A=arm||{}, pv=[sx,ty+1.0,0];
+      const jr={ rz:(A.roll||0)*(side==='l'?-1:1), rx:A.pitch||0, pv };
+      put(this.SH.body, sx, ty-0.15, 0, 0.8, 2.4, 0.85, jr);
+      put(this.SH.metal, sx, ty-1.5, 0, 0.7, 0.5, 0.75, jr);
+    });
+    return P;
+  }
+
+  // beats and interactions map to pose angles rather than sprite frames
+  devoPose(){
+    const t=this._tick||0, p=this._p, D=Math.PI/180;
+    const bob=Math.sin(t*0.9)*0.08, sway=Math.sin(t*0.9)*6*D;
+    if(this._drag){
+      const d=this._drag.dir||0;
+      return { yaw:20*D, lean:(d*14+Math.sin(t*2)*5)*D, y:0, grabbed:true,
+        armL:{roll:120*D,pitch:(-25+Math.sin(t*3)*30)*D}, armR:{roll:120*D,pitch:(-25-Math.sin(t*3)*30)*D},
+        legL:(20+Math.sin(t*2)*18)*D, legR:(-20-Math.sin(t*2)*18)*D };
+    }
+    if(this._seq){
+      const i=this._seq.i;
+      if(i<=2) return { yaw:20*D, lean:(i*32)*D, y:0, armL:{roll:100*D,pitch:-40*D}, armR:{roll:100*D,pitch:-40*D}, legL:14*D, legR:-14*D };
+      if(i<=4) return { yaw:20*D, lean:90*D, y:0.9, down:true, armL:{roll:70*D}, armR:{roll:70*D} };
+      if(i===5) return { yaw:20*D, lean:0, y:0, crouch:1, armL:{pitch:-30*D}, armR:{pitch:-30*D} };
+      return { yaw:14*D, lean:0, y:0, angry:true, armL:{roll:38*D,pitch:-70*D}, armR:{roll:38*D,pitch:-70*D} };
+    }
+    const b=Math.min(5,Math.floor(p*6)), lp=(p-b/6)*6;
+    const still=Date.now()-(this._lastMove||0)>300;
+    // a real step cycle whenever his floor position is actually changing
+    const dwp=this.devoWorld(), wx=dwp.x+dwp.z;
+    const moving=Math.abs(wx-(this._lastX==null?wx:this._lastX))>0.004;
+    this._lastX=wx;
+    const ph=Date.now()/150, step=Math.sin(ph);
+    if(moving) return { yaw:64*D, lean:5*D, y:Math.abs(Math.cos(ph))*0.14, walk:true,
+      armL:{pitch:step*34*D}, armR:{pitch:-step*34*D}, legL:step*30*D, legR:-step*30*D };
+    if(b===0){
+      // calls you over: open stance, big waving arm, speech bubble
+      const wave=Math.sin(Date.now()/170);
+      return { yaw:10*D, lean:0, y:bob, speech:true,
+        armL:{pitch:sway*0.4}, armR:{roll:(148+wave*14)*D, pitch:-10*D} };
+    }
+    const atRack = p>0.215;
+    // holding the laptop: left arm out as a shelf, right hand typing
+    const hold = { yaw:-14*D, lean:6*D, y:bob, laptop:true,
+      armL:{pitch:(80+Math.sin(Date.now()/110)*7)*D, roll:-40*D}, armR:{pitch:88*D, roll:26*D} };
+    if(still && b!==4) return atRack ? hold : { yaw:34*D, lean:0, y:bob, armL:{pitch:sway}, armR:{pitch:-sway} };
+    if(b===1 || b===2 || b===3 || b===5) return hold;
+
+    if(b===4 && lp<0.45) return hold;   // still typing when tls lands
+    const jump=Math.abs(Math.sin(Date.now()/300));
+    return { yaw:8*D, lean:0, y:jump*1.0, armL:{roll:118*D}, armR:{roll:118*D}, legL:-jump*22*D, legR:jump*22*D };
+  }
+
+  // every supplied capture gets screen time: the laptop cycles through them
+  shotFor(){
+    if(!this._imgs) return null;
+    const ready=[this.props.shotPod, this.props.shotAddons, this.props.shotDomain]
+      .filter(Boolean).map(u=>this._imgs[u])
+      .filter(im=>im && im.complete && im.naturalWidth);
+    if(!ready.length) return null;
+    return ready[Math.floor(Date.now()/2600) % ready.length];
+  }
+  drawScreen(ctx, W3){
+    const s=this._cell||5;
+    const TL=W3[0], TR=W3[1], BL=W3[2];
+    // cull when the lid faces away from the camera
+    const u=[TR[0]-TL[0],TR[1]-TL[1],TR[2]-TL[2]], v=[BL[0]-TL[0],BL[1]-TL[1],BL[2]-TL[2]];
+    const n=[u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]];
+    const c=[(TL[0]+TR[0]+BL[0])/3, (TL[1]+TR[1]+BL[1])/3, (TL[2]+TR[2]+BL[2])/3];
+    if(n[0]*c[0]+n[1]*(c[1]-this.EYE)+n[2]*c[2] > 0) return;
+    const a=this.proj(TL[0],TL[1],TL[2]).map(q=>q*s);
+    const b2=this.proj(TR[0],TR[1],TR[2]).map(q=>q*s);
+    const d=this.proj(BL[0],BL[1],BL[2]).map(q=>q*s);
+    const br=[b2[0]+d[0]-a[0], b2[1]+d[1]-a[1]];
+    if(Math.abs(b2[0]-a[0]) < 6) return;
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b2[0],b2[1]); ctx.lineTo(br[0],br[1]); ctx.lineTo(d[0],d[1]); ctx.closePath();
+    ctx.fillStyle='#081018'; ctx.fill(); ctx.clip();
+    ctx.transform(b2[0]-a[0], b2[1]-a[1], d[0]-a[0], d[1]-a[1], a[0], a[1]);
+    const img=this.shotFor();
+    if(img){
+      ctx.imageSmoothingEnabled=true;
+      ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, 1, 1);
+    } else {
+      // Placeholder wireframe of the manager pods panel, in unit space, until real
+      // manager.usectl.com captures are supplied through the Tweaks props.
+      ctx.fillStyle='#0c1a15'; ctx.fillRect(0,0,1,0.15);
+      ctx.fillStyle='#11A32A'; ctx.fillRect(0.035,0.045,0.055,0.06);
+      ctx.fillStyle='#2c3f36'; ctx.fillRect(0.105,0.055,0.34,0.04);
+      ctx.fillStyle='#11A32A'; ctx.fillRect(0.78,0.04,0.185,0.07);
+      const rows=[0.22,0.40,0.58,0.76];
+      rows.forEach((y,i)=>{
+        const on=i<3;
+        ctx.fillStyle= i===2 ? '#152a20' : '#101d18';
+        ctx.fillRect(0.035,y,0.93,0.14);
+        ctx.fillStyle= on ? '#35E055' : '#3a4d43';
+        ctx.fillRect(0.06,y+0.05,0.035,0.035);
+        ctx.fillStyle='#55705f'; ctx.fillRect(0.125,y+0.045,0.30,0.042);
+        ctx.fillStyle='#2f4038'; ctx.fillRect(0.47,y+0.05,0.16,0.032);
+        ctx.fillStyle= on ? '#1c6b31' : '#2a3a32'; ctx.fillRect(0.70,y+0.045,0.10,0.042);
+        ctx.fillStyle='#2f4038'; ctx.fillRect(0.84,y+0.05,0.12,0.032);
+      });
+      ctx.fillStyle='#11A32A'; ctx.fillRect(0.035,0.93,0.22,0.045);
+    }
+    ctx.restore();
+  }
+  speechBubble(ctx, hx, hy, lines){
+    const s=this._cell||5, fs=Math.max(10, Math.round(s*2.0));
+    ctx.font='500 '+fs+"px 'JetBrains Mono', monospace";
+    const tw=Math.max.apply(null, lines.map(l=>ctx.measureText(l).width));
+    const padX=Math.round(fs*0.7), padY=Math.round(fs*0.55), lh=Math.round(fs*1.5);
+    const bw=tw+padX*2, bh2=lines.length*lh+padY*2;
+    let x=(hx+4)*s, y=(hy-3)*s-bh2;
+    const maxX=this.GW*s-bw-4; if(x>maxX) x=maxX; if(x<4) x=4; if(y<4) y=4;
+    ctx.fillStyle='rgba(8,10,14,.92)'; ctx.fillRect(x,y,bw,bh2);
+    ctx.fillStyle='#11A32A';
+    ctx.fillRect(x,y,bw,s); ctx.fillRect(x,y+bh2-s,bw,s);
+    ctx.fillRect(x,y,s,bh2); ctx.fillRect(x+bw-s,y,s,bh2);
+    ctx.fillRect(x+Math.round(s*2),y+bh2,Math.round(s*2),s*2);
+    ctx.fillStyle='#D6F7DC'; ctx.textBaseline='top';
+    lines.forEach((l,i)=>ctx.fillText(l, x+padX, y+padY+i*lh));
+    ctx.textBaseline='alphabetic';
+  }
+  devoWorld(){ const walk = Math.min(1, this._p / 0.22);
+    return { x:-0.6 + walk*1.0, z:(20.5 - walk*4.6) - this.cam()*0.25 }; }
+  devoBox(){
+    const s=this._cell||5, w=this.devoWorld();
+    const f=this.proj(w.x,0,w.z), h=this.proj(w.x,9.5*this.DSCALE,w.z);
+    const halfW=Math.abs(this.proj(w.x+3.6,0,w.z)[0]-f[0]);
+    return { x:(f[0]-halfW)*s, y:h[1]*s, w:halfW*2*s, h:(f[1]-h[1])*s };
+  }
+  drawDevo(ctx){
+    const pose=this.devoPose(), W=this.devoWorld();
+    this._pose=pose;
+    const pv=[0, pose.down?1.2:2.4, 0];
+    const faces=[];
+    this.devoParts(pose).forEach(part=>{
+      const S=this.DSCALE;
+      const wc=part.c.map(pt=>{
+        let o=[pt[0]*S, pt[1]*S, pt[2]*S];
+        if(pose.lean) o=this.rotZ(o,pose.lean,pv);
+        o=this.rotY(o,pose.yaw||0);
+        return [W.x+o[0], (pose.y||0)+o[1], W.z+o[2]];
+      });
+      this.FACES.forEach(f=>{
+        const q=f.map(i=>wc[i]);
+        const u=[q[1][0]-q[0][0],q[1][1]-q[0][1],q[1][2]-q[0][2]];
+        const v=[q[2][0]-q[0][0],q[2][1]-q[0][1],q[2][2]-q[0][2]];
+        const n=[u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]];
+        const cx=(q[0][0]+q[1][0]+q[2][0]+q[3][0])/4;
+        const cy=(q[0][1]+q[1][1]+q[2][1]+q[3][1])/4;
+        const cz=(q[0][2]+q[1][2]+q[2][2]+q[3][2])/4;
+        const view=[cx-0, cy-this.EYE, cz-0];
+        if(n[0]*view[0]+n[1]*view[1]+n[2]*view[2] > 0) return;   // back face
+        const ln=Math.hypot(n[0],n[1],n[2])||1, ny=n[1]/ln, nx=n[0]/ln, nz=n[2]/ln;
+        let key='front';
+        if(ny>0.55) key='top'; else if(ny<-0.55) key='bottom';
+        else if(Math.abs(nx)>Math.abs(nz)) key='side'; else key = nz<0 ? 'front' : 'back';
+        faces.push({ z:cz, col:part.sh[key], pts:q.map(pt=>this.proj(pt[0],pt[1],pt[2])) });
+      });
+    });
+    faces.sort((A,B)=>B.z-A.z);
+    faces.forEach(f=>this.quad(ctx,f.pts,f.col));
+    if(this._screenLocal){
+      const S=this.DSCALE;
+      const toWorld=(pt)=>{
+        let o=[pt[0]*S, pt[1]*S, pt[2]*S];
+        if(pose.lean) o=this.rotZ(o,pose.lean,pv);
+        o=this.rotY(o,pose.yaw||0);
+        return [W.x+o[0], (pose.y||0)+o[1], W.z+o[2]];
+      };
+      this.drawScreen(ctx, this._screenLocal.map(toWorld));
+    }
+    return pose;
+  }
+  draw(){
+    const cv = this.canvasRef.current || document.querySelector('#machine-room canvas'); if(!cv) return;
+    const ctx = cv.getContext('2d'); if(!ctx) return;
+    const s = this._cell || 5, p = this._p, t = this._tick || 0;
+    const GW=this.GW, GH=this.GH, CH=this.CH, AI=this.AISLE, cz=this.cam();
+    const Z=(z)=>z-cz;
+    const lightOn = this.props.dyingLight === false ? true : !(t % 7 === 3 || t % 11 === 5);
+
+    ctx.clearRect(0,0,GW*s,GH*s);
+    this.R(ctx,0,0,GW,GH,'#090b0a');
+
+    const zf=Z(this.ZFAR), zn=Z(3);
+    const W00=this.proj(-AI,0,zf), W10=this.proj(AI,0,zf), W1H=this.proj(AI,CH,zf), W0H=this.proj(-AI,CH,zf);
+
+    // ceiling plane, then far wall, then floor
+    this.quad(ctx,[W0H,W1H,this.proj(AI,CH,zn),this.proj(-AI,CH,zn)],'#0c1010');
+    this.quad(ctx,[W0H,W1H,W10,W00], lightOn?'#151a1b':'#111415');
+    for(let x=-AI;x<=AI;x+=6) this.seg(ctx,this.proj(x,0,zf),this.proj(x,CH,zf),'#1b2022');
+    this.quad(ctx,[W00,W10,this.proj(AI,0,zn),this.proj(-AI,0,zn)],'#0b0e0e');
+
+    // floor grating: transverse ribs + longitudinal rails converge on the vanishing point
+    for(let z=4;z<=this.ZFAR;z+=2) this.seg(ctx,this.proj(-AI,0,Z(z)),this.proj(AI,0,Z(z)),'#141919');
+    for(let x=-AI;x<=AI;x+=4) this.seg(ctx,this.proj(x,0,zn),this.proj(x,0,zf),'#111616');
+
+    // overhead cable trays + cross braces running the length of the aisle
+    [-8,-3,3,8].forEach((x,i)=>this.seg(ctx,this.proj(x,CH-0.2,zn),this.proj(x,CH-0.2,zf), i%2?'#242b2d':'#2c3335'));
+    for(let z=6;z<this.ZFAR;z+=4) this.seg(ctx,this.proj(-9,CH-0.35,Z(z)),this.proj(9,CH-0.35,Z(z)),'#1d2224');
+
+    // one dying strip light
+    const lz1=Z(12), lz2=Z(16.5);
+    this.quad(ctx,[this.proj(-2.5,CH-0.5,lz1),this.proj(2.5,CH-0.5,lz1),this.proj(2.5,CH-0.5,lz2),this.proj(-2.5,CH-0.5,lz2)], lightOn?'#c9ecd2':'#3b4143');
+    if(lightOn){ const c=this.proj(0,CH-0.5,Z(14));
+      const g=ctx.createRadialGradient(c[0]*s,c[1]*s,0,c[0]*s,c[1]*s,52*s);
+      g.addColorStop(0,'rgba(214,247,220,.09)'); g.addColorStop(1,'rgba(214,247,220,0)');
+      ctx.fillStyle=g; ctx.fillRect(0,0,GW*s,GH*s); }
+
+    // neighbouring racks lining both walls, far to near
+    const depth = this.props.neighbourRacks == null ? 3 : this.props.neighbourRacks;
+    const rows=[]; for(let z=this.ZFAR-4; z>7; z-=5.5) rows.push(z);
+    rows.slice(0, depth*2).forEach((z,i)=>{
+      [-1,1].forEach(sgn=>{
+        const xi=sgn*(AI-0.6), z1=Z(z), z2=Z(z-4.4);
+        if(z2<1.4) return;
+        if(sgn>0 && z-4.4 < this.RZ+this.RD) return;   // the hero rack owns that bay
+        this.quad(ctx,[this.proj(xi,0,z1),this.proj(xi,this.RH,z1),this.proj(xi,this.RH,z2),this.proj(xi,0,z2)], i%2?'#181c1e':'#1c2123');
+        this.seg(ctx,this.proj(xi,0,z2),this.proj(xi,this.RH,z2),'#2d3436');
+        this.seg(ctx,this.proj(xi,this.RH,z1),this.proj(xi,this.RH,z2),'#262d2f');
+        for(let y=1.4;y<this.RH-1;y+=1.5){
+          const q=this.proj(xi,y,(z1+z2)/2);
+          const on=((i*7+Math.round(y*10)+t)%5===0);
+          this.R(ctx,Math.round(q[0]),Math.round(q[1]),1,1,on?'#35E055':'#222a2b');
+        }
+      });
+    });
+
+    // ---- shared platform rack, further down the aisle on the far wall ----
+    // Managed addons are slices of these instances: they light up here, never in the
+    // machine's own rack, and never touch its budget.
+    const shz=Z(24.5), shzb=Z(28);
+    const SX0=-19, SX1=-8.5, SH=13;
+    const SA=this.proj(SX0,0,shz), SB=this.proj(SX0,SH,shz), SC=this.proj(SX1,SH,shz), SD=this.proj(SX1,0,shz);
+    const sx0=Math.round(SA[0]), sx1=Math.round(SD[0]);
+    const syb=Math.round(SA[1]), syt=Math.round(SB[1]);
+    const sw=sx1-sx0, sh2=syb-syt;
+    if(sw>6){
+      this.quad(ctx,[SD,SC,this.proj(SX1,SH,shzb),this.proj(SX1,0,shzb)],'#242b2e');
+      this.R(ctx,sx0,syt,sw,sh2,'#3d454b');
+      this.R(ctx,sx0+1,syt+1,sw-2,sh2-2,'#0d1112');
+      const sbh=Math.floor((sh2-4)/4);
+      this.SHARED.forEach((at,i)=>{
+        const by=syt+3+i*sbh;
+        this.R(ctx,sx0+2,by,sw-4,sbh-2,'#151a1b');
+        if(p>at){
+          this.R(ctx,sx0+2,by,sw-4,sbh-2,'#11351d');
+          this.R(ctx,sx0+2,by,Math.max(1,Math.round(sw*0.18)),sbh-2,'#35E055');
+          this.R(ctx,sx1-4,by+1,2,2,'#35E055');
+        }
+      });
+      const slPx = Math.max(13, Math.round(s*2.4));
+      ctx.font = '600 ' + slPx + "px 'JetBrains Mono', monospace";
+      const slTxt = 'shared instance';
+      const slW = ctx.measureText(slTxt).width;
+      const slBase = (syt-3)*s;
+      ctx.fillStyle = 'rgba(6,12,8,.92)';
+      ctx.fillRect(sx0*s - slPx*0.3, slBase - slPx*1.05, slW + slPx*0.6, slPx*1.45);
+      ctx.fillStyle = '#11A32A';
+      ctx.fillRect(sx0*s - slPx*0.3, slBase - slPx*1.05, Math.max(1, s*0.6), slPx*1.45);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(slTxt, sx0*s + slPx*0.1, slBase);
+    }
+
+    // ---- hero rack: front face parallel to the image plane, left side face receding ----
+    const rz=Z(this.RZ), rzb=Z(this.RZ+this.RD);
+    const hh=this.RH;
+    const FA=this.proj(this.RX0,0,rz), FB=this.proj(this.RX0,hh,rz), FC=this.proj(this.RX1,hh,rz), FD=this.proj(this.RX1,0,rz);
+    const x0=Math.round(FA[0]), x1=Math.round(FD[0]), yb=Math.round(FA[1]), yt=Math.round(FB[1]);
+    const rw=x1-x0, rh=yb-yt;
+    // left side face gives the box its depth
+    this.quad(ctx,[FA,FB,this.proj(this.RX0,hh,rzb),this.proj(this.RX0,0,rzb)],'#3b4247');
+    this.quad(ctx,[FB,FC,this.proj(this.RX1,hh,rzb),this.proj(this.RX0,hh,rzb)],'#4c545a');
+    // front chassis
+    this.R(ctx,x0,yt,rw,rh,'#5d6570');
+    this.R(ctx,x0+1,yt+1,rw-2,rh-2,'#0f1314');
+    this.R(ctx,x0,yt,rw,1,'#8a93a0'); this.R(ctx,x0,yb-1,rw,1,'#8a93a0');
+    this.R(ctx,x0,yt,1,rh,'#8a93a0'); this.R(ctx,x1-1,yt,1,rh,'#8a93a0');
+    const labelPx = Math.max(11, Math.min(18, Math.round(rw*s*0.055)));
+    if(p>0.05){ ctx.fillStyle='#8a93a0'; ctx.font='600 '+Math.max(9,Math.round(labelPx*0.78))+"px 'JetBrains Mono', monospace";
+      ctx.fillText('2v · 4g · 10g',(x0+3)*s,(yt+6)*s); }
+    const bh=Math.floor((rh-8)/4), bays=[0,1,2,3].map(i=>yt+7+i*bh);
+    bays.forEach(by=>{ this.R(ctx,x0+2,by,rw-4,bh-2,'#151a1b'); this.R(ctx,x0+2,by,rw-4,1,'#3d454b'); });
+
+    // Modules start a rack-width outside the chassis, so everything that slides is
+    // clipped to the chassis interior — they emerge from the bay opening.
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect((x0+2)*s, yt*s, (rw-4)*s, rh*s);
+    ctx.clip();
+    // beat 3 — the blade racks and the build goes green
+    if(p>this.SCHED.blade){
+      const f=Math.min(1,(p-this.SCHED.blade)/this.SCHED.bladeDur), by=bays[0];
+      const bx=Math.round(x0+3+(1-f)*(rw+6));
+      this.R(ctx,bx,by+1,rw-6,bh-4,'#8a93a0');
+      this.R(ctx,bx+1,by+2,rw-8,bh-6,'#0f1314');
+      const built=p>this.SCHED.built;
+      this.plate(ctx, bx+2, by+Math.round(bh*0.28), Math.round(rw*0.52), Math.round(bh*0.44), 'web', built?'#D6F7DC':'#8fae99', labelPx);
+      this.R(ctx,bx+rw-10,by+2,2,2, built?'#35E055':(t%2?'#FEBC2E':'#6b5410'));
+    }
+
+    // beat 2 — postgres, redis and s3 rack up, then each is attached
+    const spineX=x1-4, bladeRow=bays[0]+3;
+    let deepest=bladeRow, anyCable=false;
+    this.ADDONS.forEach((ad,i)=>{
+      if(p<=ad.at) return;
+      const f=Math.min(1,(p-ad.at)/0.055), by=bays[i+1];
+      const mx=Math.round(x0+3+(1-f)*(rw+6));
+      this.R(ctx,mx,by+1,rw-6,bh-4,'#5d6570');
+      this.R(ctx,mx+1,by+2,rw-8,bh-6,'#0f1314');
+      const live=p>ad.live;
+      this.plate(ctx, mx+2, by+Math.round(bh*0.28), Math.round(rw*0.52), Math.round(bh*0.44), ad.tag, live?'#D6F7DC':'#8fae99', labelPx);
+      this.R(ctx,mx+rw-10,by+2,2,2, live?'#35E055':(t%2?'#FEBC2E':'#6b5410'));
+      // the attach cable stays dead metal until the attach call lands
+      const row=by+3;
+      const done=p>ad.cable;
+      this.R(ctx,spineX-Math.round(rw*0.30),row,Math.round(rw*0.30),2, done?'#35E055':'#5d6570');
+      if(done){ deepest=Math.max(deepest,row); anyCable=true; }
+    });
+    if(p>this.ADDONS[0].at){
+      const bot=bays[3]+3;
+      this.R(ctx,spineX,bladeRow,4,bot-bladeRow,'#5d6570');
+      if(anyCable) this.R(ctx,spineX,bladeRow,4,deepest-bladeRow,'#35E055');
+    }
+    ctx.restore();
+    // final beat — the dedicated volume is node-bound, and we mark it rather than hide it
+    if(p>this.SCHED.limits){
+      const by=bays[1];
+      this.R(ctx,x0+2,by,rw-4,1,'#FEBC2E');
+      this.R(ctx,x0+2,by+bh-3,rw-4,1,'#FEBC2E');
+      this.R(ctx,x1-7,by+2,3,3, t%2?'#FEBC2E':'#6b5410');
+    }
+
+    // beat 4 — uplink climbs to the tray overhead, TLS pip lights
+    if(p>this.SCHED.uplink){
+      const f=Math.min(1,(p-this.SCHED.uplink)/0.18);
+      const A=this.proj(this.RX0+2,this.RH,rz), B=this.proj(this.RX0+2,CH-0.4,rz);
+      this.seg(ctx,A,B,'#5d6570');
+      const my=[A[0]+(B[0]-A[0])*f, A[1]+(B[1]-A[1])*f];
+      this.seg(ctx,A,my,'#35E055');
+      this.R(ctx,x1-6,yt+2,2,2, f>0.7?'#35E055':(t%2?'#FEBC2E':'#6b5410'));
+    }
+
+    // ---- devo ----
+    const dw=this.devoWorld(), fc=this.proj(dw.x,0,dw.z);
+    if(!this._drag){ const fx=Math.round(fc[0]), fy=Math.round(fc[1]);
+      this.R(ctx,fx-8,fy+1,16,1,'#070909'); this.R(ctx,fx-5,fy+2,10,1,'#0a0d0d'); }
+    const pose=this.drawDevo(ctx);
+    if(pose && pose.speech && this.state.stage === 'room'){
+      const head=this.proj(dw.x, 10.4*this.DSCALE, dw.z);
+      const sp=this.BEATS[0].speech;
+      if(sp) this.speechBubble(ctx, head[0], head[1], sp);
+    }
+    if(this.state.stage !== 'room'){
+      this.loadMask();
+      const mp = this._mp == null ? 0 : this._mp;
+      if(this._mask) this.drawMap(ctx, mp);
+    }
+
+  }
+  renderVals(){
+    this.boot();
+    const b = this.state.beat, B = this.BEATS[b];
+    let left = this.state.typed;
+    const termLines = [];
+    B.lines.forEach(([txt,col])=>{
+      if(left <= 0) return;
+      termLines.push({ t: txt.slice(0, left), c: col });
+      left -= txt.length;
+    });
+    const pips = [0,1,2,3,4,5].map(i=>({
+      go: () => this.goBeat(i),
+      label: 'Go to beat ' + (i+1),
+      bg: i === b ? '#11A32A' : '#5d6570'
+    }));
+    const stage = this.state.stage, mapT = stage === 'room' ? 1 : (this.state.mapT || 0);
+    const onMap = stage !== 'room';
+    const pins = this.PINS.map(pin=>({
+      id: pin.id, name: pin.name, sub: pin.sub,
+      edge: pin.live ? '#11A32A' : '#5d6570',
+      subInk: pin.live ? '#35E055' : '#8fae99',
+      aria: pin.live ? ('Go inside ' + pin.name + ' (' + pin.sub + ')')
+                     : (pin.name + ', ' + pin.sub + ' — not available'),
+      disabled: !pin.live,
+      cta: pin.live ? '→' : 'not live',
+      cursor: pin.live ? 'pointer' : 'default',
+      rowInk: pin.live ? '#fff' : '#8fae99',
+      rowEdge: pin.live ? 'rgba(100,116,136,.32)' : 'rgba(100,116,136,.18)',
+
+      go: () => this.flyTo(pin)
+    }));
+    return {
+      pins,
+      pinsOpacity: String(onMap ? Math.max(0, 1 - mapT / 0.45) : 0),
+      pinsVis: (onMap && mapT < 0.45) ? 'visible' : 'hidden',
+      pinsHit: (stage === 'map') ? 'auto' : 'none',
+      heroOpacity: String(onMap ? Math.max(0, 1 - Math.max(0, mapT - 0.15) / 0.25) : 0),
+      heroVis: onMap ? 'visible' : 'hidden',
+      roomOpacity: String(stage === 'room' ? 1 : 0),
+      roomVis: stage === 'room' ? 'visible' : 'hidden',
+      roomHit: stage === 'room' ? 'auto' : 'none',
+      quotaPct: Math.round((B.quota || 0) * 100) + '%',
+      quotaInk: (B.quota || 0) > 0 ? '#FEBC2E' : '#5d6570',
+      quotaLabel: (B.quota || 0) > 0 ? '0.5 vcpu · 1 gb used' : '0 of 2 vcpu · 4 gb',
+      skipGo: () => {
+        this._mp = 1; this.lockScroll(false);
+        this.setState({ stage:'room', mapT:1 });
+        const t = document.getElementById('agents');
+        if(t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY, behavior:'smooth' });
+      },
+      canvasRef: this.canvasRef,
+      onDown: this.onDown,
+      termLines,
+      pips,
+      beatKicker: B.kicker,
+      beatLesson: B.lesson,
+      beatCaption: B.caption,
+      ariaLabel: 'Server room: devo at rack A unit 12. ' + B.kicker + '. ' + B.lesson
+    };
+  }
+}
+</script>
+</body>
+</html>
