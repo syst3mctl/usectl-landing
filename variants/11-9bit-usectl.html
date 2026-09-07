@@ -17,6 +17,15 @@
   .uc-cta:hover{background:#35E055;border-color:#35E055}
   .uc-cta-ghost:hover{background:rgba(255,255,255,.05)}
   @keyframes ucBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  /* a live pin is a destination, so it has to read as one under the hero scrim:
+     a hairline square sight around the dot, tightening on hover. planned sites get
+     nothing — they are markers, not targets. */
+  .uc-pins button[data-go]::after{content:'';position:absolute;left:50%;top:50%;width:21px;height:21px;
+    transform:translate(-50%,-50%);border:1px solid rgba(17,163,42,.5);transition:border-color .12s ease}
+  .uc-pins button[data-go]:hover::after{border-color:#35E055}
+  .uc-pins button[data-go] span{transition:width .12s ease,height .12s ease,box-shadow .12s ease}
+  .uc-pins button[data-go]:hover span{width:13px !important;height:13px !important;
+    box-shadow:0 0 0 3px rgba(6,16,10,.85),0 0 0 9px rgba(17,163,42,.3) !important}
   /* the written spine is the no-scene fallback: hidden from sight, read by assistive
      tech, and promoted to real content wherever the lead-in is skipped */
   .uc-beats{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
@@ -71,10 +80,22 @@
     <div class="uc-scene-sticky" style="position:sticky;top:0;height:100vh;overflow:hidden;background:#0b0d0c">
       <canvas id="uc-canvas" role="img" aria-label="Server room: devo at rack A unit 12." style="position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;touch-action:pan-y"></canvas>
 
-      <div class="uc-pins" id="uc-pins" style="opacity:1;visibility:visible;position:absolute;inset:0;z-index:1;pointer-events:none">
-        <span data-pin="fsn1" style="position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:block;width:9px;height:9px;background:#11A32A;box-shadow:0 0 0 3px rgba(6,16,10,.85)"></span>
-        <span data-pin="nbg1" style="position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:block;width:9px;height:9px;background:#5d6570;box-shadow:0 0 0 3px rgba(6,16,10,.85)"></span>
-        <span data-pin="hel1" style="position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:block;width:9px;height:9px;background:#5d6570;box-shadow:0 0 0 3px rgba(6,16,10,.85)"></span>
+      <!-- the pins are the same destinations as the site list, reachable on the map
+           itself. the layer stays pointer-events:none so only the pins themselves
+           take clicks and the rest of the canvas is left alone. they are hidden from
+           assistive tech and out of the tab order on purpose: the site list already
+           carries these three destinations with fuller labels, and duplicating them
+           would announce every site twice. -->
+      <div class="uc-pins" id="uc-pins" style="opacity:1;visibility:visible;position:absolute;inset:0;z-index:3;pointer-events:none">
+        <button data-pin="fsn1" data-go="fsn1" aria-hidden="true" tabindex="-1" style="position:absolute;left:0;top:0;z-index:2;transform:translate(-50%,-50%);display:block;width:34px;height:34px;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto">
+          <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:block;width:9px;height:9px;background:#11A32A;box-shadow:0 0 0 3px rgba(6,16,10,.85)"></span>
+        </button>
+        <button data-pin="nbg1" disabled aria-hidden="true" tabindex="-1" style="position:absolute;left:0;top:0;z-index:1;transform:translate(-50%,-50%);display:block;width:34px;height:34px;padding:0;border:0;background:none;cursor:default;pointer-events:auto">
+          <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:block;width:9px;height:9px;background:#5d6570;box-shadow:0 0 0 3px rgba(6,16,10,.85)"></span>
+        </button>
+        <button data-pin="hel1" disabled aria-hidden="true" tabindex="-1" style="position:absolute;left:0;top:0;z-index:1;transform:translate(-50%,-50%);display:block;width:34px;height:34px;padding:0;border:0;background:none;cursor:default;pointer-events:auto">
+          <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:block;width:9px;height:9px;background:#5d6570;box-shadow:0 0 0 3px rgba(6,16,10,.85)"></span>
+        </button>
       </div>
 
       <div class="uc-sites" id="uc-sites" style="opacity:1;visibility:visible;pointer-events:auto;position:absolute;right:30px;bottom:30px;z-index:4;display:flex;flex-direction:column;gap:8px;font-family:'JetBrains Mono',monospace">
@@ -646,7 +667,8 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
         this._pipEls.push(bar);
       }
 
-      Array.prototype.forEach.call(document.querySelectorAll('#uc-sites [data-go]'), function(btn){
+      // both routes into the room: the site list bottom right, and the pin on the map
+      Array.prototype.forEach.call(document.querySelectorAll('#uc-sites [data-go], .uc-pins [data-go]'), function(btn){
         btn.addEventListener('click', function(){
           var id = btn.getAttribute('data-go');
           for(var k=0;k<self.PINS.length;k++) if(self.PINS[k].id === id) self.flyTo(self.PINS[k]);
