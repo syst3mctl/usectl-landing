@@ -715,12 +715,15 @@
   stage.addEventListener('pointerleave', function(){ controls.enableZoom = false; });
 
   // ── the demo's post stack: dof → bloom → grade (grain/vignette/ca) ──
-  // the composer target carries a stencil buffer: the leg-3 reveal stamps
-  // the rack into it so the ghosted city can't draw across the rack
-  var composer = new THREE.EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, {
-    minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
-    format: THREE.RGBAFormat, stencilBuffer: true
-  }));
+  // the composer target carries a stencil buffer (the leg-3 reveal stamps
+  // the rack into it so the ghosted city can't draw across the rack) and,
+  // on webgl2, 4x msaa: fxaa alone can't hold the hair-thin wire strokes —
+  // they read as pixeled stairsteps, worst at the telephoto rack framing.
+  var composerParams = {minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
+                        format: THREE.RGBAFormat, stencilBuffer: true};
+  var composer = new THREE.EffectComposer(renderer, renderer.capabilities.isWebGL2
+    ? new THREE.WebGLMultisampleRenderTarget(1, 1, composerParams)
+    : new THREE.WebGLRenderTarget(1, 1, composerParams));
   composer.addPass(new THREE.RenderPass(scene, camera));
   var bokeh = new THREE.BokehPass(scene, camera, {focus: 1.8, aperture: 0.0003, maxblur: 0.0075});
   composer.addPass(bokeh);
@@ -793,24 +796,9 @@
   }
   window.addEventListener('resize', resize); resize();
 
-  // adaptive resolution: the content never changes, so sustained frame time
-  // maps straight to pixel count. if a device can't hold ~45fps, step the
-  // pixel ratio down (2 → 1.5 → 1.25 floor); if it later shows real
-  // headroom, step back up. long windows + hysteresis so it never flaps,
-  // and dt outliers (tab switches, gc) are clamped by the loop already.
-  var DPR_STEPS = [1.25, 1.5, Math.min(window.devicePixelRatio || 1, 2)];
-  var dprIdx = DPR_STEPS.length - 1, dprAcc = 0, dprN = 0;
-  function retune(dt){
-    dprAcc += dt; dprN++;
-    if (dprN < 120) return;                       // judge ~2s windows
-    var avg = dprAcc / dprN;
-    dprAcc = 0; dprN = 0;
-    if (avg > 1/45 && dprIdx > 0){ dprIdx--; }
-    else if (avg < 1/58 && dprIdx < DPR_STEPS.length - 1){ dprIdx++; }
-    else return;
-    renderer.setPixelRatio(DPR_STEPS[dprIdx]);
-    resize();
-  }
+  // no adaptive resolution: it stepped the pixel ratio down under the
+  // ghost-state load and the rack/city went visibly soft. full device
+  // resolution always — crispness beats frame rate here.
 
   // ── the city, exactly as the file has it: no moves, no scale, no touch ──
   var loader = new THREE.GLTFLoader();
@@ -1450,7 +1438,6 @@
     requestAnimationFrame(loop);
     var dt = Math.min(clock.getDelta(), 0.05);
     if (!stageVisible) return;   // scrolled away: skip the whole frame
-    retune(dt);
     // scroll drives the ride; a light damp on p rounds off wheel steps
     var scrollNow = window.pageYOffset || 0;
     for (var li2 = 0; li2 < LEGS.length; li2++){
@@ -1609,10 +1596,6 @@
         var nearVd = nearTmp.copy(RACK_CTR).sub(camera.position).dot(camera.getWorldDirection(nearDir));
         camera.near = Math.max(0.01, 0.01 + (nearVd - 6) * rackFade);
         camera.updateProjectionMatrix();
-        // the reveal's transient load must not steer the adaptive
-        // resolution — a mid-scrub step down/up pumps the bloom on every
-        // light in the city ("the lights blink")
-        dprAcc = 0; dprN = 0;
       }
     }
     // scene-1 rack glitch flash — same band pattern as the logo glitch
