@@ -112,14 +112,23 @@
 
   /* ── the stage: the city, full size ─────────────── */
   /* the scene is fixed; the content scrolls up over it */
-  .stage{position:fixed;top:0;left:0;right:0;height:100vh;height:100svh;background:#1e1d1d;overflow:hidden;z-index:1}
+  .stage{position:fixed;top:0;left:0;right:0;height:100vh;height:100svh;background:#1e1d1d;overflow:hidden;z-index:1;
+    /* gsap slides these with the scroll ride: the see-through circle goes
+       to the left side (the scene lands there), the hero text veil lifts */
+    --holeX:78%;--veil:1;
+  }
   .stage canvas{display:block;width:100%;height:100%}
-  /* our black gradient, full width, behind the hero title over the scene */
+  /* our black gradient, full width; the circle position rides on --holeX */
   .stage::before{
     content:"";position:absolute;top:0;bottom:0;left:0;width:100%;z-index:2;
-    background:
-      linear-gradient(90deg, rgba(30,29,29,.55) 0%, rgba(30,29,29,.4) 18%, rgba(30,29,29,.25) 35%, rgba(30,29,29,0) 60%),
-      radial-gradient(70% 80% at 78% 50%, rgba(30,29,29,0) 0%, rgba(30,29,29,0) 22%, rgba(30,29,29,.82) 55%, #1e1d1d 100%);
+    background:radial-gradient(70% 80% at var(--holeX) 50%, rgba(30,29,29,0) 0%, rgba(30,29,29,0) 22%, rgba(30,29,29,.82) 55%, #1e1d1d 100%);
+    pointer-events:none;
+  }
+  /* the hero's left text veil, its own layer so the ride can lift it */
+  .stage::after{
+    content:"";position:absolute;top:0;bottom:0;left:0;width:100%;z-index:2;
+    background:linear-gradient(90deg, rgba(30,29,29,.55) 0%, rgba(30,29,29,.4) 18%, rgba(30,29,29,.25) 35%, rgba(30,29,29,0) 60%);
+    opacity:var(--veil);
     pointer-events:none;
   }
   /* hero: in the scroll flow, over the fixed scene; offsets are paddings */
@@ -131,7 +140,7 @@
     padding:60px 0 17% 100px;
     overflow:hidden;
   }
-  .hero-over .panel{width:60%;pointer-events:auto}
+  .hero-over .panel{width:60%;pointer-events:none}
   /* the commercial loop at the bottom of the hero, railway style.
      real html: the animation engine mounts right here, no iframe. */
   .hero-demo{
@@ -262,6 +271,7 @@
     position:relative;z-index:5;
     display:grid;gap:150px;width:100%;
     padding:150px 0;
+    pointer-events:none;user-select:none;
   }
   .after .panel{
     width:min(880px,calc(100% - 40px));margin:0 auto;
@@ -614,7 +624,9 @@
 
   // no msaa: every frame reaches the canvas as one fxaa'd fullscreen quad,
   // so the multisample buffer only costs resolve bandwidth and shows nothing
-  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:false, stencil:false, powerPreference:'high-performance'});
+  // stencil on: the leg-3 reveal uses it to keep the ghosted city from
+  // drawing over the rack's silhouette
+  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:false, stencil:true, powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
   renderer.toneMapping = THREE.ReinhardToneMapping;   // sketchfab: reinhard, exposure 1
   renderer.toneMappingExposure = 1;
@@ -662,7 +674,12 @@
   stage.addEventListener('pointerleave', function(){ controls.enableZoom = false; });
 
   // ── the demo's post stack: dof → bloom → grade (grain/vignette/ca) ──
-  var composer = new THREE.EffectComposer(renderer);
+  // the composer target carries a stencil buffer: the leg-3 reveal stamps
+  // the rack into it so the ghosted city can't draw across the rack
+  var composer = new THREE.EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, {
+    minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
+    format: THREE.RGBAFormat, stencilBuffer: true
+  }));
   composer.addPass(new THREE.RenderPass(scene, camera));
   var bokeh = new THREE.BokehPass(scene, camera, {focus: 1.8, aperture: 0.0003, maxblur: 0.0075});
   composer.addPass(bokeh);
@@ -767,7 +784,9 @@
   // (the road's double-dropout shape) fired every 2-9s at random
   var redNeons = [], redBlinkAt = 2 + Math.random() * 7, redBlinkStart = -1;
   // scene toggle state (testing): 1 = the building, 2 = the rack
-  var sceneMode = 1, towerMesh = null, rackRoot = null, rackLamp = null, rackMats = [], rackFade = 0;
+  var sceneMode = 1, towerMesh = null, rackRoot = null, rackLamp = null, rackSpot = null, rackMats = [], rackFade = 0;
+  var RACK_CTR = new THREE.Vector3(-0.35, 1.6, -1.72);   // the rack's world center
+  var nearTmp = new THREE.Vector3(), nearDir = new THREE.Vector3();
   // scene-1 rack glitch flash: every 10s the rack appears for ~1.4s sliced
   // into bands with a horizontal shimmy — the same pattern as the logo's
   // clip-path glitch — then vanishes. two clipping planes carve the band;
@@ -839,6 +858,33 @@
     for (var wi = 0; wi < annexWire.length; wi++) annexWire[wi].visible = mode !== 2;
     renderer.shadowMap.needsUpdate = true;   // clipShadows changed
   }
+  // scene 2 ghosts the whole city to REAL alpha so the rack reads through
+  // the buildings standing in front of it — x-ray style. rides rackFade,
+  // so both run in lockstep. while ghosted the city stops writing depth:
+  // it can't occlude itself out of order, and the opaque rack shows
+  // through every wall while still hiding the city behind it.
+  var cityDimNow = 1;
+  function applyCityDim(f){
+    if (Math.abs(f - cityDimNow) < 0.003) return;
+    cityDimNow = f;
+    var ghost = f < 0.999;
+    for (var di = 0; di < cityMats.length; di++){
+      var m = cityMats[di];
+      if (!m.userData.__dim) m.userData.__dim = {op: m.opacity, tr: m.transparent, dw: m.depthWrite};
+      var b = m.userData.__dim;
+      m.opacity = b.op * f;
+      m.transparent = ghost || b.tr;
+      m.depthWrite = ghost ? false : b.dw;
+      // while ghosted the city may not touch the rack's stencilled pixels:
+      // whatever stands in front of the rack goes to opacity 0 over it.
+      // r128 quirk: stencilWrite is also the master enable for the TEST,
+      // so it must be on — with a zeroed write mask the city never stamps.
+      m.stencilWrite = ghost;
+      m.stencilWriteMask = ghost ? 0 : 0xff;
+      m.stencilRef = 1;
+      m.stencilFunc = ghost ? THREE.NotEqualStencilFunc : THREE.AlwaysStencilFunc;
+    }
+  }
   var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // the endless lap: constant-speed azimuth spin around the target, along the
@@ -851,32 +897,139 @@
   function pauseSpin(){
     controls.autoRotate = false;
     clearTimeout(spinTimer);
-    spinTimer = setTimeout(function(){ if (!reducedMotion) controls.autoRotate = true; }, 3000);
+    spinTimer = setTimeout(function(){ if (!reducedMotion && !scrubHome) controls.autoRotate = true; }, 3000);
   }
   controls.addEventListener('start', pauseSpin);
 
-  // ── the scroll ride: hero → the split section ──
-  // scrolling toward #split ("many servers…") scrubs the camera off its lap
-  // and up to the logged top-down pose over the number-8 block:
-  //   eye [-6.5984, 9.1941, 2.2369] target [-6.0183, 2.5124, 2.6927]
-  //   orbit r=6.7223 az=-128.2 pol=6.3
-  // the blend runs in orbit space — target, radius and polar ease with the
-  // scroll, azimuth frozen where the lap left it. any scroll offset > 0
-  // stops the auto-rotation entirely; only back at the very top do the
-  // controls take over again and resume their lap.
-  var SCRUB_DEST = {tx: -6.0183, ty: 2.5124, tz: 2.6927, r: 6.7223, pol: 6.3 * Math.PI / 180};
-  var splitEl = document.getElementById('split');
-  var scrubEnd = 1;
+  // ── the scroll rides: one logged camera per section ──
+  // every leg is a camera pasted straight from logCam (eye/target + the
+  // fov it was framed at, default 50) shown at showFov: the frame width
+  // carries over dolly-zoom style, so a leg framed at 50 can be shown
+  // near-ortho at 8 with the same composition. legs run in page order —
+  // each one scrubs from the previous section's end to its own (element
+  // top reaching 55% of the viewport). an anchor pins a world point to a
+  // fixed screen spot at every aspect ratio: that leg's target is
+  // re-solved on load and resize. to add a camera: scroll there, grab the
+  // canvas, frame the shot, copy the console log into a new
+  // { el, eye, target } row (+ showFov / loggedFov / anchor), in order.
+  // NO rotation while the page is scrolled — the scroll alone drives; the
+  // hero lap exists only at the very top.
+  var HOME_FOV = 50;
+  var LEGS = [
+    { el: 'split', showFov: 8,   // near-ortho: houses read flat, like a 2d map
+      eye: [8.3293, 16.6845, -2.1475], target: [8.3293, 1.1489, -2.1475],
+      // the 8 button holds this screen spot at every resolution
+      anchor: {x: 0.22, y: 0.58, point: [0.0165, 0.8547, -0.8369]} },
+    { el: 'deploy',   // the rack building, low telephoto — framed in free-cam
+      loggedFov: 8,   // logged before logCam printed fov: the camera was still narrow
+      early: 0.5,     // begins half a screen before the title leg settles
+      endAt: 1,       // done the moment the deploy panel enters from the bottom
+      eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
+      // the rack's center holds the middle of the left half at every aspect
+      anchor: {x: 0.25, y: 0.62, point: [-0.35, 1.6, -1.72]} }
+  ];
+  function sl(a, b, k){ return a + (b - a) * k; }
+  function wrapPi(a){
+    a = a % (Math.PI * 2);
+    if (a > Math.PI) a -= Math.PI * 2;
+    if (a < -Math.PI) a += Math.PI * 2;
+    return a;
+  }
+  LEGS.forEach(function(L, i){
+    var o = {x: L.eye[0] - L.target[0], y: L.eye[1] - L.target[1], z: L.eye[2] - L.target[2]};
+    var r = Math.sqrt(o.x * o.x + o.y * o.y + o.z * o.z);
+    var logged = L.loggedFov || HOME_FOV;
+    L.pose = {
+      tx: L.target[0], ty: L.target[1], tz: L.target[2],
+      w: r * Math.tan(logged * Math.PI / 360),   // frame width survives fov swaps
+      fov: L.showFov || logged,
+      // polar stays off the exact pole: lookAt degenerates at 0 and the
+      // screen heading would land wherever the fallback points it
+      pol: Math.max(0.5 * Math.PI / 180, Math.acos(Math.max(-1, Math.min(1, o.y / r)))),
+      az: Math.atan2(o.x, o.z)
+    };
+    // azimuth step from the previous leg, shortest way round ([0] is
+    // rewired to the live lap azimuth when a ride starts)
+    L.azD = i ? wrapPi(L.pose.az - LEGS[i - 1].pose.az) : 0;
+    L.node = document.getElementById(L.el);
+    L.start = 0; L.end = 1; L.p = 0; L.raw = 0;
+  });
+  var anchorCam = new THREE.PerspectiveCamera(HOME_FOV, 1, 0.01, 500);
+  var anchorP = new THREE.Vector3(), anchorAxis = new THREE.Vector3(), anchorPt = new THREE.Vector3();
+  function solveAnchor(L){
+    // place the leg's camera over a trial target, project the anchored
+    // point, shift the rig in the view plane onto the anchor spot; the
+    // mapping is linear in the view plane, so 2 passes nail it
+    var P = L.pose;
+    var fovR = P.fov * Math.PI / 360;
+    var r = P.w / Math.tan(fovR);
+    var sinp = Math.sin(P.pol);
+    var ox = r * sinp * Math.sin(P.az), oy = r * Math.cos(P.pol), oz = r * sinp * Math.cos(P.az);
+    anchorCam.fov = P.fov;
+    anchorCam.aspect = camera.aspect;
+    anchorCam.updateProjectionMatrix();
+    anchorPt.fromArray(L.anchor.point);
+    var t = new THREE.Vector3(P.tx, P.ty, P.tz);
+    var ndcX = L.anchor.x * 2 - 1, ndcY = 1 - L.anchor.y * 2;
+    for (var i = 0; i < 2; i++){
+      anchorCam.position.set(t.x + ox, t.y + oy, t.z + oz);
+      anchorCam.lookAt(t);
+      anchorCam.updateMatrixWorld(true);
+      anchorCam.matrixWorldInverse.copy(anchorCam.matrixWorld).invert();
+      anchorP.copy(anchorPt).project(anchorCam);
+      var d = -anchorAxis.copy(anchorPt).applyMatrix4(anchorCam.matrixWorldInverse).z;
+      var halfH = d * Math.tan(fovR), halfW = halfH * anchorCam.aspect;
+      t.add(anchorAxis.setFromMatrixColumn(anchorCam.matrixWorld, 0).multiplyScalar((anchorP.x - ndcX) * halfW));
+      t.add(anchorAxis.setFromMatrixColumn(anchorCam.matrixWorld, 1).multiplyScalar((anchorP.y - ndcY) * halfH));
+    }
+    L.solved = {x: t.x, y: t.y, z: t.z};
+  }
   function measureScrub(){
-    if (!splitEl) return;
-    // done when the section title reaches the lower middle of the screen
-    scrubEnd = Math.max(1,
-      splitEl.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * 0.55);
+    // each leg ends when its section's top reaches 55% of the viewport
+    var prev = 0;
+    for (var mi = 0; mi < LEGS.length; mi++){
+      var L = LEGS[mi];
+      // `early` (in viewport heights) lets a leg begin before the previous
+      // one has settled — the chained blend overlaps them smoothly.
+      // `endAt` is the viewport fraction the section top must reach for the
+      // leg to be done (default 0.55 = lower middle; 1 = the moment the
+      // section enters from the bottom).
+      L.start = Math.max(0, prev - (L.early || 0) * window.innerHeight);
+      L.end = Math.max(L.start + 1, L.node ?
+        L.node.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * (L.endAt || 0.55) : L.start + 1);
+      prev = L.end;
+      if (L.anchor) solveAnchor(L);
+    }
   }
   window.addEventListener('resize', measureScrub);
   window.addEventListener('load', measureScrub);
   measureScrub();
-  var scrubP = 0, scrubHome = null, scrubAz = 0;
+  // testing hook: read the ride's state from the console
+  window.__scrubDbg = function(){
+    return {legs: LEGS.map(function(L){ return {el: L.el, start: L.start, end: L.end,
+              raw: L.raw, p: L.p, solved: L.solved || null}; }),
+            aspect: camera.aspect, fov: camera.fov, free: scrubFree,
+            cam: camera.position.toArray(), tgt: controls.target.toArray()};
+  };
+  var scrubHome = null, scrubAz = 0, scrubAzD = 0, scrubFree = false, scrubScene = 1;
+  // grabbing a number while scrolled pans into this offset, which rides on
+  // top of the blend — so the view can still be framed and logged (testing)
+  var scrubOff = new THREE.Vector3();
+  // the gradient ride: gsap tweens the stage's css vars, the scroll scrub
+  // drives its progress in lockstep with the camera — the see-through
+  // circle slides to the left side (where the scene lands at the split
+  // title) and the hero's left text veil lifts out of the way
+  var gradRide = window.gsap ? gsap.to(stage, {'--holeX': '22%', '--veil': 0, ease: 'none', paused: true}) : null;
+  // testing: press the canvas while scrolled and the ride lets go — full
+  // orbit/pan/zoom to hunt for a pose (release logs it to the console).
+  // the ride stays hands-off until the page is back at the very top.
+  stage.addEventListener('pointerdown', function(ev){
+    if (scrubHome && !scrubFree && ev.target === canvas){
+      scrubFree = true;
+      controls.enabled = true;
+      controls.autoRotate = false;   // still no lap while scrolled
+    }
+  }, true);
 
   // real windows: ~30% of the lights are off at any moment, and each window
   // re-rolls its state every few seconds at its own staggered time, so lights
@@ -1038,12 +1191,17 @@
         // emissive lines in a night scene — the shadow map renders 60%
         // lighter, which matters because the rack glitch re-renders it).
         o.castShadow = false;
+        // fixed draw order for the ghost state: wires always over the
+        // ghosted buildings — the per-frame transparent z-sort otherwise
+        // flips their blend order as the camera rides, popping the strokes
+        o.renderOrder = 1;
         depthSkip.push(o);
         return;
       }
       // the demo's wireframe overlay, recolored to the manager green
       var w = new THREE.Mesh(o.geometry, wireMat);
       w.castShadow = false; w.receiveShadow = false;
+      w.renderOrder = 1;   // same stable slot as the wire strokes
       o.userData.__wire = w;
       overlays.push({mesh: w, parent: o});
       wireOverlays.push(w);
@@ -1101,10 +1259,17 @@
       r.scene.traverse(function(o){
         if (!o.isMesh) return;
         o.castShadow = true; o.receiveShadow = true;
+        o.renderOrder = 2;   // the rack draws over the ghosted city, always
         // the rack's main corpus wears the manager black metal (#272626),
         // the handles a warm amber (#fdcb6e)
         var rm = Array.isArray(o.material) ? o.material : [o.material];
         rm.forEach(function(m){
+          // the rack stamps its pixels into the stencil; the ghosted city
+          // is forbidden from drawing on them, so nothing in front of the
+          // rack leaves lines across it on the leg-3 reveal
+          m.stencilWrite = true;
+          m.stencilRef = 1;
+          m.stencilZPass = THREE.ReplaceStencilOp;
           if (m.name === 'Black_Metal_Plate') m.color.set(0x272626).convertSRGBToLinear();
           if (m.name === 'Chrome') m.color.set(0xfdcb6e).convertSRGBToLinear();
           m.clippingPlanes = glitchPlanes;   // the scene-1 glitch bands; neutral until a flash
@@ -1118,6 +1283,14 @@
       rackLamp = new THREE.PointLight(0xffe6c0, 0.55 * rackFade, 6, 2);
       rackLamp.position.set(0.95, 1.7, -0.25);
       scene.add(rackLamp);
+      // leg 3's key: a warm beam from the camera's side of the street that
+      // carries the rack once the city ghosts out. it rises with the same
+      // scroll scrub as the reveal (while spotB, the city key, dims away).
+      rackSpot = new THREE.SpotLight(0xffe6c0, 2.4 * rackFade);
+      rackSpot.angle = 24 * Math.PI / 180; rackSpot.penumbra = 0.5; rackSpot.decay = 0; rackSpot.distance = 0;
+      rackSpot.position.set(-5.6, 5.5, 7.6);
+      rackSpot.target.position.set(-0.35, 1.6, -1.72);
+      scene.add(rackSpot); scene.add(rackSpot.target);
       scene.updateMatrixWorld(true);   // bake the rack's matrices too
       renderer.shadowMap.needsUpdate = true;
       draco.dispose();   // both glbs are in; free the decoder workers
@@ -1139,7 +1312,8 @@
     console.log('camera  eye:[' + f(camera.position) + '], target:[' + f(controls.target) + ']' +
       '  orbit r=' + r.toFixed(4) +
       ' az=' + (Math.atan2(o.x, o.z) * 180 / Math.PI).toFixed(1) +
-      ' pol=' + (Math.acos(Math.max(-1, Math.min(1, o.y / r))) * 180 / Math.PI).toFixed(1));
+      ' pol=' + (Math.acos(Math.max(-1, Math.min(1, o.y / r))) * 180 / Math.PI).toFixed(1) +
+      ' fov=' + camera.fov.toFixed(1));
   }
   controls.addEventListener('end', logCam);
   var spotDrag = null, panX = new THREE.Vector3(), panYv = new THREE.Vector3();
@@ -1170,8 +1344,13 @@
       var scale = 2 * dist * Math.tan(camera.fov * Math.PI / 360) / stageH;
       panX.setFromMatrixColumn(camera.matrix, 0).multiplyScalar(-dx * scale);
       panYv.setFromMatrixColumn(camera.matrix, 1).multiplyScalar(dy * scale);
-      camera.position.add(panX).add(panYv);
-      controls.target.add(panX).add(panYv);
+      if (scrubHome && !scrubFree){
+        // scrolled: the ride owns the camera, so the pan lands in its offset
+        scrubOff.add(panX).add(panYv);
+      } else {
+        camera.position.add(panX).add(panYv);
+        controls.target.add(panX).add(panYv);
+      }
     });
     var endDrag = function(){
       if (!spotDrag) return;
@@ -1232,42 +1411,76 @@
     if (!stageVisible) return;   // scrolled away: skip the whole frame
     retune(dt);
     // scroll drives the ride; a light damp on p rounds off wheel steps
-    var scrubRaw = Math.min(1, Math.max(0, (window.pageYOffset || 0) / scrubEnd));
-    scrubP += (scrubRaw - scrubP) * Math.min(1, dt * 6);
-    if (scrubRaw === 0 && scrubP < 0.002) scrubP = 0;
-    if (scrubP > 0){
+    var scrollNow = window.pageYOffset || 0;
+    for (var li2 = 0; li2 < LEGS.length; li2++){
+      var LL = LEGS[li2];
+      LL.raw = Math.min(1, Math.max(0, (scrollNow - LL.start) / (LL.end - LL.start)));
+      LL.p += (LL.raw - LL.p) * Math.min(1, dt * 6);
+    }
+    if (LEGS[0].raw === 0 && LEGS[0].p < 0.002) LEGS[0].p = 0;
+    // the reveal rides the rack leg: the building opens (scene 2) right
+    // where the scrubbed fade segment begins, so the rack rises from zero
+    // opacity with the scroll; scrolling back seals it again. the corner
+    // buttons still override for testing.
+    var wantScene = LEGS[1] && LEGS[1].p > 0.35 ? 2 : 1;
+    if (wantScene !== scrubScene){
+      scrubScene = wantScene;
+      if (sceneMode !== wantScene){
+        applyScene(wantScene);
+        sceneBtns.forEach(function(x){ x.classList.toggle('on', +x.dataset.scene === wantScene); });
+      }
+    }
+    if (LEGS[0].p > 0 && !scrubFree){
       flight = null;   // the ride owns the camera; number flights yield
       if (!scrubHome){
         var so = camera.position.clone().sub(controls.target);
         var sr = so.length();
         scrubHome = {
           tx: controls.target.x, ty: controls.target.y, tz: controls.target.z,
-          r: sr, pol: Math.acos(Math.max(-1, Math.min(1, so.y / sr)))
+          r: sr, pol: Math.acos(Math.max(-1, Math.min(1, so.y / sr))),
+          fov: camera.fov, w: sr * Math.tan(camera.fov * Math.PI / 360)
         };
         scrubAz = Math.atan2(so.x, so.z);
+        // leg 0 heads for its pose from wherever the lap stopped
+        scrubAzD = wrapPi(LEGS[0].pose.az - scrubAz);
+        scrubOff.set(0, 0, 0);
         controls.enabled = false;
       }
-      var se = scrubP * scrubP * (3 - 2 * scrubP);    // smoothstep
-      var stx = scrubHome.tx + (SCRUB_DEST.tx - scrubHome.tx) * se;
-      var sty = scrubHome.ty + (SCRUB_DEST.ty - scrubHome.ty) * se;
-      var stz = scrubHome.tz + (SCRUB_DEST.tz - scrubHome.tz) * se;
-      var srr = scrubHome.r + (SCRUB_DEST.r - scrubHome.r) * se;
-      var spp = scrubHome.pol + (SCRUB_DEST.pol - scrubHome.pol) * se;
+      // chain the legs: each one eases the whole pose toward its own
+      var stx = scrubHome.tx, sty = scrubHome.ty, stz = scrubHome.tz;
+      var sw = scrubHome.w, sfov = scrubHome.fov, spp = scrubHome.pol;
+      var saz = scrubAz;
+      for (var bi = 0; bi < LEGS.length; bi++){
+        var BL = LEGS[bi], BP = BL.pose;
+        var be = BL.p * BL.p * (3 - 2 * BL.p);   // smoothstep
+        var BT = BL.solved || {x: BP.tx, y: BP.ty, z: BP.tz};
+        stx = sl(stx, BT.x, be); sty = sl(sty, BT.y, be); stz = sl(stz, BT.z, be);
+        sw = sl(sw, BP.w, be); sfov = sl(sfov, BP.fov, be); spp = sl(spp, BP.pol, be);
+        saz += (bi === 0 ? scrubAzD : BL.azD) * be;
+        if (bi === 0 && gradRide) gradRide.progress(be);
+      }
+      stx += scrubOff.x; sty += scrubOff.y; stz += scrubOff.z;
+      var srr = sw / Math.tan(sfov * Math.PI / 360);
+      camera.fov = sfov; camera.updateProjectionMatrix();
       var ssin = Math.sin(spp);
       controls.target.set(stx, sty, stz);
       camera.position.set(
-        stx + srr * ssin * Math.sin(scrubAz),
+        stx + srr * ssin * Math.sin(saz),
         sty + srr * Math.cos(spp),
-        stz + srr * ssin * Math.cos(scrubAz)
+        stz + srr * ssin * Math.cos(saz)
       );
       camera.lookAt(controls.target);
       bokeh.uniforms['focus'].value = srr;
     } else {
-      if (scrubHome){
+      if (scrubHome && LEGS[0].p === 0){
         // back at the top: the controls resume the lap from this exact orbit
         scrubHome = null;
+        scrubFree = false;
         controls.enabled = true;
+        camera.fov = HOME_FOV; camera.updateProjectionMatrix();
+        if (!reducedMotion) controls.autoRotate = true;
         bokeh.uniforms['focus'].value = camera.position.distanceTo(controls.target);
+        if (gradRide) gradRide.progress(0);
       }
       if (flight){
         flight.t += dt / 1.4;
@@ -1308,29 +1521,76 @@
         }
       }
     }
-    // the rack fades with the scene toggle; its lamp breathes with it
+    // the rack fade and the city ghost are scrubbed by the scroll: they
+    // ride leg 2's progress directly (rack 0→1 across p 0.35→0.85, city
+    // 1→0.1 with it), so the reveal moves exactly as fast as the scroll
+    // does. at the top (or in free-cam) the scene buttons keep the timed
+    // 0.5s fade for testing; the lamp breathes with either path.
     if (rackRoot){
-      var rt = sceneMode === 2 ? 1 : 0;
-      if (rackFade !== rt){
-        rackFade = reducedMotion ? rt : Math.max(0, Math.min(1, rackFade + (rt > rackFade ? dt : -dt) / 0.5));
+      var rackNext;
+      if (LEGS[1] && LEGS[1].p > 0.001 && !scrubFree && sceneMode === 2){
+        // quantized so the damped scrub actually settles — otherwise the
+        // asymptotic tail keeps this block (and its costs) running forever
+        rackNext = Math.round(Math.min(1, Math.max(0, (LEGS[1].p - 0.35) / 0.5)) * 200) / 200;
+      } else {
+        var rt = sceneMode === 2 ? 1 : 0;
+        rackNext = reducedMotion ? rt : Math.max(0, Math.min(1, rackFade + (rt > rackFade ? dt : -dt) / 0.5));
+      }
+      if (rackFade !== rackNext){
+        rackFade = rackNext;
         for (var ri = 0; ri < rackMats.length; ri++){
           rackMats[ri].opacity = rackFade;
           rackMats[ri].transparent = rackFade < 1;
         }
-        rackRoot.visible = rackFade > 0;
+        // the shadow map only cares whether the rack is present — opacity
+        // never reaches it. re-rendering it every fade frame overloaded the
+        // gpu, which made the adaptive resolution flap and every light in
+        // the city visibly pump with it.
+        var rackVis = rackFade > 0;
+        if (rackRoot.visible !== rackVis){
+          rackRoot.visible = rackVis;
+          renderer.shadowMap.needsUpdate = true;
+        }
+        // the light crosses over with the reveal: the rack's warm key
+        // rises, the near lamp with it, and the city's overhead key dims
         if (rackLamp) rackLamp.intensity = 0.55 * rackFade;
-        renderer.shadowMap.needsUpdate = true;   // the rack's shadow follows
+        if (rackSpot) rackSpot.intensity = 2.4 * rackFade;
+        spotB.intensity = 2.9 * (1 - 0.75 * rackFade);
+        applyCityDim(1 - 0.9 * rackFade);   // rack at 1 ⇒ city at 10%, same scrub
+        // the near plane rides the reveal: everything between the camera
+        // and the street in front of the rack is depth-wiped away — no
+        // foreground building, stroke or light can stand in the view.
+        // (stencil alone can't stop their bloom from hazing the rack.)
+        // measured along the VIEW AXIS, not center distance: the rack sits
+        // off-axis with its own depth, and a plane set from the euclidean
+        // distance slices its front wall open. 6 clears the whole cabinet;
+        // the stencil owns anything nearer.
+        var nearVd = nearTmp.copy(RACK_CTR).sub(camera.position).dot(camera.getWorldDirection(nearDir));
+        camera.near = Math.max(0.01, 0.01 + (nearVd - 6) * rackFade);
+        camera.updateProjectionMatrix();
+        // the reveal's transient load must not steer the adaptive
+        // resolution — a mid-scrub step down/up pumps the bloom on every
+        // light in the city ("the lights blink")
+        dprAcc = 0; dprN = 0;
       }
     }
     // scene-1 rack glitch flash — same band pattern as the logo glitch
-    if (rackRoot && glitchStart >= 0 && sceneMode !== 1){
-      // scene toggled mid-flash: hand the rack back to the fade logic clean
+    if (rackRoot && glitchStart >= 0 && (sceneMode !== 1 || scrollNow > 0)){
+      // scene toggled (or the page scrolled) mid-flash: end it clean
       glitchStart = -1;
       glitchPlanes[0].constant = 1e6; glitchPlanes[1].constant = 1e6;
       rackRoot.position.x = rackBaseX;
       rackRoot.updateMatrixWorld(true);
+      if (sceneMode === 1){
+        // still scene 1 (scroll interrupt): the flash ends with the rack gone
+        rackRoot.visible = false;
+        if (rackLamp) rackLamp.intensity = 0;
+        for (var gi = 0; gi < rackMats.length; gi++){ rackMats[gi].opacity = 0; rackMats[gi].transparent = true; }
+        renderer.shadowMap.needsUpdate = true;
+      }
     }
-    if (rackRoot && !reducedMotion && sceneMode === 1 && rackFade === 0){
+    // the glitch flash belongs to the resting hero only — never while scrolled
+    if (rackRoot && !reducedMotion && sceneMode === 1 && rackFade === 0 && scrollNow === 0){
       if (glitchStart < 0 && clock.elapsedTime >= glitchNext){
         glitchStart = clock.elapsedTime;
         glitchNext = clock.elapsedTime + 10;
