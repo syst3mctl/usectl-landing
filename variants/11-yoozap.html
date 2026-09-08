@@ -892,7 +892,7 @@
   // spins in the direction they turned (azimuth decreasing). any grab pauses
   // it; it eases back in after 3s of quiet. damping keeps the resume soft.
   controls.autoRotate = !reducedMotion;
-  controls.autoRotateSpeed = 1.0;   // one full lap ≈ 60s, linear
+  controls.autoRotateSpeed = 0.5;   // one full lap ≈ 120s, linear
   var spinTimer = null;
   function pauseSpin(){
     controls.autoRotate = false;
