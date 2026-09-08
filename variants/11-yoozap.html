@@ -7,6 +7,11 @@
     <meta name="robots" content="noindex, follow">
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="/commercial/gsap/commercial.css">
+    <!-- start the model downloads in parallel with the script tags below;
+         GLTFLoader's fetch then hits the http cache instead of the network -->
+    <link rel="preload" href="/models/virtual-city.glb" as="fetch" crossorigin>
+    <link rel="preload" href="/models/server_racking_system.glb" as="fetch" crossorigin>
 <style>
   :root{
     /* manager-usectl dark theme */
@@ -155,18 +160,16 @@
     87.5%{box-shadow:0 0 8px var(--card-glow)}
     100%{box-shadow:0 0 16px var(--card-glow)}
   }
-  .hero-demo x-dc,.hero-demo #dc-root{position:absolute;inset:0;display:block;height:100%}
-  [data-omelette-chrome]{display:none !important}
   @media (max-width:640px){.hero-over{padding-left:20px}}
 
   /* numbered hotspots in the city, like the viewer's annotations */
   #spots{position:absolute;inset:0;z-index:3;pointer-events:none}
   .spot{
-    position:absolute;transform:translate(-50%,-50%);
+    position:absolute;left:0;top:0;transform:translate(-50%,-50%);
     width:28px;height:28px;border-radius:50%;
     border:1.5px solid rgba(255,255,255,.7);background:rgba(0,0,0,.4);
     color:#fff;font-family:var(--mono);font-size:11.5px;line-height:25px;text-align:center;
-    cursor:pointer;pointer-events:auto;user-select:none;
+    cursor:grab;pointer-events:auto;user-select:none;touch-action:none;
     transition:border-color .2s,box-shadow .2s,opacity .25s;
   }
   .spot:hover{border-color:var(--accent-hover)}
@@ -197,6 +200,17 @@
   }
   .camviews button:hover{border-color:var(--accent);color:var(--text)}
   .camviews button.on{border-color:var(--accent);color:var(--accent-hover);box-shadow:0 0 12px rgba(17,163,42,.4)}
+
+  /* scene toggle, testing: 1 = the building, 2 = the rack */
+  .sceneswitch{position:absolute;left:18px;bottom:16px;z-index:1000000;display:flex;gap:8px}
+  .sceneswitch button{
+    padding:7px 14px;border-radius:16px;
+    border:1px solid var(--hair);background:rgba(20,20,20,.82);
+    color:var(--muted);font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;
+    cursor:pointer;transition:border-color .2s,color .2s,box-shadow .2s;
+  }
+  .sceneswitch button:hover{border-color:var(--accent);color:var(--text)}
+  .sceneswitch button.on{border-color:var(--accent);color:var(--accent-hover);box-shadow:0 0 12px rgba(17,163,42,.4)}
 
   /* ── panels: naked, no glass ────────────────────── */
   .panel{}
@@ -246,8 +260,8 @@
   /* flat sections slide up over the fixed scene; the scene is the background */
   .after{
     position:relative;z-index:5;
-    display:grid;gap:22px;width:100%;
-    padding:9vh 0 0;
+    display:grid;gap:150px;width:100%;
+    padding:150px 0;
   }
   .after .panel{
     width:min(880px,calc(100% - 40px));margin:0 auto;
@@ -257,6 +271,18 @@
     padding:26px 30px 28px;
     box-shadow:0 30px 80px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.04);
   }
+  /* the split + deploy: naked like the hero panel, docked right */
+  .after #split,.after #deploy{
+    background:none;border:0;box-shadow:none;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+    width:50%;
+    margin:0 100px 0 auto;
+    padding:26px 0 28px;
+  }
+  .after #split h2,.after #deploy h2{font-size:65px;line-height:1.04;letter-spacing:-.02em}
+  .after #deploy pre.term{margin-top:18px;padding:2px 0 0;border:0;background:none}
+  @media (max-width:1700px){.after{gap:100px;padding:100px 0}.after #split,.after #deploy{margin-right:50px}.after #split h2,.after #deploy h2{font-size:50px}}
+  @media (max-width:640px){.after #split,.after #deploy{margin-right:20px}}
   .lead{font-size:16.5px;line-height:1.6;max-width:62ch;margin:0 0 20px;color:rgba(255,255,255,.72)}
   .points{display:grid;grid-template-columns:1fr 1fr;gap:16px 26px;margin:0 0 18px}
   .points div b{display:block;font-family:var(--display);font-weight:600;font-size:15.5px;margin-bottom:4px;color:var(--text)}
@@ -373,6 +399,10 @@
 <section class="stage" id="stage">
   <canvas id="cityCanvas"></canvas>
   <div id="spots" aria-hidden="true"></div>
+  <div class="sceneswitch" id="sceneSwitch">
+    <button type="button" data-scene="1" class="on">scene 1</button>
+    <button type="button" data-scene="2">scene 2</button>
+  </div>
 
 </section>
 
@@ -385,31 +415,20 @@
       <a class="btn primary" href="https://manager.usectl.com">create a machine</a>
       <a class="btn ghost" href="https://docs.usectl.com">read the docs</a>
     </div>
-    <p class="note" style="margin-top:20px">30 days free. no card. or <a href="#commercial">watch the commercial ↓</a></p>
+    <p class="note" style="margin-top:20px">30 days free. no card.</p>
   </div>
 </div>
 
-<!-- the commercial: in the flow, full height, over the fixed scene -->
+<!-- the commercial: pure GSAP build (see /commercial/gsap/commercial.js) -->
 <div class="hero-demo">
-  <x-dc>
-    <helmet></helmet>
-    <div style="position:absolute;inset:0;background:#141414;">
-      <x-import component-from-global-scope="UsectlCommercial" from="/commercial/animations-v2.jsx#/animations-v2.jsx /commercial/usectl-scenes.jsx#/usectl-scenes.jsx" hint-size="100%,100%"></x-import>
-    </div>
-  </x-dc>
+  <div id="commercial-mount" style="position:absolute;inset:0;background:#141414;"></div>
 </div>
-<script>
-// the commercial: the real animation source from the claude design session.
-// scene list + loop mode, exactly as authored.
-window.OM_SCENES = '[{"name":"Login","dur":2.6,"nat":2.5},{"name":"Machines","dur":3,"nat":2},{"name":"Create","dur":8.5,"nat":5.8},{"name":"Pods","dur":2,"nat":2},{"name":"AddPod","dur":7.8,"nat":7.6},{"name":"Connect","dur":6.6,"nat":6.4},{"name":"Deployed","dur":3.2,"nat":3.2}]';
-window.OM_PLAYBACK = '{"mode":"loop"}';
-</script>
 
 <!-- ── the product ────────────────────────────────── -->
 <main class="after">
   <section class="panel" id="split">
     <div class="rail"><span><span class="led blue"></span>the split</span><span>namespaces</span></div>
-    <h2>one server. <span class="o">every machine</span> its own walls.</h2>
+    <h2>many servers. <span class="o">every machine</span> its own walls.</h2>
     <p class="body">each cube is a machine: its own kubernetes namespace, its own network policy, its own quota, its own postgres and domain. the air between them is real. a noisy neighbour cannot reach you, and you cannot reach it.</p>
     <p class="body"><em>what you see is one physical server in falkenstein carrying many machines. that is the whole product.</em></p>
     <div class="legend"><span>client machines</span><span class="b">agent machines</span><span class="g">free capacity</span></div>
@@ -511,13 +530,6 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
     </ol>
   </section>
 
-  <section class="panel" id="commercial">
-    <div class="rail"><span><span class="led"></span>the commercial</span><span>usectl-commercial.html · self contained</span></div>
-    <h2>the whole product, <span class="b">ninety seconds.</span></h2>
-    <div class="screen"><iframe src="/downloads/usectl-commercial.html" title="usectl commercial" loading="lazy" allow="autoplay"></iframe></div>
-    <p class="screen-note">rendered live in this page. <a href="/downloads/usectl-commercial.html" target="_blank" rel="noopener">open full screen ↗</a> · <a href="/downloads/usectl-commercial.html" download="usectl-commercial.html">download the file</a></p>
-  </section>
-
   <section class="panel" id="proof">
     <div class="rail"><span><span class="led"></span>customer zero</span><span>systemctl · tbilisi</span></div>
     <h2>customer <span class="o">zero</span></h2>
@@ -557,10 +569,11 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
   <footer><span class="mark">~*</span> built by systemctl · tbilisi · © 2026 · city: <a href="https://sketchfab.com/3d-models/virtual-city-tilt-brush-5ab3706b14194516bf695add2d9cb9c0" rel="noopener">virtual city [tilt brush]</a> by factoryfifteen · cc-by-4.0</footer>
 </main>
 
-<script src="/commercial/react.js"></script>
-<script src="/commercial/react-dom.js"></script>
-<script src="/commercial/babel.js"></script>
-<script src="/commercial/dc-runtime.js"></script>
+<script src="/commercial/gsap/gsap.min.js"></script>
+<script src="/commercial/gsap/commercial.js"></script>
+<script>
+  UsectlCommercialGSAP.mount(document.getElementById('commercial-mount'));
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -592,23 +605,33 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
     {name:'virtual city cam_05', eye:[-0.3477, 1.1431,  3.1351], target:[-0.5517, 1.0345,  0.2906], spot:[ 5.6624, 1.6332, 8.9317]},
     {name:'virtual city cam_06', eye:[10.4397, 1.8109,-11.3189], target:[-0.5517, 1.0345,  0.2906], spot:[ 8.7452, 0.8458,-9.4523]},
     {name:'virtual city cam_07', eye:[-2.8562, 1.1376, -0.4601], target:[-0.6754, 1.1345,  0.1934], spot:[-2.0511, 0.9608,-0.1720]},
-    {name:'virtual city cam_08', eye:[ 1.6295, 0.9724, -1.5598], target:[-0.4494, 1.1108, -0.3489], spot:[ 0.0165, 0.8547,-0.8369]}
+    {name:'virtual city cam_08', eye:[-5.9319, 4.0606, -2.2424], target:[-1.6125, 2.5292, -1.2250], spot:[ 0.0165, 0.8547,-0.8369]}
   ];
   var current = 7; // cam_08, like the demo
+  // tuned start view (logged from the page); the numbers still fly to CAMS
+  // orbit r=4.6944 az=73.7 pol=77.4 — the auto-rotate keeps this height
+  var START = {eye:[2.7024, 3.4579, 1.8867], target:[-1.6944, 2.4310, 0.6017]};
 
-  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, powerPreference:'high-performance'});
+  // no msaa: every frame reaches the canvas as one fxaa'd fullscreen quad,
+  // so the multisample buffer only costs resolve bandwidth and shows nothing
+  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:false, stencil:false, powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
   renderer.toneMapping = THREE.ReinhardToneMapping;   // sketchfab: reinhard, exposure 1
   renderer.toneMappingExposure = 1;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  // the lights and the city never move: render the 2048 shadow map once,
+  // then only when the scene actually changes (load, toggle, rack fade)
+  renderer.shadowMap.autoUpdate = false;
+  renderer.shadowMap.needsUpdate = true;
+  renderer.localClippingEnabled = true;   // the scene-2 building clip box
 
   var scene = new THREE.Scene();
   // manager bg-primary; linear so it lands on #1e1d1d after the gamma pass
   scene.background = new THREE.Color(0x1e1d1d).convertSRGBToLinear();
 
   var camera = new THREE.PerspectiveCamera(50, 1, 0.01, 500);   // sketchfab: fov 50
-  camera.position.fromArray(CAMS[current].eye);
+  camera.position.fromArray(START.eye);
 
   // ── the demo's lights, neutralized: our buildings are black, not blue ──
   // dim environment fill (env exposure 0.25 in the scene settings)
@@ -634,7 +657,7 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
   controls.enableDamping = true;
   controls.dampingFactor = 0.06;
   controls.enableZoom = false;               // enabled on click, so the page can scroll
-  controls.target.fromArray(CAMS[current].target);
+  controls.target.fromArray(START.target);
   canvas.addEventListener('pointerdown', function(){ controls.enableZoom = true; });
   stage.addEventListener('pointerleave', function(){ controls.enableZoom = false; });
 
@@ -643,6 +666,23 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
   composer.addPass(new THREE.RenderPass(scene, camera));
   var bokeh = new THREE.BokehPass(scene, camera, {focus: 1.8, aperture: 0.0003, maxblur: 0.0075});
   composer.addPass(bokeh);
+  // the bokeh depth pre-pass re-renders the whole scene. two mesh families
+  // can sit it out with no change to the image (the beauty pass ran first):
+  //  - the wireframe overlays: they trace the exact geometry of the meshes
+  //    they sit on, so their depth is already in the buffer;
+  //  - the hanging-wire strokes: over a million indices of hair-thin lines
+  //    whose depth is invisible at maxblur 0.0075 — the costliest geometry
+  //    in the scene, gone from the pre-pass.
+  // visibility is saved/restored (not just set true) so meshes that scene 2
+  // hides stay hidden.
+  var depthSkip = [], depthSkipVis = [];
+  var wireOverlays = depthSkip;   // overlay creation pushes here
+  var bokehRender = bokeh.render;
+  bokeh.render = function(){
+    for (var i = 0; i < depthSkip.length; i++){ depthSkipVis[i] = depthSkip[i].visible; depthSkip[i].visible = false; }
+    bokehRender.apply(bokeh, arguments);
+    for (var j = 0; j < depthSkip.length; j++) depthSkip[j].visible = depthSkipVis[j];
+  };
   var bloom = new THREE.UnrealBloomPass(new THREE.Vector2(1,1), 0.45, 0.3, 0.17);  // sketchfab: 0.233/0.15/0.167
   composer.addPass(bloom);
   composer.addPass(new THREE.ShaderPass(THREE.GammaCorrectionShader));
@@ -672,8 +712,21 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
   });
   composer.addPass(grade);
 
+  // no rendering while the stage is scrolled out of view: the whole frame
+  // (two scene passes + 5 fullscreen passes) is skipped, the rAF stays alive
+  // so everything resumes instantly. the clock keeps running, so the glitch
+  // and flicker timelines stay honest across the gap.
+  var stageVisible = true;
+  if ('IntersectionObserver' in window){
+    new IntersectionObserver(function(entries){
+      stageVisible = entries[entries.length - 1].isIntersecting;
+    }, {threshold: 0}).observe(stage);
+  }
+
+  var stageW = 0, stageH = 0;   // cached for placeSpots, no layout reads per frame
   function resize(){
     var w = stage.clientWidth, h = stage.clientHeight;
+    stageW = w; stageH = h;
     renderer.setSize(w, h, false);
     composer.setSize(w, h);
     var pr = renderer.getPixelRatio();
@@ -681,6 +734,25 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
     camera.aspect = w/h; camera.updateProjectionMatrix();
   }
   window.addEventListener('resize', resize); resize();
+
+  // adaptive resolution: the content never changes, so sustained frame time
+  // maps straight to pixel count. if a device can't hold ~45fps, step the
+  // pixel ratio down (2 → 1.5 → 1.25 floor); if it later shows real
+  // headroom, step back up. long windows + hysteresis so it never flaps,
+  // and dt outliers (tab switches, gc) are clamped by the loop already.
+  var DPR_STEPS = [1.25, 1.5, Math.min(window.devicePixelRatio || 1, 2)];
+  var dprIdx = DPR_STEPS.length - 1, dprAcc = 0, dprN = 0;
+  function retune(dt){
+    dprAcc += dt; dprN++;
+    if (dprN < 120) return;                       // judge ~2s windows
+    var avg = dprAcc / dprN;
+    dprAcc = 0; dprN = 0;
+    if (avg > 1/45 && dprIdx > 0){ dprIdx--; }
+    else if (avg < 1/58 && dprIdx < DPR_STEPS.length - 1){ dprIdx++; }
+    else return;
+    renderer.setPixelRatio(DPR_STEPS[dprIdx]);
+    resize();
+  }
 
   // ── the city, exactly as the file has it: no moves, no scale, no touch ──
   var loader = new THREE.GLTFLoader();
@@ -691,7 +763,120 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
   // window emission is boosted 10× / 6.1×, streamers 1.42×
   var EMIT = {'22_-_Defaultsd': 10, '22_-_Default': 6.115, 'Streamers': 1.42};
   var neonMats = [];
+  // the red signs run their own randomized beat: a quick glitched blink
+  // (the road's double-dropout shape) fired every 2-9s at random
+  var redNeons = [], redBlinkAt = 2 + Math.random() * 7, redBlinkStart = -1;
+  // scene toggle state (testing): 1 = the building, 2 = the rack
+  var sceneMode = 1, towerMesh = null, rackRoot = null, rackLamp = null, rackMats = [], rackFade = 0;
+  // scene-1 rack glitch flash: every 10s the rack appears for ~1.4s sliced
+  // into bands with a horizontal shimmy — the same pattern as the logo's
+  // clip-path glitch — then vanishes. two clipping planes carve the band;
+  // their constants stay huge (no visible clip) outside the flash so the
+  // shaders never recompile.
+  var glitchPlanes = [new THREE.Plane(new THREE.Vector3(0,-1,0), 1e6), new THREE.Plane(new THREE.Vector3(0,1,0), 1e6)];
+  var glitchNext = 10, glitchStart = -1, rackTopY = 0, rackBotY = 0, rackBaseX = 0;
+  // [t, top%, bottom%, shimmy%] — the visible band, measured from the rack's
+  // top like clip-path measures from the element's top; straight from the
+  // logo's @keyframes glitch (empty bands = the rack blinks off)
+  var GLITCH_STEPS = [
+    [0.00,  2,  95,  0],
+    [0.02, 78, 100, -5],
+    [0.06, 78, 100,  5],
+    [0.09, 78, 100,  0],
+    [0.10, 44,  54,  5],
+    [0.13, 44,  54,  0],
+    [0.14,  0,   0,  0],
+    [0.35, 40,  85, -5],
+    [0.40, 40,  85,  5],
+    [0.50, 40,  85,  0],
+    [0.55, 63,  80,  5],
+    [0.60, 63,  80,  0],
+    [0.61,  0,   0,  0]
+  ];
+  var annexWire = [];   // the demolished annex's rooftop lattice (mast + braces), hidden in scene 2
+  // scene 2 carves just this one building out of the city. the city's meshes
+  // are layered (one mesh's windows or wires span many buildings), so hiding
+  // whole meshes would take neighbors along — instead a clip box around the
+  // building's volume discards only fragments inside it; the rest of the
+  // city, and the rack, are untouched.
+  // sized to the 1.12x rack (x -1.15..0.45, z -2.86..-0.58) so no wall
+  // fragment slices through it.
+  // maxX reaches 0.75: the building has an east sliver (roof corner at
+  // x 0.5..0.65, y up to 2.5) that would otherwise float beside the rack.
+  // maxZ stays at the neighbor's wall line (-0.7): pushing it north slices a
+  // straight clip edge into that building's roof; instead the rack's back
+  // corner (z -0.58) tucks into the wall, same as the proud south front.
+  // minZ -2.58 also takes the one-story shops under the rack's proud front
+  // (they end at z -2.55) but stops short of the street neon ribbon crossing
+  // at z -2.6 — push it deeper and the ribbon gets a visible gap.
+  // the hanging wires + antenna keep their own smaller carve (WIRE_BOX), set
+  // ~0.2 inside the rack's faces (rack x -1.15..0.45, top 3.98) so the
+  // strands visibly run into the rack instead of stopping beside it; its
+  // minZ keeps the whole wire tangle around the proud front untouched.
+  var CLIP_BOX = {minX:-1.17, maxX:0.75, minY:-0.5, maxY:4.2, minZ:-2.58, maxZ:-0.7};
+  var WIRE_BOX = {minX:-0.95, maxX:0.25, minY:-0.5, maxY:3.8, minZ:-2.2, maxZ:-0.7};
+  function boxPlanes(B){
+    return [
+      new THREE.Plane(new THREE.Vector3( 1, 0, 0), -B.maxX),
+      new THREE.Plane(new THREE.Vector3(-1, 0, 0),  B.minX),
+      new THREE.Plane(new THREE.Vector3( 0, 1, 0), -B.maxY),
+      new THREE.Plane(new THREE.Vector3( 0,-1, 0),  B.minY),
+      new THREE.Plane(new THREE.Vector3( 0, 0, 1), -B.maxZ),
+      new THREE.Plane(new THREE.Vector3( 0, 0,-1),  B.minZ)
+    ];
+  }
+  var clipPlanes = boxPlanes(CLIP_BOX), wirePlanes = boxPlanes(WIRE_BOX);
+  var cityMats = [];
+  function applyScene(mode){
+    sceneMode = mode;
+    for (var ci = 0; ci < cityMats.length; ci++){
+      var m = cityMats[ci];
+      m.clippingPlanes = mode === 2 ? (m.name === 'Wire' ? wirePlanes : clipPlanes) : null;
+      m.clipIntersection = mode === 2;
+      m.clipShadows = mode === 2;
+      m.needsUpdate = true;
+    }
+    for (var wi = 0; wi < annexWire.length; wi++) annexWire[wi].visible = mode !== 2;
+    renderer.shadowMap.needsUpdate = true;   // clipShadows changed
+  }
   var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // the endless lap: constant-speed azimuth spin around the target, along the
+  // orbit the user traced (r stays 4.6944, target [-1.5675, 1.6158, 0.8588]);
+  // spins in the direction they turned (azimuth decreasing). any grab pauses
+  // it; it eases back in after 3s of quiet. damping keeps the resume soft.
+  controls.autoRotate = !reducedMotion;
+  controls.autoRotateSpeed = 1.0;   // one full lap ≈ 60s, linear
+  var spinTimer = null;
+  function pauseSpin(){
+    controls.autoRotate = false;
+    clearTimeout(spinTimer);
+    spinTimer = setTimeout(function(){ if (!reducedMotion) controls.autoRotate = true; }, 3000);
+  }
+  controls.addEventListener('start', pauseSpin);
+
+  // ── the scroll ride: hero → the split section ──
+  // scrolling toward #split ("many servers…") scrubs the camera off its lap
+  // and up to the logged top-down pose over the number-8 block:
+  //   eye [-6.5984, 9.1941, 2.2369] target [-6.0183, 2.5124, 2.6927]
+  //   orbit r=6.7223 az=-128.2 pol=6.3
+  // the blend runs in orbit space — target, radius and polar ease with the
+  // scroll, azimuth frozen where the lap left it. any scroll offset > 0
+  // stops the auto-rotation entirely; only back at the very top do the
+  // controls take over again and resume their lap.
+  var SCRUB_DEST = {tx: -6.0183, ty: 2.5124, tz: 2.6927, r: 6.7223, pol: 6.3 * Math.PI / 180};
+  var splitEl = document.getElementById('split');
+  var scrubEnd = 1;
+  function measureScrub(){
+    if (!splitEl) return;
+    // done when the section title reaches the lower middle of the screen
+    scrubEnd = Math.max(1,
+      splitEl.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * 0.55);
+  }
+  window.addEventListener('resize', measureScrub);
+  window.addEventListener('load', measureScrub);
+  measureScrub();
+  var scrubP = 0, scrubHome = null, scrubAz = 0;
 
   // real windows: ~30% of the lights are off at any moment, and each window
   // re-rolls its state every few seconds at its own staggered time, so lights
@@ -726,20 +911,93 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
   function fixVertexColors(geo){
     var col = geo.attributes.color;
     if (!col || col.__srgbFixed) return;
+    col.__srgbFixed = true;
+    // convert in place — no float32 blow-up: on ~3M city vertices a float
+    // copy would cost tens of MB of ram+vram for zero visual gain
     var n = col.count, sz = col.itemSize, src = col.array;
-    var out = new Float32Array(n * sz);
     var norm = col.normalized ? (src.BYTES_PER_ELEMENT === 1 ? 255 : 65535) : 1;
     for (var i = 0; i < n; i++){
-      for (var k = 0; k < sz; k++){
-        var v = src[i * sz + k] / norm;
-        out[i * sz + k] = k < 3 ? srgbToLinear(v) : v;   // alpha stays
+      for (var k = 0; k < 3 && k < sz; k++){   // alpha stays
+        var j = i * sz + k;
+        src[j] = norm === 1 ? srgbToLinear(src[j]) : Math.round(srgbToLinear(src[j] / norm) * norm);
       }
     }
-    var attr = new THREE.BufferAttribute(out, sz);
-    attr.__srgbFixed = true;
-    geo.setAttribute('color', attr);
+    col.needsUpdate = true;
   }
   loader.load('/models/virtual-city.glb', function(g){
+    // scene-2 demolition the clip boxes can't reach: some triangles must go
+    // while same-material neighbors stay (the clip planes are per material,
+    // one box each). those triangles get split into their own meshes at load
+    // and hidden in scene 2 only — scene 1 draws both halves, identical to
+    // the untouched file.
+    //  - lattice + corner conduit: the carved annex's rooftop mast, gable
+    //    braces, and the vertical conduit run down the building's east wall
+    //    (x 0.3..0.45, y 1..2.5) — all Wire material, but building furniture,
+    //    not hanging strands. the pocket stays tight so the strands that
+    //    sweep past it lose almost nothing.
+    //  - base scaffolds: wire-material clutter of the demolished building
+    //    that stands inside the rack's own footprint below y 1.
+    //  neighboring buildings are NOT touched — only furniture of the one
+    //  demolished building.
+    var HIDE2 = [
+      // rooftop mast (top) and its thin vertical conduit column — kept tight
+      // so the wire strands sweeping past still dive into the rack
+      {mats: {Wire:1}, box: {minX:0.4, maxX:0.8, minY:2.18, maxY:2.75, minZ:-1.8, maxZ:-1.15}},
+      {mats: {Wire:1}, box: {minX:0.28, maxX:0.5, minY:0.95, maxY:2.2, minZ:-1.75, maxZ:-1.18}},
+      // wire-material scaffolds/clutter of the demolished building that sit
+      // inside the rack's own footprint at its base (y < 1) — the hanging
+      // strands all run higher and stay
+      {mats: {Wire:1}, box: {minX:-1.16, maxX:0.46, minY:-0.5, maxY:1.0, minZ:-2.87, maxZ:-0.55}}
+    ];
+    g.scene.updateMatrixWorld(true);
+    var splitMeshes = [];
+    var obb = new THREE.Box3();
+    g.scene.traverse(function(o){
+      if (!o.isMesh) return;
+      var m0 = Array.isArray(o.material) ? o.material[0] : o.material;
+      if (!m0) return;
+      var boxes = [];
+      for (var h = 0; h < HIDE2.length; h++) if (HIDE2[h].mats[m0.name]) boxes.push(HIDE2[h].box);
+      if (!boxes.length) return;
+      // cheap world-bbox rejection: only the central wire tile overlaps the
+      // cut boxes — without this, every far tile pays a ~1M-vertex transform
+      // loop at load for zero cut triangles
+      obb.setFromObject(o);
+      boxes = boxes.filter(function(B){
+        return obb.max.x > B.minX && obb.min.x < B.maxX &&
+               obb.max.y > B.minY && obb.min.y < B.maxY &&
+               obb.max.z > B.minZ && obb.min.z < B.maxZ;
+      });
+      if (boxes.length) splitMeshes.push({mesh: o, boxes: boxes});
+    });
+    splitMeshes.forEach(function(s){
+      var o = s.mesh, geo = o.geometry, pos = geo.attributes.position;
+      var idx = geo.index ? geo.index.array : null;
+      var triCount = Math.floor((idx ? idx.length : pos.count) / 3);
+      var keep = [], cut = [], v = new THREE.Vector3();
+      for (var t = 0; t < triCount; t++){
+        var cx = 0, cy = 0, cz = 0;
+        for (var k = 0; k < 3; k++){
+          v.fromBufferAttribute(pos, idx ? idx[t*3+k] : t*3+k).applyMatrix4(o.matrixWorld);
+          cx += v.x / 3; cy += v.y / 3; cz += v.z / 3;
+        }
+        var inside = false;
+        for (var bi = 0; bi < s.boxes.length && !inside; bi++){
+          var B = s.boxes[bi];
+          inside = cx > B.minX && cx < B.maxX && cy > B.minY && cy < B.maxY && cz > B.minZ && cz < B.maxZ;
+        }
+        var dst = inside ? cut : keep;
+        for (k = 0; k < 3; k++) dst.push(idx ? idx[t*3+k] : t*3+k);
+      }
+      if (!cut.length) return;
+      var geoB = new THREE.BufferGeometry();
+      for (var name in geo.attributes) geoB.setAttribute(name, geo.attributes[name]);
+      geoB.setIndex(cut);
+      geo.setIndex(keep);
+      var b = new THREE.Mesh(geoB, o.material);
+      o.add(b);   // identity local transform: indices live in o's space
+      annexWire.push(b);
+    });
     var overlays = [];
     g.scene.traverse(function(o){
       if (!o.isMesh || !o.material) return;
@@ -753,6 +1011,11 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
         if (m.name === '22_-_Defaultsd' || m.name === '22_-_Default') windowFlicker(m);
         // the file's hanging wire strokes are blue; ours are green
         if (m.name === 'Wire' && m.emissive) m.emissive.setRGB(0.0055, 0.0769, 0.0208);
+        // the red signs glitch-blink on their own random interval
+        if (m.name === 'Light' && m.emissive && redNeons.indexOf(m) === -1){
+          m.userData.baseEmit = EMIT[m.name] || m.emissiveIntensity || 1;
+          redNeons.push(m);
+        }
         // the street neons wear the pods indigo (#a5b4fc) and breathe slowly
         if ((m.name === 'Streamers' || m.name === 'Waveform' || m.name === 'Electricity') && m.emissive){
           m.emissive.setRGB(0.3763, 0.4560, 0.9734);
@@ -764,12 +1027,26 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
         if (m.name === '20_-_sdsd' || m.name === '20_-_Default') m.color.copy(HOME);
         if (m.map) m.map.anisotropy = maxAniso;
         if (m.emissiveMap) m.emissiveMap.anisotropy = maxAniso;
+        if (cityMats.indexOf(m) === -1) cityMats.push(m);
       });
+      var dm = Array.isArray(o.material) ? o.material[0] : o.material;
+      if (dm && dm.name === 'Wire'){
+        // hanging-wire strokes: no wireframe overlay (a 0.05-alpha wireframe
+        // of hair-thin emissive strokes is invisible, and these 16 tiles are
+        // 1.76M tris — 61% of the city), they sit out the bokeh depth
+        // pre-pass for the same reason, and they cast no shadow (hair-thin
+        // emissive lines in a night scene — the shadow map renders 60%
+        // lighter, which matters because the rack glitch re-renders it).
+        o.castShadow = false;
+        depthSkip.push(o);
+        return;
+      }
       // the demo's wireframe overlay, recolored to the manager green
       var w = new THREE.Mesh(o.geometry, wireMat);
       w.castShadow = false; w.receiveShadow = false;
       o.userData.__wire = w;
       overlays.push({mesh: w, parent: o});
+      wireOverlays.push(w);
     });
     overlays.forEach(function(x){ x.parent.add(x.mesh); });
     scene.add(g.scene);
@@ -785,26 +1062,142 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
       gb.setFromObject(o); gb.getSize(gs);
       if (gs.y < 1.2 && gs.x > 20 && gs.z > 20) o.visible = false;
     });
-    if (hint) hint.textContent = 'drag to orbit · numbers fly the cameras';
+    // ── the server rack inside the cam_08 building ──
+    // hotspot 8 pins the mid-rise block by the camera; the rack stands in
+    // its shaft (~x -0.3, z -1.5), floor to the block's own roof, its server
+    // front just proud of the south wall so it reads on camera. the building
+    // itself is untouched.
+    g.scene.traverse(function(o){
+      if (!towerMesh && o.isMesh && o.name === 'FlatDeprecated_geo_FlatDeprecated_0_1') towerMesh = o;
+    });
+    cityMats.push(wireMat);
+    applyScene(sceneMode);
+    // nothing in the scene ever moves (only the camera, which lives outside
+    // it) — bake all world matrices once and stop the renderer re-walking
+    // the whole tree on every one of its passes
+    scene.updateMatrixWorld(true);
+    scene.autoUpdate = false;
+    loader.load('/models/server_racking_system.glb', function(r){
+      var groundY = -0.15, topY = 3.45;
+      if (towerMesh){
+        var tbb = new THREE.Box3().setFromObject(towerMesh);
+        groundY = tbb.min.y;
+        topY = tbb.max.y - 0.07;   // reach the hanging wires overhead
+      }
+      var rackBox = new THREE.Box3().setFromObject(r.scene);
+      var rackSize = new THREE.Vector3(); rackBox.getSize(rackSize);
+      r.scene.scale.setScalar((topY - groundY) / rackSize.y * 1.12);
+      r.scene.updateMatrixWorld(true);
+      rackBox.setFromObject(r.scene);
+      var rackCtr = new THREE.Vector3(); rackBox.getCenter(rackCtr);
+      r.scene.position.x += -0.35 - rackCtr.x;
+      r.scene.position.z += -1.72 - rackCtr.z;
+      r.scene.position.y += groundY - rackBox.min.y;
+      rackRoot = r.scene;
+      rackRoot.visible = sceneMode === 2 && rackFade > 0;
+      rackBox.setFromObject(r.scene);
+      rackTopY = rackBox.max.y; rackBotY = rackBox.min.y;
+      rackBaseX = r.scene.position.x;
+      r.scene.traverse(function(o){
+        if (!o.isMesh) return;
+        o.castShadow = true; o.receiveShadow = true;
+        // the rack's main corpus wears the manager black metal (#272626),
+        // the handles a warm amber (#fdcb6e)
+        var rm = Array.isArray(o.material) ? o.material : [o.material];
+        rm.forEach(function(m){
+          if (m.name === 'Black_Metal_Plate') m.color.set(0x272626).convertSRGBToLinear();
+          if (m.name === 'Chrome') m.color.set(0xfdcb6e).convertSRGBToLinear();
+          m.clippingPlanes = glitchPlanes;   // the scene-1 glitch bands; neutral until a flash
+          if (rackMats.indexOf(m) === -1) rackMats.push(m);
+        });
+      });
+      scene.add(r.scene);
+      // the key light points straight down, so the rack's faces would render
+      // black; one small warm lamp in the street lets the servers read.
+      // it fades in and out with the rack.
+      rackLamp = new THREE.PointLight(0xffe6c0, 0.55 * rackFade, 6, 2);
+      rackLamp.position.set(0.95, 1.7, -0.25);
+      scene.add(rackLamp);
+      scene.updateMatrixWorld(true);   // bake the rack's matrices too
+      renderer.shadowMap.needsUpdate = true;
+      draco.dispose();   // both glbs are in; free the decoder workers
+    });
+    if (hint) hint.textContent = 'drag to orbit · click a number to fly · grab a number to move the scene';
   }, function(ev){
     if (hint && ev.total) hint.textContent = 'loading the city · ' + Math.round(ev.loaded/ev.total*100) + '%';
   });
 
   // ── numbered hotspots + cam carousel, like the demo ──
   var spotsWrap = document.getElementById('spots');
+  // grab a number and drag: the whole view pans with it (eye + target move
+  // together, orbitcontrols-style). release logs the camera to the console,
+  // ready to paste back into CAMS as the new start position.
+  function logCam(){
+    var f = function(v){ return v.x.toFixed(4) + ', ' + v.y.toFixed(4) + ', ' + v.z.toFixed(4); };
+    var o = camera.position.clone().sub(controls.target);
+    var r = o.length();
+    console.log('camera  eye:[' + f(camera.position) + '], target:[' + f(controls.target) + ']' +
+      '  orbit r=' + r.toFixed(4) +
+      ' az=' + (Math.atan2(o.x, o.z) * 180 / Math.PI).toFixed(1) +
+      ' pol=' + (Math.acos(Math.max(-1, Math.min(1, o.y / r))) * 180 / Math.PI).toFixed(1));
+  }
+  controls.addEventListener('end', logCam);
+  var spotDrag = null, panX = new THREE.Vector3(), panYv = new THREE.Vector3();
   var spots = CAMS.map(function(c, i){
     var el = document.createElement('div');
     el.className = 'spot';
     el.textContent = i + 1;
     el.title = c.name;
-    el.addEventListener('click', function(){ flyTo(i); });
+    el.addEventListener('click', function(ev){
+      if (el.dataset.dragged){ delete el.dataset.dragged; return; }
+      flyTo(i);
+    });
+    el.addEventListener('pointerdown', function(ev){
+      ev.preventDefault(); ev.stopPropagation();
+      el.setPointerCapture(ev.pointerId);
+      pauseSpin();
+      flight = null;   // don't fight an in-progress fly
+      spotDrag = {x: ev.clientX, y: ev.clientY, sum: 0, el: el};
+      el.style.cursor = 'grabbing';
+    });
+    el.addEventListener('pointermove', function(ev){
+      if (!spotDrag) return;
+      var dx = ev.clientX - spotDrag.x, dy = ev.clientY - spotDrag.y;
+      spotDrag.x = ev.clientX; spotDrag.y = ev.clientY;
+      spotDrag.sum += Math.abs(dx) + Math.abs(dy);
+      // pixels -> world units at the target's distance, like orbitcontrols pan
+      var dist = camera.position.distanceTo(controls.target);
+      var scale = 2 * dist * Math.tan(camera.fov * Math.PI / 360) / stageH;
+      panX.setFromMatrixColumn(camera.matrix, 0).multiplyScalar(-dx * scale);
+      panYv.setFromMatrixColumn(camera.matrix, 1).multiplyScalar(dy * scale);
+      camera.position.add(panX).add(panYv);
+      controls.target.add(panX).add(panYv);
+    });
+    var endDrag = function(){
+      if (!spotDrag) return;
+      if (spotDrag.sum > 3){ el.dataset.dragged = '1'; logCam(); }
+      spotDrag = null;
+      el.style.cursor = '';
+    };
+    el.addEventListener('pointerup', endDrag);
+    el.addEventListener('pointercancel', endDrag);
     spotsWrap.appendChild(el);
     return el;
+  });
+
+  // ── scene toggle (testing): 1 = the building, 2 = the rack in its wires ──
+  var sceneBtns = Array.prototype.slice.call(document.querySelectorAll('#sceneSwitch button'));
+  sceneBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      applyScene(+b.dataset.scene);
+      sceneBtns.forEach(function(x){ x.classList.toggle('on', x === b); });
+    });
   });
 
   var flight = null;
   function flyTo(i){
     current = i;
+    pauseSpin();
     spots.forEach(function(s, j){ s.classList.toggle('on', j === i); });
     flight = {
       t: 0,
@@ -816,14 +1209,19 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
   spots[current].classList.add('on');
 
   var v3 = new THREE.Vector3();
+  var spotBehind = [];   // classList only touched on state change
   function placeSpots(){
     for (var i = 0; i < CAMS.length; i++){
       v3.fromArray(CAMS[i].spot).project(camera);
       var behind = v3.z > 1;
-      spots[i].classList.toggle('hidden', behind);
+      if (behind !== spotBehind[i]){
+        spotBehind[i] = behind;
+        spots[i].classList.toggle('hidden', behind);
+      }
       if (behind) continue;
-      spots[i].style.left = ((v3.x * 0.5 + 0.5) * stage.clientWidth) + 'px';
-      spots[i].style.top = ((-v3.y * 0.5 + 0.5) * stage.clientHeight) + 'px';
+      // transform, not left/top: moving them costs no layout pass
+      spots[i].style.transform = 'translate(' + ((v3.x * 0.5 + 0.5) * stageW) + 'px,' +
+        ((-v3.y * 0.5 + 0.5) * stageH) + 'px) translate(-50%,-50%)';
     }
   }
 
@@ -831,14 +1229,55 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
   function loop(){
     requestAnimationFrame(loop);
     var dt = Math.min(clock.getDelta(), 0.05);
-    if (flight){
-      flight.t += dt / 1.4;
-      var k = flight.t >= 1 ? 1 : (flight.t < 0.5 ? 4*flight.t*flight.t*flight.t : 1 - Math.pow(-2*flight.t + 2, 3) / 2);
-      camera.position.lerpVectors(flight.e0, flight.e1, k);
-      controls.target.lerpVectors(flight.t0, flight.t1, k);
-      if (flight.t >= 1) flight = null;
+    if (!stageVisible) return;   // scrolled away: skip the whole frame
+    retune(dt);
+    // scroll drives the ride; a light damp on p rounds off wheel steps
+    var scrubRaw = Math.min(1, Math.max(0, (window.pageYOffset || 0) / scrubEnd));
+    scrubP += (scrubRaw - scrubP) * Math.min(1, dt * 6);
+    if (scrubRaw === 0 && scrubP < 0.002) scrubP = 0;
+    if (scrubP > 0){
+      flight = null;   // the ride owns the camera; number flights yield
+      if (!scrubHome){
+        var so = camera.position.clone().sub(controls.target);
+        var sr = so.length();
+        scrubHome = {
+          tx: controls.target.x, ty: controls.target.y, tz: controls.target.z,
+          r: sr, pol: Math.acos(Math.max(-1, Math.min(1, so.y / sr)))
+        };
+        scrubAz = Math.atan2(so.x, so.z);
+        controls.enabled = false;
+      }
+      var se = scrubP * scrubP * (3 - 2 * scrubP);    // smoothstep
+      var stx = scrubHome.tx + (SCRUB_DEST.tx - scrubHome.tx) * se;
+      var sty = scrubHome.ty + (SCRUB_DEST.ty - scrubHome.ty) * se;
+      var stz = scrubHome.tz + (SCRUB_DEST.tz - scrubHome.tz) * se;
+      var srr = scrubHome.r + (SCRUB_DEST.r - scrubHome.r) * se;
+      var spp = scrubHome.pol + (SCRUB_DEST.pol - scrubHome.pol) * se;
+      var ssin = Math.sin(spp);
+      controls.target.set(stx, sty, stz);
+      camera.position.set(
+        stx + srr * ssin * Math.sin(scrubAz),
+        sty + srr * Math.cos(spp),
+        stz + srr * ssin * Math.cos(scrubAz)
+      );
+      camera.lookAt(controls.target);
+      bokeh.uniforms['focus'].value = srr;
+    } else {
+      if (scrubHome){
+        // back at the top: the controls resume the lap from this exact orbit
+        scrubHome = null;
+        controls.enabled = true;
+        bokeh.uniforms['focus'].value = camera.position.distanceTo(controls.target);
+      }
+      if (flight){
+        flight.t += dt / 1.4;
+        var k = flight.t >= 1 ? 1 : (flight.t < 0.5 ? 4*flight.t*flight.t*flight.t : 1 - Math.pow(-2*flight.t + 2, 3) / 2);
+        camera.position.lerpVectors(flight.e0, flight.e1, k);
+        controls.target.lerpVectors(flight.t0, flight.t1, k);
+        if (flight.t >= 1) flight = null;
+      }
+      controls.update();
     }
-    controls.update();
     placeSpots();
     grade.uniforms.time.value = clock.elapsedTime;
     winU.time.value = reducedMotion ? 0 : clock.elapsedTime;
@@ -850,6 +1289,108 @@ window.OM_PLAYBACK = '{"mode":"loop"}';
         var ph = ((clock.elapsedTime + i * 3.33) % 10) / 10;
         var off = (ph >= 0.02 && ph < 0.04) || (ph >= 0.06 && ph < 0.07);
         m.emissiveIntensity = m.userData.baseEmit * (off ? 0.12 : 1);
+      }
+      // the red signs: steady glow, then the same double-dropout glitch as
+      // the road, but fired at a random 2-9s interval instead of a fixed beat
+      if (redNeons.length){
+        if (redBlinkStart < 0 && clock.elapsedTime >= redBlinkAt) redBlinkStart = clock.elapsedTime;
+        var rOff = false;
+        if (redBlinkStart >= 0){
+          var rb = clock.elapsedTime - redBlinkStart;
+          rOff = rb < 0.2 || (rb >= 0.4 && rb < 0.5);
+          if (rb >= 0.5){
+            redBlinkStart = -1;
+            redBlinkAt = clock.elapsedTime + 2 + Math.random() * 7;
+          }
+        }
+        for (var ri2 = 0; ri2 < redNeons.length; ri2++){
+          redNeons[ri2].emissiveIntensity = redNeons[ri2].userData.baseEmit * (rOff ? 0.12 : 1);
+        }
+      }
+    }
+    // the rack fades with the scene toggle; its lamp breathes with it
+    if (rackRoot){
+      var rt = sceneMode === 2 ? 1 : 0;
+      if (rackFade !== rt){
+        rackFade = reducedMotion ? rt : Math.max(0, Math.min(1, rackFade + (rt > rackFade ? dt : -dt) / 0.5));
+        for (var ri = 0; ri < rackMats.length; ri++){
+          rackMats[ri].opacity = rackFade;
+          rackMats[ri].transparent = rackFade < 1;
+        }
+        rackRoot.visible = rackFade > 0;
+        if (rackLamp) rackLamp.intensity = 0.55 * rackFade;
+        renderer.shadowMap.needsUpdate = true;   // the rack's shadow follows
+      }
+    }
+    // scene-1 rack glitch flash — same band pattern as the logo glitch
+    if (rackRoot && glitchStart >= 0 && sceneMode !== 1){
+      // scene toggled mid-flash: hand the rack back to the fade logic clean
+      glitchStart = -1;
+      glitchPlanes[0].constant = 1e6; glitchPlanes[1].constant = 1e6;
+      rackRoot.position.x = rackBaseX;
+      rackRoot.updateMatrixWorld(true);
+    }
+    if (rackRoot && !reducedMotion && sceneMode === 1 && rackFade === 0){
+      if (glitchStart < 0 && clock.elapsedTime >= glitchNext){
+        glitchStart = clock.elapsedTime;
+        glitchNext = clock.elapsedTime + 10;
+      }
+      if (glitchStart >= 0){
+        // glitch in (0.45s of the logo's band chaos) -> hold solid 0.5s ->
+        // glitch out (0.45s of chaos, ends on an empty band) -> gone
+        var gIN = 0.45, gHOLD = 0.5, gOUT = 0.45;
+        var ge = clock.elapsedTime - glitchStart;
+        if (ge >= gIN + gHOLD + gOUT){
+          glitchStart = -1;
+          glitchPlanes[0].constant = 1e6; glitchPlanes[1].constant = 1e6;
+          rackRoot.visible = false;
+          rackRoot.position.x = rackBaseX;
+          rackRoot.updateMatrixWorld(true);
+          if (rackLamp) rackLamp.intensity = 0;
+          for (var gq = 0; gq < rackMats.length; gq++){
+            rackMats[gq].opacity = 0;
+            rackMats[gq].transparent = true;
+          }
+          renderer.shadowMap.needsUpdate = true;
+        } else {
+          var gOn, st = null;
+          if (ge < gIN){
+            var gp = (ge / gIN) * 0.61;                    // entrance: stop before the table's dead tail
+            st = GLITCH_STEPS[0];
+            for (var gs = 0; gs < GLITCH_STEPS.length; gs++){ if (gp >= GLITCH_STEPS[gs][0]) st = GLITCH_STEPS[gs]; }
+          } else if (ge >= gIN + gHOLD){
+            var gp2 = ((ge - gIN - gHOLD) / gOUT) * 0.7;   // exit: run past 0.61 so it ends empty
+            st = GLITCH_STEPS[0];
+            for (var gs2 = 0; gs2 < GLITCH_STEPS.length; gs2++){ if (gp2 >= GLITCH_STEPS[gs2][0]) st = GLITCH_STEPS[gs2]; }
+          }
+          if (st === null){
+            // the 0.5s hold: the rack stands whole and steady
+            gOn = true;
+            glitchPlanes[0].constant = 1e6; glitchPlanes[1].constant = 1e6;
+            rackRoot.position.x = rackBaseX;
+          } else {
+            gOn = st[2] > st[1];
+            if (gOn){
+              var gh = rackTopY - rackBotY;
+              glitchPlanes[0].constant = rackTopY - gh * (st[1] / 100);      // keep y below the band top
+              glitchPlanes[1].constant = -(rackTopY - gh * (st[2] / 100));   // keep y above the band bottom
+              rackRoot.position.x = rackBaseX + st[3] * 0.016;               // the logo's shimmy, in meters
+            }
+          }
+          // the shadow map only needs a pass when the rack pops in or out:
+          // the clip bands don't reach it (clipShadows is off for the rack),
+          // so mid-flash re-renders of 1.1M shadow tris would change nothing
+          if (rackRoot.visible !== gOn) renderer.shadowMap.needsUpdate = true;
+          rackRoot.visible = gOn;
+          if (gOn){
+            rackRoot.updateMatrixWorld(true);
+            for (var gj = 0; gj < rackMats.length; gj++){
+              rackMats[gj].opacity = 1;
+              rackMats[gj].transparent = false;
+            }
+          }
+          if (rackLamp) rackLamp.intensity = gOn ? 0.55 : 0;
+        }
       }
     }
     composer.render();
