@@ -783,6 +783,7 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/BokehShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FXAAShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lil-gui@0.19.2/dist/lil-gui.umd.min.js"></script>
 <script>
 (function(){
   var stage = document.getElementById('stage');
@@ -1044,6 +1045,42 @@
   var pcbTopY = 0, pcbBotY = 0, pcbBaseX = 0, pcbW = 0, pcbGlitchNext = 1e9, pcbGlitchStart = -1;
   // scratch for the legs-4/5 continuous screen pin
   var pinV = new THREE.Vector3(), pinP = new THREE.Vector3(), pinAx = new THREE.Vector3();
+  // leg 6's payload: the SAME grey free cube tints to green — per-
+  // instance colors on the F meshes, a blink riding the transition
+  var greenTintW = new THREE.Color(1, 1, 1), greenTintE = new THREE.Color(1, 1, 1);
+  var tintC = new THREE.Color(), revFade = 0, greenBlinkAt = -2;
+  var revSeal = 0;   // revert phase 2: the shell closes back to the solid rack
+  var radialT = 0;   // the radial's own ride: waits for the seal to finish
+  // the ride's last beat: the calculator standing in the radial's right
+  // circle, scale 0.8→1 and opacity 0→1 on radialT's own scrub — the
+  // right-side twin of the rack standing in the left circle
+  var calcRoot = null, calcMats = [], calcUnit = 1, calcQ = -1;
+  var calcV = new THREE.Vector3(), calcAx = new THREE.Vector3(), calcLamp = null, calcFill = null;
+  // the calculator's playable light rig (the bottom-right "light" panel
+  // writes this live; persisted in localStorage so reloads keep the look;
+  // "log" prints the JSON — paste it back to bake numbers into code)
+  var calcLightCfg = (function(){
+    var d = {
+      // the user's tuned look (logged from the panel 2026-09-09): a
+      // soft key from the left-front, glow cranked to 4, zero metal —
+      // the model is authored 93% FULL METAL, which renders pitch black
+      // under point lights with no envmap; metal 0 lets the light land
+      key:  {i: 0.8, c: '#ffffff', fwd: 2, up: 1.2, right: -3.2},
+      fill: {i: 0,    c: '#a5b4fc', fwd: -1.5, up: -0.8, right: 2.6},
+      emis: 4,
+      metal: 0
+    };
+    try {
+      var s = JSON.parse(localStorage.getItem('calcLight') || 'null');
+      if (s && s.key && s.fill) d = s;
+      if (d.metal === undefined) d.metal = 0;
+    } catch(e){}
+    return d;
+  })();
+  // the calculator's own scroll window, measured like a leg: it starts
+  // when the math title's top reaches 60% of the viewport — after the
+  // radial has already crossed (the leg is done at 70%)
+  var calcWin = {start: 0, end: 1, raw: 0, p: 0};
   // scene-1 rack glitch flash: every 10s the rack appears for ~1.4s sliced
   // into bands with a horizontal shimmy — the same pattern as the logo's
   // clip-path glitch — then vanishes. two clipping planes carve the band;
@@ -1214,7 +1251,14 @@
       // no fov override: the push lands at the home 50 while the frame
       // narrows — a dolly-zoom straight in, no rotation at all (the leg
       // is re-aimed along leg 4's exact heading once the grid is built)
-      eye: [-0.35, 1.9, 0.1], target: [-0.35, 1.9, -1.0] }
+      eye: [-0.35, 1.9, 0.1], target: [-0.35, 1.9, -1.0] },
+    { el: 'math',     // leg 6: pull all the way back out to LEG 3's shot
+      loggedFov: 8,   // — the rack standing left exactly as before the
+                      // wink-out — while the crowd returns and the
+                      // deployed cube comes back GREEN with a blink
+      endAt: 0.7,     // reverted before the math panel reads
+      eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
+      anchor: {x: 0.25, y: 0.62, point: [-0.35, 1.6, -1.72]} }
   ];
   function sl(a, b, k){ return a + (b - a) * k; }
   function wrapPi(a){
@@ -1289,6 +1333,13 @@
       prev = L.end;
       if (L.anchor) solveAnchor(L);
     }
+    // the calculator's window: math title top from 60% vh down to 25% vh
+    var calcNode = document.getElementById('math');
+    if (calcNode){
+      var calcTop = calcNode.getBoundingClientRect().top + window.pageYOffset;
+      calcWin.start = calcTop - window.innerHeight * 0.6;
+      calcWin.end = Math.max(calcWin.start + 1, calcTop - window.innerHeight * 0.25);
+    }
   }
   window.addEventListener('resize', measureScrub);
   window.addEventListener('load', measureScrub);
@@ -1299,7 +1350,7 @@
     return {legs: LEGS.map(function(L){ return {el: L.el, start: L.start, end: L.end,
               raw: L.raw, p: L.p, solved: L.solved || null}; }),
             aspect: camera.aspect, fov: camera.fov, free: scrubFree, ms: +(dbgDt * 1000).toFixed(2),
-            rackFade: rackFade, cubeFade: cubeFade, pcbFade: pcbFade, cubeHide: cubeHide,
+            rackFade: rackFade, cubeFade: cubeFade, pcbFade: pcbFade, cubeHide: cubeHide, revFade: revFade, revSeal: revSeal,
             cam: camera.position.toArray(), tgt: controls.target.toArray()};
   };
   var scrubHome = null, scrubAz = 0, scrubAzD = 0, scrubFree = false, scrubScene = 1;
@@ -1312,6 +1363,10 @@
   // title) and the hero's left text veil lifts out of the way
   var gradRide = window.gsap ? gsap.to(stage, {'--holeX': '22%', '--veil': 0, ease: 'none', paused: true}) : null;
   var gradQ = -1;   // last quantized progress the tween actually received
+  // leg 6 slides the radial to the RIGHT: the math text owns the left,
+  // so the see-through circle crosses over while the rack returns
+  var gradRide2 = window.gsap ? gsap.to(stage, {'--holeX': '78%', ease: 'none', paused: true, overwrite: false}) : null;
+  var gradQ2 = -1;
   // the reveal's motion curve comes from gsap: a power2.inOut ease over
   // the scroll segment instead of a raw linear ramp, so the rack fade,
   // the city ghost, the lights and the near-plane wipe all accelerate
@@ -1734,7 +1789,28 @@
         LEGS[2].anchor = {x: 0.25, y: 0.5, point: [freeC.x, freeC.y, freeC.z]};
         LEGS[3].anchor = {x: 0.25, y: 0.5, point: [freeC.x, freeC.y, freeC.z]};
         initLeg(LEGS[3], 3);
+        // leg 6's azimuth chain hangs off leg 5's re-aimed pose
+        initLeg(LEGS[4], 4);
         measureScrub();
+        // the deployed cube's green: per-instance TINTS that turn the
+        // grey free cube into a green machine in place. instance colors
+        // multiply the material color, so the tints are the linear-space
+        // ratios green-wall/grey-wall and green-accent/white. the white
+        // init here bakes USE_INSTANCING_COLOR into the programs at load
+        // — no mid-scroll recompile when the tint starts moving.
+        (function(){
+          var gw = new THREE.Color(0x264d2d).convertSRGBToLinear();
+          var bw = new THREE.Color(0x606060).convertSRGBToLinear();
+          greenTintW.setRGB(gw.r / bw.r, gw.g / bw.g, gw.b / bw.b);
+          greenTintE.copy(new THREE.Color(0x11a32a).convertSRGBToLinear());
+          tintC.setRGB(1, 1, 1);
+          for (var wi2 = 0; wi2 < nF; wi2++){
+            cubeMeshF.setColorAt(wi2, tintC);
+            cubeEdgeF.setColorAt(wi2, tintC);
+          }
+          cubeMeshF.instanceColor.needsUpdate = true;
+          cubeEdgeF.instanceColor.needsUpdate = true;
+        })();
         // levitation: read each machine's resting y straight out of its
         // baked matrix (identity rotation, so element 13 is the y), give
         // it a private phase and speed. amplitude stays well inside the
@@ -1765,6 +1841,7 @@
       // ── the pcb inside the free cube (leg 5's payload) ──
       // 90mb of board: it loads in the background and simply isn't there
       // until it arrives — the fade block guards on pcbRoot
+      var dracoPending = 2;   // pcb + calculator: last one in frees the workers
       loader.load('/models/pcb.glb', function(pg){
         var pr = pg.scene;
         var pb = new THREE.Box3().setFromObject(pr);
@@ -1824,7 +1901,75 @@
         frameCacheValid = false;   // the warm-up scribbled on the cache
         frameDirtyFlag = true;
         pcbRoot = pr;
-        draco.dispose();   // all three glbs are in; free the decoder workers
+        if (--dracoPending === 0) draco.dispose();   // free the decoder workers
+      });
+      // ── the calculator in the radial's right circle (the ride's last
+      // shot) ── its spot is solved per frame from the live camera (screen
+      // 0.78/0.5 at the focus distance), so here it only needs normalizing:
+      // recentered in a group, sized to one world unit, faded to zero
+      loader.load('/models/calculator.glb', function(cg){
+        var cr = cg.scene;
+        var cb = new THREE.Box3().setFromObject(cr);
+        var cs = new THREE.Vector3(); cb.getSize(cs);
+        calcUnit = 1 / Math.max(cs.x, cs.y, cs.z);
+        var ccn = new THREE.Vector3(); cb.getCenter(ccn);
+        cr.traverse(function(o){
+          if (!o.isMesh) return;
+          // over the ghosted city: at ride end the city neither writes
+          // depth (applyCityDim) nor may touch stencilled pixels
+          o.renderOrder = 19993;
+          o.castShadow = false; o.receiveShadow = false;
+          depthSkip.push(o);   // sits out the dof pre-pass like the pcb
+          var cm2 = Array.isArray(o.material) ? o.material : [o.material];
+          cm2.forEach(function(m){
+            // as-authored colors — the user swapped models and asked for
+            // no retinting; only the fade/stencil plumbing touches it
+            m.transparent = true; m.opacity = 0;
+            m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
+            if (calcMats.indexOf(m) === -1) calcMats.push(m);
+          });
+        });
+        // group pivot at the model's center: scale and yaw turn in place
+        var cwrap = new THREE.Group();
+        cr.position.sub(ccn);
+        cwrap.add(cr);
+        cwrap.visible = false;
+        scene.add(cwrap);
+        scene.updateMatrixWorld(true);
+        // warm the textures now, off the ride: compile + one hidden render
+        // so the first visible frame doesn't stall mid-scroll
+        renderer.compile(scene, camera);
+        cwrap.visible = true;
+        renderer.setRenderTarget(frameCache);
+        renderer.render(scene, camera);
+        renderer.setRenderTarget(null);
+        cwrap.visible = false;
+        frameCacheValid = false;   // the warm-up scribbled on the cache
+        frameDirtyFlag = true;
+        calcRoot = cwrap;
+        // testing probe (like __scrubDbg): raycast the calculator from a
+        // screen fraction to read the hit's UV — maps render→texture px
+        window.__calcDbg = {root: cwrap, mats: calcMats, pick: function(sx, sy){
+          var rc = new THREE.Raycaster();
+          rc.setFromCamera(new THREE.Vector2(sx * 2 - 1, 1 - sy * 2), camera);
+          var hits = rc.intersectObject(cwrap, true);
+          return hits.length ? {u: hits[0].uv.x, v: hits[0].uv.y, name: hits[0].object.name, d: hits[0].distance} : null;
+        }};
+        // the ride's end dims the city key and aims the warm spot at the
+        // rack — nothing lights the right circle. the calculator brings
+        // its own small lamp, in the scene from load (a constant light
+        // count: no shader recompile mid-ride), lit only while it rides
+        // the rig: key + fill, both in the scene from asset load so the
+        // light count stays constant (no shader recompile mid-ride).
+        // colors/energy come from calcLightCfg — play via the panel
+        calcLamp = new THREE.PointLight(new THREE.Color(calcLightCfg.key.c), 0, 10, 2);
+        calcFill = new THREE.PointLight(new THREE.Color(calcLightCfg.fill.c), 0, 10, 2);
+        scene.add(calcLamp); scene.add(calcFill);
+        for (var cei = 0; cei < calcMats.length; cei++){
+          calcMats[cei].emissiveIntensity = calcLightCfg.emis;
+          calcMats[cei].metalness = calcLightCfg.metal;
+        }
+        if (--dracoPending === 0) draco.dispose();
       });
       // the key light points straight down, so the rack's faces would render
       // black; one small warm lamp in the street lets the servers read.
@@ -1999,8 +2144,12 @@
   lockTermHeight();
   window.addEventListener('load', lockTermHeight);
   window.addEventListener('resize', lockTermHeight);
-  var termShown = 0;
-  function applyTerm(count){
+  var termShown = 0, termPodLast = -1;
+  function applyTerm(count, podCount){
+    // two counts: the LINES follow the leg-5 window only — they untype
+    // on scroll-up but the leg-6 revert never erases them. the PODS take
+    // the smaller of line count and the leg-6 clamp, so they glitch out
+    // on the revert while the text stands.
     var tCur = null;
     for (var tl = 0; tl < termLines.length; tl++){
       var on = tl < count;
@@ -2016,7 +2165,7 @@
     // s3 5 — glitching in when it prints, glitching out when it unprints
     for (var pv = 0; pv < podEls.length; pv++){
       var PE = podEls[pv];
-      if (count >= 3 + pv){
+      if (podCount >= 3 + pv){
         if (!PE.classList.contains('on')){ PE.classList.remove('off'); PE.classList.add('on'); }
       } else if (PE.classList.contains('on')){
         PE.classList.remove('on'); PE.classList.add('off');
@@ -2041,6 +2190,10 @@
       // amounts shimmers the thin ghost strokes behind the rack
       if (Math.abs(LL.raw - LL.p) < 0.001) LL.p = LL.raw;
     }
+    // the calculator's window damps exactly like a leg
+    calcWin.raw = Math.min(1, Math.max(0, (scrollNow - calcWin.start) / (calcWin.end - calcWin.start)));
+    calcWin.p += (calcWin.raw - calcWin.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(calcWin.raw - calcWin.p) < 0.001) calcWin.p = calcWin.raw;
     if (LEGS[0].raw === 0 && LEGS[0].p < 0.002) LEGS[0].p = 0;
     // the reveal rides the rack leg: the building opens (scene 2) right
     // where the scrubbed fade segment begins, so the rack rises from zero
@@ -2088,6 +2241,23 @@
           var gq = Math.round(be * 100) / 100;
           if (gq !== gradQ){ gradQ = gq; gradRide.progress(gq); }
         }
+        // the leg-6 radial ride waits for EVERYTHING: revert done, blink
+        // played, shell fully sealed — only then does it cross, on its
+        // own one-second clock
+        if (bi === 4 && gradRide2){
+          // scrubbed by the scroll like every animation on this page:
+          // the radial rides leg 6's LAST window (0.85→1) — the sealed
+          // rack stands by then — and rewinds the same way
+          radialT = Math.min(1, Math.max(0, (BL.p - 0.85) / 0.15));
+          if (radialT > 0.001 || gradQ2 > 0){
+            var gq2 = Math.round(radialT * 100) / 100;
+            if (gq2 !== gradQ2){
+              if (gradQ2 <= 0) gradRide2.invalidate();   // re-lock start at the live 22%
+              gradQ2 = gq2;
+              gradRide2.progress(gq2);
+            }
+          }
+        }
       }
       stx += scrubOff.x; sty += scrubOff.y; stz += scrubOff.z;
       var srr = sw / Math.tan(sfov * Math.PI / 360);
@@ -2111,6 +2281,10 @@
         // at its left spot when the terminal starts printing (mid-leg)
         var pinW = Math.min(1, LEGS[2].p / 0.35);
         pinW = pinW * pinW * (3 - 2 * pinW);
+        // and it lets go across leg 6 — the revert hands the framing
+        // back to leg 3's own rack anchor
+        var pinRel = LEGS[4] ? Math.min(1, Math.max(0, LEGS[4].p)) : 0;
+        pinW *= 1 - pinRel * pinRel * (3 - 2 * pinRel);
         camera.updateMatrixWorld(true);
         camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
         pinV.set(freeC.x, freeC.y, freeC.z).applyMatrix4(camera.matrixWorldInverse);
@@ -2145,6 +2319,62 @@
           if (podT !== podsLastT){ podsLastT = podT; podsEl.style.transform = podT; }
         }
       }
+      // the calculator rides the radial's crossing: pinned to the middle
+      // of the right circle (screen 0.78/0.5) at the focus distance, its
+      // scale 0.8→1 and opacity 0→1 on the same radialT scrub. solved
+      // from the live camera every ride frame, so it holds the spot at
+      // any aspect and rewinds with the scroll like everything else.
+      if (calcRoot){
+        // its own late window (calcWin): the radial finishes crossing at
+        // math-top 70% vh, the calculator rises over 60% → 25%
+        var calcT = calcWin.p;
+        var calcOn = calcT > 0.001;
+        if (calcRoot.visible !== calcOn){
+          calcRoot.visible = calcOn;
+          bokehStamp++; frameDirtyFlag = true;
+        }
+        if (calcOn){
+          camera.updateMatrixWorld(true);
+          calcV.set(0.78 * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
+          calcRoot.position.copy(camera.position).addScaledVector(calcV, srr);
+          // stand upright, face the lens — then turn -20° about the
+          // vertical, a three-quarter view like the rack's (not flat-on)
+          calcRoot.rotation.y = Math.atan2(camera.position.x - calcRoot.position.x, camera.position.z - calcRoot.position.z)
+            - 20 * Math.PI / 180;
+          // 45% of the viewport's height at the focus plane, times the scrub
+          var calcSc = calcUnit * 0.9 * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * calcT);
+          calcRoot.scale.setScalar(calcSc);
+          // no cloud float anymore (user cut it) — only the idle pendulum
+          // turn survives: an endless +10°/-10° swing about its own
+          // vertical axis, on top of the facing yaw
+          if (!reducedMotion && !window.__calcFreeze){
+            calcRoot.rotation.y += Math.sin(clock.elapsedTime * 0.6) * (Math.PI / 18);
+            frameDirtyFlag = true;   // the swing must render through the static gate
+          }
+          calcRoot.updateMatrixWorld(true);
+          if (calcLamp){
+            // the rig hangs off the calculator in VIEW axes — fwd toward
+            // the lens, up/side in the frame — so the panel's sliders
+            // mean the same thing wherever the camera stands
+            var CK = calcLightCfg.key, CF = calcLightCfg.fill;
+            calcAx.setFromMatrixColumn(camera.matrixWorld, 0);
+            calcLamp.position.copy(calcRoot.position).addScaledVector(calcV, -CK.fwd).addScaledVector(calcAx, CK.right);
+            calcFill.position.copy(calcRoot.position).addScaledVector(calcV, -CF.fwd).addScaledVector(calcAx, CF.right);
+            calcAx.setFromMatrixColumn(camera.matrixWorld, 1);
+            calcLamp.position.addScaledVector(calcAx, CK.up);
+            calcFill.position.addScaledVector(calcAx, CF.up);
+            // energy re-read every frame: panel tweaks land instantly
+            calcLamp.intensity = CK.i * calcT;
+            calcFill.intensity = CF.i * calcT;
+          }
+          var calcQ2 = Math.round(calcT * 200) / 200;
+          if (calcQ2 !== calcQ){
+            calcQ = calcQ2;
+            for (var cqi = 0; cqi < calcMats.length; cqi++) calcMats[cqi].opacity = calcQ;
+            frameDirtyFlag = true;   // the fade moved: the cached frame is stale
+          }
+        }
+      }
       bokeh.uniforms['focus'].value = srr;
     } else {
       if (scrubHome && LEGS[0].p === 0){
@@ -2156,6 +2386,19 @@
         if (!reducedMotion) controls.autoRotate = true;
         bokeh.uniforms['focus'].value = camera.position.distanceTo(controls.target);
         if (gradRide){ gradQ = 0; gradRide.progress(0); }
+        if (gradRide2) gradQ2 = -1;   // no render: leg 6 re-locks on next entry
+        if (calcRoot && calcRoot.visible){ calcRoot.visible = false; calcQ = -1; bokehStamp++; frameDirtyFlag = true; }
+        if (calcLamp){ calcLamp.intensity = 0; calcFill.intensity = 0; }
+        radialT = 0;
+      }
+      // free-cam with the calculator up: it has no spot to stand in
+      // without the ride's camera solve, so it eases away like the pcb
+      if (calcRoot && calcRoot.visible && scrubFree){
+        calcQ = Math.max(0, (calcQ < 0 ? 1 : calcQ) - dt / 0.5);
+        for (var cqf = 0; cqf < calcMats.length; cqf++) calcMats[cqf].opacity = calcQ;
+        if (calcLamp){ calcLamp.intensity = calcLightCfg.key.i * calcQ; calcFill.intensity = calcLightCfg.fill.i * calcQ; }
+        frameDirtyFlag = true;
+        if (calcQ === 0){ calcRoot.visible = false; calcQ = -1; radialT = 0; bokehStamp++; }
       }
       if (flight){
         flight.t += dt / 1.4;
@@ -2232,12 +2475,33 @@
       var hideNext = (LEGS[2] && !scrubFree && sceneMode === 2)
         ? Math.round(revealEase(Math.min(1, Math.max(0, LEGS[2].p))) * 200) / 200
         : (reducedMotion ? 0 : Math.max(0, cubeHide - dt / 0.5));
-      if (rackFade !== rackNext || cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext){
+      // leg 6 reverts the whole show: the pcb and pods fold away, the
+      // crowd winks back in, the shell returns — and the deployed cube
+      // comes back green (handled below)
+      // everything on the scroll, one scrub, the EXACT reverse of the
+      // way in, in five ordered windows of leg 6:
+      //   0→0.2   pods glitch out (last in, first out — via the line clamp)
+      //   0.2→0.45 the pcb folds away, the grey free cube rebuilds
+      //   0.45→0.7 the crowd winks back in, green replaces grey
+      //   0.7→0.85 the shell seals to the solid rack
+      //   0.85→1  the radial crosses right (in the blend loop)
+      var revScrub = (LEGS[4] && !scrubFree && sceneMode === 2)
+        ? Math.min(1, Math.max(0, LEGS[4].p)) : 0;
+      var revNext = Math.round(revealEase(Math.min(1, Math.max(0, (revScrub - 0.45) / 0.25))) * 200) / 200;
+      var pcbRawNext = pcbNext;   // pre-revert: the pods' own fade driver
+      var revPcb = Math.round(revealEase(Math.min(1, Math.max(0, (revScrub - 0.2) / 0.25))) * 200) / 200;
+      pcbNext = pcbNext * (1 - revPcb);
+      hideNext = hideNext * (1 - revNext);
+      var sealNext = Math.round(revealEase(Math.min(1, Math.max(0, (revScrub - 0.7) / 0.15))) * 200) / 200;
+      cubeNext = cubeNext * (1 - sealNext);
+      if (rackFade !== rackNext || cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || revSeal !== sealNext){
         var hideMoved = cubeHide !== hideNext;
         rackFade = rackNext;
         cubeFade = cubeNext;
         pcbFade = pcbNext;
         cubeHide = hideNext;
+        revFade = revNext;
+        revSeal = sealNext;
         // the machines dim the shell to 0.4 glass; then, once the leg-4
         // wink-out has taken the machines themselves (thresholds top out
         // at 0.8), the shell follows them out through its own opacity
@@ -2276,7 +2540,9 @@
               HR.b.instanceMatrix.needsUpdate = true;
             }
           }
-          // leg 5: the free cube's own wall folds away for the pcb
+          // leg 5: the free cube's own wall folds away for the pcb. on
+          // the leg-6 revert the SAME cube rebuilds as the pcb leaves
+          // and later tints green in place — nothing is swapped
           var colS = Math.max(0.0001, 1 - pcbFade);
           for (var pc = 0; pc < cubeCol.length; pc++){
             var CE = cubeCol[pc], CR = cubeBob[CE.r], o16 = CE.i * 16;
@@ -2297,8 +2563,25 @@
             if (pcbRoot.visible !== pcbVis){ pcbRoot.visible = pcbVis; bokehStamp++; }
             for (var pmI = 0; pmI < pcbMats.length; pmI++) pcbMats[pmI].opacity = 0.4 * pcbFade;
           }
-          // the addon pods ride the pcb's fade
-          if (podsEl) podsEl.style.opacity = pcbFade;
+          // the addon pods ride the PRE-revert fade: during leg 6 the
+          // container stays opaque and each pod leaves via its own
+          // glitch-out (driven below through the line count) instead of
+          // being washed away by a fade
+          if (podsEl) podsEl.style.opacity = pcbRawNext;
+          // the deployed cube's green self scales in with the revert
+          // the deployed cube tints green IN PLACE with the cubes
+          // window — same cube, its wall and frame colors sliding from
+          // grey/white to the machine green (the blink rides on top)
+          if (cubeMeshF.instanceColor && freeFi >= 0){
+            tintC.setRGB(1, 1, 1).lerp(greenTintW, revFade);
+            cubeMeshF.setColorAt(freeFi, tintC);
+            tintC.setRGB(1, 1, 1).lerp(greenTintE, revFade);
+            cubeEdgeF.setColorAt(freeFi, tintC);
+            cubeMeshF.instanceColor.needsUpdate = true;
+            cubeEdgeF.instanceColor.needsUpdate = true;
+            if (revFade >= 0.85 && greenBlinkAt === -2) greenBlinkAt = clock.elapsedTime;
+            if (revFade < 0.5) greenBlinkAt = -2;   // re-arm on scroll back
+          }
           // the corner cut sweeps open with the same scrub: the camera-side
           // corner of the shell slices away so the machines show through an
           // open wedge, not only through the glass. neutral again at zero
@@ -2368,15 +2651,38 @@
     // and only then — 45%→100% of leg 5 — does the session print
     if (termLines.length && LEGS[2]){
       var termP5 = Math.min(1, Math.max(0, LEGS[3] ? LEGS[3].p : 0));
-      var termTarget = Math.round(Math.min(1, Math.max(0, (termP5 - 0.25) / 0.75)) * termLines.length);
+      var termTarget = Math.round(Math.min(1, Math.max(0, (termP5 - 0.15) / 0.4)) * termLines.length);
+      // leg 6's FIRST window (0→0.2) claws the POD count back down —
+      // last in, first out, each at its own scroll position — while the
+      // printed text itself stands untouched
+      var termPodClamp = Math.round((1 - revealEase(Math.min(1, Math.max(0, (LEGS[4] ? LEGS[4].p : 0) / 0.2)))) * termLines.length);
       if (termShown !== termTarget){
         if (reducedMotion) termShown = termTarget;
         else termShown = termShown < termTarget
           ? Math.min(termTarget, termShown + dt * 2.5)
-          : Math.max(termTarget, termShown - dt * 8);
+          : termTarget;   // scroll-up untyping rides the scroll directly
+      }
+      var termPodCount = Math.min(Math.floor(termShown), termPodClamp);
+      if (termPodCount !== termPodLast || termShown !== termTarget || termPodLast === -1){
+        termPodLast = termPodCount;
         // pure DOM: the browser composites the terminal over the canvas,
         // no 3d frame needed — the static-frame cache stays untouched
-        applyTerm(Math.floor(termShown));
+        applyTerm(Math.floor(termShown), termPodCount);
+      }
+    }
+    // the deploy blink: the moment the reverted rack lands, the tint
+    // pulses grey↔green six times, then settles green — same cube
+    if (cubeMeshF && cubeMeshF.instanceColor && greenBlinkAt >= 0 && !reducedMotion){
+      var gbe = clock.elapsedTime - greenBlinkAt;
+      if (gbe < 1.8){
+        var gbm = 0.25 + 0.75 * Math.abs(Math.sin(gbe * Math.PI / 0.3));
+        tintC.setRGB(1, 1, 1).lerp(greenTintW, revFade * gbm);
+        cubeMeshF.setColorAt(freeFi, tintC);
+        tintC.setRGB(1, 1, 1).lerp(greenTintE, revFade * gbm);
+        cubeEdgeF.setColorAt(freeFi, tintC);
+        cubeMeshF.instanceColor.needsUpdate = true;
+        cubeEdgeF.instanceColor.needsUpdate = true;
+        frameDirtyFlag = true;   // the pulses must render
       }
     }
     // the pcb's glitch, on its own interval: while the board stands
@@ -2532,6 +2838,42 @@
   }
   bokeh.uniforms['focus'].value = camera.position.distanceTo(controls.target);
   loop();
+
+  // ── the light playground: lil-gui (three's standard debug panel)
+  // bound to calcLightCfg. tweaks land next frame, persist across
+  // reloads via localStorage; "log to console" prints the JSON —
+  // paste it back to bake the numbers into the defaults.
+  if (window.lil && window.lil.GUI){
+    var gui = new lil.GUI({title: 'calc light'});
+    gui.domElement.style.top = '64px';   // clear the fixed nav
+    gui.close();
+    var calcSave = function(){
+      try { localStorage.setItem('calcLight', JSON.stringify(calcLightCfg)); } catch(e){}
+      frameDirtyFlag = true;
+    };
+    var fk = gui.addFolder('key light');
+    fk.add(calcLightCfg.key, 'i', 0, 8, 0.05).name('power').onChange(calcSave);
+    fk.addColor(calcLightCfg.key, 'c').name('color').onChange(function(v){ if (calcLamp) calcLamp.color.set(v); calcSave(); });
+    fk.add(calcLightCfg.key, 'fwd', -2, 8, 0.1).name('front').onChange(calcSave);
+    fk.add(calcLightCfg.key, 'up', -6, 6, 0.1).onChange(calcSave);
+    fk.add(calcLightCfg.key, 'right', -8, 8, 0.1).name('side').onChange(calcSave);
+    var ff = gui.addFolder('fill light');
+    ff.add(calcLightCfg.fill, 'i', 0, 8, 0.05).name('power').onChange(calcSave);
+    ff.addColor(calcLightCfg.fill, 'c').name('color').onChange(function(v){ if (calcFill) calcFill.color.set(v); calcSave(); });
+    ff.add(calcLightCfg.fill, 'fwd', -2, 8, 0.1).name('front').onChange(calcSave);
+    ff.add(calcLightCfg.fill, 'up', -6, 6, 0.1).onChange(calcSave);
+    ff.add(calcLightCfg.fill, 'right', -8, 8, 0.1).name('side').onChange(calcSave);
+    gui.add(calcLightCfg, 'metal', 0, 1, 0.01).onChange(function(v){
+      for (var mm = 0; mm < calcMats.length; mm++) calcMats[mm].metalness = v;
+      calcSave();
+    });
+    gui.add(calcLightCfg, 'emis', 0, 4, 0.05).name('glow').onChange(function(v){
+      for (var gm = 0; gm < calcMats.length; gm++) calcMats[gm].emissiveIntensity = v;
+      calcSave();
+    });
+    gui.add({log: function(){ console.log('calcLight ' + JSON.stringify(calcLightCfg)); }}, 'log').name('log to console');
+    gui.add({reset: function(){ try { localStorage.removeItem('calcLight'); } catch(e){} location.reload(); }}, 'reset');
+  }
 })();
 </script>
 

@@ -1019,10 +1019,11 @@
       master.progress(32.0 / 33.7).pause(); /* settled "deployed" frame */
     } else {
       master.play(0);
-      /* don't burn GPU when the commercial is offscreen */
+      /* don't burn GPU when the commercial is offscreen; entries coalesce on
+         fast scrolls, so only the newest record tells the truth */
       if (typeof IntersectionObserver !== 'undefined') {
         new IntersectionObserver(function (entries) {
-          if (entries[0].isIntersecting) master.play(); else master.pause();
+          if (entries[entries.length - 1].isIntersecting) master.play(); else master.pause();
         }, { threshold: 0.05 }).observe(container);
       }
     }
