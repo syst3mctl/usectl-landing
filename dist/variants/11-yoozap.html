@@ -166,6 +166,12 @@
     background:radial-gradient(70% 80% at var(--holeX) 50%, rgba(30,29,29,0) 0%, rgba(30,29,29,0) 22%, rgba(30,29,29,.82) 55%, #1e1d1d 100%);
     pointer-events:none;
   }
+  /* the addons flat: a full gray cover that scrubs in over the whole
+     scene (city, radial, pods, hud) while the addon board is on screen */
+  .stage .graycover{
+    position:absolute;inset:0;z-index:5;background:#1e1d1d;
+    opacity:0;pointer-events:none;will-change:opacity;
+  }
   /* the hero's left text veil, its own layer so the ride can lift it */
   .stage::after{
     content:"";position:absolute;top:0;bottom:0;left:0;width:100%;z-index:2;
@@ -411,28 +417,86 @@
     padding:26px 30px 28px;
     box-shadow:0 30px 80px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.04);
   }
-  /* the split + deploy: naked like the hero panel, docked right */
-  .after #split,.after #deploy{
+  /* the split + deploy + modes + agents: naked like the hero panel, docked right */
+  .after #split,.after #deploy,.after #modes,.after #agents{
     background:none;border:0;box-shadow:none;
     -webkit-backdrop-filter:none;backdrop-filter:none;
     width:50%;
     margin:0 100px 0 auto;
     padding:26px 0 28px;
   }
-  .after #split h2,.after #deploy h2{font-size:65px;line-height:1.04;letter-spacing:-.02em}
+  .after #split h2,.after #deploy h2,.after #modes h2,.after #agents h2{font-size:65px;line-height:1.04;letter-spacing:-.02em}
   .after #deploy pre.term{margin:0;padding:18px 20px;border:0;background:rgba(30,29,29,.4)}
-  /* the math rides the LEFT half, naked like the split — no glass, no
-     border, the split's display sizes */
-  .after #math{
+  /* the math + machine ('what you get') ride the LEFT half, naked like
+     the split — no glass, no border, the split's display sizes */
+  .after #math,.after #machine{
     background:none;border:0;box-shadow:none;
     -webkit-backdrop-filter:none;backdrop-filter:none;
     width:50%;
     margin:0 auto 0 100px;
     padding:26px 0 28px;
   }
-  .after #math h2{font-size:65px;line-height:1.04;letter-spacing:-.02em}
-  @media (max-width:1700px){.after{gap:200px;padding:250px 0}.after #split,.after #deploy{margin-right:50px}.after #math{margin-left:50px}.after #split h2,.after #deploy h2,.after #math h2{font-size:50px}}
-  @media (max-width:640px){.after #split,.after #deploy{margin-right:20px}.after #math{margin-left:20px}}
+  .after #math h2,.after #machine h2{font-size:65px;line-height:1.04;letter-spacing:-.02em}
+  /* addons: naked like the left panels, docked at their left edge but
+     stretched over the full band */
+  .after #addons{
+    background:none;border:0;box-shadow:none;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+    width:calc(100% - 200px);
+    margin:0 auto 0 100px;
+    padding:26px 0 28px;
+  }
+  .after #addons h2{font-size:65px;line-height:1.04;letter-spacing:-.02em}
+  /* the addon board: the manager machine page's pod canvas — the dotted
+     grid (24px * the 0.75 dot scale = 18px), radius, clipped overflow */
+  #addons .pods-board{
+    position:relative;margin-top:26px;
+    /* full bleed: the section is centered (symmetric gutters at every
+       breakpoint), so 50% - 50vw walks the board back to the screen edge */
+    width:100vw;margin-left:calc(50% - 50vw);
+    border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);overflow:hidden;
+    background-color:#161616;
+    background-image:radial-gradient(circle,#2a2a2a 1px,transparent 1px);
+    background-size:18px 18px;
+    pointer-events:auto;touch-action:pan-y;
+  }
+  /* the colored dot overlays: same grid, painted in the pod green, shaped
+     by mask-image from the wave painter (halo / hover halo / follow ripple) */
+  #addons .pods-board-dots{
+    position:absolute;inset:0;pointer-events:none;opacity:0;
+    background-image:radial-gradient(circle,#11a32a 1px,transparent 1px);
+    background-size:18px 18px;background-repeat:repeat;
+    z-index:0;   /* no will-change: three board-sized layers would be
+                    allocated right as the section scrolls in — the drag
+                    promotes them when the water actually moves */
+  }
+  /* the board pod: the manager's pod-canvas-card in the site green, only a
+     name and a description inside */
+  .bpod{
+    position:absolute;left:0;top:0;z-index:1;
+    padding:14px 16px;border-radius:10px;
+    border:1px solid rgba(17,163,42,.4);
+    border-left:4px solid rgba(17,163,42,.85);
+    background:rgba(30,29,29,1);
+    --card-glow:rgba(17,163,42,.45);
+    cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;
+    transition:box-shadow .15s;will-change:transform;
+  }
+  .bpod:active{cursor:grabbing}
+  .bpod:hover{box-shadow:0 0 7px var(--card-glow)}
+  .bpod.on{box-shadow:0 0 16px var(--card-glow);animation:pod-neon-flicker 10s linear infinite}
+  .bpod .pcc-header{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+  .bpod .pcc-dot{width:10px;height:10px;border-radius:50%;background:#16a34a;box-shadow:0 0 6px rgba(22,163,74,.8);flex:none;animation:pcc-blink 2.5s ease-in-out infinite}
+  .bpod .pcc-icon{display:flex;color:rgba(17,163,42,.9);line-height:1;flex:none}
+  .bpod .pcc-name{font-weight:600;font-size:.88rem;color:#e8e8e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bpod .bpod-desc{margin:0;font-size:.78rem;line-height:1.5;color:rgba(255,255,255,.6)}
+  /* 'what you get': the points stack in ONE column down the left side —
+     no cube markers, roomier gaps, bigger titles */
+  .after #machine .points{grid-template-columns:1fr;gap:30px;margin:36px 0}
+  .after #machine .points div b{font-size:19px;margin-bottom:6px;color:var(--accent)}
+  .after #machine .points div b::before{display:none}
+  @media (max-width:1700px){.after{gap:200px;padding:250px 0}.after #split,.after #deploy,.after #modes,.after #agents{margin-right:50px}.after #math,.after #machine{margin-left:50px}.after #addons{width:calc(100% - 100px);margin-left:50px}.after #split h2,.after #deploy h2,.after #modes h2,.after #agents h2,.after #math h2,.after #machine h2,.after #addons h2{font-size:50px}}
+  @media (max-width:640px){.after #split,.after #deploy,.after #modes,.after #agents{margin-right:20px}.after #math,.after #machine{margin-left:20px}.after #addons{width:calc(100% - 40px);margin-left:20px}}
   .lead{font-size:16.5px;line-height:1.6;max-width:62ch;margin:0 0 20px;color:rgba(255,255,255,.72)}
   .points{display:grid;grid-template-columns:1fr 1fr;gap:16px 26px;margin:0 0 18px}
   .points div b{display:block;font-family:var(--display);font-weight:600;font-size:15.5px;margin-bottom:4px;color:var(--text)}
@@ -591,6 +655,7 @@
       <div class="pcc-footer"><span class="pcc-deployed">Deployed 1 m ago</span></div>
     </div>
   </div>
+  <div class="graycover" id="grayCover" aria-hidden="true"></div>
   <div class="sceneswitch" id="sceneSwitch">
     <button type="button" data-scene="1" class="on">scene 1</button>
     <button type="button" data-scene="2">scene 2</button>
@@ -676,19 +741,24 @@
     <div class="rail"><span><span class="led"></span>addons</span><span>managed or dedicated</span></div>
     <h2>the stack, <span class="b">one toggle each.</span></h2>
     <p class="lead">managed on shared platform instances, or dedicated in your own namespace with its own volume and size. attach to any app in one command.</p>
-    <div class="grid3">
-      <div class="card"><b>postgres</b><span>managed or dedicated. pgvector and timescale on request. scheduled backups to a private bucket.</span></div>
-      <div class="card"><b>redis</b><span>managed with a key prefix, or dedicated with aof and search modules.</span></div>
-      <div class="card"><b>s3 storage</b><span>your own bucket and iam user on seaweedfs, with a cdn url.</span></div>
-      <div class="card"><b>nats</b><span>jetstream on its own volume, websocket in.</span></div>
-      <div class="card"><b>mongodb</b><span>per machine database, or dedicated.</span></div>
-      <div class="card"><b>sql server</b><span>for the apps that need it.</span></div>
-      <div class="card"><b>meilisearch</b><span>search with its own persistent volume.</span></div>
-      <div class="card"><b>cron</b><span>scheduled jobs from your app image, with run history.</span></div>
-      <div class="card"><b>oauth2 proxy</b><span>github or google login in front of any app, no code.</span></div>
-      <div class="card"><b>grafana</b><span>dedicated per machine, wired read only to your own telemetry.</span></div>
-      <div class="card"><b>glitchtip</b><span>sentry compatible error tracking, one dsn per environment.</span></div>
-      <div class="card b"><b>ai</b><span>an openai compatible endpoint in the cluster: qwen3-14b for chat, bge-m3 for embeddings, metered per machine.</span></div>
+    <!-- the manager machine page's pod canvas: dotted board, pcc pods,
+         draggable, with the colored-dot halo + calm waves + drag ripples -->
+    <div class="pods-board" id="podsBoard">
+      <div class="pods-board-dots" id="boardHalo"></div>
+      <div class="pods-board-dots" id="boardHover"></div>
+      <div class="pods-board-dots" id="boardFollow"></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg fill="currentColor" viewBox="0 0 24 24" height="17" width="17"><path d="M23.5594 14.7228a.5269.5269 0 0 0-.0563-.1191c-.139-.2632-.4768-.3418-1.0074-.2321-1.6533.3411-2.2935.1312-2.5256-.0191 1.342-2.0482 2.445-4.522 3.0411-6.8297.2714-1.0507.7982-3.5237.1222-4.7316a1.5641 1.5641 0 0 0-.1509-.235C21.6931.9086 19.8007.0248 17.5099.0005c-1.4947-.0158-2.7705.3461-3.1161.4794a9.449 9.449 0 0 0-.5159-.0816 8.044 8.044 0 0 0-1.3114-.1278c-1.1822-.0184-2.2038.2642-3.0498.8406-.8573-.3211-4.7888-1.645-7.2219.0788C.9359 2.1526.3086 3.8733.4302 6.3043c.0409.818.5069 3.334 1.2423 5.7436.4598 1.5065.9387 2.7019 1.4334 3.582.553.9942 1.1259 1.5933 1.7143 1.7895.4474.1491 1.1327.1441 1.8581-.7279.8012-.9635 1.5903-1.8258 1.9446-2.2069.4351.2355.9064.3625 1.39.3772a.0569.0569 0 0 0 .0004.0041 11.0312 11.0312 0 0 0-.2472.3054c-.3389.4302-.4094.5197-1.5002.7443-.3102.064-1.1344.2339-1.1464.8115-.0025.1224.0329.2309.0919.3268.2269.4231.9216.6097 1.015.6331 1.3345.3335 2.5044.092 3.3714-.6787-.017 2.231.0775 4.4174.3454 5.0874.2212.5529.7618 1.9045 2.4692 1.9043.2505 0 .5263-.0291.8296-.0941 1.7819-.3821 2.5557-1.1696 2.855-2.9059.1503-.8707.4016-2.8753.5388-4.1012.0169-.0703.0357-.1207.057-.1362.0007-.0005.0697-.0471.4272.0307a.3673.3673 0 0 0 .0443.0068l.2539.0223.0149.001c.8468.0384 1.9114-.1426 2.5312-.4308.6438-.2988 1.8057-1.0323 1.5951-1.6698zM2.371 11.8765c-.7435-2.4358-1.1779-4.8851-1.2123-5.5719-.1086-2.1714.4171-3.6829 1.5623-4.4927 1.8367-1.2986 4.8398-.5408 6.108-.13-.0032.0032-.0066.0061-.0098.0094-2.0238 2.044-1.9758 5.536-1.9708 5.7495-.0002.0823.0066.1989.0162.3593.0348.5873.0996 1.6804-.0735 2.9184-.1609 1.1504.1937 2.2764.9728 3.0892.0806.0841.1648.1631.2518.2374-.3468.3714-1.1004 1.1926-1.9025 2.1576-.5677.6825-.9597.5517-1.0886.5087-.3919-.1307-.813-.5871-1.2381-1.3223-.4796-.839-.9635-2.0317-1.4155-3.5126zm6.0072 5.0871c-.1711-.0428-.3271-.1132-.4322-.1772.0889-.0394.2374-.0902.4833-.1409 1.2833-.2641 1.4815-.4506 1.9143-1.0002.0992-.126.2116-.2687.3673-.4426a.3549.3549 0 0 0 .0737-.1298c.1708-.1513.2724-.1099.4369-.0417.156.0646.3078.26.3695.4752.0291.1016.0619.2945-.0452.4444-.9043 1.2658-2.2216 1.2494-3.1676 1.0128zm2.094-3.988-.0525.141c-.133.3566-.2567.6881-.3334 1.003-.6674-.0021-1.3168-.2872-1.8105-.8024-.6279-.6551-.9131-1.5664-.7825-2.5004.1828-1.3079.1153-2.4468.079-3.0586-.005-.0857-.0095-.1607-.0122-.2199.2957-.2621 1.6659-.9962 2.6429-.7724.4459.1022.7176.4057.8305.928.5846 2.7038.0774 3.8307-.3302 4.7363-.084.1866-.1633.3629-.2311.5454zm7.3637 4.5725c-.0169.1768-.0358.376-.0618.5959l-.146.4383a.3547.3547 0 0 0-.0182.1077c-.0059.4747-.054.6489-.115.8693-.0634.2292-.1353.4891-.1794 1.0575-.11 1.4143-.8782 2.2267-2.4172 2.5565-1.5155.3251-1.7843-.4968-2.0212-1.2217a6.5824 6.5824 0 0 0-.0769-.2266c-.2154-.5858-.1911-1.4119-.1574-2.5551.0165-.5612-.0249-1.9013-.3302-2.6462.0044-.2932.0106-.5909.019-.8918a.3529.3529 0 0 0-.0153-.1126 1.4927 1.4927 0 0 0-.0439-.208c-.1226-.4283-.4213-.7866-.7797-.9351-.1424-.059-.4038-.1672-.7178-.0869.067-.276.1831-.5875.309-.9249l.0529-.142c.0595-.16.134-.3257.213-.5012.4265-.9476 1.0106-2.2453.3766-5.1772-.2374-1.0981-1.0304-1.6343-2.2324-1.5098-.7207.0746-1.3799.3654-1.7088.5321a5.6716 5.6716 0 0 0-.1958.1041c.0918-1.1064.4386-3.1741 1.7357-4.4823a4.0306 4.0306 0 0 1 .3033-.276.3532.3532 0 0 0 .1447-.0644c.7524-.5706 1.6945-.8506 2.802-.8325.4091.0067.8017.0339 1.1742.081 1.939.3544 3.2439 1.4468 4.0359 2.3827.8143.9623 1.2552 1.9315 1.4312 2.4543-1.3232-.1346-2.2234.1268-2.6797.779-.9926 1.4189.543 4.1729 1.2811 5.4964.1353.2426.2522.4522.2889.5413.2403.5825.5515.9713.7787 1.2552.0696.087.1372.1714.1885.245-.4008.1155-1.1208.3825-1.0552 1.717-.0123.1563-.0423.4469-.0834.8148-.0461.2077-.0702.4603-.0994.7662zm.8905-1.6211c-.0405-.8316.2691-.9185.5967-1.0105a2.8566 2.8566 0 0 0 .135-.0406 1.202 1.202 0 0 0 .1342.103c.5703.3765 1.5823.4213 3.0068.1344-.2016.1769-.5189.3994-.9533.6011-.4098.1903-1.0957.333-1.7473.3636-.7197.0336-1.0859-.0807-1.1721-.151zm.5695-9.2712c-.0059.3508-.0542.6692-.1054 1.0017-.055.3576-.112.7274-.1264 1.1762-.0142.4368.0404.8909.0932 1.3301.1066.887.216 1.8003-.2075 2.7014a3.5272 3.5272 0 0 1-.1876-.3856c-.0527-.1276-.1669-.3326-.3251-.6162-.6156-1.1041-2.0574-3.6896-1.3193-4.7446.3795-.5427 1.3408-.5661 2.1781-.463zm.2284 7.0137a12.3762 12.3762 0 0 0-.0853-.1074l-.0355-.0444c.7262-1.1995.5842-2.3862.4578-3.4385-.0519-.4318-.1009-.8396-.0885-1.2226.0129-.4061.0666-.7543.1185-1.0911.0639-.415.1288-.8443.1109-1.3505.0134-.0531.0188-.1158.0118-.1902-.0457-.4855-.5999-1.938-1.7294-3.253-.6076-.7073-1.4896-1.4972-2.6889-2.0395.5251-.1066 1.2328-.2035 2.0244-.1859 2.0515.0456 3.6746.8135 4.8242 2.2824a.908.908 0 0 1 .0667.1002c.7231 1.3556-.2762 6.2751-2.9867 10.5405zm-8.8166-6.1162c-.025.1794-.3089.4225-.6211.4225a.5821.5821 0 0 1-.0809-.0056c-.1873-.026-.3765-.144-.5059-.3156-.0458-.0605-.1203-.178-.1055-.2844.0055-.0401.0261-.0985.0925-.1488.1182-.0894.3518-.1226.6096-.0867.3163.0441.6426.1938.6113.4186zm7.9305-.4114c.0111.0792-.049.201-.1531.3102-.0683.0717-.212.1961-.4079.2232a.5456.5456 0 0 1-.075.0052c-.2935 0-.5414-.2344-.5607-.3717-.024-.1765.2641-.3106.5611-.352.297-.0414.6111.0088.6356.1851z"></path></svg></span><span class="pcc-name">postgres</span></div><p class="bpod-desc">managed or dedicated. pgvector and timescale on request. scheduled backups to a private bucket.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg fill="currentColor" viewBox="0 0 24 24" height="17" width="17"><path d="M22.71 13.145c-1.66 2.092-3.452 4.483-7.038 4.483-3.203 0-4.397-2.825-4.48-5.12.701 1.484 2.073 2.685 4.214 2.63 4.117-.133 6.94-3.852 6.94-7.239 0-4.05-3.022-6.972-8.268-6.972-3.752 0-8.4 1.428-11.455 3.685C2.59 6.937 3.885 9.958 4.35 9.626c2.648-1.904 4.748-3.13 6.784-3.744C8.12 9.244.886 17.05 0 18.425c.1 1.261 1.66 4.648 2.424 4.648.232 0 .431-.133.664-.365a100.49 100.49 0 0 0 5.54-6.765c.222 3.104 1.748 6.898 6.014 6.898 3.819 0 7.604-2.756 9.33-8.965.2-.764-.73-1.361-1.261-.73zm-4.349-5.013c0 1.959-1.926 2.922-3.685 2.922-.941 0-1.664-.247-2.235-.568 1.051-1.592 2.092-3.225 3.21-4.973 1.972.334 2.71 1.43 2.71 2.619z"></path></svg></span><span class="pcc-name">redis</span></div><p class="bpod-desc">managed with a key prefix, or dedicated with aof and search modules.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="17" width="17"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"></path><path d="m7.5 4.27 9 5.15"></path></svg></span><span class="pcc-name">s3 storage</span></div><p class="bpod-desc">your own bucket and iam user on seaweedfs, with a cdn url.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg fill="currentColor" viewBox="0 0 24 24" height="17" width="17"><path d="M12.004 0H.404v18.807h9.938l1.714 1.602v-.026L15.966 24v-5.193h7.63V0H12.003zm7.578 14.45H15.38L6.898 6.519v7.93H4.116V4.376h4.349l8.344 7.784V4.375h2.773V14.45z"></path></svg></span><span class="pcc-name">nats</span></div><p class="bpod-desc">jetstream on its own volume, websocket in.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg fill="currentColor" viewBox="0 0 24 24" height="17" width="17"><path d="M17.193 9.555c-1.264-5.58-4.252-7.414-4.573-8.115-.28-.394-.53-.954-.735-1.44-.036.495-.055.685-.523 1.184-.723.566-4.438 3.682-4.74 10.02-.282 5.912 4.27 9.435 4.888 9.884l.07.05A73.49 73.49 0 0111.91 24h.481c.114-1.032.284-2.056.51-3.07.417-.296.604-.463.85-.693a11.342 11.342 0 003.639-8.464c.01-.814-.103-1.662-.197-2.218zm-5.336 8.195s0-8.291.275-8.29c.213 0 .49 10.695.49 10.695-.381-.045-.765-1.76-.765-2.405z"></path></svg></span><span class="pcc-name">mongodb</span></div><p class="bpod-desc">per machine database, or dedicated.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M2 20h20v-4H2zm2-3h2v2H4zM2 4v4h20V4zm4 3H4V5h2zm-4 7h20v-4H2zm2-3h2v2H4z"></path></svg></span><span class="pcc-name">sql server</span></div><p class="bpod-desc">for the apps that need it.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg fill="currentColor" viewBox="0 0 24 24" height="17" width="17"><path d="m6.505 18.998 4.434-11.345a4.168 4.168 0 0 1 3.882-2.651h2.674l-4.434 11.345a4.169 4.169 0 0 1-3.883 2.651H6.505Zm6.505 0 4.434-11.345a4.169 4.169 0 0 1 3.883-2.651H24l-4.434 11.345a4.168 4.168 0 0 1-3.882 2.651H13.01Zm-13.01 0L4.434 7.653a4.168 4.168 0 0 1 3.882-2.651h2.674L6.556 16.347a4.169 4.169 0 0 1-3.883 2.651H0Z"></path></svg></span><span class="pcc-name">meilisearch</span></div><p class="bpod-desc">search with its own persistent volume.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2M12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8"></path><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path></svg></span><span class="pcc-name">cron</span></div><p class="bpod-desc">scheduled jobs from your app image, with run history.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2m-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1z"></path></svg></span><span class="pcc-name">oauth2 proxy</span></div><p class="bpod-desc">github or google login in front of any app, no code.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M21 8c-1.45 0-2.26 1.44-1.93 2.51l-3.55 3.56c-.3-.09-.74-.09-1.04 0l-2.55-2.55C12.27 10.45 11.46 9 10 9c-1.45 0-2.27 1.44-1.93 2.52l-4.56 4.55C2.44 15.74 1 16.55 1 18c0 1.1.9 2 2 2 1.45 0 2.26-1.44 1.93-2.51l4.55-4.56c.3.09.74.09 1.04 0l2.55 2.55C12.73 16.55 13.54 18 15 18c1.45 0 2.27-1.44 1.93-2.52l3.56-3.55c1.07.33 2.51-.48 2.51-1.93 0-1.1-.9-2-2-2"></path><path d="m15 9 .94-2.07L18 6l-2.06-.93L15 3l-.92 2.07L12 6l2.08.93zM3.5 11 4 9l2-.5L4 8l-.5-2L3 8l-2 .5L3 9z"></path></svg></span><span class="pcc-name">grafana</span></div><p class="bpod-desc">dedicated per machine, wired read only to your own telemetry.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5s-.96.06-1.41.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20zm-6 8h-4v-2h4zm0-4h-4v-2h4z"></path></svg></span><span class="pcc-name">glitchtip</span></div><p class="bpod-desc">sentry compatible error tracking, one dsn per environment.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3M7.5 11.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5S9.83 13 9 13s-1.5-.67-1.5-1.5M16 17H8v-2h8zm-1-4c-.83 0-1.5-.67-1.5-1.5S14.17 10 15 10s1.5.67 1.5 1.5S15.83 13 15 13"></path></svg></span><span class="pcc-name">ai</span></div><p class="bpod-desc">an openai compatible endpoint in the cluster: qwen3-14b for chat, bge-m3 for embeddings, metered per machine.</p></div>
     </div>
   </section>
 
@@ -862,14 +932,20 @@
 
   // ── the demo's post stack: dof → bloom → grade (grain/vignette/ca) ──
   // the composer target carries a stencil buffer (the leg-3 reveal stamps
-  // the rack into it so the ghosted city can't draw across the rack) and,
-  // on webgl2, 4x msaa: fxaa alone can't hold the hair-thin wire strokes —
-  // they read as pixeled stairsteps, worst at the telephoto rack framing.
+  // the rack into it so the ghosted city can't draw across the rack).
+  // NO msaa target anymore — measured on mac/ANGLE Metal: the per-frame
+  // multisample resolve blit collides with any css backdrop-filter over
+  // the canvas (the glass panels) and chrome serializes the two into a
+  // ~45ms/frame stall during the scroll rides; with a plain target the
+  // same frame is ~10ms, glass untouched. the wire edges are now held by
+  // fxaa, which finally works — its resolution uniform was set in device
+  // pixels while the chain renders in css pixels (a custom-target
+  // composer locks its pixelRatio to 1), so its taps landed inside one
+  // texel and it never engaged. that dead fxaa is why msaa looked
+  // indispensable here in the first place.
   var composerParams = {minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
                         format: THREE.RGBAFormat, stencilBuffer: true};
-  var composer = new THREE.EffectComposer(renderer, renderer.capabilities.isWebGL2
-    ? new THREE.WebGLMultisampleRenderTarget(1, 1, composerParams)
-    : new THREE.WebGLRenderTarget(1, 1, composerParams));
+  var composer = new THREE.EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, composerParams));
   var renderPass = new THREE.RenderPass(scene, camera);
   composer.addPass(renderPass);
   var bokeh = new THREE.BokehPass(scene, camera, {focus: 1.8, aperture: 0.0003, maxblur: 0.0075});
@@ -929,7 +1005,91 @@
     }
   };
   var bloom = new THREE.UnrealBloomPass(new THREE.Vector2(1,1), 0.45, 0.3, 0.17);  // sketchfab: 0.233/0.15/0.167
+  // soften the high-pass knee (r128 ships a hard 0.01): broad flat
+  // brights — the rack name plates, the led strips — otherwise cut a
+  // hard-edged rectangle into the mip chain and the upsample shows it
+  // as terraced boxes around the glow
+  bloom.highPassUniforms['smoothWidth'].value = 0.25;
+  // r128's bloom composite reads every mip with plain bilinear taps. the
+  // deepest mip is ~47×22 texels for the WHOLE screen; magnified ×32,
+  // each texel is a 32-px block — a bright glyph's halo composites as
+  // nested grey rectangles (the slabs around the rack name plates). the
+  // fix is in the reconstruction: b-spline bicubic sampling per mip (4
+  // bilinear fetches instead of 1, one fullscreen pass, ~free) turns the
+  // block grid into a continuous gradient. intensities untouched.
+  (function(){
+    var cm = bloom.compositeMaterial;
+    for (var mi2 = 1; mi2 <= 5; mi2++) cm.uniforms['texSize' + mi2] = {value: new THREE.Vector2(1, 1)};
+    cm.fragmentShader = [
+      'varying vec2 vUv;',
+      'uniform sampler2D blurTexture1; uniform sampler2D blurTexture2;',
+      'uniform sampler2D blurTexture3; uniform sampler2D blurTexture4;',
+      'uniform sampler2D blurTexture5;',
+      'uniform vec2 texSize1; uniform vec2 texSize2; uniform vec2 texSize3;',
+      'uniform vec2 texSize4; uniform vec2 texSize5;',
+      'uniform float bloomStrength; uniform float bloomRadius;',
+      'uniform float bloomFactors[NUM_MIPS];',
+      'uniform vec3 bloomTintColors[NUM_MIPS];',
+      'float lerpBloomFactor(const in float factor){',
+      '  float mirrorFactor = 1.2 - factor;',
+      '  return mix(factor, mirrorFactor, bloomRadius);',
+      '}',
+      'vec4 cubicW(float v){',
+      '  vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;',
+      '  vec4 s = n * n * n;',
+      '  float x = s.x;',
+      '  float y = s.y - 4.0 * s.x;',
+      '  float z = s.z - 4.0 * s.y + 6.0 * s.x;',
+      '  float w = 6.0 - x - y - z;',
+      '  return vec4(x, y, z, w) * (1.0 / 6.0);',
+      '}',
+      'vec4 texBicubic(sampler2D tex, vec2 uv, vec2 ts){',
+      '  vec2 tc = uv * ts - 0.5;',
+      '  vec2 fxy = fract(tc);',
+      '  tc -= fxy;',
+      '  vec4 xc = cubicW(fxy.x);',
+      '  vec4 yc = cubicW(fxy.y);',
+      '  vec4 c = tc.xxyy + vec2(-0.5, 1.5).xyxy;',
+      '  vec4 s = vec4(xc.xz + xc.yw, yc.xz + yc.yw);',
+      '  vec4 off = (c + vec4(xc.yw, yc.yw) / s) / ts.xxyy;',
+      '  vec4 s0 = texture2D(tex, off.xz);',
+      '  vec4 s1 = texture2D(tex, off.yz);',
+      '  vec4 s2 = texture2D(tex, off.xw);',
+      '  vec4 s3 = texture2D(tex, off.yw);',
+      '  float sx = s.x / (s.x + s.y);',
+      '  float sy = s.z / (s.z + s.w);',
+      '  return mix(mix(s3, s2, sx), mix(s1, s0, sx), sy);',
+      '}',
+      'void main(){',
+      '  gl_FragColor = bloomStrength * (',
+      '    lerpBloomFactor(bloomFactors[0]) * vec4(bloomTintColors[0], 1.0) * texBicubic(blurTexture1, vUv, texSize1) +',
+      '    lerpBloomFactor(bloomFactors[1]) * vec4(bloomTintColors[1], 1.0) * texBicubic(blurTexture2, vUv, texSize2) +',
+      '    lerpBloomFactor(bloomFactors[2]) * vec4(bloomTintColors[2], 1.0) * texBicubic(blurTexture3, vUv, texSize3) +',
+      '    lerpBloomFactor(bloomFactors[3]) * vec4(bloomTintColors[3], 1.0) * texBicubic(blurTexture4, vUv, texSize4) +',
+      '    lerpBloomFactor(bloomFactors[4]) * vec4(bloomTintColors[4], 1.0) * texBicubic(blurTexture5, vUv, texSize5));',
+      '}'
+    ].join('\n');
+    cm.needsUpdate = true;
+    // the mip sizes mirror UnrealBloomPass.setSize's own halving walk
+    bloom.__setMipSizes = function(bw, bh){
+      var rx = Math.round(bw / 2), ry = Math.round(bh / 2);
+      for (var i = 1; i <= 5; i++){
+        cm.uniforms['texSize' + i].value.set(Math.max(1, rx), Math.max(1, ry));
+        rx = Math.round(rx / 2); ry = Math.round(ry / 2);
+      }
+    };
+  })();
   composer.addPass(bloom);
+  // the rack name plates render OVER the bloomed image, not into it:
+  // their own two-mesh scene, drawn after bloom and before the gamma /
+  // fxaa / grade tail. the text can be pure #fff — the bloom pass never
+  // sees the plates, so no deep-mip stain ever hangs on the black sky
+  // (the halo is baked into the plate texture instead).
+  var plateScene = new THREE.Scene();
+  var platePass = new THREE.RenderPass(plateScene, camera);
+  platePass.clear = false;
+  platePass.enabled = false;   // switched on by the plates' driver
+  composer.addPass(platePass);
   var gammaPass = new THREE.ShaderPass(THREE.GammaCorrectionShader);
   composer.addPass(gammaPass);
   // fxaa: the composer bypasses msaa, this brings the edges back
@@ -993,15 +1153,41 @@
   }
 
   var stageW = 0, stageH = 0;   // cached for placeSpots, no layout reads per frame
+  // the chain's supersample: the post chain renders at CHAIN_RES × css px
+  // and fxaa downstream lands it in the device-px frame cache. 1 was the
+  // old css-px chain (edges read as 2×2 device-pixel steps on retina);
+  // 2 = full device res, REJECTED — fragment-bound ~37ms on M4 (the
+  // ghost city's transparent overdraw scales with pixels). 1.5 is the
+  // measured middle: the cube/wire edges tighten, the frame stays under
+  // budget. drop to 1.25 if a heavy leg ever stutters.
+  var CHAIN_RES = 1.5;
   function resize(){
     var w = stage.clientWidth, h = stage.clientHeight;
     stageW = w; stageH = h;
     renderer.setSize(w, h, false);
-    composer.setSize(w, h);
+    var cw = Math.round(w * CHAIN_RES), ch = Math.round(h * CHAIN_RES);
+    composer.setSize(cw, ch);
+    // bloom keeps its mips at css resolution, NOT the supersampled
+    // chain: its per-mip blur kernels are fixed in pixels, so at 1.5×
+    // they cover a third less screen — the halos tightened into the
+    // terraced rings around the plates and led strips. css-px mips
+    // restore the pre-supersample glow scale (and cost less).
+    bloom.setSize(w, h);
+    bloom.__setMipSizes(w, h);   // the bicubic composite needs each mip's texel grid
+    // the bokeh's depth pre-pass target is built window-sized and never
+    // follows the composer — resize it by hand or the depth map samples
+    // off-grid against the supersampled color and the dof edges swim
+    bokeh.renderTargetDepth.setSize(cw, ch);
+    if (bokeh.uniforms.textureWidth) bokeh.uniforms.textureWidth.value = cw;
+    if (bokeh.uniforms.textureHeight) bokeh.uniforms.textureHeight.value = ch;
     var pr = renderer.getPixelRatio();
     frameCache.setSize(w * pr, h * pr);
     frameDirtyFlag = true;   // the cache died with the old size
-    fxaa.uniforms.resolution.value.set(1 / (w * pr), 1 / (h * pr));
+    // fxaa taps step in the CHAIN's texels (a custom-target composer runs
+    // at pixelRatio 1, so the chain is cw×ch, not w*pr×h*pr). this was set
+    // to the device-pixel size before — taps landed half a texel apart,
+    // inside one pixel, and fxaa never engaged; msaa was covering for it.
+    fxaa.uniforms.resolution.value.set(1 / cw, 1 / ch);
     camera.aspect = w/h; camera.updateProjectionMatrix();
   }
   window.addEventListener('resize', resize); resize();
@@ -1024,6 +1210,11 @@
   var redNeons = [], redBlinkAt = 2 + Math.random() * 7, redBlinkStart = -1;
   // scene toggle state (testing): 1 = the building, 2 = the rack
   var sceneMode = 1, towerMesh = null, rackRoot = null, rackLamp = null, rackSpot = null, rackMats = [], rackFade = 0;
+  // the second rack ('on yours'): a clone standing to the right, its own
+  // materials so its fade rides the metal window alone, its own warm pair
+  var rackRoot2 = null, rack2Mats = [], rack2Op = 0, rackLamp2 = null, rackSpot2 = null;
+  var rack2BaseX = 0, rack2DxW = 0;   // the clone's birth x (inside the original) and its travel
+  var rackLbl1 = null, rackLbl2 = null;   // the typed name plates over the two racks
   // the version-10 machine grid living inside the rack: cubes that rise
   // in the leg-3 tail while the shell dims to glass. styled like the
   // page's annotation swatches: bright border in the exact accent hex,
@@ -1050,12 +1241,32 @@
   var greenTintW = new THREE.Color(1, 1, 1), greenTintE = new THREE.Color(1, 1, 1);
   var tintC = new THREE.Color(), revFade = 0, greenBlinkAt = -2;
   var revSeal = 0;   // revert phase 2: the shell closes back to the solid rack
+  var radialHide = 0;   // leg 6's last window: the rack fades out as the radial crosses
   var radialT = 0;   // the radial's own ride: waits for the seal to finish
   // the ride's last beat: the calculator standing in the radial's right
   // circle, scale 0.8→1 and opacity 0→1 on radialT's own scrub — the
   // right-side twin of the rack standing in the left circle
   var calcRoot = null, calcMats = [], calcUnit = 1, calcQ = -1;
   var calcV = new THREE.Vector3(), calcAx = new THREE.Vector3(), calcLamp = null, calcFill = null;
+  // leg 10's prop: the laptop standing on the ground in front of the rack
+  var lapRoot = null, lapMats = [], lapQ = -1, lapLamp = null, lapNeonOff = false;
+  // the lid: a hinge group around the screen mesh — born closed, open
+  // exactly whenever the rack stands at opacity 1 (rides __addonsRackHide)
+  var lapLid = null, lapLidClose = 0, lapLidQ = -1;
+  // the display's neon 200$: its own layer so the logo band glitch can
+  // rip the digits without touching the panel
+  var calcTextMat = null, calcTextDraw = null, calcBlinkAt = -1, calcBlinkStart = -1;
+  // the levitating cube column on the calculator's left: 10 machines in
+  // the rack's annotation vocabulary, each bobbing on its own phase
+  var calcCubes = null, calcCubeMats = [], calcCQ = -1;
+  // the equation floating between them: 10 machines = 200$ a month —
+  // typed out character by character as the scrub rises, terminal-style
+  var calcLabel = null, calcLabelDraw = null, calcLabelShown = -1;
+  // the key glyphs' road-blink state (city pod-neon-flicker pattern)
+  var calcKeysOff = false;
+  // the pod-card glow behind the calculator: green halo breathing on the
+  // pod-glow rhythm (8↔16px breath, dropouts at 2-4% and 6-7% of 10s)
+  var calcGlow = null, calcGlowMat = null;
   // the calculator's playable light rig (the bottom-right "light" panel
   // writes this live; persisted in localStorage so reloads keep the look;
   // "log" prints the JSON — paste it back to bake numbers into code)
@@ -1068,12 +1279,14 @@
       key:  {i: 0.8, c: '#ffffff', fwd: 2, up: 1.2, right: -3.2},
       fill: {i: 0,    c: '#a5b4fc', fwd: -1.5, up: -0.8, right: 2.6},
       emis: 4,
-      metal: 0
+      metal: 0,
+      // saved panel settings from BEFORE this version are discarded: a
+      // stale glow-0 in localStorage kept blanking the display's neon
+      v: 2
     };
     try {
       var s = JSON.parse(localStorage.getItem('calcLight') || 'null');
-      if (s && s.key && s.fill) d = s;
-      if (d.metal === undefined) d.metal = 0;
+      if (s && s.key && s.fill && s.v === d.v) d = s;
     } catch(e){}
     return d;
   })();
@@ -1081,6 +1294,36 @@
   // when the math title's top reaches 60% of the viewport — after the
   // radial has already crossed (the leg is done at 70%)
   var calcWin = {start: 0, end: 1, raw: 0, p: 0};
+  var calcMathBot = 0;   // math panel's document bottom: the way-out trigger
+  var calcOut = {raw: 0, p: 0};   // the out ride, damped like a leg
+  // the metal panel's window, measured the same way: as 'our metal'
+  // enters, the radial un-crosses back to the left (shadow right again)
+  // and the rack fades back to full — both on this one scrub
+  var metalWin = {start: 0, end: 1, raw: 0, p: 0};
+  // the rack's own fade-out window on the math panel: right after the
+  // radial finishes crossing (leg done at top 70% vh), before the
+  // calculator is fully up — between "too fast" and "too late"
+  var rackOutWin = {start: 0, end: 1, raw: 0, p: 0};
+  // the name plates' window: begins EXACTLY where the metal window ends
+  // (modes top 55% vh — the clone has just landed), so the typing only
+  // starts once the slide-out is over
+  var rackLblWin = {start: 0, end: 1, raw: 0, p: 0};
+  // the machine panel's window ('what you get'): the metal show plays
+  // BACKWARDS on it — plates un-type, the clone folds back home, the
+  // radial re-crosses right — while leg 9 pushes the camera in
+  var machineWin = {start: 0, end: 1, raw: 0, p: 0};
+  // the agents panel's window ('built for agents'): the text is docked
+  // right, so the radial un-crosses back LEFT (shadow right again) while
+  // leg 10 pulls the camera up and wide — same fractions as the leg
+  var agentsWin = {start: 0, end: 1, raw: 0, p: 0};
+  // past the machine leg the scene stops being pinned: it rides the page
+  // scroll at a fraction of its speed (parallax) — the rack drifts
+  // toward the top slower than the text scrolling over it, all through
+  // 'what you get' and the addons board. leg 10 (agents) winds the drift
+  // back out as it takes the camera, so the logged wide shot lands
+  // exactly; past ITS end the tail resumes on its own window. px units.
+  var prlxWin = {raw: 0, p: 0};
+  var prlxWin2 = {raw: 0, p: 0};
   // scene-1 rack glitch flash: every 10s the rack appears for ~1.4s sliced
   // into bands with a horizontal shimmy — the same pattern as the logo's
   // clip-path glitch — then vanishes. two clipping planes carve the band;
@@ -1114,6 +1357,41 @@
     [0.60, 63,  80,  0],
     [0.61,  0,   0,  0]
   ];
+  // the machine-leg rack glitch, on a GSAP clock: every 10s, while the
+  // 'what you get' frame stands, the rack rips through the same band
+  // table over 0.6s and heals — the scene-1 flash's exact planes and
+  // shimmy. a temporal ambient flourish (allowed off the scroll, like
+  // the pcb's pulse); the gate keeps it silent everywhere else, and the
+  // heal writes only once so the static-frame cache stays asleep.
+  var rackGlitchP = {t: 1}, rackGlitchDirty = false;
+  function rackGlitchApply(){
+    if (!rackRoot) return;
+    var on = machineWin.p > 0.95 && sceneMode === 2 && !scrubFree &&
+             rackFade > 0.99 && rackGlitchP.t < 1 && !reducedMotion;
+    if (!on){
+      if (rackGlitchDirty){
+        rackGlitchDirty = false;
+        glitchPlanes[0].constant = 1e6; glitchPlanes[1].constant = 1e6;
+        rackRoot.position.x = rackBaseX;
+        rackRoot.updateMatrixWorld(true);
+        frameDirtyFlag = true;
+      }
+      return;
+    }
+    var gp = rackGlitchP.t * 0.61;   // the table ends whole at 0.61
+    var st = GLITCH_STEPS[0];
+    for (var gi = 0; gi < GLITCH_STEPS.length; gi++){ if (gp >= GLITCH_STEPS[gi][0]) st = GLITCH_STEPS[gi]; }
+    var gh = rackTopY - rackBotY;
+    glitchPlanes[0].constant = rackTopY - gh * (st[1] / 100);      // keep y below the band top
+    glitchPlanes[1].constant = -(rackTopY - gh * (st[2] / 100));   // keep y above the band bottom
+    rackRoot.position.x = rackBaseX + st[3] * 0.016;               // the logo's shimmy, in meters
+    rackRoot.updateMatrixWorld(true);
+    rackGlitchDirty = true;
+    frameDirtyFlag = true;
+  }
+  if (window.gsap) gsap.timeline({repeat: -1, repeatDelay: 9.4})
+    .fromTo(rackGlitchP, {t: 0}, {t: 1, duration: 0.6, ease: 'none',
+      onUpdate: rackGlitchApply, onComplete: rackGlitchApply});
   var annexWire = [];   // the demolished annex's rooftop lattice (mast + braces), hidden in scene 2
   // scene 2 carves just this one building out of the city. the city's meshes
   // are layered (one mesh's windows or wires span many buildings), so hiding
@@ -1258,7 +1536,46 @@
                       // deployed cube comes back GREEN with a blink
       endAt: 0.7,     // reverted before the math panel reads
       eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
-      anchor: {x: 0.25, y: 0.62, point: [-0.35, 1.6, -1.72]} }
+      anchor: {x: 0.25, y: 0.62, point: [-0.35, 1.6, -1.72]} },
+    { el: 'modes',    // leg 8: 'our metal, or yours' — pull wide and level,
+      loggedFov: 8,   // framed in free-cam; the look center sits between
+                      // the rack and its clone, both racks in frame
+      startAt: 0.9,   // waits for the modes panel to actually enter —
+                      // the move runs on the math→metal transition only
+      endAt: 0.6,     // (1.05/0.7 played the whole show too early —
+                      // user pulled the WHOLE leg later)
+      eye: [0.7027, 5.0724, 63.4526], target: [7.7103, 2.6830, -4.3409] },
+    { el: 'machine',  // leg 9: 'what you get' — the show reverses (plates
+      loggedFov: 8,   // un-type, the clone folds home, ONE rack) and the
+                      // camera pushes in from the right, rack right of
+                      // center — the machine text owns the shadowed left
+      startAt: 0.9,
+      endAt: 0.6,
+      // the logged shot ([9.0849, 7.1420, 13.7772] → [-4.2444, 2.3212,
+      // -4.6211]) panned HALF A METER against screen-right (same orbit,
+      // same fov): the rack rides ~10% of the frame further right
+      eye: [8.5747, 7.1420, 14.1468], target: [-4.7546, 2.3212, -4.2515] },
+    { el: 'agents',   // leg 10: 'built for agents', the SETUP — the camera
+      loggedFov: 8,   // switches to a low street-level frame on the LEFT
+                      // (az -54) ENTIRELY under the addons flat: begins a
+                      // hair after the cover is opaque (addons top 45% vh)
+                      // and is done before it starts lifting. the radial's
+                      // left crossing (agentsWin) rides this leg's span.
+                      // (startEl: the start is measured off ANOTHER
+                      // section's top, not the leg's own)
+      startEl: 'addons', startAt: 0.42,
+      endAt: 0.85,
+      eye: [-43.1862, 1.7298, 34.5598], target: [6.8413, -0.2224, -1.2387] },
+    { el: 'agents',   // leg 11: the VISIBLE ride — from the street-level
+      loggedFov: 8,   // start it climbs and orbits right (az -54 → -35)
+                      // to the settled laptop shot while the reveal plays
+                      // and the section reads
+      endAt: 0.5,
+      // the logged settle ([-22.7910, 12.3207, 39.1277] → [5.0643,
+      // 1.5153, -1.1268]) panned HALF A METER along screen-UP in the
+      // view plane (same orbit, same fov): the CONTENT lands lower in
+      // the frame — "more bottom", 1m was "to much"
+      eye: [-22.7296, 12.8090, 39.0390], target: [5.1257, 2.0036, -1.2155] }
   ];
   function sl(a, b, k){ return a + (b - a) * k; }
   function wrapPi(a){
@@ -1328,6 +1645,13 @@
       // leg to be done (default 0.55 = lower middle; 1 = the moment the
       // section enters from the bottom).
       L.start = Math.max(0, prev - (L.early || 0) * window.innerHeight);
+      // `startAt` (viewport fraction) delays a leg past the previous end:
+      // it begins only once its section's top reaches that line —
+      // `startEl` points that measurement at ANOTHER section (leg 10
+      // starts off the addons top, so it rides under the gray cover)
+      var sN = L.startEl ? document.getElementById(L.startEl) : L.node;
+      if (L.startAt && sN) L.start = Math.max(L.start,
+        sN.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * L.startAt);
       L.end = Math.max(L.start + 1, L.node ?
         L.node.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * (L.endAt || 0.55) : L.start + 1);
       prev = L.end;
@@ -1336,10 +1660,43 @@
     // the calculator's window: math title top from 60% vh down to 25% vh
     var calcNode = document.getElementById('math');
     if (calcNode){
-      var calcTop = calcNode.getBoundingClientRect().top + window.pageYOffset;
-      calcWin.start = calcTop - window.innerHeight * 0.6;
+      var calcRect = calcNode.getBoundingClientRect();
+      var calcTop = calcRect.top + window.pageYOffset;
+      calcWin.start = calcTop - window.innerHeight * 0.55;
       calcWin.end = Math.max(calcWin.start + 1, calcTop - window.innerHeight * 0.25);
+      // the rack leaves over math top 75% → 50% vh ("delay is so big" —
+      // the whole math train moved 10% vh earlier)
+      rackOutWin.start = calcTop - window.innerHeight * 0.75;
+      rackOutWin.end = Math.max(rackOutWin.start + 1, calcTop - window.innerHeight * 0.5);
+      // the release point: once the math panel's bottom passes the
+      // calculator's bottom, the whole composition scrolls out with it
+      calcMathBot = calcTop + calcRect.height;
     }
+    // the metal panel's window: 'our metal' top from 90% vh down to 55%
+    var metalNode = document.getElementById('modes');
+    if (metalNode){
+      var metalTop = metalNode.getBoundingClientRect().top + window.pageYOffset;
+      metalWin.start = metalTop - window.innerHeight * 0.9;
+      metalWin.end = Math.max(metalWin.start + 1, metalTop - window.innerHeight * 0.6);
+      // the plates start typing the moment the CLONING starts (metalWin
+      // p 0.4 ≈ top 78% vh): '[ our metal ]' writes while the clone
+      // slides, '[ your metal ]' picks up right as it lands
+      rackLblWin.start = metalTop - window.innerHeight * 0.78;
+      rackLblWin.end = Math.max(rackLblWin.start + 1, metalTop - window.innerHeight * 0.45);
+    }
+    // the machine panel's window: top 90% → 60% vh, in step with leg 9
+    var machNode = document.getElementById('machine');
+    if (machNode){
+      var machTop = machNode.getBoundingClientRect().top + window.pageYOffset;
+      machineWin.start = machTop - window.innerHeight * 0.9;
+      machineWin.end = Math.max(machineWin.start + 1, machTop - window.innerHeight * 0.6);
+    }
+    // the agents window rides EXACTLY leg 10's span (measured above):
+    // the radial's crossing to the left happens with the camera switch,
+    // entirely under the addons cover — the scene comes back already
+    // crossed, shadow on the right where the agents text sits
+    agentsWin.start = LEGS[7].start;
+    agentsWin.end = LEGS[7].end;
   }
   window.addEventListener('resize', measureScrub);
   window.addEventListener('load', measureScrub);
@@ -1350,7 +1707,7 @@
     return {legs: LEGS.map(function(L){ return {el: L.el, start: L.start, end: L.end,
               raw: L.raw, p: L.p, solved: L.solved || null}; }),
             aspect: camera.aspect, fov: camera.fov, free: scrubFree, ms: +(dbgDt * 1000).toFixed(2),
-            rackFade: rackFade, cubeFade: cubeFade, pcbFade: pcbFade, cubeHide: cubeHide, revFade: revFade, revSeal: revSeal,
+            rackFade: rackFade, cubeFade: cubeFade, pcbFade: pcbFade, cubeHide: cubeHide, revFade: revFade, revSeal: revSeal, radialHide: radialHide, calcWin: calcWin.p, metalWin: metalWin.p, rackOutWin: rackOutWin.p, rack2Op: rack2Op, agentsWin: agentsWin.p, lapLid: lapLidQ,
             cam: camera.position.toArray(), tgt: controls.target.toArray()};
   };
   var scrubHome = null, scrubAz = 0, scrubAzD = 0, scrubFree = false, scrubScene = 1;
@@ -1644,6 +2001,109 @@
         });
       });
       scene.add(r.scene);
+      // ── the second rack, 'on yours': a clone standing right NEXT to
+      // the original — one rack-width plus a small gap, so both machines
+      // stand side by side inside the radial's left circle (the metal
+      // panel's text owns the covered right). cloned BEFORE the cube
+      // grid goes in — the copy is the sealed shell only. its materials
+      // are clones (the fade must ride alone) but keep the SAME live
+      // glitchPlanes array and stencil stamp: identical defines → the
+      // already-compiled programs are reused, no new shaders.
+      var rack2Dx = (rackBox.max.x - rackBox.min.x) * 1.75;
+      rackRoot2 = r.scene.clone(true);
+      // the clone is BORN inside the original and slides out to its
+      // side-by-side spot on the metal window (the driver in the loop
+      // writes position.x each scrub step); only the travel is baked here
+      rack2BaseX = rackRoot2.position.x;
+      rack2DxW = rack2Dx;
+      // a hair toward the lens: while the two overlap mid-slide their
+      // faces sit coplanar and would z-fight (the shimmer that reads as
+      // glitch); 5cm is ~2 depth steps at ride distance, invisible at rest
+      rackRoot2.position.z += 0.05;
+      var m2cache = {};
+      rackRoot2.traverse(function(o){
+        if (!o.isMesh) return;
+        var rm2 = Array.isArray(o.material) ? o.material : [o.material];
+        var out2 = rm2.map(function(m){
+          if (!m2cache[m.uuid]){
+            var c2 = m.clone();
+            c2.clippingPlanes = glitchPlanes;   // clone() froze a dead copy — relink the live array
+            c2.transparent = true; c2.opacity = 0;
+            m2cache[m.uuid] = c2;
+            rack2Mats.push(c2);
+          }
+          return m2cache[m.uuid];
+        });
+        o.material = Array.isArray(o.material) ? out2 : out2[0];
+      });
+      rackRoot2.visible = false;
+      scene.add(rackRoot2);
+      rackRoot2.updateMatrixWorld(true);   // autoUpdate is off — bake once
+      // ── the name plates standing over the two racks, typed exactly
+      // like the calculator's label: terminal mono, block cursor at the
+      // tip, the count riding a scroll window (drawn in the loop) ──
+      function rackLblMake(text, hl){
+        var cv = document.createElement('canvas');
+        cv.width = 1600; cv.height = 224;
+        var cx2 = cv.getContext('2d');
+        var tex = new THREE.CanvasTexture(cv);
+        tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
+        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        tex.encoding = THREE.sRGBEncoding;
+        var mat = new THREE.MeshBasicMaterial({map: tex, transparent: true, opacity: 0});
+        mat.toneMapped = false;
+        mat.depthTest = false; mat.depthWrite = false;
+        var mesh = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 0.476), mat);
+        mesh.renderOrder = 19996;
+        mesh.castShadow = mesh.receiveShadow = false;
+        mesh.visible = false;
+        mesh.userData.len = text.length;
+        mesh.userData.shown = -1;
+        mesh.userData.mat = mat;
+        mesh.userData.draw = function(n){
+          // the calculator label's EXACT draw — same font, same
+          // #e6e6e6, same cursor block. it can stay this bright with
+          // no stain because the plates render in the overlay pass,
+          // after bloom: the pass never sees them.
+          cx2.clearRect(0, 0, 1600, 224);
+          cx2.font = '500 82px "Space Mono", ui-monospace, Menlo, monospace';
+          cx2.textBaseline = 'middle'; cx2.textAlign = 'left';
+          var sx2 = 800 - cx2.measureText(text).width / 2;
+          var s2 = text.slice(0, n);
+          if (n > 0){
+            // the page's color coding, per word: the typed run splits
+            // into before / highlight / after segments — mono font, so
+            // the widths chain exactly
+            var segs = [
+              [s2.slice(0, Math.min(n, hl.a)), '#e6e6e6'],
+              [s2.slice(hl.a, Math.min(n, hl.b)), hl.c],
+              [s2.slice(hl.b), '#e6e6e6']
+            ];
+            var ax2 = sx2;
+            for (var gi = 0; gi < 3; gi++){
+              if (!segs[gi][0]) continue;
+              cx2.fillStyle = segs[gi][1];
+              cx2.fillText(segs[gi][0], ax2, 116);
+              ax2 += cx2.measureText(segs[gi][0]).width;
+            }
+          }
+          cx2.fillStyle = '#e6e6e6';
+          if (n > 0 && n < text.length)
+            cx2.fillRect(sx2 + cx2.measureText(s2).width + 10, 78, 40, 76);   // the cursor block
+          tex.needsUpdate = true;
+        };
+        mesh.userData.draw(0);
+        plateScene.add(mesh);
+        return mesh;
+      }
+      // 'our' in the site green, 'your' in the site blue — the same
+      // coding as the panel's heading spans (indices are hl.a..hl.b-1)
+      rackLbl1 = rackLblMake('[ our metal ]', {a: 2, b: 5, c: '#11a32a'});
+      rackLbl2 = rackLblMake('[ your metal ]', {a: 2, b: 6, c: '#a5b4fc'});
+      rackLbl1.position.set(-0.35, rackTopY + 0.5, -1.72);
+      rackLbl2.position.set(-0.35, rackTopY + 0.5, -1.67);   // x follows the clone (driver)
+      rackLbl1.updateMatrixWorld(true);
+      rackLbl2.updateMatrixWorld(true);
       // ── the machines inside the shell (the version-10 grid) ──
       // a lattice of small cubes filling the rack's interior, drawn like
       // the page's annotation swatches: a bright square border in the
@@ -1651,6 +2111,31 @@
       // (MeshBasicMaterial) so no lamp can shift the colors off the
       // annotation's — the earlier lit cubes washed out under the warm
       // key. hidden until the leg-3 tail opens the shell around them.
+      // the border frame: 12 solid thin bars along a cube's edges merged
+      // into one geometry — crisp square frames with none of the triangle
+      // diagonals a wireframe box would draw, and none of the aliasing a
+      // 1px gl line gets. shared by the rack lattice AND the math column.
+      function frameGeo(s, t){
+        var half = s / 2, pos = [], idx = [], off = 0;
+        var bars = [];
+        for (var a = -1; a <= 1; a += 2) for (var b = -1; b <= 1; b += 2){
+          bars.push([s + t, t, t, 0, a * half, b * half]);
+          bars.push([t, s + t, t, a * half, 0, b * half]);
+          bars.push([t, t, s + t, a * half, b * half, 0]);
+        }
+        bars.forEach(function(B){
+          var bg = new THREE.BoxGeometry(B[0], B[1], B[2]);
+          var p = bg.attributes.position.array, ix = bg.index.array;
+          for (var i = 0; i < p.length; i += 3) pos.push(p[i] + B[3], p[i + 1] + B[4], p[i + 2] + B[5]);
+          for (var j = 0; j < ix.length; j++) idx.push(ix[j] + off);
+          off += bg.attributes.position.count;
+          bg.dispose();
+        });
+        var out = new THREE.BufferGeometry();
+        out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        out.setIndex(idx);
+        return out;
+      }
       (function(){
         var mx = (rackBox.max.x - rackBox.min.x) * 0.14,
             mz = (rackBox.max.z - rackBox.min.z) * 0.14,
@@ -1699,27 +2184,6 @@
         // the border: 12 solid thin bars along the cube's edges merged
         // into one geometry — crisp square frames with none of the
         // triangle diagonals a wireframe box would draw
-        function frameGeo(s, t){
-          var half = s / 2, pos = [], idx = [], off = 0;
-          var bars = [];
-          for (var a = -1; a <= 1; a += 2) for (var b = -1; b <= 1; b += 2){
-            bars.push([s + t, t, t, 0, a * half, b * half]);
-            bars.push([t, s + t, t, a * half, 0, b * half]);
-            bars.push([t, t, s + t, a * half, b * half, 0]);
-          }
-          bars.forEach(function(B){
-            var bg = new THREE.BoxGeometry(B[0], B[1], B[2]);
-            var p = bg.attributes.position.array, ix = bg.index.array;
-            for (var i = 0; i < p.length; i += 3) pos.push(p[i] + B[3], p[i + 1] + B[4], p[i + 2] + B[5]);
-            for (var j = 0; j < ix.length; j++) idx.push(ix[j] + off);
-            off += bg.attributes.position.count;
-            bg.dispose();
-          });
-          var out = new THREE.BufferGeometry();
-          out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-          out.setIndex(idx);
-          return out;
-        }
         var fillGeo = new THREE.BoxGeometry(cell, cell, cell);
         var edgeGeo = frameGeo(cell, cell * 0.035);
         // wall tone = the annotation swatch's bg pushed well up (~1.6×
@@ -1791,6 +2255,12 @@
         initLeg(LEGS[3], 3);
         // leg 6's azimuth chain hangs off leg 5's re-aimed pose
         initLeg(LEGS[4], 4);
+        // leg 8 centers the PAIR of racks in the radial's left circle:
+        // the midpoint between the original and the clone pins to the
+        // hole's center (screen 0.22), at the height the shot was
+        // framed at (mid-rack 1.6 sat at ~0.61 in the logged frame)
+        LEGS[5].anchor = {x: 0.22, y: 0.61, point: [-0.35 + rack2Dx / 2, 1.6, -1.72]};
+        initLeg(LEGS[5], 5);
         measureScrub();
         // the deployed cube's green: per-instance TINTS that turn the
         // grey free cube into a green machine in place. instance colors
@@ -1841,7 +2311,7 @@
       // ── the pcb inside the free cube (leg 5's payload) ──
       // 90mb of board: it loads in the background and simply isn't there
       // until it arrives — the fade block guards on pcbRoot
-      var dracoPending = 2;   // pcb + calculator: last one in frees the workers
+      var dracoPending = 3;   // pcb + calculator + laptop: last one in frees the workers
       loader.load('/models/pcb.glb', function(pg){
         var pr = pg.scene;
         var pb = new THREE.Box3().setFromObject(pr);
@@ -1925,6 +2395,8 @@
             // as-authored colors — the user swapped models and asked for
             // no retinting; only the fade/stencil plumbing touches it
             m.transparent = true; m.opacity = 0;
+            m.userData.baseA = 0.95;  // the body rests near-solid; the display stays solid
+            m.userData.glyphBlink = true;   // the key glyphs ride the road-blink below
             m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
             if (calcMats.indexOf(m) === -1) calcMats.push(m);
           });
@@ -1933,6 +2405,207 @@
         var cwrap = new THREE.Group();
         cr.position.sub(ccn);
         cwrap.add(cr);
+        // ── our own display plate ──
+        // the authored display content mesh is gone (it left with the
+        // DUSK deletion) and the brand art is baked deep into the body
+        // maps — so the display is OURS now: a quad glued over the
+        // window AND the brand band, green panel, neon-red 200$,
+        // unlit + un-tonemapped so it reads like the city's neon signs
+        var dcv = document.createElement('canvas');
+        dcv.width = 1024; dcv.height = 384;
+        var dcx = dcv.getContext('2d');
+        // rounded panel on a transparent canvas: the plate spans the FULL
+        // body width, the clear corners keep it inside the shell's radius
+        function drr(x, y, w, h, r){
+          dcx.beginPath();
+          dcx.moveTo(x + r, y);
+          dcx.arcTo(x + w, y, x + w, y + h, r);
+          dcx.arcTo(x + w, y + h, x, y + h, r);
+          dcx.arcTo(x, y + h, x, y, r);
+          dcx.arcTo(x, y, x + w, y, r);
+          dcx.closePath(); dcx.fill();
+        }
+        dcx.fillStyle = '#041f08';
+        drr(0, 0, 1024, 384, 58);
+        dcx.fillStyle = '#06300f';
+        drr(14, 14, 996, 356, 46);
+        var dtex = new THREE.CanvasTexture(dcv);
+        // crisp at the pendulum's angles: no mip shimmer, full anisotropy
+        // (the minification moiré on the digits read as constant glitching)
+        dtex.minFilter = THREE.LinearFilter; dtex.generateMipmaps = false;
+        dtex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        dtex.encoding = THREE.sRGBEncoding;   // canvas colors are sRGB; keep them honest through the gamma pass
+        var dmat = new THREE.MeshBasicMaterial({map: dtex, transparent: true, opacity: 0});
+        dmat.toneMapped = false;   // neon: skip reinhard, feed the bloom raw
+        // the plate floats sub-millimeter off the glass: at ride distance
+        // the depth buffer can't split them and pixels flicker (the
+        // "gloss glitch"). draw order stacks the layers, depth sits out
+        dmat.depthTest = false; dmat.depthWrite = false;
+        dmat.stencilWrite = true; dmat.stencilRef = 1; dmat.stencilZPass = THREE.ReplaceStencilOp;
+        var dplate = new THREE.Mesh(new THREE.PlaneGeometry(0.104, 0.041), dmat);
+        // local coords of the wrap (model recentered): the face's top
+        // box at 100% body width, stretched DOWN over the brand band
+        dplate.position.set(0, 0.065, 0.0058);
+        dplate.renderOrder = 19994;
+        dplate.castShadow = dplate.receiveShadow = false;
+        depthSkip.push(dplate);
+        cwrap.add(dplate);
+        calcMats.push(dmat);   // fades with the same calcQ as the body
+        // the digits: their own transparent layer, right-justified like
+        // a real calculator, glitch-flickered like the city's red signs
+        var tcv = document.createElement('canvas');
+        tcv.width = 1024; tcv.height = 384;
+        var tcx = tcv.getContext('2d');
+        var ttex;   // assigned below; drawDigits marks it stale per frame
+        // redraw the digits for one logo-glitch step: only the step's
+        // band survives (clip), shifted by the shimmy; null = whole
+        calcTextDraw = function(st){
+          tcx.clearRect(0, 0, 1024, 384);
+          tcx.save();
+          if (st){
+            if (st[2] <= st[1]){ tcx.restore(); ttex.needsUpdate = true; return; }   // empty band: blink off
+            tcx.beginPath();
+            tcx.rect(0, 384 * st[1] / 100, 1024, 384 * (st[2] - st[1]) / 100);
+            tcx.clip();
+            tcx.translate(st[3] * 6.1, 0);   // the logo's shimmy, canvas-scaled
+          }
+          var TOT_F = '800 68px Archivo, Helvetica, Arial, sans-serif';
+          var SUM_F = '800 150px Archivo, Helvetica, Arial, sans-serif';
+          tcx.textBaseline = 'middle';
+          tcx.shadowColor = '#ff2a18'; tcx.shadowBlur = 38;
+          tcx.fillStyle = '#ff2a18';
+          tcx.font = TOT_F; tcx.textAlign = 'left';  tcx.fillText('total:', 84, 214);
+          tcx.font = SUM_F; tcx.textAlign = 'right'; tcx.fillText('200$', 940, 200);
+          tcx.shadowBlur = 0;
+          tcx.font = TOT_F; tcx.textAlign = 'left';  tcx.fillText('total:', 84, 214);
+          tcx.font = SUM_F; tcx.textAlign = 'right'; tcx.fillText('200$', 940, 200);
+          tcx.restore();
+          ttex.needsUpdate = true;
+        };
+        ttex = new THREE.CanvasTexture(tcv);
+        calcTextDraw(null);
+        ttex.minFilter = THREE.LinearFilter; ttex.generateMipmaps = false;
+        ttex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        ttex.encoding = THREE.sRGBEncoding;
+        calcTextMat = new THREE.MeshBasicMaterial({map: ttex, transparent: true, opacity: 0});
+        calcTextMat.toneMapped = false;
+        calcTextMat.depthTest = false; calcTextMat.depthWrite = false;
+        calcTextMat.stencilWrite = true; calcTextMat.stencilRef = 1; calcTextMat.stencilZPass = THREE.ReplaceStencilOp;
+        var dtextm = new THREE.Mesh(new THREE.PlaneGeometry(0.104, 0.041), calcTextMat);
+        dtextm.position.set(0, 0.065, 0.006);
+        dtextm.renderOrder = 19995;
+        dtextm.castShadow = dtextm.receiveShadow = false;
+        depthSkip.push(dtextm);
+        cwrap.add(dtextm);
+        // ── the cube column: 10 machines stacked vertically, the rack's
+        // exact annotation palette (walls = swatch bg, edges = accent),
+        // unit layout (cube 1, gap 0.32) — the ride scales the group ──
+        calcCubes = new THREE.Group();
+        // all green: every cube is a deployed project beside the bill
+        var CUBE_ROLES = ['g','g','g','g','g','g','g','g','g','g'];
+        var CUBE_COL = {
+          g: {wall: 0x264d2d, edge: 0x11a32a, ea: 0.95},   // the rack lattice's exact green pair
+          b: {wall: 0x282a34, edge: 0xa5b4fc, ea: 0.95},
+          f: {wall: 0x353535, edge: 0xffffff, ea: 0.34}
+        };
+        var cubeGeo = new THREE.BoxGeometry(1, 1, 1);
+        // the frames are the rack lattice's solid merged bars, NOT gl
+        // lines: a LineSegments edge is a 1px hairline that aliases into
+        // visible stair-steps ("i see pixels") and never thickens with
+        // the cube — the bars scale, fxaa holds their edges
+        var cubeEdgeGeo = frameGeo(1, 0.035);
+        for (var ci = 0; ci < 10; ci++){
+          var role = CUBE_COL[CUBE_ROLES[ci]];
+          var one = new THREE.Group();
+          var wm = new THREE.MeshBasicMaterial({color: role.wall, transparent: true, opacity: 0});
+          wm.color.convertSRGBToLinear();   // the gamma pass re-encodes; feed it linear
+          wm.stencilWrite = true; wm.stencilRef = 1; wm.stencilZPass = THREE.ReplaceStencilOp;
+          var em2 = new THREE.MeshBasicMaterial({color: role.edge, transparent: true, opacity: 0});
+          em2.color.convertSRGBToLinear();
+          em2.stencilWrite = true; em2.stencilRef = 1; em2.stencilZPass = THREE.ReplaceStencilOp;
+          var wmesh = new THREE.Mesh(cubeGeo, wm);
+          var emesh = new THREE.Mesh(cubeEdgeGeo, em2);
+          wmesh.renderOrder = 19990; emesh.renderOrder = 19991;
+          wmesh.castShadow = wmesh.receiveShadow = false;
+          emesh.castShadow = emesh.receiveShadow = false;
+          depthSkip.push(wmesh);
+          depthSkip.push(emesh);
+          one.add(wmesh); one.add(emesh);
+          // stacked bottom-up, centered on the column's middle
+          one.userData.baseY = (ci - 4.5) * 1.32;
+          one.userData.sp = 0.7 + (ci * 0.617) % 0.7;      // levitation rhythm
+          one.userData.ph = ci * 2.399;                    // golden-angle phases
+          // the rack crowd's wink: each cube pops at its own seeded
+          // moment of the scrub (0.2-wide window, like the rack's)
+          one.userData.th = 0.05 + ((ci * 0.618) % 1) * 0.55;
+          one.position.y = one.userData.baseY;
+          calcCubes.add(one);
+          calcCubeMats.push({m: wm, a: 1});
+          calcCubeMats.push({m: em2, a: role.ea});
+        }
+        calcCubes.visible = false;
+        scene.add(calcCubes);
+        // ── the equation between the projects and the bill, set in the
+        // terminal's white mono, stacked to fit the narrow gap ──
+        var lcv = document.createElement('canvas');
+        lcv.width = 1600; lcv.height = 224;
+        var lcx = lcv.getContext('2d');
+        var ltex;   // assigned below; the draw marks it stale
+        var LBL = '[ 10 machines · 200$ a month ]';
+        // typed like the terminal window: the first n characters, a block
+        // cursor at the tip while mid-line, anchored so the finished line
+        // sits exactly centered
+        calcLabelDraw = function(n){
+          lcx.clearRect(0, 0, 1600, 224);
+          lcx.font = '500 82px "Space Mono", ui-monospace, Menlo, monospace';
+          lcx.textBaseline = 'middle'; lcx.textAlign = 'left';
+          lcx.fillStyle = '#e6e6e6';
+          var lsx = 800 - lcx.measureText(LBL).width / 2;
+          var ls = LBL.slice(0, n);
+          if (n > 0) lcx.fillText(ls, lsx, 116);
+          if (n > 0 && n < LBL.length)
+            lcx.fillRect(lsx + lcx.measureText(ls).width + 10, 78, 40, 76);   // the cursor block
+          ltex.needsUpdate = true;
+        };
+        ltex = new THREE.CanvasTexture(lcv);
+        ltex.minFilter = THREE.LinearFilter; ltex.generateMipmaps = false;
+        ltex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        ltex.encoding = THREE.sRGBEncoding;
+        var lmat = new THREE.MeshBasicMaterial({map: ltex, transparent: true, opacity: 0});
+        lmat.toneMapped = false;
+        lmat.depthTest = false; lmat.depthWrite = false;
+        lmat.stencilWrite = true; lmat.stencilRef = 1; lmat.stencilZPass = THREE.ReplaceStencilOp;
+        calcLabel = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.14), lmat);
+        calcLabel.userData.len = LBL.length;
+        calcLabelDraw(0);
+        calcLabel.renderOrder = 19996;
+        calcLabel.castShadow = calcLabel.receiveShadow = false;
+        depthSkip.push(calcLabel);
+        calcLabel.visible = false;
+        scene.add(calcLabel);
+        calcCubeMats.push({m: lmat, a: 1});   // fades with the ride like the cubes
+        // ── the pod-card glow, standing just behind the calculator ──
+        var gcv = document.createElement('canvas');
+        gcv.width = gcv.height = 256;
+        var ggx = gcv.getContext('2d');
+        var grad = ggx.createRadialGradient(128, 128, 10, 128, 128, 128);
+        grad.addColorStop(0, 'rgba(17,163,42,0.85)');
+        grad.addColorStop(0.55, 'rgba(17,163,42,0.28)');
+        grad.addColorStop(1, 'rgba(17,163,42,0)');
+        ggx.fillStyle = grad;
+        ggx.fillRect(0, 0, 256, 256);
+        var gtex = new THREE.CanvasTexture(gcv);
+        gtex.encoding = THREE.sRGBEncoding;
+        calcGlowMat = new THREE.MeshBasicMaterial({map: gtex, transparent: true, opacity: 0});
+        calcGlowMat.toneMapped = false;
+        calcGlowMat.depthTest = false; calcGlowMat.depthWrite = false;
+        calcGlowMat.stencilWrite = true; calcGlowMat.stencilRef = 1; calcGlowMat.stencilZPass = THREE.ReplaceStencilOp;
+        calcGlow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1.35), calcGlowMat);
+        calcGlow.renderOrder = 19989;   // under the calc, the cubes, everything
+        calcGlow.castShadow = calcGlow.receiveShadow = false;
+        depthSkip.push(calcGlow);
+        calcGlow.visible = false;
+        scene.add(calcGlow);
         cwrap.visible = false;
         scene.add(cwrap);
         scene.updateMatrixWorld(true);
@@ -1971,6 +2644,111 @@
         }
         if (--dracoPending === 0) draco.dispose();
       });
+      // ── the laptop in front of the rack (leg 10's prop) ── stands on
+      // the city ground between the rack and the leg-10 lens, turned to
+      // face it with a three-quarter twist like the calculator. faded on
+      // the agents window — the whole entrance happens under the addons
+      // cover, so it is simply THERE when the radial returns.
+      loader.load('/models/laptop.glb', function(lg){
+        var lr = lg.scene;
+        var lb = new THREE.Box3().setFromObject(lr);
+        var lsz = new THREE.Vector3(); lb.getSize(lsz);
+        var lct = new THREE.Vector3(); lb.getCenter(lct);
+        // group origin = the model's base center, so the wrap scales,
+        // turns and stands like a prop
+        var lwrap = new THREE.Group();
+        lr.position.sub(new THREE.Vector3(lct.x, lb.min.y, lct.z));
+        lwrap.add(lr);
+        // ~2.2m across the ground against the ~3.6m rack: a console-sized
+        // machine that reads boldly at the leg-10 fov 8 (the source pair's
+        // RIGHT laptop is deleted offline — R3D_Laptop2 disposed before
+        // the optimize join — so the box here measures the ONE machine)
+        lwrap.scale.setScalar(2.2 / Math.max(lsz.x, lsz.z));
+        // right of the rack and a good step FORWARD of its front face, on
+        // the ground — far enough that the rack's near corner can't cut
+        // across the display from the leg-11 angle
+        lwrap.position.set(1.26, groundY, 0.8);
+        // the exact heading of the rack (which ships un-rotated, server
+        // front to +z): the laptop looks where the rack looks
+        lwrap.rotation.y = 0;
+        lwrap.visible = false;
+        lwrap.traverse(function(o){
+          if (!o.isMesh) return;
+          o.renderOrder = 20002;   // over the rack shell (20000): drawn
+                                   // LAST so the rack can't blend through
+                                   // the body; depthTest still culls the
+                                   // truly-hidden parts
+          o.castShadow = false; o.receiveShadow = false;
+          depthSkip.push(o);   // sits out the dof pre-pass like the pcb
+          var lm = Array.isArray(o.material) ? o.material : [o.material];
+          lm.forEach(function(m){
+            m.transparent = true; m.opacity = 0;
+            // the gltf BLEND flag turned depthWrite off: restore it or
+            // the rack (drawn later at 20000) paints over the laptop
+            m.depthWrite = true;
+            m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
+            // neon: the trim lines live in the EMISSIVE map (their diffuse
+            // copy is dimmed to 15% in the bake) — driven hot so both the
+            // indigo AND the darker green glow, and the road-blink dropout
+            // reads as a true blackout, not a lamp-lit flicker
+            m.emissiveIntensity = 2;
+            m.userData.baseEmit = 2;   // the road-blink's resting level
+            if (lapMats.indexOf(m) === -1) lapMats.push(m);
+          });
+        });
+        scene.add(lwrap);
+        // ── the lid ── the laptop STARTS CLOSED; it stands open exactly
+        // whenever the rack is at opacity 1 (the driver rides the rack's
+        // own return factor, __addonsRackHide, so the two land together).
+        // the screen survives as its own node (--join false export); the
+        // hinge line is measured from its geometry in lwrap-local space
+        lwrap.updateMatrixWorld(true);
+        var lidMesh = null;
+        lwrap.traverse(function(o){ if (o.isMesh && o.name.indexOf('pPlane4') !== -1) lidMesh = o; });
+        if (lidMesh){
+          var lidM = new THREE.Matrix4().copy(lwrap.matrixWorld).invert().multiply(lidMesh.matrixWorld);
+          var lidPos = lidMesh.geometry.attributes.position;
+          var lv = new THREE.Vector3();
+          var sMin = new THREE.Vector3(1e9, 1e9, 1e9), sMax = new THREE.Vector3(-1e9, -1e9, -1e9);
+          var lidPts = new Float32Array(lidPos.count * 3);
+          for (var lpi = 0; lpi < lidPos.count; lpi++){
+            lv.fromBufferAttribute(lidPos, lpi).applyMatrix4(lidM);
+            sMin.min(lv); sMax.max(lv);
+            lidPts[lpi * 3] = lv.x; lidPts[lpi * 3 + 1] = lv.y; lidPts[lpi * 3 + 2] = lv.z;
+          }
+          // hinge = the screen's lowest edge: average of the bottom 6%
+          var hx = 0, hz = 0, hn = 0, lidH = sMax.y - sMin.y;
+          for (var lpj = 0; lpj < lidPts.length; lpj += 3){
+            if (lidPts[lpj + 1] < sMin.y + lidH * 0.06){ hx += lidPts[lpj]; hz += lidPts[lpj + 2]; hn++; }
+          }
+          hx /= hn; hz /= hn;
+          // the screen's open angle off the hinge, and the flat angle over
+          // the deck (the body lies on the hinge's other side: the wrap
+          // origin is the machine's base center). rest a hair above flat.
+          var openPhi = Math.atan2((sMin.y + sMax.y) / 2 - sMin.y, (sMin.z + sMax.z) / 2 - hz);
+          var closedPhi = hz < 0 ? 0.08 : Math.PI - 0.08;
+          lapLidClose = openPhi - closedPhi;
+          var lid = new THREE.Group();
+          lid.position.set(hx, sMin.y, hz);
+          lwrap.add(lid);
+          lid.updateMatrixWorld(true);
+          lid.attach(lidMesh);
+          lid.rotation.x = lapLidClose;   // born closed
+          lid.updateMatrixWorld(true);    // scene.autoUpdate is off — bake it
+          lapLid = lid;
+        }
+        // its own small warm key, in the scene from load (constant light
+        // count) — the dark body would read as a hole against the night
+        lapLamp = new THREE.PointLight(0xffe6c0, 0, 6, 2);
+        lapLamp.position.set(lwrap.position.x + 1.6, groundY + 1.6, lwrap.position.z + 1.9);
+        scene.add(lapLamp);
+        // compile now, in load idle — the first visible frame comes right
+        // as the addons cover thins; a shader stall there would hitch it
+        renderer.compile(scene, camera);
+        lapRoot = lwrap;
+        frameDirtyFlag = true;
+        if (--dracoPending === 0) draco.dispose();
+      });
       // the key light points straight down, so the rack's faces would render
       // black; one small warm lamp in the street lets the servers read.
       // it fades in and out with the rack.
@@ -1986,6 +2764,19 @@
       rackSpot.position.set(3.2, 9.5, 6.6);   // front-right and high
       rackSpot.target.position.set(-0.35, 1.6, -1.72);
       scene.add(rackSpot); scene.add(rackSpot.target);
+      // the clone's own warm pair, the same recipe shifted right with it
+      // — the originals' lamp reaches 6m and the copy stands ~16m away,
+      // so without these it renders near-black. added at load like every
+      // light (constant light count = no mid-ride recompile); intensity
+      // rides the metal window with the copy's fade.
+      rackLamp2 = new THREE.PointLight(0xffe6c0, 0, 6, 2);
+      rackLamp2.position.set(0.95 + rack2Dx, 1.7, -0.25);
+      scene.add(rackLamp2);
+      rackSpot2 = new THREE.SpotLight(0xffe6c0, 0);
+      rackSpot2.angle = 28 * Math.PI / 180; rackSpot2.penumbra = 0.5; rackSpot2.decay = 0; rackSpot2.distance = 0;
+      rackSpot2.position.set(3.2 + rack2Dx, 9.5, 6.6);
+      rackSpot2.target.position.set(-0.35 + rack2Dx, 1.6, -1.72);
+      scene.add(rackSpot2); scene.add(rackSpot2.target);
       scene.updateMatrixWorld(true);   // bake the rack's matrices too
       renderer.shadowMap.needsUpdate = true;
       // draco.dispose() moved into the pcb callback: the board is
@@ -2173,10 +2964,26 @@
     }
   }
   var clock = new THREE.Clock();
+  // set while the addons flat blanks the frame — and STARTS true: the
+  // very first frame after a reload snaps every damped ride straight to
+  // the restored scroll position. a mid-page refresh used to damp-up
+  // from zero over ~1s: the camera swept the whole chain, and radialT
+  // (machineWin * (1-agentsWin)) bumped through values organic scrolling
+  // never produces — gradRide2 latched its gsap start off the in-flight
+  // --holeX and the radial stuck at a garbage spot (refresh on addons /
+  // agents). snapping first makes gradRide fully settled BEFORE
+  // gradRide2 ever captures its start.
+  var coverJump = true;
   function loop(){
     requestAnimationFrame(loop);
     var dt = Math.min(clock.getDelta(), 0.05);
     if (!stageVisible) return;   // scrolled away: skip the whole frame
+    // the addons flat is fully opaque: nothing of the scene can show —
+    // skip the whole chain; the ride resumes as soon as the cover thins.
+    // the flag makes the resume a JUMP CUT: everything the scroll did
+    // under the cover (leg 10's camera switch, the radial's crossing)
+    // must have already happened when the scene shows again
+    if ((window.__addonsCoverOp || 0) >= 0.999){ coverJump = true; return; }
     dbgDt += (dt - dbgDt) * 0.05;
     // scroll drives the ride; a light damp on p rounds off wheel steps
     var scrollNow = window.pageYOffset || 0;
@@ -2194,6 +3001,89 @@
     calcWin.raw = Math.min(1, Math.max(0, (scrollNow - calcWin.start) / (calcWin.end - calcWin.start)));
     calcWin.p += (calcWin.raw - calcWin.p) * (1 - Math.exp(-dt * 6));
     if (Math.abs(calcWin.raw - calcWin.p) < 0.001) calcWin.p = calcWin.raw;
+    calcOut.raw = Math.min(1, Math.max(0, (0.85 - (calcMathBot - scrollNow) / window.innerHeight) / 0.4));
+    calcOut.p += (calcOut.raw - calcOut.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(calcOut.raw - calcOut.p) < 0.001) calcOut.p = calcOut.raw;
+    metalWin.raw = Math.min(1, Math.max(0, (scrollNow - metalWin.start) / (metalWin.end - metalWin.start)));
+    metalWin.p += (metalWin.raw - metalWin.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(metalWin.raw - metalWin.p) < 0.001) metalWin.p = metalWin.raw;
+    rackOutWin.raw = Math.min(1, Math.max(0, (scrollNow - rackOutWin.start) / (rackOutWin.end - rackOutWin.start)));
+    rackOutWin.p += (rackOutWin.raw - rackOutWin.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(rackOutWin.raw - rackOutWin.p) < 0.001) rackOutWin.p = rackOutWin.raw;
+    rackLblWin.raw = Math.min(1, Math.max(0, (scrollNow - rackLblWin.start) / (rackLblWin.end - rackLblWin.start)));
+    rackLblWin.p += (rackLblWin.raw - rackLblWin.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(rackLblWin.raw - rackLblWin.p) < 0.001) rackLblWin.p = rackLblWin.raw;
+    machineWin.raw = Math.min(1, Math.max(0, (scrollNow - machineWin.start) / (machineWin.end - machineWin.start)));
+    machineWin.p += (machineWin.raw - machineWin.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(machineWin.raw - machineWin.p) < 0.001) machineWin.p = machineWin.raw;
+    agentsWin.raw = Math.min(1, Math.max(0, (scrollNow - agentsWin.start) / (agentsWin.end - agentsWin.start)));
+    agentsWin.p += (agentsWin.raw - agentsWin.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(agentsWin.raw - agentsWin.p) < 0.001) agentsWin.p = agentsWin.raw;
+    prlxWin.raw = LEGS[6].end > 1 ? Math.max(0, scrollNow - LEGS[6].end) : 0;
+    prlxWin.p += (prlxWin.raw - prlxWin.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(prlxWin.raw - prlxWin.p) < 0.1) prlxWin.p = prlxWin.raw;   // px scale
+    prlxWin2.raw = LEGS[8].end > 1 ? Math.max(0, scrollNow - LEGS[8].end) : 0;
+    prlxWin2.p += (prlxWin2.raw - prlxWin2.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(prlxWin2.raw - prlxWin2.p) < 0.1) prlxWin2.p = prlxWin2.raw;   // px scale
+    // back from under the addons flat: whatever the scroll did while the
+    // cover was opaque already LANDED — snap every damped ride to its raw
+    // so the scene re-emerges switched, no visible catch-up swoop. works
+    // both directions (scrolling back up snaps the same way).
+    if (coverJump){
+      coverJump = false;
+      for (var cj = 0; cj < LEGS.length; cj++) LEGS[cj].p = LEGS[cj].raw;
+      calcWin.p = calcWin.raw; calcOut.p = calcOut.raw;
+      metalWin.p = metalWin.raw; rackOutWin.p = rackOutWin.raw;
+      rackLblWin.p = rackLblWin.raw; machineWin.p = machineWin.raw;
+      agentsWin.p = agentsWin.raw; prlxWin.p = prlxWin.raw; prlxWin2.p = prlxWin2.raw;
+      frameDirtyFlag = true;
+    }
+    // leg 10's laptop: faded on the agents window, quantized like the
+    // fade block (the entrance itself lives under the addons cover).
+    // driven OUTSIDE the ride gate so free-cam keeps it for framing.
+    if (lapRoot){
+      // staged by agentsWin (under the cover) but VISIBLY faded with the
+      // rack's own return factor: the laptop rises opacity 0→1 exactly
+      // like the rack, the lid swinging open on the same beat
+      var lapNext = Math.round(revealEase(agentsWin.p) * (1 - (window.__addonsRackHide || 0)) * 200) / 200;
+      if (lapNext !== lapQ){
+        lapQ = lapNext;
+        var lapOn = lapQ > 0.001;
+        if (lapRoot.visible !== lapOn){ lapRoot.visible = lapOn; bokehStamp++; }
+        for (var lqi = 0; lqi < lapMats.length; lqi++) lapMats[lqi].opacity = lapQ;
+        if (lapLamp) lapLamp.intensity = 1.6 * lapQ;
+        frameDirtyFlag = true;
+      }
+      // the lid rides the rack's OWN return factor (coverTick's rackOut,
+      // already eased): closed while the rack is away or still fading,
+      // and FULLY OPEN whenever the rack stands at opacity 1 — the two
+      // land together, always in step, reversible with the scroll
+      if (lapLid){
+        var lidNext = Math.round((1 - (window.__addonsRackHide || 0)) * 200) / 200;
+        if (lidNext !== lapLidQ){
+          lapLidQ = lidNext;
+          lapLid.rotation.x = lapLidClose * (1 - lidNext);
+          lapLid.updateMatrixWorld(true);   // scene.autoUpdate is off — bake the swing
+          frameDirtyFlag = true;
+        }
+      }
+      // the laptop's neon trim blinks like the city's road strokes — the
+      // pod-neon-flicker (10s cycle, dropouts at 2-4% and 6-7%, dimmed to
+      // 0.12). its own copy of the loop: the road loop stands down while
+      // the rack is up (ghostCalm), which is exactly when the laptop is
+      // on stage. change-guarded so the static frame cache only wakes on
+      // the toggle frames.
+      if (!reducedMotion && lapQ > 0.001){
+        var lph = (clock.elapsedTime % 10) / 10;
+        var lOff = (lph >= 0.02 && lph < 0.04) || (lph >= 0.06 && lph < 0.07);
+        if (lOff !== lapNeonOff){
+          lapNeonOff = lOff;
+          for (var lni = 0; lni < lapMats.length; lni++)
+            lapMats[lni].emissiveIntensity = lapMats[lni].userData.baseEmit * (lOff ? 0.12 : 1);
+          frameDirtyFlag = true;   // the dropout must render through the static gate
+        }
+      }
+    }
     if (LEGS[0].raw === 0 && LEGS[0].p < 0.002) LEGS[0].p = 0;
     // the reveal rides the rack leg: the building opens (scene 2) right
     // where the scrubbed fade segment begins, so the rack rises from zero
@@ -2247,8 +3137,15 @@
         if (bi === 4 && gradRide2){
           // scrubbed by the scroll like every animation on this page:
           // the radial rides leg 6's LAST window (0.85→1) — the sealed
-          // rack stands by then — and rewinds the same way
-          radialT = Math.min(1, Math.max(0, (BL.p - 0.85) / 0.15));
+          // rack stands by then — and rewinds the same way. the metal
+          // panel then pulls it BACK left on its own window, the
+          // machine panel crosses it RIGHT again (max of the two rides:
+          // whichever side of the story the scroll sits in wins), and
+          // the agents panel pulls it back LEFT once more — its text
+          // is docked right, the scene owns the left circle
+          radialT = Math.max(
+            Math.min(1, Math.max(0, (BL.p - 0.85) / 0.15)) * (1 - metalWin.p),
+            machineWin.p * (1 - agentsWin.p));
           if (radialT > 0.001 || gradQ2 > 0){
             var gq2 = Math.round(radialT * 100) / 100;
             if (gq2 !== gradQ2){
@@ -2260,6 +3157,15 @@
         }
       }
       stx += scrubOff.x; sty += scrubOff.y; stz += scrubOff.z;
+      // the parallax tail: camera AND target pan down together (a pure
+      // pan — the orbit never changes), so the scene slides up on
+      // screen at 30% of the page's scroll speed. sw is the frame's
+      // half-height in meters, so the ratio holds at any viewport.
+      // the machine tail unwinds across leg 10 (same smoothstep as the
+      // blend) so the agents shot settles on its logged framing, then
+      // the second tail takes over past the agents leg.
+      var prlx10 = LEGS[7].p * LEGS[7].p * (3 - 2 * LEGS[7].p);
+      sty -= (prlxWin.p * (1 - prlx10) + prlxWin2.p) / window.innerHeight * sw * 2 * 0.3;
       var srr = sw / Math.tan(sfov * Math.PI / 360);
       if (camera.fov !== sfov){ camera.fov = sfov; camera.updateProjectionMatrix(); }
       var ssin = Math.sin(spp);
@@ -2331,18 +3237,32 @@
         var calcOn = calcT > 0.001;
         if (calcRoot.visible !== calcOn){
           calcRoot.visible = calcOn;
+          if (calcCubes) calcCubes.visible = calcOn;
+          if (calcLabel) calcLabel.visible = calcOn;
+          if (calcGlow) calcGlow.visible = calcOn;
           bokehStamp++; frameDirtyFlag = true;
         }
         if (calcOn){
+          // the staggered entrance: the cubes lead, the label follows a
+          // tenth behind, the calculator brings up the rear — all three
+          // are windows of the same scrub, so the whole train rewinds
+          // the way OUT is the way in, backwards: as the math panel's
+          // bottom crosses 65%->30% vh the master clock is pulled back
+          // down, so the staggered train reverses — calculator first,
+          // the label untypes, the cubes wink away last. all scroll.
+          calcT = calcT * (1 - calcOut.p);
+          var cubesT = Math.min(1, calcT / 0.6);
+          var labelT = Math.min(1, Math.max(0, (calcT - 0.2) / 0.6));
+          var bodyT  = Math.min(1, Math.max(0, (calcT - 0.4) / 0.6));
           camera.updateMatrixWorld(true);
-          calcV.set(0.78 * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
+          calcV.set(0.84 * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
           calcRoot.position.copy(camera.position).addScaledVector(calcV, srr);
           // stand upright, face the lens — then turn -20° about the
           // vertical, a three-quarter view like the rack's (not flat-on)
           calcRoot.rotation.y = Math.atan2(camera.position.x - calcRoot.position.x, camera.position.z - calcRoot.position.z)
             - 20 * Math.PI / 180;
           // 45% of the viewport's height at the focus plane, times the scrub
-          var calcSc = calcUnit * 0.9 * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * calcT);
+          var calcSc = calcUnit * 0.9 * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * bodyT);
           calcRoot.scale.setScalar(calcSc);
           // no cloud float anymore (user cut it) — only the idle pendulum
           // turn survives: an endless +10°/-10° swing about its own
@@ -2352,6 +3272,83 @@
             frameDirtyFlag = true;   // the swing must render through the static gate
           }
           calcRoot.updateMatrixWorld(true);
+          // the cube column on the calculator's left: pinned at screen
+          // 0.70/0.5 the same way, half the viewport tall, each cube
+          // levitating on its own phase (the rack lattice's bob)
+          if (calcCubes){
+            calcV.set(0.66 * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
+            calcCubes.position.copy(camera.position).addScaledVector(calcV, srr);
+            calcCubes.rotation.y = Math.atan2(camera.position.x - calcCubes.position.x, camera.position.z - calcCubes.position.z) + 0.5;
+            calcCubes.scale.setScalar((0.5 * 2 * srr * Math.tan(camera.fov * Math.PI / 360) / 12.9) * (0.8 + 0.2 * cubesT));
+            for (var cbb = 0; cbb < calcCubes.children.length; cbb++){
+              var CB = calcCubes.children[cbb];
+              if (!reducedMotion)
+                CB.position.y = CB.userData.baseY + Math.sin(clock.elapsedTime * CB.userData.sp + CB.userData.ph) * 0.11;
+              // the rack crowd's wink-in: each cube pops at its own
+              // seeded moment of the scrub, 0.2-wide window
+              var cws = Math.min(1, Math.max(0, (cubesT - CB.userData.th) / 0.2));
+              cws = cws * cws * (3 - 2 * cws);
+              CB.scale.setScalar(Math.max(0.0001, cws));
+            }
+            if (!reducedMotion) frameDirtyFlag = true;   // the bob must render through the static gate
+            calcCubes.updateMatrixWorld(true);
+          }
+          // the pod-card shadow: a green halo just behind the body,
+          // breathing on the pod-glow keyframes — 10s cycle, 16↔8 glow
+          // every 12.5%, the two neon dropouts at 2-4% and 6-7%
+          if (calcGlow){
+            calcV.set(0.84 * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
+            calcGlow.position.copy(camera.position).addScaledVector(calcV, srr + 1.6);
+            // the halo turns WITH the calculator: same -20° stance, same
+            // infinite pendulum — it reads as the body's own shadow
+            calcGlow.rotation.y = calcRoot.rotation.y;
+            calcGlow.scale.setScalar(0.34 * 2 * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * bodyT));
+            var gph = reducedMotion ? 0 : (clock.elapsedTime % 10) / 10;
+            var gDrop = (gph >= 0.02 && gph < 0.04) || (gph >= 0.06 && gph < 0.07);
+            var gBreath = 12 + 4 * Math.cos(gph * 8 * Math.PI);   // 16↔8, period 2.5s
+            var gO = gDrop ? 0 : calcQ * (0.22 + 0.3 * (gBreath - 8) / 8);
+            if (calcGlowMat.opacity !== gO){
+              calcGlowMat.opacity = gO;
+              frameDirtyFlag = true;   // the breath must render through the static gate
+            }
+            calcGlow.updateMatrixWorld(true);
+          }
+          // the key glyphs blink like the city's blue road strokes: the
+          // pod-neon-flicker — 10s cycle, two quick dropouts at 2-4% and
+          // 6-7%, dimmed to 0.12 of the panel's glow
+          if (!reducedMotion){
+            var kph = (clock.elapsedTime % 10) / 10;
+            var kOff = (kph >= 0.02 && kph < 0.04) || (kph >= 0.06 && kph < 0.07);
+            if (kOff !== calcKeysOff){
+              calcKeysOff = kOff;
+              var kEI = calcLightCfg.emis * (kOff ? 0.12 : 1);
+              for (var kmi = 0; kmi < calcMats.length; kmi++)
+                if (calcMats[kmi].userData.glyphBlink) calcMats[kmi].emissiveIntensity = kEI;
+              frameDirtyFlag = true;   // the dropout must render through the static gate
+            }
+          }
+          // the equation stands VERTICAL, centered in the empty band
+          // between the cube column's right edge and the calculator's
+          // left edge; reads bottom-up, small terminal type
+          if (calcLabel){
+            calcV.set(0.725 * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
+            calcLabel.position.copy(camera.position).addScaledVector(calcV, srr);
+            calcLabel.rotation.set(0,
+              Math.atan2(camera.position.x - calcLabel.position.x, camera.position.z - calcLabel.position.z),
+              Math.PI / 2);
+            calcLabel.scale.setScalar(0.34 * 2 * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * labelT));
+            calcLabel.updateMatrixWorld(true);
+            // typed on the scrub, like the terminal window: characters
+            // appear across calcT 0.35→0.85 and untype on the way back
+            var llen = calcLabel.userData.len;
+            var lp = Math.min(1, Math.max(0, (labelT - 0.25) / 0.6));
+            var ln = reducedMotion ? llen : Math.round(lp * llen);
+            if (ln !== calcLabelShown && calcLabelDraw){
+              calcLabelShown = ln;
+              calcLabelDraw(ln);
+              frameDirtyFlag = true;   // a fresh character must render
+            }
+          }
           if (calcLamp){
             // the rig hangs off the calculator in VIEW axes — fwd toward
             // the lens, up/side in the frame — so the panel's sliders
@@ -2364,14 +3361,49 @@
             calcLamp.position.addScaledVector(calcAx, CK.up);
             calcFill.position.addScaledVector(calcAx, CF.up);
             // energy re-read every frame: panel tweaks land instantly
-            calcLamp.intensity = CK.i * calcT;
-            calcFill.intensity = CF.i * calcT;
+            calcLamp.intensity = CK.i * bodyT;
+            calcFill.intensity = CF.i * bodyT;
           }
-          var calcQ2 = Math.round(calcT * 200) / 200;
+          var calcQ2 = Math.round(bodyT * 200) / 200;
           if (calcQ2 !== calcQ){
             calcQ = calcQ2;
-            for (var cqi = 0; cqi < calcMats.length; cqi++) calcMats[cqi].opacity = calcQ;
+            for (var cqi = 0; cqi < calcMats.length; cqi++) calcMats[cqi].opacity = (calcMats[cqi].userData.baseA || 1) * calcQ;
             frameDirtyFlag = true;   // the fade moved: the cached frame is stale
+          }
+          // the cubes and label fade on THEIR clock: they lead the train
+          var calcC2 = Math.round(cubesT * 200) / 200;
+          if (calcC2 !== calcCQ){
+            calcCQ = calcC2;
+            for (var cbm = 0; cbm < calcCubeMats.length; cbm++) calcCubeMats[cbm].m.opacity = calcCubeMats[cbm].a * calcCQ;
+            frameDirtyFlag = true;
+          }
+          // the digits rip through the LOGO's band glitch (same
+          // GLITCH_STEPS table as the rack flash and the pcb): only a
+          // band survives each step, shimmied sideways, blink-off on the
+          // empty steps, heals whole — every 5 seconds, ~0.6s long
+          if (calcTextMat){
+            if (calcTextMat.opacity !== calcQ){
+              calcTextMat.opacity = calcQ;
+              frameDirtyFlag = true;
+            }
+            if (!reducedMotion && calcTextDraw){
+              if (calcBlinkAt < 0) calcBlinkAt = clock.elapsedTime + 5;
+              if (calcBlinkStart < 0 && clock.elapsedTime >= calcBlinkAt) calcBlinkStart = clock.elapsedTime;
+              if (calcBlinkStart >= 0){
+                var cge = clock.elapsedTime - calcBlinkStart;
+                if (cge >= 0.6){
+                  calcBlinkStart = -1;
+                  calcBlinkAt = clock.elapsedTime + 5;   // steady 5s beat
+                  calcTextDraw(null);                    // heal whole
+                } else {
+                  var cgp = (cge / 0.6) * 0.61;
+                  var cst = GLITCH_STEPS[0];
+                  for (var cgi = 0; cgi < GLITCH_STEPS.length; cgi++){ if (cgp >= GLITCH_STEPS[cgi][0]) cst = GLITCH_STEPS[cgi]; }
+                  calcTextDraw(cst);
+                }
+                frameDirtyFlag = true;   // the bands must render while everything rests
+              }
+            }
           }
         }
       }
@@ -2387,7 +3419,10 @@
         bokeh.uniforms['focus'].value = camera.position.distanceTo(controls.target);
         if (gradRide){ gradQ = 0; gradRide.progress(0); }
         if (gradRide2) gradQ2 = -1;   // no render: leg 6 re-locks on next entry
-        if (calcRoot && calcRoot.visible){ calcRoot.visible = false; calcQ = -1; bokehStamp++; frameDirtyFlag = true; }
+        if (calcRoot && calcRoot.visible){ calcRoot.visible = false; calcQ = -1; calcCQ = -1; bokehStamp++; frameDirtyFlag = true; }
+        if (calcCubes) calcCubes.visible = false;
+        if (calcLabel) calcLabel.visible = false;
+        if (calcGlow) calcGlow.visible = false;
         if (calcLamp){ calcLamp.intensity = 0; calcFill.intensity = 0; }
         radialT = 0;
       }
@@ -2395,10 +3430,12 @@
       // without the ride's camera solve, so it eases away like the pcb
       if (calcRoot && calcRoot.visible && scrubFree){
         calcQ = Math.max(0, (calcQ < 0 ? 1 : calcQ) - dt / 0.5);
-        for (var cqf = 0; cqf < calcMats.length; cqf++) calcMats[cqf].opacity = calcQ;
+        for (var cqf = 0; cqf < calcMats.length; cqf++) calcMats[cqf].opacity = (calcMats[cqf].userData.baseA || 1) * calcQ;
+        for (var cbf = 0; cbf < calcCubeMats.length; cbf++) calcCubeMats[cbf].m.opacity = calcCubeMats[cbf].a * calcQ;
+        if (calcTextMat) calcTextMat.opacity = calcQ;
         if (calcLamp){ calcLamp.intensity = calcLightCfg.key.i * calcQ; calcFill.intensity = calcLightCfg.fill.i * calcQ; }
         frameDirtyFlag = true;
-        if (calcQ === 0){ calcRoot.visible = false; calcQ = -1; radialT = 0; bokehStamp++; }
+        if (calcQ === 0){ calcRoot.visible = false; if (calcCubes) calcCubes.visible = false; if (calcLabel) calcLabel.visible = false; if (calcGlow) calcGlow.visible = false; calcQ = -1; calcCQ = -1; radialT = 0; bokehStamp++; }
       }
       if (flight){
         flight.t += dt / 1.4;
@@ -2484,7 +3521,9 @@
       //   0.2→0.45 the pcb folds away, the grey free cube rebuilds
       //   0.45→0.7 the crowd winks back in, green replaces grey
       //   0.7→0.85 the shell seals to the solid rack
-      //   0.85→1  the radial crosses right (in the blend loop)
+      //   0.85→1  the radial crosses right (in the blend loop); the
+      //            sealed rack then fades out LATER, on the calculator's
+      //            window — and 'our metal' brings rack + radial back
       var revScrub = (LEGS[4] && !scrubFree && sceneMode === 2)
         ? Math.min(1, Math.max(0, LEGS[4].p)) : 0;
       var revNext = Math.round(revealEase(Math.min(1, Math.max(0, (revScrub - 0.45) / 0.25))) * 200) / 200;
@@ -2494,24 +3533,40 @@
       hideNext = hideNext * (1 - revNext);
       var sealNext = Math.round(revealEase(Math.min(1, Math.max(0, (revScrub - 0.7) / 0.15))) * 200) / 200;
       cubeNext = cubeNext * (1 - sealNext);
-      if (rackFade !== rackNext || cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || revSeal !== sealNext){
+      // the rack's fade waits PAST the crossing but not as long as the
+      // calculator (the leg's 0.85→1 was too early, calcWin too late):
+      // it rides its OWN window — math top 65%→40% vh — and the metal
+      // panel's window pulls it straight back to full, both ways
+      var radHideNext = (LEGS[4] && !scrubFree && sceneMode === 2)
+        ? Math.round(revealEase(rackOutWin.p) * (1 - revealEase(Math.min(1, metalWin.p / 0.5))) * 200) / 200
+        : 0;
+      // the addons flat (the board script at the bottom): as the addons
+      // section rides in, it pulls the rack out FIRST, ahead of the gray
+      // cover that then takes the radial — whichever hide is deeper wins
+      radHideNext = Math.max(radHideNext, Math.round((window.__addonsRackHide || 0) * 200) / 200);
+      if (rackFade !== rackNext || cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || revSeal !== sealNext || radialHide !== radHideNext){
         var hideMoved = cubeHide !== hideNext;
+        // the addons rack fade moves radialHide alone for whole windows of
+        // scroll — the cube/pcb machinery (instance uploads included) only
+        // wakes when one of ITS drivers actually stepped
+        var cubesMoved = cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext;
         rackFade = rackNext;
         cubeFade = cubeNext;
         pcbFade = pcbNext;
         cubeHide = hideNext;
         revFade = revNext;
         revSeal = sealNext;
+        radialHide = radHideNext;
         // the machines dim the shell to 0.4 glass; then, once the leg-4
         // wink-out has taken the machines themselves (thresholds top out
         // at 0.8), the shell follows them out through its own opacity
         var shellHide = Math.min(1, Math.max(0, (cubeHide - 0.8) / 0.2));
-        var shellOp = rackFade * (1 - 0.6 * cubeFade) * (1 - shellHide);
+        var shellOp = rackFade * (1 - 0.6 * cubeFade) * (1 - shellHide) * (1 - radialHide);
         for (var ri = 0; ri < rackMats.length; ri++){
           rackMats[ri].opacity = shellOp;
           rackMats[ri].transparent = shellOp < 1;
         }
-        if (cubeMeshG){
+        if (cubeMeshG && cubesMoved){
           var cubeVis = cubeFade > 0;
           if (cubeMeshG.visible !== cubeVis){
             cubeMeshG.visible = cubeMeshP.visible = cubeMeshF.visible = cubeVis;
@@ -2600,7 +3655,20 @@
         // the ghost's green glow must not bloom across the rack: the bloom
         // threshold rises with the reveal so the faint city drops out of
         // the bloom pass while the rack's own bright leds keep their halo
-        bloom.threshold = 0.17 + 0.23 * rackFade;
+        // 0.55 with the rack up: the warm-lit shell body sits at 0.4-0.6
+        // and at the old 0.4 the whole rack silhouette entered bloom —
+        // a dilated grey aura around the corpus. the leds live near 1.0
+        // and keep their halo either way.
+        bloom.threshold = 0.17 + 0.38 * rackFade;
+        // and the DEEP mips ride down with the rack for the same reason:
+        // their kernels span half the screen, so the rack's bright led
+        // strips smear into a grey cloud on the black sky. the tight
+        // mips (0-1) keep the led sparkle; the city look at rackFade 0
+        // keeps the stock falloff untouched.
+        var bfA = bloom.compositeMaterial.uniforms['bloomFactors'].value;
+        bfA[2] = 0.6 - 0.35 * rackFade;
+        bfA[3] = 0.4 - 0.31 * rackFade;
+        bfA[4] = 0.2 - 0.16 * rackFade;
         // the carved building dissolves TOP-DOWN with the same scrub: the
         // clip box floor sweeps from the roof to the ground, so the block
         // that stood where the rack is erases smoothly instead of popping
@@ -2615,8 +3683,8 @@
         grade.uniforms.grain.value = 0.055 * (1 - 0.75 * rackFade);
         // the light crosses over with the reveal: the rack's warm key
         // rises, the near lamp with it, and the city's overhead key dims
-        if (rackLamp) rackLamp.intensity = 0.55 * rackFade;
-        if (rackSpot) rackSpot.intensity = 2.4 * rackFade;
+        if (rackLamp) rackLamp.intensity = 0.55 * rackFade * (1 - radialHide);
+        if (rackSpot) rackSpot.intensity = 2.4 * rackFade * (1 - radialHide);
         spotB.intensity = 2.9 * (1 - 0.75 * rackFade);
         applyCityDim(1 - 0.9 * rackFade, 1 - rackFade);   // rack at 1 ⇒ city 10% alpha, 0 lights
         // the carved building's furniture rides the ghost fade and only
@@ -2629,6 +3697,76 @@
       // scroll opacity fade as the rest of the ghost city (the stencil
       // keeps them off the rack, and with their lights at zero there is
       // no bloom left to haze it) — nothing ever vanishes in a hard cut
+    }
+    // the second rack ('on yours'), staged on the metal panel's window:
+    // the ORIGINAL returns first (its radialHide releases over metalWin
+    // 0→0.5, above); then the clone slides OUT of it over 0.4→1 — born
+    // inside the original, travelling to its side-by-side spot, solid
+    // by a third of the travel. one quantized scrub drives slide + fade
+    // + lights, both ways — scroll up and it folds back inside.
+    if (rackRoot2){
+      // the machine panel reverses the slide: the clone travels home
+      // into the original over machineWin 0.35→0.8 (after the plates
+      // have un-typed) and dissolves as it merges
+      var r2Next = sceneMode === 2
+        ? Math.round(revealEase(Math.max(0, (metalWin.p - 0.4) / 0.6))
+            * (1 - revealEase(Math.min(1, Math.max(0, (machineWin.p - 0.35) / 0.45))))
+            * 200) / 200 : 0;
+      if (r2Next !== rack2Op){
+        rack2Op = r2Next;
+        rackRoot2.position.x = rack2BaseX + rack2DxW * rack2Op;
+        rackRoot2.updateMatrixWorld(true);   // autoUpdate is off — bake the step
+        var r2op = Math.min(1, rack2Op / 0.35);
+        for (var r2i = 0; r2i < rack2Mats.length; r2i++){
+          rack2Mats[r2i].opacity = r2op;
+          rack2Mats[r2i].transparent = r2op < 1;
+        }
+        if (rackLamp2) rackLamp2.intensity = 0.55 * r2op;
+        if (rackSpot2) rackSpot2.intensity = 2.4 * r2op;
+        var r2Vis = rack2Op > 0.001;
+        if (rackRoot2.visible !== r2Vis){
+          rackRoot2.visible = r2Vis;
+          renderer.shadowMap.needsUpdate = true;
+          bokehStamp++;   // the copy just entered/left the depth buffer
+        }
+        // shadows refresh at the travel's endpoints only — a stale
+        // mid-slide shadow is invisible here, per-step re-renders would
+        // make the adaptive resolution flap (the leg-3 lesson)
+        if (rack2Op === 0 || rack2Op === 1) renderer.shadowMap.needsUpdate = true;
+        frameDirtyFlag = true;
+      }
+    }
+    // the name plates, typed on their own window (it opens as the
+    // clone's slide BEGINS): '[ our metal ]' writes over the original
+    // while the clone travels (0→0.45), a beat, then '[ your metal ]'
+    // over the clone as it lands (0.55→1). the count rides the scroll —
+    // scroll up and they untype.
+    if (rackLbl1 && rackLbl2){
+      for (var li3 = 0; li3 < 2; li3++){
+        var LB3 = li3 ? rackLbl2 : rackLbl1;
+        var lw3 = sceneMode === 2
+          ? Math.min(1, Math.max(0, (rackLblWin.p - (li3 ? 0.55 : 0)) / 0.45)) : 0;
+        // the machine panel un-types them, last in first out: the
+        // clone's plate deletes first (0→0.35), the original's follows
+        // (0.15→0.5) — before the clone starts its ride home
+        lw3 *= 1 - revealEase(Math.min(1, Math.max(0, (machineWin.p - (li3 ? 0 : 0.15)) / 0.35)));
+        var lv3 = lw3 > 0.001;
+        if (LB3.visible !== lv3){ LB3.visible = lv3; frameDirtyFlag = true; }
+        if (!lv3) continue;
+        var lo3 = Math.min(1, lw3 * 6);   // the plate lands fast, then types
+        if (LB3.userData.mat.opacity !== lo3){ LB3.userData.mat.opacity = lo3; frameDirtyFlag = true; }
+        var ln3 = Math.round(Math.min(1, Math.max(0, (lw3 - 0.08) / 0.92)) * LB3.userData.len);
+        if (ln3 !== LB3.userData.shown){
+          LB3.userData.shown = ln3;
+          LB3.userData.draw(ln3);
+          frameDirtyFlag = true;
+        }
+        // the clone's plate rides the slide; both face the lens
+        if (li3) LB3.position.x = -0.35 + rack2DxW * rack2Op;
+        LB3.rotation.y = Math.atan2(camera.position.x - LB3.position.x, camera.position.z - LB3.position.z);
+        LB3.updateMatrixWorld(true);
+      }
+      platePass.enabled = rackLbl1.visible || rackLbl2.visible;
     }
     // scene-1 rack glitch flash — same band pattern as the logo glitch
     if (rackRoot && glitchStart >= 0 && (sceneMode !== 1 || scrollNow > 0)){
@@ -2874,6 +4012,372 @@
     gui.add({log: function(){ console.log('calcLight ' + JSON.stringify(calcLightCfg)); }}, 'log').name('log to console');
     gui.add({reset: function(){ try { localStorage.removeItem('calcLight'); } catch(e){} location.reload(); }}, 'reset');
   }
+})();
+</script>
+
+<script>
+/* ── the addon board: the manager machine page's pod canvas, ported ──
+   the dotted grid, draggable pcc pods, and the water: a colored-dot halo
+   under the grabbed pod, calm waves rippling through it at rest, a radial
+   splash on grab and a directional bow wave while dragging — all painted
+   as mask-image stacks over the green dot overlays, gsap-driven, straight
+   from app/machines/[id]/[[...tab]]/page.tsx at zoom 1 / pan 0. */
+(function(){
+  var board = document.getElementById('podsBoard');
+  if (!board || !window.gsap) return;
+  var haloEl = document.getElementById('boardHalo');
+  var hoverEl = document.getElementById('boardHover');
+  var followEl = document.getElementById('boardFollow');
+  var cards = Array.prototype.slice.call(board.querySelectorAll('.bpod'));
+
+  var GAP = 16, PAD = 24, PAD_Y = 100;   // roomy water above and below the pods
+  var CARD_W = 310;
+  var GREEN = 'rgb(17,163,42)';
+
+  // ── layout: a plain grid to start from; every card owns {x,y} after ──
+  var pos = [];
+  var zTop = 1;
+  function cardW(){ return board.clientWidth < 700 ? 230 : 310; }
+  function layout(){
+    CARD_W = cardW();
+    for (var i = 0; i < cards.length; i++) cards[i].style.width = CARD_W + 'px';
+    var W = board.clientWidth;
+    var cols = Math.max(1, Math.min(cards.length, Math.floor((W - PAD * 2 + GAP) / (CARD_W + GAP))));
+    var maxH = 0;
+    for (i = 0; i < cards.length; i++) maxH = Math.max(maxH, cards[i].offsetHeight);
+    var rows = Math.ceil(cards.length / cols);
+    var innerW = cols * CARD_W + (cols - 1) * GAP;
+    var left = Math.max(PAD, (W - innerW) / 2);
+    for (i = 0; i < cards.length; i++){
+      pos[i] = { x: left + (i % cols) * (CARD_W + GAP), y: PAD_Y + Math.floor(i / cols) * (maxH + GAP) };
+      place(i);
+    }
+    board.style.height = (PAD_Y * 2 + rows * maxH + (rows - 1) * GAP) + 'px';
+  }
+  function place(i){
+    cards[i].style.transform = 'translate(' + pos[i].x + 'px,' + pos[i].y + 'px)';
+  }
+  function centerOf(i){
+    return { x: pos[i].x + CARD_W / 2, y: pos[i].y + cards[i].offsetHeight / 2 };
+  }
+
+  // ── the water's state, mirroring the manager's refs ──
+  var halo = { cx: 0, cy: 0, opacity: 0 };          // active halo (full size)
+  var hover = { cx: 0, cy: 0, opacity: 0 };         // hover halo (60%)
+  var waveT = { t: 0 };                             // calm-wave phase, 0..1 loop
+  var calmAlpha = { t: 1 };                         // calm-wave fade, 0 while dragging
+  var ripple = { t: -1 };                           // grab splash, anchored ring
+  var rippleAnchor = { cx: 0, cy: 0 };
+  var follow = { t: -1, mode: 'idle' };             // bow wave: expand|hold|release
+  var motion = { t: 1 };                            // drag-speed intensity 0..1
+  var dragDir = { dx: 0, dy: -1 };
+  var lastFollowPos = null;
+  var recentMoves = [];
+  var motionRaf = null;
+  var activeIdx = -1, hoverIdx = -1, dragIdx = -1, dragging = false;
+  var waveTween = null, calmTween = null, rippleTween = null, followTween = null,
+      haloTween = null, hoverTween = null, calmResumeTimer = null;
+
+  function setMask(el, mask, clip){
+    el.style.maskImage = mask; el.style.webkitMaskImage = mask;
+    el.style.maskComposite = 'add'; el.style.webkitMaskComposite = 'source-over';
+    el.style.clipPath = clip; el.style.webkitClipPath = clip;
+  }
+
+  // calm waves: two phase-offset elliptical ridges travel top → bottom,
+  // splitting around the card as they pass its waterline
+  function waveMasks(sx, sy, radius, cardHalf, calm){
+    var wt = calm > 0.001 ? waveT.t : -1;
+    if (wt < 0) return '';
+    var eRX = radius * 0.85, eRY = radius * 0.2;
+    var startY = sy - radius * 1.05, endY = sy + radius * 1.05;
+    var splitRange = radius * 0.55;
+    var parts = [];
+    var phases = [wt, (wt + 0.5) % 1];
+    for (var k = 0; k < 2; k++){
+      var p = phases[k];
+      var bandY = startY + p * (endY - startY);
+      var a = (0.8 * Math.sin(p * Math.PI) * calm).toFixed(3);
+      var splitT = Math.max(0, 1 - Math.abs(bandY - sy) / splitRange);
+      var offX = splitT * (cardHalf * 0.95);
+      var sideRX = eRX * (1 - splitT * 0.5);
+      parts.push('radial-gradient(ellipse ' + sideRX + 'px ' + eRY + 'px at ' + (sx - offX) + 'px ' + bandY + 'px, rgba(0,0,0,' + a + '), transparent)');
+      parts.push('radial-gradient(ellipse ' + sideRX + 'px ' + eRY + 'px at ' + (sx + offX) + 'px ' + bandY + 'px, rgba(0,0,0,' + a + '), transparent)');
+    }
+    return parts.join(', ');
+  }
+  // grab splash: one concentric ring expanding from where the drag began
+  function rippleMask(radius){
+    var t = ripple.t;
+    if (t < 0 || t > 1) return '';
+    var rsx = rippleAnchor.cx, rsy = rippleAnchor.cy;
+    var currentR = t * radius;
+    var ringHalf = Math.max(15, radius * 0.07);
+    var a = (0.7 * Math.sin(t * Math.PI)).toFixed(3);
+    var ext = radius + ringHalf * 2;
+    var inner = Math.max(0, (currentR - ringHalf) / ext * 100).toFixed(1);
+    var mid = (currentR / ext * 100).toFixed(1);
+    var outer = Math.min(100, (currentR + ringHalf) / ext * 100).toFixed(1);
+    return ', radial-gradient(circle ' + ext + 'px at ' + rsx + 'px ' + rsy + 'px, transparent ' + inner + '%, rgba(0,0,0,' + a + ') ' + mid + '%, transparent ' + outer + '%)';
+  }
+
+  function paintHalo(){
+    if (halo.opacity <= 0.001){ haloEl.style.opacity = '0'; return; }
+    var sx = halo.cx, sy = halo.cy;
+    var radius = CARD_W / 2 + 89;
+    var radial = 'radial-gradient(circle ' + radius + 'px at ' + sx + 'px ' + sy + 'px, rgba(0,0,0,0.4) 25%, transparent 100%)';
+    var waves = waveMasks(sx, sy, radius, CARD_W / 2, calmAlpha.t);
+    var rip = rippleMask(radius);
+    var mask = waves ? radial + ', ' + waves + rip : radial + rip;
+    haloEl.style.opacity = String(halo.opacity);
+    setMask(haloEl, mask, 'circle(' + radius + 'px at ' + sx + 'px ' + sy + 'px)');
+  }
+
+  function paintHover(){
+    if (hover.opacity <= 0.001){ hoverEl.style.opacity = '0'; return; }
+    var sx = hover.cx, sy = hover.cy;
+    var radius = (CARD_W / 2 + 89) * 0.6;
+    var radial = 'radial-gradient(circle ' + radius + 'px at ' + sx + 'px ' + sy + 'px, rgba(0,0,0,0.4) 25%, transparent 100%)';
+    var waves = waveMasks(sx, sy, radius, (CARD_W / 2) * 0.6, calmAlpha.t);
+    var mask = waves ? radial + ', ' + waves : radial;
+    hoverEl.style.opacity = String(hover.opacity);
+    setMask(hoverEl, mask, 'circle(' + radius + 'px at ' + sx + 'px ' + sy + 'px)');
+  }
+
+  // bow wave: a half-disk ring facing the drag direction. fast expand to
+  // 60% of the halo on grab, breathes with drag speed while held, then
+  // swells past the halo and dies on release
+  function paintFollow(){
+    var st = follow;
+    if (st.t < 0 || activeIdx < 0){ followEl.style.opacity = '0'; return; }
+    var sx = halo.cx, sy = halo.cy;
+    var radius = CARD_W / 2 + 89;
+    var verticalBoost = 1 + 0.15 * Math.abs(dragDir.dy);
+    var baseUnit = radius * 0.45 * verticalBoost;
+    var visualR = st.t * baseUnit;
+    var alpha;
+    if (st.mode === 'expand') alpha = 0.7 * Math.sqrt(Math.max(0, st.t));
+    else if (st.mode === 'hold'){ visualR = baseUnit * motion.t; alpha = 0.7 * motion.t; }
+    else if (st.mode === 'release') alpha = 0.7 * Math.max(0, Math.min(1, (2.5 - st.t) / 1.5));
+    else alpha = 0;
+    var ringHalf = Math.max(25, radius * 0.15);
+    var ext = Math.max(visualR + ringHalf * 2, 1);
+    var inner = Math.max(0, (visualR - ringHalf) / ext * 100).toFixed(1);
+    var mid = (visualR / ext * 100).toFixed(1);
+    var outer = Math.min(100, (visualR + ringHalf) / ext * 100).toFixed(1);
+    var mask = 'radial-gradient(circle ' + ext + 'px at ' + sx + 'px ' + sy + 'px, transparent ' + inner + '%, rgba(0,0,0,' + alpha.toFixed(3) + ') ' + mid + '%, transparent ' + outer + '%)';
+    followEl.style.opacity = String(halo.opacity);
+    var perpX = -dragDir.dy, perpY = dragDir.dx;
+    var clipR = st.mode === 'release' ? Math.max(visualR + ringHalf * 2, radius) : radius;
+    var x1 = (sx + perpX * clipR).toFixed(1), y1 = (sy + perpY * clipR).toFixed(1);
+    var x2 = (sx - perpX * clipR).toFixed(1), y2 = (sy - perpY * clipR).toFixed(1);
+    var clip = 'path("M ' + x1 + ' ' + y1 + ' A ' + clipR.toFixed(1) + ' ' + clipR.toFixed(1) + ' 0 0 0 ' + x2 + ' ' + y2 + ' Z")';
+    setMask(followEl, mask, clip);
+  }
+  function paintAll(){ paintHalo(); paintHover(); paintFollow(); }
+
+  // the calm-wave loop: 6s top → bottom, forever; painters gate visibility
+  function startWaveLoop(){
+    if (waveTween) waveTween.kill();
+    waveT.t = 0;
+    waveTween = gsap.to(waveT, { t: 1, duration: 6, ease: 'none', repeat: -1, onUpdate: paintAll });
+  }
+  startWaveLoop();
+
+  // the halo claims a grabbed pod: fade out at the old spot, in at the new
+  function setActive(i){
+    if (activeIdx === i) return;
+    activeIdx = i;
+    var c = centerOf(i);
+    if (haloTween) haloTween.kill();
+    if (halo.opacity > 0.01){
+      haloTween = gsap.to(halo, { opacity: 0, duration: 0.15, ease: 'power2.out', onUpdate: paintAll, onComplete: function(){
+        halo.cx = c.x; halo.cy = c.y;
+        haloTween = gsap.to(halo, { opacity: 1, duration: 0.3, ease: 'power2.out', onUpdate: paintAll });
+      }});
+    } else {
+      halo.cx = c.x; halo.cy = c.y;
+      haloTween = gsap.to(halo, { opacity: 1, duration: 0.3, ease: 'power2.out', onUpdate: paintAll });
+    }
+    for (var k = 0; k < cards.length; k++) cards[k].classList.toggle('on', k === i);
+    if (hoverIdx === i) hideHover();
+  }
+
+  function hideHover(){
+    if (hoverTween) hoverTween.kill();
+    hoverTween = gsap.to(hover, { opacity: 0, duration: 0.25, ease: 'power2.out', onUpdate: paintHover });
+  }
+
+  // drag toggle: the manager's setActiveDragging — calm waves out, splash
+  // ring + bow wave in; on release the bow wave breaks and the calm water
+  // returns 2 seconds later, from the top
+  function setDragging(on){
+    if (dragging === on) return;
+    dragging = on;
+    if (calmResumeTimer != null){ clearTimeout(calmResumeTimer); calmResumeTimer = null; }
+    if (on){
+      if (calmTween) calmTween.kill();
+      calmTween = gsap.to(calmAlpha, { t: 0, duration: 0.5, ease: 'power2.out', onUpdate: paintAll, onComplete: function(){
+        if (waveTween) waveTween.pause();
+        paintAll();
+      }});
+    } else {
+      calmResumeTimer = setTimeout(function(){
+        calmResumeTimer = null;
+        startWaveLoop();
+        if (calmTween) calmTween.kill();
+        calmTween = gsap.to(calmAlpha, { t: 1, duration: 0.5, ease: 'power2.out', onUpdate: paintAll });
+      }, 2000);
+    }
+    paintAll();
+    if (on){
+      rippleAnchor.cx = halo.cx; rippleAnchor.cy = halo.cy;
+      if (rippleTween) rippleTween.kill();
+      ripple.t = 0;
+      rippleTween = gsap.to(ripple, { t: 1, duration: 2.5, ease: 'none', onUpdate: paintHalo, onComplete: function(){ ripple.t = -1; paintHalo(); } });
+      lastFollowPos = null;
+      // drag-speed tracker: px/ms over a 150ms window, floored at 0.45
+      motion.t = 1; recentMoves = [];
+      if (motionRaf != null) cancelAnimationFrame(motionRaf);
+      var tick = function(){
+        var now = performance.now(), cutoff = now - 150;
+        while (recentMoves.length > 0 && recentMoves[0].t < cutoff) recentMoves.shift();
+        var dist = 0;
+        for (var m = 0; m < recentMoves.length; m++) dist += recentMoves[m].d;
+        var target = Math.min(1, 0.45 + (dist / 150) / 1.0);
+        motion.t = motion.t * 0.78 + target * 0.22;
+        paintFollow();
+        motionRaf = requestAnimationFrame(tick);
+      };
+      motionRaf = requestAnimationFrame(tick);
+      if (followTween) followTween.kill();
+      follow.t = 0; follow.mode = 'expand';
+      followTween = gsap.to(follow, { t: 1, duration: 0.4, ease: 'power2.out', onUpdate: paintFollow, onComplete: function(){
+        follow.mode = 'hold'; paintFollow();
+      }});
+    } else {
+      if (motionRaf != null){ cancelAnimationFrame(motionRaf); motionRaf = null; }
+      motion.t = 1;
+      if (followTween) followTween.kill();
+      var startT = Math.max(follow.t, 1);
+      follow.t = startT; follow.mode = 'release';
+      followTween = gsap.to(follow, { t: 2.5, duration: Math.max(1.0, (2.5 - startT) * 1.3), ease: 'none', onUpdate: paintFollow, onComplete: function(){
+        follow.t = -1; follow.mode = 'idle';
+        paintFollow(); paintHalo(); paintHover();
+      }});
+    }
+  }
+
+  // during drag the halo tracks the pod; movement samples feed the bow
+  // wave's direction (low-pass on the unit vector) and speed
+  function followActive(){
+    if (activeIdx < 0) return;
+    var c = centerOf(activeIdx);
+    if (halo.cx === c.x && halo.cy === c.y) return;
+    if (lastFollowPos){
+      var ddx = c.x - lastFollowPos.x, ddy = c.y - lastFollowPos.y;
+      var len = Math.sqrt(ddx * ddx + ddy * ddy);
+      recentMoves.push({ t: performance.now(), d: len });
+      if (len > 0.5){
+        var smooth = 0.25;
+        var dirX = dragDir.dx + (ddx / len - dragDir.dx) * smooth;
+        var dirY = dragDir.dy + (ddy / len - dragDir.dy) * smooth;
+        var n = Math.sqrt(dirX * dirX + dirY * dirY) || 1;
+        dragDir.dx = dirX / n; dragDir.dy = dirY / n;
+      }
+    }
+    lastFollowPos = { x: c.x, y: c.y };
+    halo.cx = c.x; halo.cy = c.y;
+    paintHalo(); paintFollow();
+  }
+
+  // ── drag: pointer capture, board-clamped ──
+  cards.forEach(function(card, i){
+    card.addEventListener('pointerdown', function(e){
+      if (e.button !== undefined && e.button !== 0 && e.pointerType === 'mouse') return;
+      e.preventDefault();
+      card.setPointerCapture(e.pointerId);
+      dragIdx = i;
+      card._sx = e.clientX; card._sy = e.clientY;
+      card._px = pos[i].x; card._py = pos[i].y;
+      zTop++; card.style.zIndex = zTop;
+      setActive(i);
+      setDragging(true);
+    });
+    card.addEventListener('pointermove', function(e){
+      if (dragIdx !== i) return;
+      var x = card._px + (e.clientX - card._sx);
+      var y = card._py + (e.clientY - card._sy);
+      pos[i].x = Math.max(0, Math.min(board.clientWidth - CARD_W, x));
+      pos[i].y = Math.max(0, Math.min(board.clientHeight - card.offsetHeight, y));
+      place(i);
+      followActive();
+    });
+    var release = function(e){
+      if (dragIdx !== i) return;
+      dragIdx = -1;
+      setDragging(false);
+    };
+    card.addEventListener('pointerup', release);
+    card.addEventListener('pointercancel', release);
+    // hover halo on the not-yet-grabbed pods, 60% size
+    card.addEventListener('pointerenter', function(e){
+      if (e.pointerType !== 'mouse' || i === activeIdx || dragIdx >= 0) return;
+      hoverIdx = i;
+      var c = centerOf(i);
+      hover.cx = c.x; hover.cy = c.y;
+      if (hoverTween) hoverTween.kill();
+      hoverTween = gsap.to(hover, { opacity: 1, duration: 0.25, ease: 'power2.out', onUpdate: paintHover });
+    });
+    card.addEventListener('pointerleave', function(e){
+      if (e.pointerType !== 'mouse' || hoverIdx !== i) return;
+      hoverIdx = -1;
+      hideHover();
+    });
+  });
+
+  var relayout = function(){
+    layout();
+    if (activeIdx >= 0){ var c = centerOf(activeIdx); halo.cx = c.x; halo.cy = c.y; }
+    if (hoverIdx >= 0){ var h = centerOf(hoverIdx); hover.cx = h.x; hover.cy = h.y; }
+    paintAll();
+  };
+  window.addEventListener('resize', relayout);
+  window.addEventListener('load', relayout);   // heights settle with the fonts
+  layout();
+
+  // ── the flat, in two beats: as the addons section rides in, the RACK
+  // leaves first (the ride reads __addonsRackHide into its radialHide →
+  // shellOp chain), THEN the gray cover takes the radial and the rest of
+  // the scene to plain #1e1d1d. on the way out the order mirrors: the
+  // veil lifts first, the rack steps back in last. all scroll, reversible.
+  var cover = document.getElementById('grayCover');
+  var addonsSec = document.getElementById('addons') || board;
+  function win(v, a, b){ return Math.max(0, Math.min(1, (v - a) / (b - a))); }
+  function ease(t){ return t * t * (3 - 2 * t); }
+  function coverTick(){
+    if (!cover) return;
+    var vh = window.innerHeight;
+    var r = addonsSec.getBoundingClientRect();
+    // entry: rack fades over section top 95%→70% vh, cover over 68%→45%
+    var rackIn = 1 - win(r.top, vh * 0.70, vh * 0.95);
+    var coverIn = 1 - win(r.top, vh * 0.45, vh * 0.68);
+    // exit, pulled EARLY (the 40→18 / 16→2 train read as arriving too
+    // late): the cover lifts over section bottom 52%→30% vh — the radial
+    // is back just past mid-screen — and the rack (with the laptop lid
+    // riding it) returns 44%→28%, starting under the thinning cover and
+    // landing right as it clears
+    var coverOut = win(r.bottom, vh * 0.30, vh * 0.52);
+    var rackOut = win(r.bottom, vh * 0.28, vh * 0.44);
+    window.__addonsRackHide = ease(Math.min(rackIn, rackOut));
+    var op = ease(Math.min(coverIn, coverOut));
+    window.__addonsCoverOp = op;   // the ride skips its frames at 1
+    var v = op.toFixed(3);
+    if (cover.style.opacity !== v) cover.style.opacity = v;
+  }
+  window.addEventListener('scroll', coverTick, { passive: true });
+  window.addEventListener('resize', coverTick);
+  coverTick();
 })();
 </script>
 
