@@ -22,6 +22,7 @@
     <link rel="preload" href="/models/calculator.glb" as="fetch" crossorigin>
     <link rel="preload" href="/models/laptop.glb" as="fetch" crossorigin>
     <link rel="preload" href="/models/qblock.glb" as="fetch" crossorigin>
+    <link rel="preload" href="/models/door.glb" as="fetch" crossorigin>
 <style>
   :root{
     /* manager-usectl dark theme */
@@ -292,7 +293,7 @@
 
   /* numbered hotspots in the city — TESTER UI, retired from the real
      page (the machinery stays for future framing work) */
-  #spots{position:absolute;inset:0;z-index:3;pointer-events:none;display:none}
+  #spots{position:absolute;inset:0;z-index:3;pointer-events:none}   /* TESTER MODE: add display:none to ship */
   .spot{
     position:absolute;left:0;top:0;transform:translate(-50%,-50%);
     width:28px;height:28px;border-radius:50%;
@@ -395,8 +396,9 @@
     position:relative;z-index:5;
     display:grid;gap:250px;width:100%;
     padding:300px 0 0;   /* the footer carries its own small bottom gap */
-    /* pointer-events/user-select restored: real visitors click the
-       ctas and select text; the free-cam grab-through was tester-only */
+    /* TESTER MODE ON: the free-cam grab works through the sections;
+       links/text don't click. flip these two lines off to ship. */
+    pointer-events:none;user-select:none;
   }
   .after .panel{
     width:min(880px,calc(100% - 40px));margin:0 auto;
@@ -448,7 +450,7 @@
     background-color:#161616;
     background-image:radial-gradient(circle,#2a2a2a 1px,transparent 1px);
     background-size:18px 18px;
-    pointer-events:auto;touch-action:pan-y;
+    /* TESTER MODE: pointer-events:auto;touch-action:pan-y; — restore to ship */
   }
   /* the colored dot overlays: same grid, painted in the pod green, shaped
      by mask-image from the wave painter (halo / hover halo / follow ripple) */
@@ -497,11 +499,21 @@
   .after #for{width:32%}
   .after #for .grid3{grid-template-columns:1fr}
   /* the machine points wear the same stacked card list as 'who it is for' —
-     and the same selectable behavior, themed BLUE like the shield bubble */
-  .after #machine .grid3{grid-template-columns:1fr}
+     and the same selectable behavior, themed BLUE */
+  .after #machine .grid3{grid-template-columns:1fr;gap:22px}
+  .after #machine .small{margin-top:26px}   /* the note breathes off the card stack */
   .after #machine .grid3 .card{cursor:pointer}
   .after #machine .grid3 .card:hover{border-color:rgba(165,180,252,.55)}
   .after #machine .grid3 .card.on{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 22px rgba(165,180,252,.18)}
+  /* the machine cards carry li lists now: the site's round blue dots
+     do the marking, so the title drops its cube glyph; the title
+     itself steps up to the points' size, in the site blue */
+  .after #machine .grid3 .card b::before{display:none}
+  .after #machine .grid3 .card > b{font-size:19px;color:var(--blue)}
+  .after #machine .grid3 .card ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:9px}
+  .after #machine .grid3 .card li{position:relative;padding-left:18px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+  .after #machine .grid3 .card li::before{content:"";position:absolute;left:0;top:7px;width:7px;height:7px;border-radius:50%;background:var(--blue)}
+  .after #machine .grid3 .card li b{display:inline;font-family:inherit;font-size:inherit;letter-spacing:0;color:var(--text);margin:0;font-weight:600}
   .after #for h2{margin-bottom:40px}
   /* ...and double as the laptop-screen slider's buttons: the active card
      mirrors the slide on the glass */
@@ -655,18 +667,28 @@
     window.addEventListener('scroll', navTick, {passive: true});
     navTick();
   })();
-  // the machine cards select their slide (0 = the shield bubble)
+  // the machine cards select their slide. NOTE: this script sits ABOVE
+  // the section markup — it must wait for the DOM or #machCards is
+  // null and the whole thing silently no-ops (it did, from day one)
   (function(){
+    if (document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', mcInit);
+    } else mcInit();
+    function mcInit(){
     var mc = document.getElementById('machCards');
     if (!mc) return;
     var cards = Array.prototype.slice.call(mc.children);
-    window.__machSlide = 0;
+    // TESTER MODE: slide 2 active by default while it's being built
+    // (cards don't click with pointer-events off) — ship at 0
+    window.__machSlide = 1;
+    cards.forEach(function(x, j){ x.classList.toggle('on', j === 1); });
     cards.forEach(function(c, i){
       c.addEventListener('click', function(){
         window.__machSlide = i;
         cards.forEach(function(x, j){ x.classList.toggle('on', j === i); });
       });
     });
+    }
   })();
 </script>
 
@@ -758,10 +780,34 @@
     <h2>A machine is a computer that is <span class="o">only yours.</span></h2>
     <p class="lead">A machine has its own resources, its own addons, its own domains, its own team and one bill. Underneath, it is Kubernetes — run by us, invisible to you. You see a box with a slider.</p>
     <div class="grid3 big" id="machCards">
-      <div class="card on"><b>Isolated by default</b><span>Its own network policy, its own quota, its own secrets. A neighbour cannot reach you and you cannot reach it.</span></div>
-      <div class="card"><b>Everything inside</b><span>Postgres, Redis, S3, cron, domains and TLS live in the machine, not in five other dashboards.</span></div>
-      <div class="card"><b>One bill</b><span>A machine's budget is shared by all its apps, addons and groups. Adding a second app does not add a second bill.</span></div>
-      <div class="card"><b>Stage and prod</b><span>Split a machine into groups, each with its own namespace and its own database, on the same budget.</span></div>
+      <div class="card on"><b>Isolated by default</b><span>Bare-metal speed behind ironclad kernel and network walls — no leaky multi-tenant hosts.</span>
+        <ul>
+          <li><b>Hardened network perimeter</b> — every machine sealed in its own namespace, ingress and egress policy enforced. Neighbours cannot sniff your traffic or reach your pods.</li>
+          <li><b>Kernel sandboxing</b> — heavy workloads and AI agents run inside gVisor sandboxes, fully isolated from the host kernel.</li>
+          <li><b>Envelope-vault secrets</b> — keys and env vars under AES-256-GCM envelope encryption with tamper-evident audit logs. Protected secrets never return plaintext.</li>
+        </ul>
+      </div>
+      <div class="card"><b>Everything inside</b><span>Kill five SaaS subscriptions — the whole production stack lives in one machine.</span>
+        <ul>
+          <li><b>Auto-healing data</b> — two-instance PostgreSQL clusters with streaming failover, three-node NATS JetStream RAFT.</li>
+          <li><b>Storage, cron and edge TLS</b> — Redis, MongoDB, S3 object storage, CronJobs and custom domains with automated TLS. No external addons.</li>
+          <li><b>Full-stack telemetry</b> — Grafana dashboards for metrics, logs and traces, plus Sentry-compatible error tracking, all in one CLI.</li>
+        </ul>
+      </div>
+      <div class="card"><b>One bill</b><span>One budget, unlimited apps — no multi-app tax.</span>
+        <ul>
+          <li><b>Unified resource wallet</b> — a machine is a fixed budget of vCPU, RAM and storage on one predictable subscription.</li>
+          <li><b>Apps without bills</b> — extra web services, workers or databases share the machine's budget. No new fees.</li>
+          <li><b>Stage and prod groups</b> — sibling groups with isolated networks, each with its own database and namespace, on the same budget.</li>
+        </ul>
+      </div>
+      <div class="card"><b>Workloads and previews</b><span>Zero-downtime rollouts and an instant preview for every pull request.</span>
+        <ul>
+          <li><b>Targeted pods</b> — run workloads as web, worker or release, each owning its repo, branch, domain and ports.</li>
+          <li><b>Zero-downtime rollouts</b> — rolling or recreate strategies with 5xx watchers and instant auto-rollback.</li>
+          <li><b>PR preview URLs</b> — every pull request spins up an isolated preview with its own namespace and URL.</li>
+        </ul>
+      </div>
     </div>
     <p class="small">Apps inside a machine can be web, worker or release. Each has its own repo, branch, port, replicas and rollout. PR previews get their own namespace and URL.</p>
   </section>
@@ -926,6 +972,7 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/SVGLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/GammaCorrectionShader.js"></script>
@@ -1490,6 +1537,15 @@
   var macWin = {start: 0, end: 1, raw: 0, p: 0};   // machine SHOW window: the
                        // box-close keeps this fixed timing while the zoom
                        // camera overlaps the flight (one combined move)
+  var doorWin = {start: 0, end: 1, raw: 0, p: 0};  // the door choreography:
+                       // opens AFTER the leg-9 camera lands (machine top
+                       // 60 → 30% vh) so the glitch + seal play on screen
+  var doorOut = {start: 0, end: 1, raw: 0, p: 0};  // the EXIT: the same
+                       // band glitch rips the sealed door away as the
+                       // machine container's bottom leaves mid-screen
+  var macCloseWin = {start: 0, end: 1, raw: 0, p: 0};  // the SPLIT's rack
+                       // seal: earlier than the machine show (top 115 →
+                       // 80vh) — the box closes while the split leaves
   var depWin = {start: 0, end: 1, raw: 0, p: 0};   // deploy SHOW window: the
                        // rack re-open + wink-out keep this fixed timing while
                        // the dive CAMERA can be delayed independently
@@ -1551,9 +1607,25 @@
   var glitchPlanes = [new THREE.Plane(new THREE.Vector3(0,-1,0), 1e6), new THREE.Plane(new THREE.Vector3(0,1,0), 1e6),
                       new THREE.Plane(new THREE.Vector3(1,0,-1).normalize(), 1e6)];
   var cornerBase = 1e6, cornerDepth = 0, cornerHalf = 0;
-  // the 'isolated by default' shield: a wow-style absorb bubble around the
-  // rack — electric rim + crackle in the site blue; slide 0 of #machine
-  var bubble = null, bubbleMat = null, bubbleQ = 0;
+  // the 'isolated by default' gate: a sci-fi door across the rack's
+  // front face; slide 0 of #machine. choreography all on the scroll:
+  // construction glitches in, stands OPEN, panels seal top + bottom.
+  var doorRoot = null, doorMats = [], doorLamp = null, doorP = 0, doorQ = 0;
+  var doorUp = null, doorDown = null, doorLock = null, doorUpTravel = 0, doorDownTravel = 0;
+  var doorGP = null, doorGTop = 0, doorGBot = 0, doorGlitchQ = -1, doorCloseQ = -1;
+  // slide 2 of #machine ('everything inside'): the second card zooms
+  // the lens to its own logged shot and opens the rack ONE LINE — the
+  // free cube's own front row. interaction-damped on the click,
+  // gated in/out by the scroll like every slide payload.
+  var s2P = 0, s2Show = 0, s2Cam = 0, s2LineQ = -1, slideAwayP = 0, s2Keep = null, s2WasUni = false, s2Hand = 1;
+  var s2Engaged = false, s2LandT = 0;
+  var S2_EYE = new THREE.Vector3(6.4551, 5.7053, 8.7048);
+  var S2_TGT = new THREE.Vector3(-4.7548, 1.2931, -4.6307);
+  var s2TgtW = new THREE.Vector3(), s2EyeW = new THREE.Vector3();
+  var s2Dir = new THREE.Vector3(), s2Right = new THREE.Vector3(), s2UpV = new THREE.Vector3(), S2_UP = new THREE.Vector3(0, 1, 0);
+  // the floor logos: real product icons extruded to 3d, floating
+  // inside the slide-2 floor's translucent machines
+  var s2Logos = null, s2LogoMats = [], s2LogoBob = [];
   var glitchNext = Infinity, glitchStart = -1, rackTopY = 0, rackBotY = 0, rackBaseX = 0;   // Infinity = hero rack flash removed per user (was 10)
   // [t, top%, bottom%, shimmy%] — the visible band, measured from the rack's
   // top like clip-path measures from the element's top; straight from the
@@ -1742,15 +1814,17 @@
       eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
       // the rack's center holds the middle of the left half at every aspect
       anchor: {x: 0.25, y: 0.62, point: [-0.35, 1.6, -1.72]} },
-    { el: 'machine',  // 'what you get' — the section's OWN shot, kept from
-      loggedFov: 8,   // the old order: the camera pushes in from the right,
-                      // rack right of center, ZOOMED — the machine text
-                      // owns the shadowed left
+    { el: 'machine',  // 'what you get' — the section's OWN shot, re-logged
+      loggedFov: 8,   // WIDER for the isolation door (user free-cam framing,
+                      // 2026-09-16): the gate + rack read whole, right of
+                      // center — the machine text owns the shadowed left
       early: 0.15,    // overlaps the flight leg: turn + push blend into ONE
                       // combined move ("in 1 time, not 1 by 1"); the
                       // box-close rides its own fixed macWin
       endAt: 0.6,
-      eye: [8.5747, 7.1420, 14.1468], target: [-4.7546, 2.3212, -4.2515] },
+      // pan baked into the logged shot: +10% of the frame height along
+      // camUp ("move rack more to bottom" — 20% was too much, halved)
+      eye: [20.1690, 14.0078, 37.5940], target: [-6.5917, 2.3051, -3.1492] },
     { el: 'deploy',   // leg 4: "the lights come on" — dive toward the free cube
       loggedFov: 8,   // framed in free-cam at the narrow ride fov
       startAt: 0.8,   // was 1 — the CAMERA waits +20% longer on the zoomed
@@ -1972,6 +2046,24 @@
       var macTop = macNode.getBoundingClientRect().top + window.pageYOffset;
       macWin.start = macTop - window.innerHeight * 0.9;
       macWin.end = Math.max(macWin.start + 1, macTop - window.innerHeight * 0.6);
+      // the split's rack seal: earlier than the machine show but NOT
+      // rushed — starts as the split leaves (105vh), lands at 70vh
+      // (115→80 closed too early/fast — "ending end so fast")
+      macCloseWin.start = macTop - window.innerHeight * 1.05;
+      macCloseWin.end = Math.max(macCloseWin.start + 1, macTop - window.innerHeight * 0.70);
+      // the door show starts the moment the leg-9 camera lands (60vh)
+      // and seals by 30vh — the earlier/tighter ride ("its to late")
+      doorWin.start = macTop - window.innerHeight * 0.60;
+      doorWin.end = Math.max(doorWin.start + 1, macTop - window.innerHeight * 0.30);
+      // the exit rides the DEPLOY leg's departure ("make it when rack
+      // is start goin to next leg"): it begins the moment the camera
+      // starts pulling away and completes just past mid-flight —
+      // the door opens and rips out while the rack swings off
+      // ...fired AT the departure moment ("when u start movin, in this
+      // moment") but STRETCHED across the flight's first 30% — same
+      // start, slower end ("make it more slowly, not start, only end")
+      doorOut.start = Math.max(doorWin.end + 1, LEGS[3].start);
+      doorOut.end = doorOut.start + Math.max(1, (LEGS[3].end - LEGS[3].start) * 0.30);
     }
     // the metal-reverse window — order rewire: it rides the MATH panel's
     // approach now (plates un-type, clone home, radial right), 90% → 60% vh
@@ -2517,6 +2609,15 @@
           if (roles[midI] === 0) nG--; else nP--;
           roles[midI] = 2; nF++;
         }
+        // slide 2's floor: the FRONT row ships all-GREEN, the rows
+        // behind keep the default random mix ("not all greens man!
+        // in back! default our random color cubes")
+        var s2R0 = Math.min(ny - 1, Math.floor(ny / 2) + 1);
+        for (var s2x = 0; s2x < nx; s2x++){
+          var s2i = ((nz - 1) * ny + s2R0) * nx + s2x;
+          if (roles[s2i] === 1){ nP--; roles[s2i] = 0; nG++; }
+          else if (roles[s2i] === 2){ nF--; roles[s2i] = 0; nG++; }
+        }
         function machineMat(hex){
           var m = new THREE.MeshBasicMaterial({
             color: new THREE.Color(hex).convertSRGBToLinear(),
@@ -2525,7 +2626,27 @@
           // same stencil stamp as the shell: the ghosted city may not
           // draw across the machines either
           m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
+          // per-instance fade lane (slide 2's opacity wave): an aFade
+          // instanced attribute multiplies the alpha — baked into the
+          // program at load, driven from the same masked writer
+          m.onBeforeCompile = function(sh){
+            sh.vertexShader = sh.vertexShader
+              .replace('#include <common>', '#include <common>\nattribute float aFade;\nvarying float vFade;')
+              .replace('void main() {', 'void main() {\n\tvFade = aFade;');
+            sh.fragmentShader = sh.fragmentShader
+              .replace('#include <common>', '#include <common>\nvarying float vFade;')
+              .replace('#include <color_fragment>', '#include <color_fragment>\n\tdiffuseColor.a *= vFade;');
+          };
           return m;
+        }
+        // each mesh needs its OWN geometry for its own aFade lane —
+        // the six meshes may not share one instanced attribute
+        function fadeGeo(g, n){
+          var gg = g.clone();
+          var fa = new THREE.InstancedBufferAttribute(new Float32Array(n).fill(1), 1);
+          fa.setUsage(THREE.DynamicDrawUsage);
+          gg.setAttribute('aFade', fa);
+          return gg;
         }
         // the border: 12 solid thin bars along the cube's edges merged
         // into one geometry — crisp square frames with none of the
@@ -2535,19 +2656,30 @@
         // wall tone = the annotation swatch's bg pushed well up (~1.6×
         // the strict 14%-mix) — the strict tone drowned under the 0.4
         // shell and the grade; these keep the hue but actually read
-        cubeMeshG = new THREE.InstancedMesh(fillGeo, machineMat(0x264d2d), nG);
-        cubeMeshP = new THREE.InstancedMesh(fillGeo, machineMat(0x4d5063), nP);
-        cubeMeshF = new THREE.InstancedMesh(fillGeo, machineMat(0x606060), nF);
-        cubeEdgeG = new THREE.InstancedMesh(edgeGeo, machineMat(0x11a32a), nG);
-        cubeEdgeP = new THREE.InstancedMesh(edgeGeo, machineMat(0xa5b4fc), nP);
-        cubeEdgeF = new THREE.InstancedMesh(edgeGeo, machineMat(0xffffff), nF);
+        cubeMeshG = new THREE.InstancedMesh(fadeGeo(fillGeo, nG), machineMat(0x264d2d), nG);
+        cubeMeshP = new THREE.InstancedMesh(fadeGeo(fillGeo, nP), machineMat(0x4d5063), nP);
+        cubeMeshF = new THREE.InstancedMesh(fadeGeo(fillGeo, nF), machineMat(0x606060), nF);
+        cubeEdgeG = new THREE.InstancedMesh(fadeGeo(edgeGeo, nG), machineMat(0x11a32a), nG);
+        cubeEdgeP = new THREE.InstancedMesh(fadeGeo(edgeGeo, nP), machineMat(0xa5b4fc), nP);
+        cubeEdgeF = new THREE.InstancedMesh(fadeGeo(edgeGeo, nF), machineMat(0xffffff), nF);
         var cO = new THREE.Object3D(), gi = 0, pi = 0, fi = 0, ii = 0;
+        // slide 2's line mask: the WHOLE FLOOR one above the middle
+        // ("+ 1 floor! not topest!" / "show all cubes on this floor")
+        // — every cube of that y-layer stays, all depths, when the
+        // second machine card zooms in
+        var s2Row = Math.min(ny - 1, Math.floor(ny / 2) + 1);
+        s2Keep = {G: new Uint8Array(nG), P: new Uint8Array(nP), F: new Uint8Array(nF),
+                  WG: new Float32Array(nG).fill(1), WP: new Float32Array(nP).fill(1), WF: new Float32Array(nF).fill(1)};
         for (var zz = 0; zz < nz; zz++) for (var yy = 0; yy < ny; yy++) for (var xx = 0; xx < nx; xx++){
           cO.position.set(x0 + px * (xx + 0.5), y0 + py * (yy + 0.5), z0 + pz * (zz + 0.5));
           cO.updateMatrix();
-          if (roles[ii] === 0){ cubeMeshG.setMatrixAt(gi, cO.matrix); cubeEdgeG.setMatrixAt(gi, cO.matrix); gi++; }
-          else if (roles[ii] === 1){ cubeMeshP.setMatrixAt(pi, cO.matrix); cubeEdgeP.setMatrixAt(pi, cO.matrix); pi++; }
-          else { cubeMeshF.setMatrixAt(fi, cO.matrix); cubeEdgeF.setMatrixAt(fi, cO.matrix); fi++; }
+          var s2k = (yy === s2Row) ? 1 : 0;
+          // the floor's opacity WAVE: the front (green) row at .4, the
+          // rows behind ride up to 1 at the floor's last cubes
+          var s2w = s2k ? 0.4 + 0.6 * ((nz - 1 - zz) / Math.max(1, nz - 1)) : 1;
+          if (roles[ii] === 0){ s2Keep.G[gi] = s2k; s2Keep.WG[gi] = s2w; cubeMeshG.setMatrixAt(gi, cO.matrix); cubeEdgeG.setMatrixAt(gi, cO.matrix); gi++; }
+          else if (roles[ii] === 1){ s2Keep.P[pi] = s2k; s2Keep.WP[pi] = s2w; cubeMeshP.setMatrixAt(pi, cO.matrix); cubeEdgeP.setMatrixAt(pi, cO.matrix); pi++; }
+          else { s2Keep.F[fi] = s2k; s2Keep.WF[fi] = s2w; cubeMeshF.setMatrixAt(fi, cO.matrix); cubeEdgeF.setMatrixAt(fi, cO.matrix); fi++; }
           ii++;
         }
         [cubeMeshG, cubeMeshP, cubeMeshF, cubeEdgeG, cubeEdgeP, cubeEdgeF].forEach(function(mm){
@@ -2571,7 +2703,71 @@
         // fold away so the top camera can see in)
         var midX = 0, midY = Math.floor(ny / 2), midZ = nz - 1;
         freeC = {x: x0 + px * (midX + 0.5), y: y0 + py * (midY + 0.5),
-                 z: z0 + pz * (midZ + 0.5), cell: cell};
+                 z: z0 + pz * (midZ + 0.5), cell: cell, py: py};
+        // slide 2's shot re-aims at the LINE's center: the logged
+        // orbit (the eye-target offset) is kept, but the row lands
+        // centered when the animation ends
+        s2Keep.rowY = y0 + py * (s2Row + 0.5);
+        (function(){
+          var s2o = S2_EYE.clone().sub(S2_TGT);
+          S2_TGT.set(x0 + px * nx / 2, s2Keep.rowY, freeC.z);
+          S2_EYE.copy(S2_TGT).add(s2o);
+        })();
+        // warm BOTH clipping flavors of the rack programs: slide 2
+        // flips clipIntersection for its gap — compile the union
+        // variant now so the flip never builds shaders mid-ride
+        for (var wm = 0; wm < rackMats.length; wm++) rackMats[wm].clipIntersection = true;
+        renderer.compile(scene, camera);
+        for (var wm2 = 0; wm2 < rackMats.length; wm2++) rackMats[wm2].clipIntersection = false;
+
+        // ── the floor logos: real product icons (the manager's
+        // PodIcons set + the pods overlay's postgres path) extruded
+        // to 3d, one floating inside each translucent machine of the
+        // slide-2 floor — front row first, then deeper rows.
+        if (THREE.SVGLoader) (function(){
+          var LG = [
+            {n: 'postgres', d: 'M23.5594 14.7228a.5269.5269 0 0 0-.0563-.1191c-.139-.2632-.4768-.3418-1.0074-.2321-1.6533.3411-2.2935.1312-2.5256-.0191 1.342-2.0482 2.445-4.522 3.0411-6.8297.2714-1.0507.7982-3.5237.1222-4.7316a1.5641 1.5641 0 0 0-.1509-.235C21.6931.9086 19.8007.0248 17.5099.0005c-1.4947-.0158-2.7705.3461-3.1161.4794a9.449 9.449 0 0 0-.5159-.0816 8.044 8.044 0 0 0-1.3114-.1278c-1.1822-.0184-2.2038.2642-3.0498.8406-.8573-.3211-4.7888-1.645-7.2219.0788C.9359 2.1526.3086 3.8733.4302 6.3043c.0409.818.5069 3.334 1.2423 5.7436.4598 1.5065.9387 2.7019 1.4334 3.582.553.9942 1.1259 1.5933 1.7143 1.7895.4474.1491 1.1327.1441 1.8581-.7279.8012-.9635 1.5903-1.8258 1.9446-2.2069.4351.2355.9064.3625 1.39.3772a.0569.0569 0 0 0 .0004.0041 11.0312 11.0312 0 0 0-.2472.3054c-.3389.4302-.4094.5197-1.5002.7443-.3102.064-1.1344.2339-1.1464.8115-.0025.1224.0329.2309.0919.3268.2269.4231.9216.6097 1.015.6331 1.3345.3335 2.5044.092 3.3714-.6787-.017 2.231.0775 4.4174.3454 5.0874.2212.5529.7618 1.9045 2.4692 1.9043.2505 0 .5263-.0291.8296-.0941 1.7819-.3821 2.5557-1.1696 2.855-2.9059.1503-.8707.4016-2.8753.5388-4.1012.0169-.0703.0357-.1207.057-.1362.0007-.0005.0697-.0471.4272.0307a.3673.3673 0 0 0 .0443.0068l.2539.0223.0149.001c.8468.0384 1.9114-.1426 2.5312-.4308.6438-.2988 1.8057-1.0323 1.5951-1.6698z', c: 0x336791},
+            {n: 'nats', d: 'M12.004 0H.404v18.807h9.938l1.714 1.602v-.026L15.966 24v-5.193h7.63V0H12.003zm7.578 14.45H15.38L6.898 6.519v7.93H4.116V4.376h4.349l8.344 7.784V4.375h2.773V14.45z', c: 0x27aae1},
+            {n: 'redis', d: 'M22.71 13.145c-1.66 2.092-3.452 4.483-7.038 4.483-3.203 0-4.397-2.825-4.48-5.12.701 1.484 2.073 2.685 4.214 2.63 4.117-.133 6.94-3.852 6.94-7.239 0-4.05-3.022-6.972-8.268-6.972-3.752 0-8.4 1.428-11.455 3.685C2.59 6.937 3.885 9.958 4.35 9.626c2.648-1.904 4.748-3.13 6.784-3.744C8.12 9.244.886 17.05 0 18.425c.1 1.261 1.66 4.648 2.424 4.648.232 0 .431-.133.664-.365a100.49 100.49 0 0 0 5.54-6.765c.222 3.104 1.748 6.898 6.014 6.898 3.819 0 7.604-2.756 9.33-8.965.2-.764-.73-1.361-1.261-.73zm-4.349-5.013c0 1.959-1.926 2.922-3.685 2.922-.941 0-1.664-.247-2.235-.568 1.051-1.592 2.092-3.225 3.21-4.973 1.972.334 2.71 1.43 2.71 2.619z', c: 0xdc382d},
+            {n: 'mongodb', d: 'M17.193 9.555c-1.264-5.58-4.252-7.414-4.573-8.115-.28-.394-.53-.954-.735-1.44-.036.495-.055.685-.523 1.184-.723.566-4.438 3.682-4.74 10.02-.282 5.912 4.27 9.435 4.888 9.884l.07.05A73.49 73.49 0 0111.91 24h.481c.114-1.032.284-2.056.51-3.07.417-.296.604-.463.85-.693a11.342 11.342 0 003.639-8.464c.01-.814-.103-1.662-.197-2.218zm-5.336 8.195s0-8.291.275-8.29c.213 0 .49 10.695.49 10.695-.381-.045-.765-1.76-.765-2.405z', c: 0x47a248},
+            {n: 'grafana', d: 'M23.02 10.59a8.578 8.578 0 0 0-.862-3.034 8.911 8.911 0 0 0-1.789-2.445c.337-1.342-.413-2.505-.413-2.505-1.292-.08-2.113.4-2.416.62-.052-.02-.102-.044-.154-.064-.22-.089-.446-.172-.677-.247-.231-.073-.47-.14-.711-.197a9.867 9.867 0 0 0-.875-.161C14.557.753 12.94 0 12.94 0c-1.804 1.145-2.147 2.744-2.147 2.744l-.018.093c-.098.029-.2.057-.298.088-.138.042-.275.094-.413.143-.138.055-.275.107-.41.166a8.869 8.869 0 0 0-1.557.87l-.063-.029c-2.497-.955-4.716.195-4.716.195-.203 2.658.996 4.33 1.235 4.636a11.608 11.608 0 0 0-.607 2.635C1.636 12.677.953 15.014.953 15.014c1.926 2.214 4.171 2.351 4.171 2.351.003-.002.006-.002.006-.005.285.509.615.994.986 1.446.156.19.32.371.488.548-.704 2.009.099 3.68.099 3.68 2.144.08 3.553-.937 3.849-1.173a9.784 9.784 0 0 0 3.164.501h.08l.055-.003.107-.002.103-.005.003.002c1.01 1.44 2.788 1.646 2.788 1.646 1.264-1.332 1.337-2.653 1.337-2.94v-.058c0-.02-.003-.039-.003-.06.265-.187.52-.387.758-.6a7.875 7.875 0 0 0 1.415-1.7c1.43.083 2.437-.885 2.437-.885-.236-1.49-1.085-2.216-1.264-2.354l-.018-.013-.016-.013a.217.217 0 0 1-.031-.02c.008-.092.016-.18.02-.27.011-.162.016-.323.016-.48v-.253l-.005-.098-.008-.135a1.891 1.891 0 0 0-.01-.13c-.003-.042-.008-.083-.013-.125l-.016-.124-.018-.122a6.215 6.215 0 0 0-2.032-3.73 6.015 6.015 0 0 0-3.222-1.46 6.292 6.292 0 0 0-.85-.048l-.107.002h-.063l-.044.003-.104.008a4.777 4.777 0 0 0-3.335 1.695c-.332.4-.592.84-.768 1.297a4.594 4.594 0 0 0-.312 1.817l.003.091c.005.055.007.11.013.164a3.615 3.615 0 0 0 .698 1.82 3.53 3.53 0 0 0 1.827 1.282c.33.098.66.14.971.137.039 0 .078 0 .114-.002l.063-.003c.02 0 .041-.003.062-.003.034-.002.065-.007.099-.01.007 0 .018-.003.028-.003l.031-.005.06-.008a1.18 1.18 0 0 0 .112-.02c.036-.008.072-.013.109-.024a2.634 2.634 0 0 0 .914-.415c.028-.02.056-.041.085-.065a.248.248 0 0 0 .039-.35.244.244 0 0 0-.309-.06l-.078.042c-.09.044-.184.083-.283.116a2.476 2.476 0 0 1-.475.096c-.028.003-.054.006-.083.006l-.083.002c-.026 0-.054 0-.08-.002l-.102-.006h-.012l-.024.006c-.016-.003-.031-.003-.044-.006-.031-.002-.06-.007-.091-.01a2.59 2.59 0 0 1-.724-.213 2.557 2.557 0 0 1-.667-.438 2.52 2.52 0 0 1-.805-1.475 2.306 2.306 0 0 1-.029-.444l.006-.122v-.023l.002-.031c.003-.021.003-.04.005-.06a3.163 3.163 0 0 1 1.352-2.29 3.12 3.12 0 0 1 .937-.43 2.946 2.946 0 0 1 .776-.101h.06l.07.002.045.003h.026l.07.005a4.041 4.041 0 0 1 1.635.49 3.94 3.94 0 0 1 1.602 1.662 3.77 3.77 0 0 1 .397 1.414l.005.076.003.075c.002.026.002.05.002.075 0 .024.003.052 0 .07v.065l-.002.073-.008.174a6.195 6.195 0 0 1-.08.639 5.1 5.1 0 0 1-.267.927 5.31 5.31 0 0 1-.624 1.13 5.052 5.052 0 0 1-3.237 2.014 4.82 4.82 0 0 1-.649.066l-.039.003h-.287a6.607 6.607 0 0 1-1.716-.265 6.776 6.776 0 0 1-3.4-2.274 6.75 6.75 0 0 1-.746-1.15 6.616 6.616 0 0 1-.714-2.596l-.005-.083-.002-.02v-.056l-.003-.073v-.096l-.003-.104v-.07l.003-.163c.008-.22.026-.45.054-.678a8.707 8.707 0 0 1 .28-1.355c.128-.444.286-.872.473-1.277a7.04 7.04 0 0 1 1.456-2.1 5.925 5.925 0 0 1 .953-.763c.169-.111.343-.213.524-.306.089-.05.182-.091.273-.135.047-.02.093-.042.138-.062a7.177 7.177 0 0 1 .714-.267l.145-.045c.049-.015.098-.026.148-.041.098-.029.197-.052.296-.076.049-.013.1-.02.15-.033l.15-.032.151-.028.076-.013.075-.01.153-.024c.057-.01.114-.013.171-.023l.169-.021c.036-.003.073-.008.106-.01l.073-.008.036-.003.042-.002c.057-.003.114-.008.171-.01l.086-.006h.023l.037-.003.145-.007a7.999 7.999 0 0 1 1.708.125 7.917 7.917 0 0 1 2.048.68 8.253 8.253 0 0 1 1.672 1.09l.09.077.089.078c.06.052.114.107.171.159.057.052.112.106.166.16.052.055.107.107.159.164a8.671 8.671 0 0 1 1.41 1.978c.012.026.028.052.04.078l.04.078.075.156c.023.051.05.1.07.153l.065.15a8.848 8.848 0 0 1 .45 1.34.19.19 0 0 0 .201.142.186.186 0 0 0 .172-.184c.01-.246.002-.532-.024-.856z', c: 0xf46800},
+            {n: 'meilisearch', d: 'm6.505 18.998 4.434-11.345a4.168 4.168 0 0 1 3.882-2.651h2.674l-4.434 11.345a4.169 4.169 0 0 1-3.883 2.651H6.505Zm6.505 0 4.434-11.345a4.169 4.169 0 0 1 3.883-2.651H24l-4.434 11.345a4.168 4.168 0 0 1-3.882 2.651H13.01Zm-13.01 0L4.434 7.653a4.168 4.168 0 0 1 3.882-2.651h2.674L6.556 16.347a4.169 4.169 0 0 1-3.883 2.651H0Z', c: 0xff5caa}
+          ];
+          var svgl = new THREE.SVGLoader();
+          s2Logos = new THREE.Group();
+          var slots = [];
+          for (var lz = nz - 1; lz >= 0; lz--) for (var lx = 0; lx < nx; lx++)
+            slots.push([x0 + px * (lx + 0.5), y0 + py * (s2Row + 0.5), z0 + pz * (lz + 0.5)]);
+          var lN = Math.min(LG.length, slots.length);
+          for (var li = 0; li < lN; li++){
+            var pd = svgl.parse('<svg xmlns="http://www.w3.org/2000/svg"><path d="' + LG[li].d + '"/></svg>').paths;
+            var shp = [];
+            for (var pi2 = 0; pi2 < pd.length; pi2++) shp = shp.concat(pd[pi2].toShapes(true));
+            var lg = new THREE.ExtrudeGeometry(shp, {depth: 3, bevelEnabled: false});
+            lg.computeBoundingBox();
+            var lbb = lg.boundingBox;
+            lg.translate(-(lbb.min.x + lbb.max.x) / 2, -(lbb.min.y + lbb.max.y) / 2, -1.5);
+            var ls = cell * 0.6 / 24;
+            lg.scale(ls, -ls, ls);   // svg y runs down: the flip rights it
+            var lm = new THREE.MeshBasicMaterial({
+              color: new THREE.Color(LG[li].c).convertSRGBToLinear(),
+              transparent: true, opacity: 0, side: THREE.DoubleSide
+            });
+            lm.stencilWrite = true; lm.stencilRef = 1; lm.stencilZPass = THREE.ReplaceStencilOp;
+            var lmesh = new THREE.Mesh(lg, lm);
+            lmesh.position.set(slots[li][0], slots[li][1], slots[li][2]);
+            lmesh.renderOrder = 19989;   // under the cube walls — the glass tints them 'inside'
+            lmesh.castShadow = false; lmesh.receiveShadow = false;
+            lmesh.frustumCulled = false;
+            depthSkip.push(lmesh);
+            s2LogoMats.push(lm);
+            s2LogoBob.push({m: lmesh, y0: slots[li][1], sp: 0.7 + 0.617 * (li % 7) / 7, ph: li * 2.39996, amp: cell * 0.05});
+            s2Logos.add(lmesh);
+          }
+          s2Logos.visible = false;
+          scene.add(s2Logos);
+          renderer.compile(scene, camera);
+        })();
         function instIdx(target){
           var c = 0;
           for (var q = 0; q < target; q++) if (roles[q] === roles[target]) c++;
@@ -2607,72 +2803,6 @@
         // framed at (mid-rack 1.6 sat at ~0.61 in the logged frame)
         LEGS[9].anchor = {x: 0.22, y: 0.61, point: [-0.35 + rack2Dx / 2, 1.6, -1.72]};
         initLeg(LEGS[9], 9);
-        // ── the shield bubble, sized off the rack's final bounds ──
-        // additive + no stencil (the city glows through it), no depth
-        // write/test (whole sphere ghosts over the shot), depthSkip'd
-        // from the bokeh pre-pass, no new lights (ShaderMaterial)
-        (function(){
-          var bs = new THREE.Vector3(); rackBox.getSize(bs);
-          var bc = new THREE.Vector3(); rackBox.getCenter(bc);
-          var bR = Math.max(bs.x, bs.z) * 0.62 + 0.55;
-          bubbleMat = new THREE.ShaderMaterial({
-            uniforms: {
-              uT: {value: 0},
-              uOp: {value: 0},
-              uCol: {value: new THREE.Color(0xa5b4fc).convertSRGBToLinear()}
-            },
-            vertexShader: [
-              'varying vec3 vN; varying vec3 vW; varying vec2 vUv;',
-              'void main(){',
-              '  vN = normalize(normalMatrix * normal);',
-              '  vUv = uv;',
-              '  vec4 w = modelViewMatrix * vec4(position, 1.0);',
-              '  vW = w.xyz;',
-              '  gl_Position = projectionMatrix * w;',
-              '}'
-            ].join('\n'),
-            fragmentShader: [
-              'uniform float uT; uniform float uOp; uniform vec3 uCol;',
-              'varying vec3 vN; varying vec3 vW; varying vec2 vUv;',
-              'float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }',
-              'float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);',
-              '  return mix(mix(h21(i), h21(i + vec2(1, 0)), f.x), mix(h21(i + vec2(0, 1)), h21(i + vec2(1, 1)), f.x), f.y); }',
-              'void main(){',
-              '  vec3 V = normalize(-vW);',
-              '  float rim = pow(1.0 - abs(dot(normalize(vN), V)), 2.2);',
-              // thunder: the bolt pattern JUMPS ~8x/s (quantized time) and
-              // each strike carries its own flicker brightness
-              '  float tq = floor(uT * 8.0);',
-              '  float fl = 0.55 + 0.45 * h21(vec2(tq, 7.7));',
-              '  vec2 P = vUv * vec2(10.0, 5.0);',
-              '  float w = vn(P * 2.3 + tq * 1.7);',
-              '  float n1 = vn(P + w * 1.8 + vec2(0.0, tq * 3.1));',
-              '  float b1 = pow(max(0.0, 1.0 - abs(2.0 * n1 - 1.0) * 2.2), 6.0);',
-              '  float n2 = vn(P * 2.1 - w * 1.2 + vec2(tq * 2.3, 0.0));',
-              '  float b2 = pow(max(0.0, 1.0 - abs(2.0 * n2 - 1.0) * 2.5), 7.0);',
-              '  float cr = (b1 + b2 * 0.8) * fl;',
-              '  float a = rim * 0.45 + cr * (0.22 + rim * 0.5) + 0.025;',
-              // bolt cores flash toward white-hot, the field stays blue
-              '  vec3 col = uCol * (0.5 + rim * 0.7 + cr * 1.1) + vec3(0.4, 0.45, 0.6) * cr * 0.5;',
-              '  gl_FragColor = vec4(col, a * uOp);',
-              '}'
-            ].join('\n'),
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            depthTest: false,
-            side: THREE.DoubleSide
-          });
-          bubble = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32), bubbleMat);
-          bubble.position.copy(bc);
-          bubble.scale.set(bR, Math.max(bs.y * 0.62 + 0.4, bR * 0.9), bR);
-          bubble.renderOrder = 20006;
-          bubble.visible = false;
-          bubble.frustumCulled = false;
-          depthSkip.push(bubble);
-          scene.add(bubble);
-          renderer.compile(scene, camera);
-        })();
         measureScrub();
         // the deployed cube's green: per-instance TINTS that turn the
         // grey free cube into a green machine in place. instance colors
@@ -2806,7 +2936,95 @@
       // ── the pcb inside the free cube (leg 5's payload) ──
       // 90mb of board: it loads in the background and simply isn't there
       // until it arrives — the fade block guards on pcbRoot
-      var dracoPending = 3;   // pcb + calculator + laptop: last one in frees the workers
+      var dracoPending = 4;   // pcb + calculator + laptop + door: last one in frees the workers
+      // ── the isolation door, sized to the rack's exact height ──
+      // slide 0's payload: a sealed sci-fi gate across the rack's front
+      // face (+z, the heading everything on this stage shares). the glb
+      // is pre-baked upright offline (White twin dropped, Dark recentered,
+      // transforms baked y-up with the base at 0, thin axis z) — the wrap
+      // only scales and seats it. same prop recipe as the laptop: stencil
+      // stamp, renderOrder above the rack shell, depthSkip, opacity fade.
+      loader.load('/models/door.glb', function(dg){
+        var dr = dg.scene;
+        dr.updateMatrixWorld(true);
+        var db = new THREE.Box3().setFromObject(dr);
+        var dsz = new THREE.Vector3(); db.getSize(dsz);
+        var dct = new THREE.Vector3(); db.getCenter(dct);
+        var dwrap = new THREE.Group();
+        dr.position.sub(new THREE.Vector3(dct.x, db.min.y, dct.z));
+        dwrap.add(dr);
+        // the INNER DOOR (the Up+Down panel pair — the doorway) is the
+        // rack's front side: their union fits the rack face per axis;
+        // the frame wraps the face as a bezel, a hair wider and taller,
+        // half-proud of the front plane. the glb ships --join false so
+        // the panels survive as their own meshes and can slide.
+        var doorway = new THREE.Box3();
+        dr.traverse(function(o){
+          if (!o.isMesh) return;
+          if (o.name.indexOf('Door01Up') !== -1){ doorUp = o; doorway.expandByObject(o); }
+          else if (o.name.indexOf('Door01Down') !== -1){ doorDown = o; doorway.expandByObject(o); }
+          else if (o.name.indexOf('lock') !== -1) doorLock = o;
+        });
+        var lfs = new THREE.Vector3(); (doorUp ? doorway : db).getSize(lfs);
+        var dsx = (rackBox.max.x - rackBox.min.x) / lfs.x;
+        dwrap.scale.set(dsx, (rackTopY - rackBotY) / lfs.y, dsx);
+        // panel travel in the door's own space — nearly the full panel
+        // height, so open leaves only a thin lip proud of the pockets
+        if (doorUp && doorDown){
+          var upB = new THREE.Box3().setFromObject(doorUp);
+          var dnB = new THREE.Box3().setFromObject(doorDown);
+          doorUpTravel = (upB.max.y - upB.min.y) * 0.92;
+          doorDownTravel = (dnB.max.y - dnB.min.y) * 0.92;
+        }
+        // clip rig: the glitch pair (neutral until the entrance bands
+        // run) rides EVERY door material; the panel material also gets
+        // the pocket pair — world planes at the doorway's top and floor
+        // (the fit maps them onto rackTopY/rackBotY exactly), so the
+        // open panels vanish into the crown and the ground
+        doorGP = [new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e6), new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e6)];
+        var doorPocket = [new THREE.Plane(new THREE.Vector3(0, -1, 0), rackTopY), new THREE.Plane(new THREE.Vector3(0, 1, 0), -rackBotY)];
+        // rack center x, base on the rack's floor, the leaf plane flush
+        // with the rack's front face (the frame half-proud around it)
+        dwrap.position.set(-0.35, rackBotY, rackBox.max.z);
+        dwrap.visible = false;
+        dwrap.traverse(function(o){
+          if (!o.isMesh) return;
+          o.renderOrder = 20003;   // over the rack shell (20000): drawn
+                                   // after so the rack can't blend
+                                   // through the panels mid-fade
+          o.castShadow = false; o.receiveShadow = false;
+          depthSkip.push(o);   // sits out the dof pre-pass like the pcb
+          var dm = Array.isArray(o.material) ? o.material : [o.material];
+          dm.forEach(function(m){
+            m.transparent = true; m.opacity = 0;
+            m.depthWrite = true;   // blend materials lose it in the loader
+            m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
+            if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            // the construction lights are baked accent green in the
+            // emissive: driven hot so they cross the bloom threshold
+            // and smear like the city road neons
+            m.emissiveIntensity = 2;
+            // frame wears the glitch pair alone; the sliding panels add
+            // the pocket clips (same live plane objects in both arrays)
+            m.clippingPlanes = m.name.indexOf('Frame') !== -1 ? doorGP : doorGP.concat(doorPocket);
+            if (doorMats.indexOf(m) === -1) doorMats.push(m);
+          });
+        });
+        dwrap.updateMatrixWorld(true);
+        // the entrance glitch bands ride the whole construction's
+        // world extents (crown included), like the rack flash rides its
+        var dgb = new THREE.Box3().setFromObject(dwrap);
+        doorGTop = dgb.max.y; doorGBot = dgb.min.y;
+        doorRoot = dwrap;
+        scene.add(dwrap);
+        // its own warm key, driven by the fade — dark panels read as a
+        // hole under the rack lamp alone (the calculator taught this)
+        doorLamp = new THREE.PointLight(0xffe6c0, 0, 6);
+        doorLamp.position.set(0.6, rackTopY * 0.75, rackBox.max.z + 2.1);
+        scene.add(doorLamp);
+        renderer.compile(scene, camera);
+        if (--dracoPending === 0) draco.dispose();
+      });
       loader.load('/models/pcb.glb', function(pg){
         var pr = pg.scene;
         var pb = new THREE.Box3().setFromObject(pr);
@@ -4118,7 +4336,7 @@
   }
   spots[current].classList.add('on');
 
-  var SPOTS_ON = false;   // tester UI retired; pairs with #spots{display:none}
+  var SPOTS_ON = true;   // TESTER MODE ON (false to ship; pairs with #spots{display:none})
   var v3 = new THREE.Vector3();
   var spotBehind = [], spotLastT = [];   // classList/style only touched on change
   function placeSpots(){
@@ -4340,6 +4558,42 @@
     macWin.raw = Math.min(1, Math.max(0, (scrollNow - macWin.start) / (macWin.end - macWin.start)));
     macWin.p += (macWin.raw - macWin.p) * (1 - Math.exp(-dt * 6));
     if (Math.abs(macWin.raw - macWin.p) < 0.001) macWin.p = macWin.raw;
+    doorWin.raw = Math.min(1, Math.max(0, (scrollNow - doorWin.start) / (doorWin.end - doorWin.start)));
+    doorWin.p += (doorWin.raw - doorWin.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(doorWin.raw - doorWin.p) < 0.001) doorWin.p = doorWin.raw;
+    doorOut.raw = Math.min(1, Math.max(0, (scrollNow - doorOut.start) / (doorOut.end - doorOut.start)));
+    doorOut.p += (doorOut.raw - doorOut.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(doorOut.raw - doorOut.p) < 0.001) doorOut.p = doorOut.raw;
+    macCloseWin.raw = Math.min(1, Math.max(0, (scrollNow - macCloseWin.start) / (macCloseWin.end - macCloseWin.start)));
+    macCloseWin.p += (macCloseWin.raw - macCloseWin.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(macCloseWin.raw - macCloseWin.p) < 0.001) macCloseWin.p = macCloseWin.raw;
+    // the machine cards: slideAwayP (any card but the first — plays the
+    // door's outer animation), s2P (the second card specifically — the
+    // zoom + one-line open). interaction damps, scroll does the gating.
+    var s2On = ((window.__machSlide || 0) === 1 && sceneMode === 2 && !scrubFree) ? 1 : 0;
+    s2P += (s2On - s2P) * (1 - Math.exp(-dt * 5));
+    if (Math.abs(s2On - s2P) < 0.003) s2P = s2On;
+    var slAwayOn = ((window.__machSlide || 0) !== 0 && sceneMode === 2 && !scrubFree) ? 1 : 0;
+    slideAwayP += (slAwayOn - slideAwayP) * (1 - Math.exp(-dt * 5));
+    if (Math.abs(slAwayOn - slideAwayP) < 0.003) slideAwayP = slAwayOn;
+    // the zoom/open factor: on with the click, held only while the
+    // machine frame stands (macWin in, the deploy departure out)
+    // ONE gate, SAME effect both directions: while the deploy flight
+    // is anywhere active (LEGS[3].p off zero) the slide-2 payload is
+    // simply OFF; the moment the gate flips — leaving OR returning —
+    // the zoom and the vertical opening play the same time-ramped
+    // animation. no graded scroll factors, no asymmetry.
+    // EVERYTHING rides the scroll: the zoom and the opening are pure
+    // scrub functions of the CAMERA LEGS — in with the leg-9 landing
+    // flight (macWin), out with whichever flight leaves (macWin's
+    // reversal upward, the deploy dive downward). zoom and camera
+    // move are ONE combined ride in every direction, no time gates.
+    s2Show = s2P * revealEase(Math.min(1, Math.max(0, macWin.p)))
+      * (1 - revealEase(Math.min(1, (LEGS[3] ? LEGS[3].p : 0) / 0.45)))
+      * Math.min(1, Math.max(0, (rackFade - 0.5) * 2));
+    var s2CamT = s2Show;
+    s2Cam += (s2CamT - s2Cam) * (1 - Math.exp(-dt * 5));
+    if (Math.abs(s2CamT - s2Cam) < 0.002) s2Cam = s2CamT;
     agentsWin.raw = Math.min(1, Math.max(0, (scrollNow - agentsWin.start) / (agentsWin.end - agentsWin.start)));
     agentsWin.p += (agentsWin.raw - agentsWin.p) * (1 - Math.exp(-dt * 6));
     if (Math.abs(agentsWin.raw - agentsWin.p) < 0.001) agentsWin.p = agentsWin.raw;
@@ -4392,7 +4646,7 @@
       calcWin.p = calcWin.raw; calcOut.p = calcOut.raw;
       metalWin.p = metalWin.raw; rackOutWin.p = rackOutWin.raw;
       rackLblWin.p = rackLblWin.raw; machineWin.p = machineWin.raw;
-      depWin.p = depWin.raw; macWin.p = macWin.raw;
+      depWin.p = depWin.raw; macWin.p = macWin.raw; doorWin.p = doorWin.raw; doorOut.p = doorOut.raw; macCloseWin.p = macCloseWin.raw;
       agentsWin.p = agentsWin.raw; prlxWin.p = prlxWin.raw; prlxWin2.p = prlxWin2.raw;
       prlxWinM.p = prlxWinM.raw;
       forWin.p = forWin.raw; prlxWin3.p = prlxWin3.raw;
@@ -4651,6 +4905,7 @@
         }
       }
       stx += scrubOff.x; sty += scrubOff.y; stz += scrubOff.z;
+      var s2PrlxY0 = sty;   // slide 2's zoom re-applies the pans below
       // the parallax tail: camera AND target pan down together (a pure
       // pan — the orbit never changes), so the scene slides up on
       // screen at 30% of the page's scroll speed. sw is the frame's
@@ -4672,6 +4927,7 @@
       // on the parallax axis — the orbit never turns), so it stands a
       // touch higher inside the lifted circle
       sty -= 0.05 * sw * 2 * revealEase(footWin.p);
+      var s2PrlxDy = sty - s2PrlxY0;   // the pans' net vertical ride
       // ...and once the site is over (scroll parked at the bottom) the
       // hero's lap resumes around the same target: temporal like the
       // hero spin itself — an allowed ambient flourish — but its angle
@@ -4695,6 +4951,33 @@
         stz + srr * ssin * Math.cos(saz)
       );
       camera.lookAt(controls.target);
+      // slide 2's zoom: the second machine card pushes the lens to its
+      // own logged orbit re-aimed at the line's center (fov 8 both
+      // ends — a pure eye/target slide), damped on the click, unwound
+      // by the scroll either direction. the parallax pans ride along
+      // so the zoomed frame still drifts up with the scroll.
+      if (s2Cam > 0.001){
+        var s2f = revealEase(Math.min(1, s2Cam));
+        // the drift rides at 30%: full parallax lifted the cubes to
+        // the frame top by the lower cards — the row must hold NEAR
+        // CENTER through the whole container read, still breathing
+        s2TgtW.copy(S2_TGT); s2TgtW.y += s2PrlxDy * 0.3;
+        s2EyeW.copy(S2_EYE); s2EyeW.y += s2PrlxDy * 0.3;
+        // the line centers the RIGHT HALF of the display (the text
+        // owns the left) and rides 20% of the frame LOWER ("move rack
+        // more bottom on slide 2. + 10%" — walked 10 → 20): pan a
+        // quarter frame left and a fifth frame up in the view plane
+        var s2hh = S2_EYE.distanceTo(S2_TGT) * Math.tan(camera.fov * Math.PI / 360);
+        var s2hw = s2hh * camera.aspect;
+        s2Dir.copy(s2TgtW).sub(s2EyeW).normalize();
+        s2Right.crossVectors(s2Dir, S2_UP).normalize();
+        s2UpV.crossVectors(s2Right, s2Dir);
+        s2TgtW.addScaledVector(s2Right, -0.5 * s2hw).addScaledVector(s2UpV, 0.4 * s2hh);
+        s2EyeW.addScaledVector(s2Right, -0.5 * s2hw).addScaledVector(s2UpV, 0.4 * s2hh);
+        controls.target.lerp(s2TgtW, s2f);
+        camera.position.lerp(s2EyeW, s2f);
+        camera.lookAt(controls.target);
+      }
       // legs 4-5 nail the pcb cube to (0.25, 0.5) CONTINUOUSLY: the
       // per-leg anchors only hold at leg endpoints, and mid-blend the
       // dolly-zoom (fov 8→50, r 22→0.6) bent its screen path into a
@@ -5038,7 +5321,7 @@
         // 'what you get' CLOSES the rack for its zoomed shot — the solid
         // box ("you see a box with a slider") — and the deploy approach
         // opens it again for the dive
-        var machClose = revealEase(Math.min(1, Math.max(0, macWin.p)));
+        var machClose = revealEase(Math.min(1, Math.max(0, macCloseWin.p)));
         // the open uses the CAMERA'S OWN smoothstep — the rack starts
         // opening the moment the camera visibly starts moving, and they
         // accelerate and settle together: one animation, one curve
@@ -5103,6 +5386,32 @@
       // blocks' swap state itself stays put, so scrolling back into the
       // faq finds them standing)
       cubeNext = Math.round(cubeNext * (1 - ctaSeal) * 200) / 200;
+      // slide 2 vs the horizontal shows — an ASYNC handover baton.
+      // the two write the same planes in different modes, so they may
+      // NEVER move together, and neither may ever jump to an absolute
+      // scrub value (the scrubs keep advancing while the other side
+      // holds the planes — snapping to them was the "sometimes stick"
+      // race). s2Hand 1 = the wedge/wink own the rack, 0 = slide 2
+      // owns it; every transition of EITHER side is its own dt ramp:
+      //   s2 wants in  -> baton ramps down (others FADE from wherever
+      //                   their scrubs stand) -> at zero the gap opens
+      //   s2 leaves    -> gap closes on its ramp -> baton ramps up ->
+      //                   others FADE IN to their live scrub values
+      // the baton and the gap are PURE functions of the one scrubbed
+      // ride (s2Show): the wedge/wink shows fade across the ride's
+      // FIRST QUARTER, the vertical gap opens across the REST — the
+      // no-overlap ordering lives in the scroll range itself, inner
+      // and outer both, no time ramps anywhere
+      // linear here — the gap driver eases once at the planes; the
+      // double revealEase steepened the middle and read abrupt
+      var s2Want = (!scrubFree && sceneMode === 2) ? Math.min(1, Math.max(0, (s2Show - 0.30) / 0.70)) : 0;
+      s2Hand = 1 - Math.min(1, Math.max(0, s2Show / 0.30));
+      cubeNext = Math.round(cubeNext * s2Hand * 200) / 200;
+      hideNext = Math.round(hideNext * s2Hand * 200) / 200;
+      var s2Prev = Math.max(0, s2LineQ);
+      var s2Can = cubeNext <= 0.001 || s2Prev > 0.001;
+      var s2Cube = Math.round((s2Can ? s2Want : 0) * 200) / 200;
+      if (s2Cube > 0.001){ cubeNext = s2Cube; hideNext = 0; }
       // ...and the faq leg widens that wedge back out to the split's
       // FULL window, so the projects grid shows like in the split
       var faqCubeNext = (!scrubFree && sceneMode === 2)
@@ -5118,12 +5427,14 @@
       // section rides in, it pulls the rack out FIRST, ahead of the gray
       // cover that then takes the radial — whichever hide is deeper wins
       radHideNext = Math.max(radHideNext, Math.round((window.__addonsRackHide || 0) * 200) / 200);
-      if (rackFade !== rackNext || cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || revSeal !== sealNext || radialHide !== radHideNext || faqCube !== faqCubeNext || ctaWink !== ctaWinkNext){
+      if (rackFade !== rackNext || cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || revSeal !== sealNext || radialHide !== radHideNext || faqCube !== faqCubeNext || ctaWink !== ctaWinkNext || s2LineQ !== s2Cube){
         var hideMoved = cubeHide !== hideNext;
+        var s2LineMoved = s2LineQ !== s2Cube;
+        s2LineQ = s2Cube;
         // the addons rack fade moves radialHide alone for whole windows of
         // scroll — the cube/pcb machinery (instance uploads included) only
         // wakes when one of ITS drivers actually stepped
-        var cubesMoved = cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || faqCube !== faqCubeNext || ctaWink !== ctaWinkNext;
+        var cubesMoved = cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || faqCube !== faqCubeNext || ctaWink !== ctaWinkNext || s2LineMoved;
         rackFade = rackNext;
         cubeFade = cubeNext;
         pcbFade = pcbNext;
@@ -5137,7 +5448,10 @@
         // wink-out has taken the machines themselves (thresholds top out
         // at 0.8), the shell follows them out through its own opacity
         var shellHide = Math.min(1, Math.max(0, (cubeHide - 0.8) / 0.2));
-        var shellOp = rackFade * (1 - 0.6 * cubeFade) * (1 - shellHide) * (1 - radialHide);
+        // slide 2 keeps the WHOLE rack solid — no glass dim, the open
+        // side is the only look inside (s2Hand is 0 while slide 2
+        // owns the rack, so the glass factor blends out both ways)
+        var shellOp = rackFade * (1 - 0.6 * cubeFade * s2Hand) * (1 - shellHide) * (1 - radialHide);
         for (var ri = 0; ri < rackMats.length; ri++){
           rackMats[ri].opacity = shellOp;
           rackMats[ri].transparent = shellOp < 1;
@@ -5157,24 +5471,56 @@
           // the leg-4 wink-out: scale each machine down over a 0.2-wide
           // window past its own random threshold (els 0/5/10 — the bob
           // only ever writes 13, so the two never collide)
-          if (hideMoved){
+          if (hideMoved || s2LineMoved){
             for (var hr = 0; hr < cubeBob.length; hr++){
               var HR = cubeBob[hr], hA = HR.a.instanceMatrix.array, hB = HR.b.instanceMatrix.array;
+              // slide 2's mask folds into the same scale writer — but
+              // not a hard hide: off-floor machines scale by their
+              // DISTANCE from the open floor. the rows hugging the gap
+              // stay collapsed, the far top/bottom rows stand at full
+              // scale ("dont hide other cubes... around our floor
+              // cubes will be like them are now")
+              var HK = s2Keep ? (hr === 0 ? s2Keep.G : hr === 1 ? s2Keep.P : s2Keep.F) : null;
+              var HW = s2Keep ? (hr === 0 ? s2Keep.WG : hr === 1 ? s2Keep.WP : s2Keep.WF) : null;
+              var FA = HR.a.geometry.getAttribute('aFade'), FB = HR.b.geometry.getAttribute('aFade');
               for (var hi = 0; hi < HR.n; hi++){
                 if (hi === HR.skip) continue;   // the free cube never hides
-                var hs = Math.max(0.0001, 1 - Math.min(1, Math.max(0, (cubeHide - HR.hide[hi]) / 0.2)));
+                var lineK = 1;
+                if (HK && !HK[hi] && s2LineQ > 0){
+                  var s2d = Math.abs(HR.y[hi] - s2Keep.rowY);
+                  var s2g = Math.min(1, Math.max(0, (s2d - freeC.py * 1.2) / (freeC.py * 2.2)));
+                  lineK = 1 - s2LineQ * (1 - s2g);
+                }
+                // the floor's opacity wave rides the same beat: front
+                // row eases to .4, deeper cubes toward full
+                if (FA && HW){
+                  var s2fw = 1 - s2LineQ * (1 - HW[hi]);
+                  FA.array[hi] = s2fw; FB.array[hi] = s2fw;
+                }
+                var hs = Math.max(0.0001, (1 - Math.min(1, Math.max(0, (cubeHide - HR.hide[hi]) / 0.2))) * lineK);
                 var ho = hi * 16;
                 hA[ho] = hA[ho + 5] = hA[ho + 10] = hs;
                 hB[ho] = hB[ho + 5] = hB[ho + 10] = hs;
               }
               HR.a.instanceMatrix.needsUpdate = true;
               HR.b.instanceMatrix.needsUpdate = true;
+              if (FA){ FA.needsUpdate = true; FB.needsUpdate = true; }
+            }
+            // the floor logos ride the same beat: visible with the
+            // line, opacity on its ramp
+            if (s2Logos){
+              var slVis = s2LineQ > 0.001 && cubeVis;
+              if (s2Logos.visible !== slVis){ s2Logos.visible = slVis; bokehStamp++; }
+              for (var sli = 0; sli < s2LogoMats.length; sli++) s2LogoMats[sli].opacity = 0.95 * s2LineQ;
             }
           }
           // leg 5: the free cube's own wall folds away for the pcb. on
           // the leg-6 revert the SAME cube rebuilds as the pcb leaves
           // and later tints green in place — nothing is swapped
-          var colS = Math.max(0.0001, 1 - pcbFade);
+          // ...the free cube also hides with the crowd on slide 2 (it
+          // sits mid-rack, not on the top floor, and the wink-out loop
+          // skips it — this write is its only scale driver)
+          var colS = Math.max(0.0001, (1 - pcbFade) * (1 - s2LineQ));
           for (var pc = 0; pc < cubeCol.length; pc++){
             var CE = cubeCol[pc], CR = cubeBob[CE.r], o16 = CE.i * 16;
             var mA = CR.a.instanceMatrix.array;
@@ -5253,9 +5599,29 @@
           // so the scene-1 glitch inherits untouched planes. on the 'who
           // it is for' re-open the wedge stops at HALF the rack's width,
           // then the faq widens it back to the split's full window.
-          glitchPlanes[2].constant = cubeVis
-            ? cornerBase - (forCube > 0.001 ? cornerHalf + (cornerDepth - cornerHalf) * faqCube : cornerDepth) * cubeFade
-            : 1e6;
+          // SLIDE 2 takes the planes over instead: union clipping
+          // (clipIntersection) hides a growing gap around the +1-floor
+          // row — hugging it below, a storey of headroom above — so
+          // the shell opens apart around that one line. the corner
+          // plane is muted to keep-NOTHING while the union runs (a
+          // keep-all neutral would union-keep EVERYTHING); both
+          // program flavors are pre-compiled at load.
+          var s2uni = s2LineQ > 0.001 && !!freeC && !!s2Keep;
+          if (s2uni){
+            var s2e = revealEase(s2LineQ);
+            glitchPlanes[0].constant = s2Keep.rowY - freeC.cell * 0.75 * s2e;                    // keep BELOW the gap
+            glitchPlanes[1].constant = -(s2Keep.rowY + (freeC.cell * 0.75 + freeC.py) * s2e);    // keep ABOVE the gap
+            glitchPlanes[2].constant = -1e6;
+          } else {
+            if (s2WasUni){ glitchPlanes[0].constant = 1e6; glitchPlanes[1].constant = 1e6; }
+            glitchPlanes[2].constant = cubeVis
+              ? cornerBase - (forCube > 0.001 ? cornerHalf + (cornerDepth - cornerHalf) * faqCube : cornerDepth) * cubeFade
+              : 1e6;
+          }
+          if (s2uni !== s2WasUni){
+            s2WasUni = s2uni;
+            for (var s2m = 0; s2m < rackMats.length; s2m++) rackMats[s2m].clipIntersection = s2uni;
+          }
         }
         // the shadow map only cares whether the rack is present — opacity
         // never reaches it. re-rendering it every fade frame overloaded the
@@ -5384,24 +5750,91 @@
       }
       platePass.enabled = rackLbl1.visible || rackLbl2.visible;
     }
-    // the shield bubble: in on the machine window, out with the dive,
-    // slide 0 only; the electric shimmer is an ambient animator (paced
-    // to ~60hz like the holo spin, never wakes the full-rate path)
-    if (bubble){
-      var bubT = (!scrubFree && sceneMode === 2 && (window.__machSlide || 0) === 0 && rackFade > 0.5)
-        ? revealEase(macWin.p) * (1 - Math.min(1, (LEGS[3] ? LEGS[3].p : 0) / 0.4)) : 0;
-      var bubNext = Math.round(bubT * 200) / 200;
-      if (bubNext !== bubbleQ){
-        bubbleQ = bubNext;
-        bubbleMat.uniforms.uOp.value = bubbleQ;
-        var bubVis = bubbleQ > 0.001;
-        if (bubble.visible !== bubVis){ bubble.visible = bubVis; bokehStamp++; }
+    // the isolation door — slide-0 choreography, ALL on the scroll
+    // scrub (reversible), riding doorWin (machine top 58→18vh — the
+    // leg-9 camera is LANDED before it opens): the construction
+    // GLITCHES IN over 0-0.30 (the logo band table), stands OPEN,
+    // then the panels SEAL from top and bottom over 0.40-1. another
+    // card, the addons cover or free-cam takes it away (short damp).
+    if (doorRoot){
+      var dgT = Math.min(1, Math.max(0, doorWin.p / 0.30));
+      // EXIT ("outer animation"): panels OPEN back into their pockets
+      // (0→0.55), then the construction rips away on the same band
+      // table (0.60→1) and parks hidden. TWO drivers share it: the
+      // scroll (doorOut — the deploy departure) and the CARD SWITCH
+      // (slideAwayP — any card but the first plays the same outer
+      // animation); back-scroll / switching back replays it in reverse
+      var dOutP = Math.min(1, Math.max(0, Math.max(doorOut.p, slideAwayP)));
+      var outOpen = revealEase(Math.min(1, dOutP / 0.55));
+      var ebT = Math.min(1, Math.max(0, (dOutP - 0.60) / 0.40));
+      var dorT = (!scrubFree && sceneMode === 2 && rackFade > 0.5)
+        ? Math.min(1, dgT * 3) * (ebT >= 0.99 ? 0 : 1) * (1 - Math.min(1, agentsWin.p / 0.4)) : 0;
+      doorP += (dorT - doorP) * (1 - Math.exp(-dt * 8));
+      if (Math.abs(dorT - doorP) < 0.003) doorP = dorT;
+      var dorNext = Math.round(doorP * 200) / 200;
+      if (dorNext !== doorQ){
+        doorQ = dorNext;
+        for (var dri = 0; dri < doorMats.length; dri++){
+          doorMats[dri].opacity = doorQ;
+          doorMats[dri].transparent = doorQ < 0.999;
+        }
+        if (doorLamp) doorLamp.intensity = 1.4 * doorQ;
+        var dorVis = doorQ > 0.001;
+        if (doorRoot.visible !== dorVis){ doorRoot.visible = dorVis; bokehStamp++; }
         frameDirtyFlag = true;
       }
-      if (bubble.visible && !reducedMotion){
-        bubbleMat.uniforms.uT.value = clock.elapsedTime;
-        ambientDirtyFlag = true;
+      // the band glitch — the ENTRANCE plays the logo table across
+      // doorWin, the EXIT replays it on its own phase and parks on
+      // clip-all past the last blink-off (empty steps hide whole)
+      var bandT = ebT > 0.001 ? ebT : dgT;
+      var dgQ = Math.round(bandT * 200) / 200 + (ebT > 0.001 ? 2 : 0);   // exit keyed apart
+      if (doorGP && dgQ !== doorGlitchQ){
+        doorGlitchQ = dgQ;
+        var bq = dgQ >= 2 ? dgQ - 2 : dgQ;
+        if (bq > 0 && bq < 1){
+          var dgp = bq * 0.61;
+          var dst = GLITCH_STEPS[0];
+          for (var dgi = 0; dgi < GLITCH_STEPS.length; dgi++){ if (dgp >= GLITCH_STEPS[dgi][0]) dst = GLITCH_STEPS[dgi]; }
+          var dgh = doorGTop - doorGBot;
+          doorGP[0].constant = doorGTop - dgh * (dst[1] / 100);
+          doorGP[1].constant = -(doorGTop - dgh * (dst[2] / 100));
+          doorRoot.position.x = -0.35 + dst[3] * 0.016;
+        } else if (dgQ >= 3){
+          // exit complete: parked dead until scrolled back
+          doorGP[0].constant = doorGBot - 1; doorGP[1].constant = 1e6;
+          doorRoot.position.x = -0.35;
+        } else {
+          doorGP[0].constant = 1e6; doorGP[1].constant = 1e6;
+          doorRoot.position.x = -0.35;
+        }
+        doorRoot.updateMatrixWorld(true);
+        frameDirtyFlag = true;
       }
+      // the panels: born OPEN (slid into the pockets), sealed by the
+      // scroll as the section reads — and OPENED AGAIN by the exit
+      // before the construction rips away
+      var dcT = revealEase(Math.min(1, Math.max(0, (doorWin.p - 0.40) / 0.60)));
+      var dcQ = Math.round(Math.min(dcT, 1 - outOpen) * 200) / 200;
+      if (doorUp && doorDown && dcQ !== doorCloseQ){
+        doorCloseQ = dcQ;
+        doorUp.position.y = doorUpTravel * (1 - dcQ);
+        doorDown.position.y = -doorDownTravel * (1 - dcQ);
+        if (doorLock) doorLock.position.y = doorDown.position.y;
+        doorRoot.updateMatrixWorld(true);
+        frameDirtyFlag = true;
+      }
+    }
+    // the floor logos float inside their translucent machines — an
+    // ambient flourish on the slide-2 show (the cubeBob pattern:
+    // seeded phases, frameDirtyFlag keeps the static gate live)
+    if (s2Logos && s2Logos.visible && !reducedMotion){
+      var slT = clock.elapsedTime;
+      for (var slb = 0; slb < s2LogoBob.length; slb++){
+        var SL = s2LogoBob[slb];
+        SL.m.position.y = SL.y0 + Math.sin(slT * SL.sp + SL.ph) * SL.amp;
+      }
+      s2Logos.updateMatrixWorld(true);
+      frameDirtyFlag = true;
     }
     // scene-1 rack glitch flash — same band pattern as the logo glitch
     if (rackRoot && glitchStart >= 0 && (sceneMode !== 1 || scrollNow > 0)){
