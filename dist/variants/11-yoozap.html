@@ -64,6 +64,8 @@
     <link rel="preload" href="../models/laptop.glb" as="fetch" crossorigin>
     <link rel="preload" href="../models/qblock.glb" as="fetch" crossorigin>
     <link rel="preload" href="../models/door.glb" as="fetch" crossorigin>
+    <link rel="preload" href="../models/terminal.glb" as="fetch" crossorigin>
+    <link rel="preload" href="../models/card.glb" as="fetch" crossorigin>
 <style>
   :root{
     /* manager-usectl dark theme */
@@ -99,7 +101,91 @@
   .nav-left{display:flex;align-items:center;gap:12px}
   .nav-logo{display:flex;align-items:center}
   .nav-logo img{height:22px;width:auto}
-  .nav-badge{font-size:.65rem;font-weight:600;color:var(--text);background:linear-gradient(90deg,rgba(17,163,42,.1) 0%,rgba(0,0,0,.25) 100%);padding:3px 10px;border-radius:20px;letter-spacing:.04em}
+  /* the soundtrack player: a white play mark where the Beta pill used to
+     sit. hovering it (or playing) slides the transport out to its right —
+     arrows, a note, and the track name in the site's green terminal type,
+     scrolling left to right. */
+  .nav-music{position:relative;display:flex;align-items:center;gap:10px;height:34px}
+  /* the audio frame: in the viewport (never throttled), invisible */
+  #ytHost{position:fixed;right:0;bottom:0;width:180px;height:101px;opacity:0;pointer-events:none;overflow:hidden}
+  #ytHost iframe{width:100%;height:100%;border:0;display:block}
+  .nav-play{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;padding:0;border:0;background:none;color:#fff;cursor:pointer;opacity:.9;transition:opacity .2s,transform .2s}
+  .nav-play:hover{opacity:1;transform:scale(1.12);color:var(--accent);filter:drop-shadow(0 0 7px rgba(17,163,42,.55))}
+  .nav-play svg{display:block;width:13px;height:13px;fill:currentColor}
+  .nav-play .ico-pause{display:none}
+  .nav-music.playing .nav-play .ico-play{display:none}
+  .nav-music.playing .nav-play .ico-pause{display:block}
+  /* the transport: clipped to nothing except while hovered — playing
+     does NOT hold it open, it lives on hover alone */
+  .nav-player{display:flex;align-items:center;gap:10px;max-width:0;opacity:0;overflow:hidden;pointer-events:none;transition:max-width .5s cubic-bezier(.19,1,.22,1),opacity .3s ease-in-out}
+  .nav-music:hover .nav-player,.nav-music:has(:focus-visible) .nav-player{max-width:320px;opacity:1;pointer-events:auto}
+  /* skip back / skip forward, the transport glyphs — the play mark's own
+     16px box and 13px art, so the three read as one row of buttons.
+     prev is the same path flipped. */
+  .np-arrows{display:flex;align-items:center;gap:8px}
+  .np-arrow{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;padding:0;border:0;background:none;color:rgba(255,255,255,.75);cursor:pointer;transition:color .2s,transform .2s}
+  .np-arrow:hover{color:var(--accent);transform:scale(1.12);filter:drop-shadow(0 0 7px rgba(17,163,42,.5))}
+  .np-arrow svg{display:block;width:13px;height:13px;fill:currentColor}
+  #npPrev svg{transform:scaleX(-1)}
+  /* the transport buttons wear the CTA's glitch, verbatim: the same seven
+     clip polygons, the same shimmy, the same 2s loop — only the copy on
+     top is an icon instead of letters. no background on the overlay, so
+     the green cut-up rides over the white mark instead of hiding it. */
+  .nav-play,.np-arrow,.np-nudge{
+    position:relative;
+    --shimmy-distance:5;
+    --clip-one:polygon(0 2%, 100% 2%, 100% 95%, 95% 95%, 95% 90%, 85% 90%, 85% 95%, 8% 95%, 0 70%);
+    --clip-two:polygon(0 78%, 100% 78%, 100% 100%, 95% 100%, 95% 90%, 85% 90%, 85% 100%, 8% 100%, 0 78%);
+    --clip-three:polygon(0 44%, 100% 44%, 100% 54%, 95% 54%, 95% 54%, 85% 54%, 85% 54%, 8% 54%, 0 54%);
+    --clip-four:polygon(0 0, 100% 0, 100% 0, 95% 0, 95% 0, 85% 0, 85% 0, 8% 0, 0 0);
+    --clip-five:polygon(0 0, 100% 0, 100% 0, 95% 0, 95% 0, 85% 0, 85% 0, 8% 0, 0 0);
+    --clip-six:polygon(0 40%, 100% 40%, 100% 85%, 95% 85%, 95% 85%, 85% 85%, 85% 85%, 8% 85%, 0 70%);
+    --clip-seven:polygon(0 63%, 100% 63%, 100% 80%, 95% 80%, 95% 80%, 85% 80%, 85% 80%, 8% 80%, 0 70%);
+  }
+  .nav-play .glitch,.np-arrow .glitch{display:none;position:absolute;inset:0;align-items:center;justify-content:center;pointer-events:none;z-index:10;color:var(--accent)}
+  .nav-play:hover .glitch,.np-arrow:hover .glitch{display:flex;animation:glitch 2s infinite}
+  /* "play me": the bar's nudge while the soundtrack sits idle. it cuts in
+     on the CTA's own clip polygons, holds one second, cuts back out, then
+     stays gone for the rest of the ten-second lap. sits where the
+     transport lands, so hover hands the space over — and playing retires
+     it entirely. */
+  .np-nudge{
+    position:absolute;left:26px;top:0;bottom:0;display:flex;align-items:center;
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--accent);
+    text-shadow:0 0 10px rgba(17,163,42,.45);white-space:nowrap;pointer-events:none;
+    opacity:0;animation:np-nudge 15s linear infinite;
+  }
+  .nav-music:hover .np-nudge,.nav-music.playing .np-nudge{animation:none;opacity:0}
+  @keyframes np-nudge{
+    0%,0.93%   {opacity:0;clip-path:var(--clip-four);transform:translateX(0)}
+    1.07%      {opacity:1;clip-path:var(--clip-two);transform:translateX(calc(var(--shimmy-distance) * -1%))}
+    1.33%      {opacity:1;clip-path:var(--clip-six);transform:translateX(calc(var(--shimmy-distance) * 1%))}
+    1.6%       {opacity:1;clip-path:var(--clip-three);transform:translateX(calc(var(--shimmy-distance) * -1%))}
+    1.87%,8.53%{opacity:1;clip-path:var(--clip-one);transform:translateX(0)}    /* the steady second */
+    8.8%       {opacity:1;clip-path:var(--clip-seven);transform:translateX(calc(var(--shimmy-distance) * 1%))}
+    9.07%      {opacity:1;clip-path:var(--clip-three);transform:translateX(calc(var(--shimmy-distance) * -1%))}
+    9.33%,100% {opacity:0;clip-path:var(--clip-five);transform:translateX(0)}
+  }
+  /* the cover: the track's own frame, racked in a hairline card like
+     every other pod on the page. the note sits underneath as the
+     fallback for a thumbnail that never arrives. */
+  .np-art{position:relative;flex:0 0 auto;width:34px;height:34px;border:1px solid var(--hair);border-radius:5px;overflow:hidden;background:#0d0d0d;display:flex;align-items:center;justify-content:center;transition:border-color .3s,box-shadow .3s}
+  .nav-music.playing .np-art{border-color:rgba(17,163,42,.55);box-shadow:0 0 10px rgba(17,163,42,.22)}
+  /* the cover is the way out to the track on youtube. the second selector
+     is only there to outrank .nav-music.playing .np-art, which would
+     otherwise hold its own border while the cover is hovered. */
+  .np-art{cursor:pointer;text-decoration:none}
+  .np-art:hover,.nav-music.playing .np-art:hover{border-color:var(--accent);box-shadow:0 0 14px rgba(17,163,42,.4)}
+  .np-art:hover img{filter:brightness(1.12)}
+  .np-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;z-index:1}
+  .np-art img[hidden]{display:none}
+  .np-note{display:inline-flex;align-items:center;color:var(--accent);opacity:.85}
+  .np-note svg{display:block;width:15px;height:15px;fill:currentColor}
+  /* the name, in the terminal green — a two-copy track sliding rightwards */
+  .np-title{position:relative;width:168px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%)}
+  .np-marquee{display:flex;width:max-content;font-family:var(--mono);font-size:11px;line-height:22px;letter-spacing:.04em;color:var(--accent);text-shadow:0 0 10px rgba(17,163,42,.45);white-space:nowrap;animation:np-run 14s linear infinite}
+  .np-marquee span{padding-right:28px}
+  @keyframes np-run{from{transform:translateX(-50%)}to{transform:translateX(0)}}
   .nav-right{display:flex;align-items:center;gap:32px}
   .nav-links{display:flex;align-items:center;gap:32px;color:rgba(255,255,255,.7)}
   .nav-links a{color:inherit;font-size:.88rem;font-weight:500;text-decoration:none;transition:color .2s}
@@ -164,6 +250,9 @@
   @media (max-width:767px){
     .mobile-menu a{font-size:18px}
     .nav-inner{padding:0 20px;height:50px}
+    /* no room for the transport beside an 85px logo — play mark only */
+    .np-nudge{display:none}
+    .nav-music:hover .nav-player,.nav-music:has(:focus-visible) .nav-player{max-width:0;opacity:0;pointer-events:none}
     .nav-logo{width:85px}
     .mobile-menu{top:50px;height:calc(100vh - 50px)}
   }
@@ -334,7 +423,7 @@
 
   /* numbered hotspots in the city — TESTER UI, retired from the real
      page (the machinery stays for future framing work) */
-  #spots{position:absolute;inset:0;z-index:3;pointer-events:none}   /* TESTER MODE: add display:none to ship */
+  #spots{position:absolute;inset:0;z-index:3;pointer-events:none;display:none}   /* testers retired; drop display:none to bring them back */
   .spot{
     position:absolute;left:0;top:0;transform:translate(-50%,-50%);
     width:28px;height:28px;border-radius:50%;
@@ -437,9 +526,8 @@
     position:relative;z-index:5;
     display:grid;gap:250px;width:100%;
     padding:300px 0 0;   /* the footer carries its own small bottom gap */
-    /* TESTER MODE ON: the free-cam grab works through the sections;
-       links/text don't click. flip these two lines off to ship. */
-    pointer-events:none;user-select:none;
+    /* SHIPPED: content clicks. add pointer-events:none;user-select:none
+       here to put the free-cam grab back through the sections. */
   }
   .after .panel{
     width:min(880px,calc(100% - 40px));margin:0 auto;
@@ -491,7 +579,7 @@
     background-color:#161616;
     background-image:radial-gradient(circle,#2a2a2a 1px,transparent 1px);
     background-size:18px 18px;
-    /* TESTER MODE: pointer-events:auto;touch-action:pan-y; — restore to ship */
+    pointer-events:auto;touch-action:pan-y;
   }
   /* the colored dot overlays: same grid, painted in the pod green, shaped
      by mask-image from the wave painter (halo / hover halo / follow ripple) */
@@ -543,8 +631,12 @@
      and the same selectable behavior, themed BLUE */
   .after #machine .grid3{grid-template-columns:1fr;gap:22px}
   .after #machine .small{margin-top:26px}   /* the note breathes off the card stack */
-  .after #machine .grid3 .card{cursor:pointer}
-  .after #machine .grid3 .card:hover{border-color:rgba(165,180,252,.55)}
+  /* the cards ARE the slider: HOVERING one drives the scene (no click
+     needed), so the whole card — and every glyph inside it — wears the
+     hand, and the hover nudges it a hair off the stack */
+  .after #machine .grid3 .card,.after #machine .grid3 .card *{cursor:pointer}
+  .after #machine .grid3 .card{transition:background .2s,border-color .2s,box-shadow .25s,transform .25s cubic-bezier(.19,1,.22,1)}
+  .after #machine .grid3 .card:hover{border-color:rgba(165,180,252,.55);transform:translateX(5px)}
   .after #machine .grid3 .card.on{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 22px rgba(165,180,252,.18)}
   /* the machine cards carry li lists now: the site's round blue dots
      do the marking, so the title drops its cube glyph; the title
@@ -653,7 +745,37 @@
         <a href="/" class="nav-logo" aria-label="usectl home">
           <img src="../img/logo.svg" alt="usectl logo" width="83" height="22">
         </a>
-        <span class="nav-badge">Beta</span>
+        <div class="nav-music" id="navMusic">
+          <button class="nav-play" id="navPlay" type="button" aria-label="Play soundtrack">
+            <svg class="ico-play" viewBox="0 0 12 14" aria-hidden="true"><path d="M1 .8 11.3 7 1 13.2Z"/></svg>
+            <svg class="ico-pause" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.2 1h3.2v12H1.2zm6.2 0h3.2v12H7.4z"/></svg>
+            <span class="glitch" aria-hidden="true">
+              <svg class="ico-play" viewBox="0 0 12 14"><path d="M1 .8 11.3 7 1 13.2Z"/></svg>
+              <svg class="ico-pause" viewBox="0 0 12 14"><path d="M1.2 1h3.2v12H1.2zm6.2 0h3.2v12H7.4z"/></svg>
+            </span>
+          </button>
+          <span class="np-nudge" aria-hidden="true">play me</span>
+          <div class="nav-player">
+            <div class="np-arrows">
+              <button class="np-arrow" id="npPrev" type="button" aria-label="Previous track">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M.6 1.6 6 7 .6 12.4Zm5.4 0L11.4 7 6 12.4Zm6 0h1.8v10.8h-1.8z"/></svg>
+                <span class="glitch" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M.6 1.6 6 7 .6 12.4Zm5.4 0L11.4 7 6 12.4Zm6 0h1.8v10.8h-1.8z"/></svg></span>
+              </button>
+              <button class="np-arrow" id="npNext" type="button" aria-label="Next track">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M.6 1.6 6 7 .6 12.4Zm5.4 0L11.4 7 6 12.4Zm6 0h1.8v10.8h-1.8z"/></svg>
+                <span class="glitch" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M.6 1.6 6 7 .6 12.4Zm5.4 0L11.4 7 6 12.4Zm6 0h1.8v10.8h-1.8z"/></svg></span>
+              </button>
+            </div>
+            <a class="np-art" id="npArtLink" href="https://www.youtube.com/watch?v=etk-D9ARsGs"
+               target="_blank" rel="noopener noreferrer" aria-label="Open this track on YouTube">
+              <span class="np-note" aria-hidden="true">
+                <svg viewBox="0 0 14 14"><path d="M12.4.6 5.6 2.2v7.3a2.5 2.5 0 1 0 1.2 2.1V4.6l4.4-1v4.3a2.5 2.5 0 1 0 1.2 2.1Z"/></svg>
+              </span>
+              <img id="npArt" alt="" decoding="async" onerror="this.hidden=true">
+            </a>
+            <span class="np-title"><span class="np-marquee" id="npMarquee"><span>—</span><span>—</span></span></span>
+          </div>
+        </div>
       </div>
       <div class="nav-right">
         <div class="nav-links">
@@ -697,6 +819,144 @@
     </div>
   </nav>
 </header>
+<!-- the soundtrack engine: a real youtube iframe, built by hand so it
+     carries allow="autoplay" — the api's own generated iframe does not,
+     and a cross-origin frame without it refuses every playVideo() the
+     parent asks for. kept on-screen at zero opacity: a 1px offscreen
+     frame gets throttled. src stays empty until the first hover, so
+     page load still costs nothing. -->
+<div id="ytHost" aria-hidden="true">
+  <iframe id="ytAudio" title="Soundtrack player" frameborder="0"
+          allow="autoplay; encrypted-media"></iframe>
+</div>
+<script>
+  (function(){
+    var TRACKS = [
+      {id:'etk-D9ARsGs', name:'The Matrix Soundtrack Track 7. "Mindfields" The Prodigy'},
+      {id:'Sc6_NOhCZPM', name:'The Matrix Soundtrack Track 6. "Leave You Far Behind" Lunatic Calm'},
+      {id:'F4Br683kDVU', name:'The Matrix Soundtrack Track 4. "Clubbed to Death (Kurayamino Mix)" Rob D'},
+      {id:'hyhfx_XDDdE', name:'The Matrix Soundtrack Track 5. "Prime Audio Soup" Meat Beat Manifesto'}
+    ];
+    var wrap = document.getElementById('navMusic');
+    if (!wrap) return;
+    var btn = document.getElementById('navPlay'),
+        marquee = document.getElementById('npMarquee'),
+        art = document.getElementById('npArt'),
+        artLink = document.getElementById('npArtLink'),
+        frame = document.getElementById('ytAudio'),
+        i = 0, yt = null, ready = false, want = false, booted = false, dead = 0,
+        intent = false;   // the user's last instruction: play (true) or pause (false)
+
+    function label(){
+      var n = TRACKS[i].name;
+      art.hidden = false;
+      art.src = 'https://i.ytimg.com/vi/' + TRACKS[i].id + '/mqdefault.jpg';
+      art.alt = n;
+      if (artLink){
+        artLink.href = 'https://www.youtube.com/watch?v=' + TRACKS[i].id;
+        artLink.title = n;                                   // the full name on hover
+        artLink.setAttribute('aria-label', 'Open on YouTube: ' + n);
+      }
+      marquee.innerHTML = '';
+      for (var k = 0; k < 2; k++){
+        var s = document.createElement('span');
+        s.textContent = n;
+        marquee.appendChild(s);
+      }
+      // pace the scroll by length so long and short names read alike
+      marquee.style.animationDuration = Math.max(9, n.length * 0.42).toFixed(1) + 's';
+    }
+    label();
+
+    function on(v){ wrap.classList.toggle('playing', v); }
+
+    // the api arrives once, on the first hover or the first click. BOTH
+    // gates must be open before attaching: the api itself, and the
+    // iframe's own load. attaching to a frame that has not loaded yet
+    // loses the postMessage handshake — onReady never fires and every
+    // button goes dead, which is exactly what happened.
+    var apiUp = false, frameUp = false, guard = 0;
+
+    function boot(){
+      if (booted) return;
+      booted = true;
+      frame.addEventListener('load', function(){ frameUp = true; attach(); });
+      var u = 'https://www.youtube.com/embed/' + TRACKS[i].id +
+              '?enablejsapi=1&controls=0&disablekb=1&playsinline=1&rel=0&modestbranding=1';
+      if (location.protocol.indexOf('http') === 0) u += '&origin=' + encodeURIComponent(location.origin);
+      frame.src = u;
+      if (window.YT && window.YT.Player){ apiUp = true; attach(); return; }
+      var prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = function(){
+        if (typeof prev === 'function') prev();
+        apiUp = true; attach();
+      };
+      var s = document.createElement('script');
+      s.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(s);
+    }
+    wrap.addEventListener('pointerenter', boot);
+
+    function attach(){
+      if (!apiUp || !frameUp || yt) return;
+      yt = new YT.Player(frame, {events:{onReady:onReady, onStateChange:onState, onError:onError}});
+      // if youtube never answers, stop lying to the user with a pause icon
+      guard = setTimeout(function(){ if (!ready){ want = intent = false; on(false); } }, 8000);
+    }
+
+    function onReady(){
+      ready = true;
+      clearTimeout(guard);
+      yt.setVolume(55);
+      if (want){ want = false; yt.playVideo(); }
+    }
+
+    // `intent` is what the user last asked for, and it is the ONLY thing the
+    // toggle reads. getPlayerState() cannot be trusted here: a freshly
+    // loaded embed sits in BUFFERING while it preloads, so asking the
+    // player "are you playing?" answers yes before anything has started —
+    // the first click then paused a video that never played and the button
+    // ran a click out of phase with its own icon from then on.
+    function onState(e){
+      var S = YT.PlayerState;
+      if (e.data === S.PLAYING){
+        dead = 0; intent = true; on(true);
+        // youtube knows the real title — take it verbatim
+        var d = yt.getVideoData && yt.getVideoData();
+        if (d && d.title && d.title !== TRACKS[i].name){ TRACKS[i].name = d.title; label(); }
+      }
+      else if (e.data === S.PAUSED){ intent = false; on(false); }
+      else if (e.data === S.ENDED) step(1);
+    }
+
+    // embedding disabled, region block, dead video: walk to the next one,
+    // but stop after a full lap so a bad playlist cannot spin forever
+    function onError(){
+      if (++dead >= TRACKS.length){ on(false); return; }
+      step(1);
+    }
+
+    function step(d){
+      i = (i + d + TRACKS.length) % TRACKS.length;
+      label();
+      intent = true; on(true);
+      boot();
+      if (ready) yt.loadVideoById(TRACKS[i].id);   // loadVideoById autoplays
+      else want = true;
+    }
+
+    btn.addEventListener('click', function(){
+      boot();
+      intent = !intent;
+      on(intent);
+      if (!ready){ want = intent; return; }        // onReady picks it up
+      if (intent) yt.playVideo(); else yt.pauseVideo();
+    });
+    document.getElementById('npPrev').addEventListener('click', function(){ step(-1); });
+    document.getElementById('npNext').addEventListener('click', function(){ step(1); });
+
+  })();
+</script>
 <script>
   // the nav's black gradient: on whenever the page is scrolled off the top
   (function(){
@@ -719,15 +979,22 @@
     var mc = document.getElementById('machCards');
     if (!mc) return;
     var cards = Array.prototype.slice.call(mc.children);
-    // TESTER MODE: slide 2 active by default while it's being built
-    // (cards don't click with pointer-events off) — ship at 0
-    window.__machSlide = 1;
-    cards.forEach(function(x, j){ x.classList.toggle('on', j === 1); });
+    // the door slide opens the container; HOVER picks the slide from here
+    // (the card is the button — no click). the pick is sticky: the mouse
+    // leaving the stack holds the last slide, it does not snap back.
+    window.__machSlide = 0;
+    cards.forEach(function(x, j){ x.classList.toggle('on', j === 0); });
+    function mcPick(i){
+      if ((window.__machSlide || 0) === i) return;
+      window.__machSlide = i;
+      cards.forEach(function(x, j){ x.classList.toggle('on', j === i); });
+    }
     cards.forEach(function(c, i){
-      c.addEventListener('click', function(){
-        window.__machSlide = i;
-        cards.forEach(function(x, j){ x.classList.toggle('on', j === i); });
+      c.addEventListener('pointerenter', function(ev){
+        if (ev.pointerType === 'touch') return;   // touch has no hover — it taps below
+        mcPick(i);
       });
+      c.addEventListener('click', function(){ mcPick(i); });   // touch / keyboard-less taps
     });
     }
   })();
@@ -1152,8 +1419,14 @@
     // camera stops the age is already spent, so the very next frame
     // re-renders at the exact final pose — a settled shot can never sit
     // on a stale map.
+    // ...and while the page is ACTIVELY scrolling it may ride three: the
+    // depth map only steers the blur radius, the scene is a second full
+    // geometry pass (3.7M triangles at the rack), and a radius ~50ms old
+    // under motion the eye cannot see — exactly the frames where the
+    // budget is tightest. the age is spent the moment scrolling stops, so
+    // the settled shot still re-renders at the final pose.
     if (fresh){ bokehCamAge = 0; }
-    else if (bokehSceneSame && bokehCamAge < 1){ bokehCamAge++; fresh = true; }
+    else if (bokehSceneSame && bokehCamAge < (scrollActive ? 3 : 1)){ bokehCamAge++; fresh = true; }
     if (!fresh){
       bokehCamAge = 0;
       bokehPrevCam.copy(camera.matrixWorld);
@@ -1335,6 +1608,14 @@
   // on a 60hz panel the clock never trips and nothing changes at all.
   // scroll, fades, glitches and any real scene event stay full-rate.
   var ambientDirtyFlag = false, ambClock = 1;
+  // ...and the hold ADAPTS to what a live frame actually costs here. a
+  // machine that renders one in under 20ms keeps the plain 60hz pacing
+  // (nothing changes); on a heavier frame — the rack scene, where the
+  // ghost city puts 4M transparent triangles through the chain — the
+  // idle animators back off proportionally instead of pinning the page
+  // to the cost of a full render every tick. the animations all still
+  // run: only their sample rate follows the budget.
+  var liveCost = 0.0161, liveCostLast = false;
   // ── scroll judder governor ── on a high-hz panel a heavy leg's live
   // frames miss the native tick unevenly (12ms work on an 8.3ms grid →
   // 70-100fps jitter, read as scroll lag). when misses pile up the
@@ -1551,6 +1832,7 @@
       var s = JSON.parse(localStorage.getItem('calcLight') || 'null');
       if (s && s.key && s.fill && s.v === d.v) d = s;
     } catch(e){}
+    d.metal = 0;   // the body is a dielectric now; a tuned-metal save must not resurrect it
     return d;
   })();
   // the calculator's own scroll window, measured like a leg: it starts
@@ -1581,6 +1863,9 @@
   var doorWin = {start: 0, end: 1, raw: 0, p: 0};  // the door choreography:
                        // opens AFTER the leg-9 camera lands (machine top
                        // 60 → 30% vh) so the glitch + seal play on screen
+  // slide 4's wall panel leaves AHEAD of the flight — its own window,
+  // measured to close as the deploy dive begins (see measureScrub)
+  var panelOut = {start: 0, end: 1, raw: 0, p: 0};
   var doorOut = {start: 0, end: 1, raw: 0, p: 0};  // the EXIT: the same
                        // band glitch rips the sealed door away as the
                        // machine container's bottom leaves mid-screen
@@ -1659,11 +1944,173 @@
   // free cube's own front row. interaction-damped on the click,
   // gated in/out by the scroll like every slide payload.
   var s2P = 0, s2Show = 0, s2Cam = 0, s2LineQ = -1, slideAwayP = 0, s2Keep = null, s2WasUni = false, s2Hand = 1;
+  // MACH_SPEED — how fast EVERY slide state travels, in units per second,
+  // one number for all of them so no card switches faster than another.
+  // it is a LINEAR ramp, not the exponential damp this used to be, and
+  // that swap is what fixed "glitchs make faster only, they are so slow
+  // ... when i change slides man, not on scrolls": the band tables all
+  // live in a LATE sub-range of their slide's ride (the door's rip runs
+  // 0.60→1, slide 3's pod group 0.78→1), and an exponential spends most
+  // of its life crawling through exactly that tail. every scroll-driven
+  // glitch was always fine — those ride scrub windows, not this. linear
+  // costs nothing in feel and makes a sub-range take time in PROPORTION
+  // TO ITS WIDTH. the ride walked 5 → 3.6 "to fast" → 7 "so slow" → 4.5
+  // → 3 → 2.2 "make animations slower" as a damp, then 0.5 → 0.6 "make
+  // other animation faster + 20%" as a speed.
+  // NOTE there is no sequencer left above this: "next slide animation
+  // always start imediatly" — the whole rig rides machWant directly, so
+  // the incoming slide begins on the hover frame while the outgoing one
+  // retracts alongside it, both at this one speed.
+  var MACH_SPEED = 0.6;
+  // MACH_HANDOVER — the ONE asymmetry, and it is forced by the renderer.
+  // slide 2's floor gap and slide 3's corner wedge share one set of clip
+  // planes AND opposite material modes (slide 2 unions — clipIntersection
+  // true — slide 3 intersects), so the two openings can NEVER be shown at
+  // once: s3Can/s2Can below hold the incoming one at zero until the
+  // outgoing one is fully shut. at the common speed that left slide 2's
+  // slot hanging open across the entire camera move ("from 2 to 3 i have
+  // stick of rack open") and then popped slide 3's wedge in at ~57%,
+  // because by the time the planes came free its own ride was already
+  // half over. clearing an opening at 2.8/s instead gets it out of the
+  // way in ~0.25s — before the incoming ride crosses the 0.30 its
+  // opening starts at, so the new one still opens from SHUT, from zero,
+  // immediately. OPENING is always MACH_SPEED; only the clearing out is
+  // quick, and it is quick on every slide alike.
+  var MACH_HANDOVER = 2.8;
+  // ...and the band tables are tuned in SECONDS, not in ride fraction.
+  // every glitch lives in a LATE sub-range of its slide's ride, so raising
+  // MACH_SPEED to make the OTHER animations faster would drag the rips
+  // along with it — widen each range by the same factor and it holds its
+  // absolute duration instead. baseline 0.5/s, where the door's rip is
+  // 0.80s and slide 3's two bands are ~0.31s each; those are the numbers
+  // the widths below preserve at any speed.
+  var MACH_GW = MACH_SPEED / 0.5;
+  // the door's rip-away, anchored to the END of the outer animation
+  var DOOR_RIP_W = Math.min(0.55, 0.40 * MACH_GW), DOOR_RIP_0 = 1 - DOOR_RIP_W;
+  // slide 3's board band then its pod group — back to back, both strictly
+  // after the column has finished winking out (that ends at 0.45), so the
+  // pair anchors at the end and the earlier one clamps off that floor.
+  // NOTE the clamp caps the useful widen factor near 1.2; past that the
+  // board band would start biting into the wink-out it must follow.
+  var S3_POD_W = 0.22 * MACH_GW, S3_POD_0 = 1 - S3_POD_W;
+  var S3_BND_0 = Math.max(0.46, S3_POD_0 - 0.23 * MACH_GW);
+  var S3_BND_W = Math.max(0.05, S3_POD_0 - S3_BND_0);
+  // one linear step toward a target, clamped — no asymptote, no snap
+  // threshold, and it lands on the target exactly
+  function machRamp(cur, tgt, step){
+    if (cur < tgt) return Math.min(tgt, cur + step);
+    if (cur > tgt) return Math.max(tgt, cur - step);
+    return tgt;
+  }
   var s2Engaged = false, s2LandT = 0;
+  // slide 3 ('one bill'): the user-logged WIDE shot + the split's
+  // corner wedge from the OTHER corner — full crowd show, all scrub
+  var s3P = 0, s3Show = 0, s3Cam = 0, s3Hand = 1, s3CubeQ = -1, s3WasOwn = false, s3CornerBase = 0;
+  var S3_TGT = new THREE.Vector3(-2.6939, 2.2994, 0.2608);
+  // re-logged shot (az 40.2) with the eye pulled 5.5% down the view
+  // axis — the same framing, a touch closer ("more zoom in + 5-6 %")
+  var S3_EYE = new THREE.Vector3(24.1017, 8.9299, 32.3982);   // +10% closer again
+  var s3TgtW = new THREE.Vector3(), s3EyeW = new THREE.Vector3();
+  // slide 4's payload: a sci-fi control panel bolted to the rack's
+  // RIGHT-hand wall (+x — the face this slide's camera turns to the
+  // lens). not a prop standing beside the machine: part of it.
+  var panelRoot = null, panelMats = [], panelLamp = null, panelQ = -1;
+  // the panel's dashboards, recolored to OUR blue and kept alive: the
+  // authored screen art is amber and rides the EMISSIVE map whole, so
+  // the recolor is one pass over that map (every pixel keeps its own
+  // luminance, takes the site blue as its hue — nothing inside the
+  // displays is redrawn). the live copy adds a scan band per screen,
+  // sweeping forever, and the whole map blinks on the city roads' beat.
+  var panelBaseCv = null, panelMaskCv = null, panelCv = null, panelCx = null, panelTex = null, panelScreens = [];
+  // ── the dashboards' MOVING PARTS ──
+  // the authored art is a STILL: every gauge sits at whatever value the
+  // modeller baked. these are the pieces that move, measured once off the
+  // shipped map and hardcoded (the laptop hologram's lesson — the glb
+  // never changes and a runtime hunt for them is guesswork). all numbers
+  // are emissive-map pixels, top-down: the space panelCv is drawn in.
+  //   · screen A — three stat bars fill and drain; three ring gauges TURN
+  //     (the C's flared end is the art's own pointer, so the whole
+  //     annulus rotates: the ring is never redrawn, it rides)
+  //   · screen B — the speedometer needle sweeps its scale
+  //   · screen C — three faders slide, three ladder markers step
+  // panelCleanCv is the art with EXACTLY those pieces blacked out; every
+  // frame paints them back at their value, so nothing else is touched.
+  var panelCleanCv = null, panelDashDraw = null, panelScrBlink = null, panelDirty = null;
+  var PD_BARS = [[234, 236], [243, 246], [252, 255]];          // each bar's interior rows
+  var PD_BX0 = 94, PD_BX1 = 177;                               // the fill's run (the end cap at 178-179 is art)
+  var PD_RING = [[105.5, 305.5], [144.1, 305.5], [183.1, 305.6]];
+  var PD_RIN = 9.4, PD_ROUT = 19.8;                            // the ring band; the value digits sit inside r 8
+  var PD_NDL = [125, 456.5], PD_NA0 = 76.4;                    // the needle's hub, and the angle it was baked at
+  var PD_FADE = [[366, 4, 371], [379, 5, 384], [392, 4, 397]]; // track x, track w, knob x
+  var PD_FTOP = 449, PD_FY0 = 455, PD_FY1 = 497;               // the faders' rail
+  var PD_MARK = [311, 327, 342], PD_MY0 = 452, PD_MY1 = 493;   // the ladder markers' gutters and their travel
+  // the three displays and the clock each one blinks on: the roads'
+  // dropout pattern, but three PERIODS that share no common beat, so no
+  // two screens ever drop together (x, y, w, h, seconds, offset)
+  var PD_SCR = [[82, 211, 125, 146, 9.7, 0], [83, 376, 124, 140, 6.3, 2.4], [287, 382, 129, 138, 13.1, 5.1]];
+  // slide 3's money terminal: a kiosk standing right of the rack
+  var termRoot = null, termMats = [], termLamp = null, termQ = 0;
+  // the terminal's LIVE holo dashboard: canvas-drawn in the site blue,
+  // rings at different speeds, charts that never repeat, road-blink
+  var termHoloMat = null, termHoloTex = null, termHoloDraw = null, termHoloOff = false;
+  // slide 3's SCHEME: a second pcb standing in the removed slab
+  var s3Pcb = null, s3PcbMats = [];
+  var s3Pods = null, s3PodsMat = null, s3PodsTex = null, s3PodsDraw = null, s3PodsOff = false;
+  // slide 3's staged reveal: the slab cubes wink out at their own
+  // seeded moments, THEN the board glitches in, THEN the pod group —
+  // all scrubbed, so scrolling out plays the three phases backwards
+  var s3BandP = null, s3BandTop = 0, s3BandBot = 0, s3BandQ = -1, s3PodsStep = null, s3PodsGQ = -2;
+  // the payment card: slides into the kiosk's reader on the scroll,
+  // site green at 0.8, blinking on the city roads' pattern
+  var cardRoot = null, cardMats = [], cardQ = -1, cardNeonOff = false, cardZ0 = 0, cardZ1 = 0;
   var S2_EYE = new THREE.Vector3(6.4551, 5.7053, 8.7048);
   var S2_TGT = new THREE.Vector3(-4.7548, 1.2931, -4.6307);
   var s2TgtW = new THREE.Vector3(), s2EyeW = new THREE.Vector3();
+  // slide 4 ('workloads and previews'): the user-logged three-quarter
+  // shot — rack right of center, SEALED. it opens nothing: no wedge, no
+  // vertical line, no crowd wink — the solid box stands while the
+  // section reads. same scrub chain as slides 2 and 3 (macWin in, the
+  // deploy dive out), so it rewinds with the scroll like everything else.
+  // logged in free-cam at fov 8: r 28.1057, az 56.3, pol 80.4
+  var s4P = 0, s4Show = 0, s4Cam = 0;
+  var S4_TGT = new THREE.Vector3(-2.4496, 1.5576, -0.3413);
+  var S4_EYE = new THREE.Vector3(20.6125, 6.2434, 15.0247);
+  var s4TgtW = new THREE.Vector3(), s4EyeW = new THREE.Vector3();
   var s2Dir = new THREE.Vector3(), s2Right = new THREE.Vector3(), s2UpV = new THREE.Vector3(), S2_UP = new THREE.Vector3(0, 1, 0);
+  // the BASE weight of the camera blend below — the default framing is
+  // just a fourth pose, and it only earns weight when slide 0 is the one
+  // wanted. that is what keeps a card→card switch from swinging through
+  // the default shot on its way ("dont go to default position man").
+  var sBCam = 1;
+  var machAccTgt = new THREE.Vector3(), machAccEye = new THREE.Vector3();
+  // every slide's pose on demand — the three recipes verbatim (logged
+  // orbit + the parallax drift at 30% + the tester drag-pan + the baked
+  // view-plane framing walk), hoisted out of the loop so the blend can
+  // ask for ANY pair of them in the same frame.
+  function machPose(i, tgtOut, eyeOut, prlxDy){
+    var TGT, EYE, panR, panU, pxR;
+    // slide 2: the line centers the display's RIGHT HALF (the text owns
+    // the left) and rides 20% of the frame lower
+    if (i === 1){ TGT = S2_TGT; EYE = S2_EYE; panR = -0.5; panU = 0.4; pxR = 0; }
+    // slide 3: the wide crowd shot, content 14% righter / 24% up, plus a
+    // 4px nudge left in real pixels
+    else if (i === 2){ TGT = S3_TGT; EYE = S3_EYE; panR = 0.14; panU = 0.24; pxR = 4; }
+    // slide 4: the sealed rack right of center, a tenth left / a fifth low
+    else { TGT = S4_TGT; EYE = S4_EYE; panR = 0.1; panU = 0.2; pxR = 0; }
+    tgtOut.copy(TGT); tgtOut.y += prlxDy * 0.3; tgtOut.add(scrubOff);
+    eyeOut.copy(EYE); eyeOut.y += prlxDy * 0.3; eyeOut.add(scrubOff);
+    var hh = EYE.distanceTo(TGT) * Math.tan(camera.fov * Math.PI / 360);
+    var hw = hh * camera.aspect;
+    s2Dir.copy(tgtOut).sub(eyeOut).normalize();
+    s2Right.crossVectors(s2Dir, S2_UP).normalize();
+    s2UpV.crossVectors(s2Right, s2Dir);
+    // pixels → view-plane units via the frame's own half-height, so the
+    // walk holds at any viewport
+    var dR = panR * hw + pxR * (hh / (window.innerHeight / 2));
+    var dU = panU * hh;
+    tgtOut.addScaledVector(s2Right, dR).addScaledVector(s2UpV, dU);
+    eyeOut.addScaledVector(s2Right, dR).addScaledVector(s2UpV, dU);
+  }
   // the floor logos: real product icons extruded to 3d, floating
   // inside the slide-2 floor's translucent machines
   var s2Logos = null, s2LogoMats = [], s2LogoBob = [];
@@ -1755,6 +2202,80 @@
   }
   var clipPlanes = boxPlanes(CLIP_BOX), wirePlanes = boxPlanes(WIRE_BOX);
   var cityMats = [];
+  // ── the ghost city's cheap twin ──
+  // behind the rack the city is a 10%-alpha backdrop whose fragments run a
+  // full PBR loop against 15 lights for a layer nothing actually lights:
+  // applyCityDim has already taken its emissive to zero there, and every
+  // lamp in the scene is a short-range fixture at the machine. measured:
+  // 4M transparent double-sided triangles with no depth rejection, ~67ms a
+  // frame, ~17ms with the lighting gone. the twin carries the SAME colour,
+  // map, blend, stencil and clip state on an unlit material and is bound
+  // only at FULL ghost — the hero and the footer, where the city is the
+  // subject, keep every light. it is not free: measured against the lit
+  // original it moves 0.28% of one colour step on average (max 22/255),
+  // all of it on the city geometry nearest the rack, which the machine's
+  // own lamps do reach.
+  var cityMeshList = [], cityTwins = null, cityTwinOn = false, cityTwinWarm = false;
+  // a city mesh whose material has reached opacity EXACTLY zero paints
+  // nothing and may sit the frame out. the threshold has to be exact: a
+  // first cut skipped anything under one 8-bit step (1/255) on the theory
+  // that it could not show, and that is false in a scene this layered —
+  // the city is seen through itself dozens of times over, so sub-step
+  // alpha accumulates into real tone (12.5% of the hero frame moved).
+  // zero times any number of layers is still zero.
+  var cityAllMeshes = [], cityWireMeshes = [];
+  function cityCullInvisible(){
+    for (var i = 0; i < cityAllMeshes.length; i++){
+      var e = cityAllMeshes[i], mm = e.o.material;
+      var op = Array.isArray(mm) ? Math.max.apply(null, mm.map(function(x){ return x.transparent ? x.opacity : 1; }))
+                                 : (mm.transparent ? mm.opacity : 1);
+      var gone = op <= 0;
+      // only ever hide what is currently shown, and only restore what WE
+      // hid — the city has its own visibility rules (the flat ground cull
+      // at load, annexWire) and they must keep the last word
+      if (gone){ if (e.o.visible){ e.o.visible = false; e.hid = true; } }
+      else if (e.hid){ e.o.visible = true; e.hid = false; }
+    }
+  }
+  function cityTwinFor(m){
+    if (!m || !(m.isMeshStandardMaterial || m.isMeshPhysicalMaterial)) return m;   // already unlit
+    var t = cityTwins.get(m.uuid);
+    if (t) return t;
+    t = new THREE.MeshBasicMaterial({
+      color: m.color ? m.color.clone() : new THREE.Color(0xffffff),
+      map: m.map || null, alphaMap: m.alphaMap || null, alphaTest: m.alphaTest,
+      vertexColors: m.vertexColors, side: m.side, blending: m.blending,
+      toneMapped: m.toneMapped, wireframe: m.wireframe,
+      transparent: m.transparent, opacity: m.opacity,
+      depthTest: m.depthTest, depthWrite: m.depthWrite
+    });
+    t.userData.__src = m;
+    cityTwins.set(m.uuid, t);
+    return t;
+  }
+  // the dim/scene state lives on the ORIGINALS; the twin mirrors it
+  function cityTwinSync(){
+    if (!cityTwins) return;
+    cityTwins.forEach(function(t){
+      var b = t.userData.__src;
+      t.opacity = b.opacity; t.transparent = b.transparent; t.depthWrite = b.depthWrite;
+      t.stencilWrite = b.stencilWrite; t.stencilWriteMask = b.stencilWriteMask;
+      t.stencilRef = b.stencilRef; t.stencilFunc = b.stencilFunc;
+      t.clipIntersection = b.clipIntersection; t.clipShadows = b.clipShadows;
+      if (t.clippingPlanes !== b.clippingPlanes){ t.clippingPlanes = b.clippingPlanes; t.needsUpdate = true; }
+    });
+  }
+  function cityTwinBind(on){
+    if (!cityTwins || on === cityTwinOn || !cityMeshList.length) return;
+    cityTwinOn = on;
+    for (var i = 0; i < cityMeshList.length; i++){
+      var e = cityMeshList[i];
+      e.o.material = on ? e.t : e.m;
+    }
+    // first bind pays the twins' shader compile once, off a scroll frame
+    if (on && !cityTwinWarm){ cityTwinWarm = true; renderer.compile(scene, camera); }
+    frameDirtyFlag = true;
+  }
   function applyScene(mode){
     sceneMode = mode;
     for (var ci = 0; ci < cityMats.length; ci++){
@@ -1769,6 +2290,7 @@
     // it fades with the ghost like all city geometry and the fade block
     // unloads it only at full reveal.
     if (mode !== 2) for (var wi = 0; wi < annexWire.length; wi++) annexWire[wi].visible = true;
+    cityTwinSync();   // the clip planes just moved
     renderer.shadowMap.needsUpdate = true;   // clipShadows changed
   }
   // scene 2 ghosts the whole city to REAL alpha so the rack reads through
@@ -1806,6 +2328,18 @@
       m.stencilRef = 1;
       m.stencilFunc = ghost ? THREE.NotEqualStencilFunc : THREE.AlwaysStencilFunc;
     }
+    // FULL ghost only: the lights argument is already at zero there (no
+    // emissive left to lose) and the reveal has finished, so the swap can
+    // never land mid-crossover where the lamps still reach the buildings
+    cityTwinSync();
+    var fullGhost = f < 0.12 && lights < 0.03;
+    cityTwinBind(fullGhost);
+    // NOT the overlay pass: hiding it at full ghost measured 1.3-1.7ms a
+    // frame, but wireMat's 1.27/255 is per LINE and the wireframe is thin
+    // and dense — the layers accumulate into real green structure (17% of
+    // the frame moved, max 44/255). those are the city's green building
+    // lines and they stay. cityWireMeshes is kept for the cull below.
+    cityCullInvisible();
   }
   var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -2105,6 +2639,14 @@
       // start, slower end ("make it more slowly, not start, only end")
       doorOut.start = Math.max(doorWin.end + 1, LEGS[3].start);
       doorOut.end = doorOut.start + Math.max(1, (LEGS[3].end - LEGS[3].start) * 0.30);
+      // ...and the wall panel goes BEFORE it: the window shuts a sliver
+      // into the dive and opens half a leg's worth of scroll earlier,
+      // while the machine is still parked in frame. fading it inside the
+      // flight means nobody ever sees it go — the rack clears the frame
+      // in the dive's first quarter.
+      var s4Span = Math.max(1, (LEGS[3].end - LEGS[3].start));
+      panelOut.end = LEGS[3].start + s4Span * 0.06;
+      panelOut.start = Math.max(doorWin.end + 1, panelOut.end - s4Span * 0.55);
     }
     // the metal-reverse window — order rewire: it rides the MATH panel's
     // approach now (plates un-type, clone home, radial right), 90% → 60% vh
@@ -2395,6 +2937,7 @@
       w.renderOrder = 10000 + orderSeq;   // overlays ride with the wires
       o.userData.__wire = w;
       overlays.push({mesh: w, parent: o});
+      cityWireMeshes.push(w);
       wireOverlays.push(w);
     });
     overlays.forEach(function(x){ x.parent.add(x.mesh); });
@@ -2420,6 +2963,22 @@
       if (!towerMesh && o.isMesh && o.name === 'FlatDeprecated_geo_FlatDeprecated_0_1') towerMesh = o;
     });
     cityMats.push(wireMat);
+    // build the twins BEFORE the first applyScene/applyCityDim so the
+    // mirror has something to write to (the overlays' wireMat is already
+    // unlit and is handed back unchanged — twin === original for those)
+    cityTwins = new Map();
+    g.scene.traverse(function(o){
+      if (!o.isMesh || !o.material) return;
+      cityAllMeshes.push({o: o, hid: false});
+      var many = Array.isArray(o.material);
+      var mm = many ? o.material : [o.material];
+      var tt = [];
+      for (var mi = 0; mi < mm.length; mi++) tt.push(cityTwinFor(mm[mi]));
+      var same = true;
+      for (var si = 0; si < mm.length; si++) if (tt[si] !== mm[si]) same = false;
+      if (same) return;   // nothing to swap for this mesh
+      cityMeshList.push({o: o, m: o.material, t: many ? tt : tt[0]});
+    });
     applyScene(sceneMode);
     // nothing in the scene ever moves (only the camera, which lives outside
     // it) — bake all world matrices once and stop the renderer re-walking
@@ -2459,6 +3018,10 @@
       // the 'who it is for' cut stops at HALF the rack's width — a
       // narrower wedge than the split's full window
       cornerHalf = (rackBox.max.x - rackBox.min.x) * 0.5 / Math.sqrt(2);
+      // slide 3's wedge starts from the OTHER corner — the front-right
+      // edge (max.x, max.z): same depth, mirrored normal (-1,0,-1)/rt2
+      s3CornerBase = -new THREE.Vector3(-1, 0, -1).normalize()
+        .dot(new THREE.Vector3(rackBox.max.x, rackBox.min.y, rackBox.max.z));
       r.scene.traverse(function(o){
         if (!o.isMesh) return;
         o.castShadow = true; o.receiveShadow = true;
@@ -2710,17 +3273,21 @@
         // second machine card zooms in
         var s2Row = Math.min(ny - 1, Math.floor(ny / 2) + 1);
         s2Keep = {G: new Uint8Array(nG), P: new Uint8Array(nP), F: new Uint8Array(nF),
-                  WG: new Float32Array(nG).fill(1), WP: new Float32Array(nP).fill(1), WF: new Float32Array(nF).fill(1)};
+                  WG: new Float32Array(nG).fill(1), WP: new Float32Array(nP).fill(1), WF: new Float32Array(nF).fill(1),
+                  HG: new Uint8Array(nG), HP: new Uint8Array(nP), HF: new Uint8Array(nF)};
         for (var zz = 0; zz < nz; zz++) for (var yy = 0; yy < ny; yy++) for (var xx = 0; xx < nx; xx++){
           cO.position.set(x0 + px * (xx + 0.5), y0 + py * (yy + 0.5), z0 + pz * (zz + 0.5));
           cO.updateMatrix();
           var s2k = (yy === s2Row) ? 1 : 0;
+          // slide 3 hides the OPENED side's whole vertical slab — the
+          // rightmost x-column, the one the corner wedge exposes
+          var s3h = (xx === nx - 1) ? 1 : 0;
           // the floor's opacity WAVE: the front (green) row at .4, the
           // rows behind ride up to 1 at the floor's last cubes
           var s2w = s2k ? 0.4 + 0.6 * ((nz - 1 - zz) / Math.max(1, nz - 1)) : 1;
-          if (roles[ii] === 0){ s2Keep.G[gi] = s2k; s2Keep.WG[gi] = s2w; cubeMeshG.setMatrixAt(gi, cO.matrix); cubeEdgeG.setMatrixAt(gi, cO.matrix); gi++; }
-          else if (roles[ii] === 1){ s2Keep.P[pi] = s2k; s2Keep.WP[pi] = s2w; cubeMeshP.setMatrixAt(pi, cO.matrix); cubeEdgeP.setMatrixAt(pi, cO.matrix); pi++; }
-          else { s2Keep.F[fi] = s2k; s2Keep.WF[fi] = s2w; cubeMeshF.setMatrixAt(fi, cO.matrix); cubeEdgeF.setMatrixAt(fi, cO.matrix); fi++; }
+          if (roles[ii] === 0){ s2Keep.G[gi] = s2k; s2Keep.WG[gi] = s2w; s2Keep.HG[gi] = s3h; cubeMeshG.setMatrixAt(gi, cO.matrix); cubeEdgeG.setMatrixAt(gi, cO.matrix); gi++; }
+          else if (roles[ii] === 1){ s2Keep.P[pi] = s2k; s2Keep.WP[pi] = s2w; s2Keep.HP[pi] = s3h; cubeMeshP.setMatrixAt(pi, cO.matrix); cubeEdgeP.setMatrixAt(pi, cO.matrix); pi++; }
+          else { s2Keep.F[fi] = s2k; s2Keep.WF[fi] = s2w; s2Keep.HF[fi] = s3h; cubeMeshF.setMatrixAt(fi, cO.matrix); cubeEdgeF.setMatrixAt(fi, cO.matrix); fi++; }
           ii++;
         }
         [cubeMeshG, cubeMeshP, cubeMeshF, cubeEdgeG, cubeEdgeP, cubeEdgeF].forEach(function(mm){
@@ -2749,6 +3316,9 @@
         // orbit (the eye-target offset) is kept, but the row lands
         // centered when the animation ends
         s2Keep.rowY = y0 + py * (s2Row + 0.5);
+        // the removed slab's exact volume (slide 3's scheme fills it)
+        s2Keep.slab = {x: x0 + px * (nx - 0.5), y0: y0, y1: y0 + py * ny, z0: z0, z1: z0 + pz * nz,
+                       nbr: x0 + px * (nx - 2 + 0.5) + cell / 2, gap: px - cell};
         (function(){
           var s2o = S2_EYE.clone().sub(S2_TGT);
           S2_TGT.set(x0 + px * nx / 2, s2Keep.rowY, freeC.z);
@@ -2977,7 +3547,305 @@
       // ── the pcb inside the free cube (leg 5's payload) ──
       // 90mb of board: it loads in the background and simply isn't there
       // until it arrives — the fade block guards on pcbRoot
-      var dracoPending = 4;   // pcb + calculator + laptop + door: last one in frees the workers
+      var dracoPending = 6;   // pcb + calculator + laptop + door + terminal + card: last one in frees the workers
+      // ── the money terminal (slide 3, 'one bill') ── the kiosk
+      // stands RIGHT of the rack at the rack's own heading (yaw 0 —
+      // "same degrees"), human height against the 4m machine. the
+      // laptop's prop recipe verbatim.
+      loader.load('/models/terminal.glb', function(tg){
+        var tr = tg.scene;
+        tr.updateMatrixWorld(true);
+        var tb = new THREE.Box3().setFromObject(tr);
+        var tsz = new THREE.Vector3(); tb.getSize(tsz);
+        var tct = new THREE.Vector3(); tb.getCenter(tct);
+        var twrap = new THREE.Group();
+        tr.position.sub(new THREE.Vector3(tct.x, tb.min.y, tct.z));
+        twrap.add(tr);
+        twrap.scale.setScalar(3.4 / tsz.y);   // +100% — a monument of a pay kiosk against the rack
+        twrap.position.set(2.05, groundY, -1.5);   // BESIDE the rack, level with its body, with real air between them
+        twrap.rotation.y = Math.PI;   // turned fully around — the holo screen faces the lens ("180 sorry")
+        twrap.visible = false;
+        var termHoloMesh = null;
+        twrap.traverse(function(o){
+          if (!o.isMesh) return;
+          o.renderOrder = 20006;   // the kiosk family draws over the rack (20000) and the board (19992)
+          o.castShadow = false; o.receiveShadow = false;
+          depthSkip.push(o);
+          if (o.name.indexOf('hologram') !== -1){ termHoloMesh = o; return; }
+          var tm = Array.isArray(o.material) ? o.material : [o.material];
+          tm.forEach(function(m){
+            m.transparent = true; m.opacity = 0;
+            m.depthWrite = true;
+            // a DEEPER negative bias than the board's (-400): draw order
+            // alone can't win when another mesh biases its depth forward
+            m.polygonOffset = true; m.polygonOffsetFactor = 0; m.polygonOffsetUnits = -1600;
+            m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
+            if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            if (termMats.indexOf(m) === -1) termMats.push(m);
+          });
+        });
+        // ── the holo screen is OURS: a live canvas dashboard in the
+        // site blue — three rings at their own speeds, a bar chart and
+        // a sparkline that never repeat, ticking numbers. the material
+        // swaps wholesale (unlit, toneMapped off so it glows like the
+        // city neons); opacity rides termQ times the road-blink.
+        if (termHoloMesh){
+          var hcv = document.createElement('canvas');
+          hcv.width = 1024; hcv.height = 512;
+          var hcx = hcv.getContext('2d');
+          termHoloTex = new THREE.CanvasTexture(hcv);
+          termHoloTex.encoding = THREE.sRGBEncoding;
+          termHoloTex.flipY = true;   // OUR plane, standard canvas orientation
+          termHoloTex.minFilter = THREE.LinearFilter;
+          termHoloTex.generateMipmaps = false;
+          termHoloTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          termHoloMat = new THREE.MeshBasicMaterial({
+            map: termHoloTex, transparent: true, opacity: 0,
+            toneMapped: false, side: THREE.DoubleSide,
+            // a FLOATING hologram (the laptop holo / calc display
+            // recipe): no depth at all, so the kiosk body's forward
+            // bias can never cut it — its draw slot alone decides
+            depthWrite: false, depthTest: false
+          });
+          termHoloMat.stencilWrite = true; termHoloMat.stencilRef = 1; termHoloMat.stencilZPass = THREE.ReplaceStencilOp;
+
+          // the plate's REAL aspect drives the canvas — the layout is
+          // relative, so rings stay round whatever the mesh proportions
+          termHoloMesh.geometry.computeBoundingBox();
+          var hbs = new THREE.Vector3();
+          termHoloMesh.geometry.boundingBox.getSize(hbs);
+          var hdims = [hbs.x, hbs.y, hbs.z].sort(function(a, b){ return b - a; });
+          var HW = 1024, HH = Math.max(256, Math.round(1024 * hdims[1] / hdims[0] / 2) * 2);
+          hcv.width = HW; hcv.height = HH;
+          // the authored plate's UV islands (front + mirrored back) can
+          // never map one canvas cleanly — the calculator lesson again:
+          // the display is a CODE-BUILT PLATE. the model's holo mesh
+          // hides; our plane stands in its exact local footprint.
+          termHoloMesh.visible = false;
+          var hbbL = termHoloMesh.geometry.boundingBox;
+          var hcen = new THREE.Vector3(); hbbL.getCenter(hcen);
+          var hthin = hbs.x <= hbs.y && hbs.x <= hbs.z ? 'x' : (hbs.y <= hbs.z ? 'y' : 'z');
+          var hplateG;
+          if (hthin === 'z'){ hplateG = new THREE.PlaneGeometry(hbs.x, hbs.y); }
+          else if (hthin === 'y'){ hplateG = new THREE.PlaneGeometry(hbs.x, hbs.z); hplateG.rotateX(-Math.PI / 2); }
+          else { hplateG = new THREE.PlaneGeometry(hbs.z, hbs.y); hplateG.rotateY(Math.PI / 2); }
+          hplateG.rotateZ(Math.PI);   // the authored front points the
+          hplateG.rotateY(Math.PI);   // other way: turn + roll to face
+          hplateG.translate(hcen.x, hcen.y, hcen.z);
+          var hplate = new THREE.Mesh(hplateG, null);
+          hplate.position.copy(termHoloMesh.position);
+          hplate.quaternion.copy(termHoloMesh.quaternion);
+          hplate.scale.copy(termHoloMesh.scale);
+          hplate.renderOrder = 20007;
+          hplate.castShadow = false; hplate.receiveShadow = false;
+          hplate.frustumCulled = false;
+          depthSkip.push(hplate);
+          hplate.material = termHoloMat;
+          termHoloMesh.parent.add(hplate);
+          var HB = '#a5b4fc', HHOT = '#e9edff';
+          function hd(a){ return 'rgba(165,180,252,' + a + ')'; }
+          function hrr(x, y, w, h, r){
+            hcx.beginPath();
+            hcx.moveTo(x + r, y); hcx.arcTo(x + w, y, x + w, y + h, r);
+            hcx.arcTo(x + w, y + h, x, y + h, r); hcx.arcTo(x, y + h, x, y, r);
+            hcx.arcTo(x, y, x + w, y, r); hcx.closePath();
+          }
+          termHoloDraw = function(t, st, pay){
+            var W = HW, H = HH;
+            // the kiosk node carries a mirror (negative-scale fbx bake):
+            // pre-mirror the drawing so the displayed face reads true
+            hcx.setTransform(-1, 0, 0, 1, W, 0);
+            hcx.clearRect(0, 0, W, H);
+            // the on/off GLITCH: the logo band table clips the whole
+            // dashboard — bands, shimmy, blank on the empty steps
+            if (st){
+              if (!st[1] && !st[2]) return;
+              hcx.save();
+              hcx.beginPath();
+              hcx.rect(0, H * st[1] / 100, W, H * (st[2] - st[1]) / 100);
+              hcx.clip();
+              hcx.translate(st[3] * W * 0.006, 0);
+            }
+            // ── the PAYMENT flash: the whole dashboard yields to a
+            // green 'Payment completed' frame in the terminal mono ──
+            if (pay){
+              // status-tile hierarchy: check glyph -> title -> amount
+              // -> muted meta. status color + ICON, never color alone;
+              // ink levels carry the text, one restrained glow.
+              hcx.fillStyle = 'rgba(8,34,14,0.9)';
+              hrr(W * 0.006, H * 0.012, W * 0.988, H * 0.976, 18); hcx.fill();
+              hcx.strokeStyle = 'rgba(17,163,42,0.8)'; hcx.lineWidth = 2;
+              hcx.shadowColor = '#11a32a'; hcx.shadowBlur = 16; hcx.stroke();
+              hcx.shadowBlur = 0;
+              hcx.fillStyle = 'rgba(17,163,42,0.1)';
+              for (var psy = H * 0.03; psy < H * 0.99; psy += 8) hcx.fillRect(W * 0.01, psy, W * 0.98, 1);
+              hcx.textAlign = 'center';
+              hcx.font = '600 ' + Math.round(H * 0.125) + 'px "JetBrains Mono", monospace';
+              hcx.fillStyle = '#7dffa8'; hcx.shadowColor = '#0ec435'; hcx.shadowBlur = 20;
+              hcx.fillText('Payment completed', W / 2, H * 0.52);
+              hcx.shadowBlur = 0;
+              hcx.font = '500 ' + Math.round(H * 0.05) + 'px "JetBrains Mono", monospace';
+              hcx.fillStyle = 'rgba(125,255,168,0.45)';
+              hcx.fillText('one bill / mo · usectl billing', W / 2, H * 0.66);
+              if (st) hcx.restore();
+              return;
+            }
+            hcx.shadowBlur = 0;
+            hcx.fillStyle = 'rgba(96,108,190,0.85)';
+            hrr(W * 0.006, H * 0.012, W * 0.988, H * 0.976, 18); hcx.fill();
+            hcx.strokeStyle = hd('0.9'); hcx.lineWidth = 3;
+            hcx.shadowColor = HB; hcx.shadowBlur = 22; hcx.stroke();
+            hcx.shadowBlur = 0;
+            hcx.fillStyle = hd('0.14');
+            for (var sy = H * 0.03; sy < H * 0.99; sy += 8) hcx.fillRect(W * 0.01, sy, W * 0.98, 1);
+            var f1 = Math.round(H * 0.055);
+            hcx.font = '500 ' + f1 + 'px "JetBrains Mono", monospace';
+            hcx.fillStyle = hd('0.8'); hcx.textAlign = 'left';
+            hcx.fillText('usectl · billing', W * 0.04, H * 0.1);
+            hcx.textAlign = 'right';
+            hcx.fillText('one machine · one bill', W * 0.96, H * 0.1);
+            // ── ring cluster, each at its own speed ──
+            var rcx = W * 0.245, rcy = H * 0.56;
+            hcx.lineWidth = Math.max(2, H * 0.008);
+            var RS = [
+              {r: H * 0.36, sp: 0.35, a0: 0.4, a1: 2.2, al: '1'},
+              {r: H * 0.285, sp: -0.6, a0: 2.8, a1: 4.9, al: '0.8'},
+              {r: H * 0.21, sp: 1.05, a0: 5.4, a1: 6.9, al: '0.95'}
+            ];
+            for (var ri = 0; ri < RS.length; ri++){
+              var R = RS[ri], ra = t * R.sp;
+              hcx.strokeStyle = hd(R.al); hcx.shadowColor = HB; hcx.shadowBlur = 10;
+              hcx.beginPath(); hcx.arc(rcx, rcy, R.r, ra + R.a0, ra + R.a1); hcx.stroke();
+              hcx.shadowBlur = 0;
+              hcx.strokeStyle = hd('0.32');
+              hcx.beginPath(); hcx.arc(rcx, rcy, R.r, 0, Math.PI * 2); hcx.stroke();
+            }
+            var tickR = H * 0.405;
+            for (var ti2 = 0; ti2 < 60; ti2++){
+              var ta = ti2 / 60 * Math.PI * 2 + t * 0.12;
+              var tl = (ti2 % 5 === 0 ? 0.028 : 0.012) * H;
+              hcx.strokeStyle = hd(ti2 % 5 === 0 ? '0.7' : '0.3'); hcx.lineWidth = 2;
+              hcx.beginPath();
+              hcx.moveTo(rcx + Math.cos(ta) * tickR, rcy + Math.sin(ta) * tickR);
+              hcx.lineTo(rcx + Math.cos(ta) * (tickR - tl), rcy + Math.sin(ta) * (tickR - tl));
+              hcx.stroke();
+            }
+            hcx.textAlign = 'center';
+            hcx.font = '600 ' + Math.round(H * 0.135) + 'px "JetBrains Mono", monospace';
+            hcx.fillStyle = HHOT; hcx.shadowColor = HB; hcx.shadowBlur = 18;
+            hcx.fillText('$' + (200 + Math.sin(t * 0.4) * 1.5).toFixed(2), rcx, rcy + H * 0.02);
+            hcx.shadowBlur = 0;
+            hcx.font = '500 ' + Math.round(H * 0.05) + 'px "JetBrains Mono", monospace';
+            hcx.fillStyle = hd('0.7');
+            hcx.fillText('ONE BILL / MO', rcx, rcy + H * 0.115);
+            // ── bar chart, heights that never repeat ──
+            hcx.textAlign = 'left';
+            hcx.fillText('vCPU · RAM · IO', W * 0.51, H * 0.21);
+            var barB = H * 0.5, barW = W * 0.02;
+            for (var bi2 = 0; bi2 < 9; bi2++){
+              var bh = H * (0.05 + 0.2 * (0.5 + 0.5 * Math.sin(t * (0.7 + bi2 * 0.113) + bi2 * 1.9)));
+              var bx2 = W * 0.51 + bi2 * W * 0.029;
+              hcx.fillStyle = hd('0.6');
+              hcx.fillRect(bx2, barB - bh, barW, bh);
+              hcx.fillStyle = HHOT; hcx.shadowColor = HB; hcx.shadowBlur = 8;
+              hcx.fillRect(bx2, barB - bh - 3, barW, 3);
+              hcx.shadowBlur = 0;
+            }
+            hcx.strokeStyle = hd('0.3'); hcx.lineWidth = 1;
+            hcx.beginPath(); hcx.moveTo(W * 0.505, barB + 2); hcx.lineTo(W * 0.785, barB + 2); hcx.stroke();
+            // ── mini ring pair + live percent ──
+            var mcx = W * 0.878, mcy = H * 0.33;
+            hcx.lineWidth = Math.max(3, H * 0.01);
+            hcx.strokeStyle = hd('0.8'); hcx.shadowColor = HB; hcx.shadowBlur = 8;
+            hcx.beginPath(); hcx.arc(mcx, mcy, H * 0.125, t * 1.4, t * 1.4 + 4.2); hcx.stroke();
+            hcx.strokeStyle = hd('0.45'); hcx.shadowBlur = 0;
+            hcx.beginPath(); hcx.arc(mcx, mcy, H * 0.09, -t * 2.1, -t * 2.1 + 3.1); hcx.stroke();
+            hcx.textAlign = 'center';
+            hcx.font = '600 ' + Math.round(H * 0.062) + 'px "JetBrains Mono", monospace';
+            hcx.fillStyle = HHOT;
+            hcx.fillText(((62 + 8 * Math.sin(t * 0.5)) | 0) + '%', mcx, mcy + H * 0.022);
+            // ── the sparkline, scrolling forever ──
+            hcx.strokeStyle = HB; hcx.lineWidth = 3;
+            hcx.shadowColor = HB; hcx.shadowBlur = 12;
+            hcx.beginPath();
+            var spy0 = H * 0.76, sx0 = W * 0.51, sx1 = W * 0.975;
+            for (var sx2 = sx0; sx2 <= sx1; sx2 += 6){
+              var syv = spy0 + H * 0.085 * Math.sin(sx2 * 0.02 + t * 1.4) + H * 0.035 * Math.sin(sx2 * 0.047 - t * 2.3);
+              if (sx2 === sx0) hcx.moveTo(sx2, syv); else hcx.lineTo(sx2, syv);
+            }
+            hcx.stroke(); hcx.shadowBlur = 0;
+            var eyv = spy0 + H * 0.085 * Math.sin(sx1 * 0.02 + t * 1.4) + H * 0.035 * Math.sin(sx1 * 0.047 - t * 2.3);
+            hcx.fillStyle = HHOT; hcx.shadowColor = HB; hcx.shadowBlur = 14;
+            hcx.beginPath(); hcx.arc(sx1, eyv, Math.max(4, H * 0.012), 0, Math.PI * 2); hcx.fill();
+            hcx.shadowBlur = 0;
+            hcx.strokeStyle = hd('0.25');
+            hcx.beginPath(); hcx.moveTo(W * 0.505, H * 0.885); hcx.lineTo(sx1, H * 0.885); hcx.stroke();
+            if (st) hcx.restore();
+          };
+          termHoloDraw(0);
+          termHoloTex.needsUpdate = true;
+          if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){
+            if (termHoloDraw){ termHoloDraw(0); termHoloTex.needsUpdate = true; }
+          });
+        }
+        twrap.updateMatrixWorld(true);
+        termRoot = twrap;
+        scene.add(twrap);
+        termLamp = new THREE.PointLight(0xffe6c0, 0, 6);
+        termLamp.position.set(2.3, 2.2, 1.6);
+        scene.add(termLamp);
+        renderer.compile(scene, camera);
+        // ── the payment card, child of the kiosk: it rides twrap's
+        // own scale/heading, sliding into the reader in local space ──
+        loader.load('/models/card.glb', function(cg2){
+          var cdr = cg2.scene;
+          cdr.updateMatrixWorld(true);
+          var cdb = new THREE.Box3().setFromObject(cdr);
+          var cds = new THREE.Vector3(); cdb.getSize(cds);
+          var cdc = new THREE.Vector3(); cdb.getCenter(cdc);
+          var cwrap2 = new THREE.Group();
+          cdr.position.sub(cdc);
+          cwrap2.add(cdr);
+          var cdm = Math.max(cds.x, cds.y, cds.z);
+          cwrap2.scale.setScalar(0.42 / cdm);
+          // orient by MEASUREMENT: whatever axis is thin turns UP so
+          // the card lies flat on the tray (sources differ wildly)
+          if (cds.z <= cds.x && cds.z <= cds.y) cwrap2.rotation.x = -Math.PI / 2;
+          else if (cds.x <= cds.y && cds.x <= cds.z) cwrap2.rotation.z = Math.PI / 2;
+          // the reader sits on the kiosk's FRONT face (local -z): the
+          // card starts proud of it and slides mostly inside
+          cardZ0 = -tsz.z / 2 - 0.35;
+          cardZ1 = -tsz.z / 2 + 0.22;   // fully SWALLOWED at the end — the
+                                        // body's depth hides the whole card
+          cwrap2.position.set(0, tsz.y * 0.38, cardZ0);   // the reader tray on the LOWER body
+          cwrap2.visible = false;
+          cwrap2.traverse(function(o){
+            if (!o.isMesh) return;
+            o.renderOrder = 20008;   // over the kiosk and its display
+            o.castShadow = false; o.receiveShadow = false;
+            depthSkip.push(o);
+            var cm2 = Array.isArray(o.material) ? o.material : [o.material];
+            cm2.forEach(function(m){
+              m.color.set(0x11a32a).convertSRGBToLinear();   // our green
+              // the texture x green multiply lands murky — a green
+              // emissive lift makes it read like the site's lit props
+              if (m.emissive){ m.emissive.set(0x11a32a).convertSRGBToLinear(); m.emissiveIntensity = 0.22; }   // low: the stripe/chip print must survive the glow
+              m.metalness = 0.2; m.roughness = 0.6;   // metal 1 renders black with no envmap
+              m.transparent = true; m.opacity = 0;
+              m.depthWrite = true;
+              m.polygonOffset = true; m.polygonOffsetFactor = 0; m.polygonOffsetUnits = -1600;
+              m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
+              if (cardMats.indexOf(m) === -1) cardMats.push(m);
+            });
+          });
+          twrap.add(cwrap2);
+          cwrap2.updateMatrixWorld(true);
+          cardRoot = cwrap2;
+          renderer.compile(scene, camera);
+          if (--dracoPending === 0) draco.dispose();
+        });
+        if (--dracoPending === 0) draco.dispose();
+      });
       // ── the isolation door, sized to the rack's exact height ──
       // slide 0's payload: a sealed sci-fi gate across the rack's front
       // face (+z, the heading everything on this stage shares). the glb
@@ -3066,6 +3934,329 @@
         renderer.compile(scene, camera);
         if (--dracoPending === 0) draco.dispose();
       });
+      // ── the wall control panel (slide 4, 'workloads and previews') ──
+      // bolted FLAT to the rack's right-hand wall (+x, the face this
+      // slide's shot turns toward the lens), standing on the machine's
+      // own floor and running the WHOLE width of that wall — a console
+      // band across the base, not a unit hung on it. the glb ships
+      // face-first
+      // along +x and upright once the loader's y-up conversion is done,
+      // so the wrap only scales and seats it — no rotation at all.
+      // not draco and 3mb of pngs: it streams in the background like the
+      // pcb (no preload link, no dracoPending slot) and simply isn't
+      // there until it lands — the fade block guards on panelRoot.
+      loader.load('/models/sci-fi_control_panel.glb', function(cp){
+        var cr = cp.scene;
+        cr.updateMatrixWorld(true);
+        var cb = new THREE.Box3().setFromObject(cr);
+        var csz = new THREE.Vector3(); cb.getSize(csz);
+        var cct = new THREE.Vector3(); cb.getCenter(cct);
+        var cwrap = new THREE.Group();
+        // origin at the panel's BACK plane, its BASE, centered across:
+        // seating it is then one write against the wall plane and floor
+        cr.position.sub(new THREE.Vector3(cb.min.x, cb.min.y, cct.z));
+        cwrap.add(cr);
+        var rackH = rackTopY - rackBotY;
+        // the WIDTH drives the fit and the scale stays UNIFORM, so the
+        // console keeps its authored proportions (stretched, the gauges
+        // read squashed). 80% of the wall, NOT the whole of it: the
+        // rack's box is measured over its front handles, so a full-span
+        // panel hangs its plinth out past the machine's own front face
+        // ("panel is goin out of rack") — this leaves real metal either
+        // side of it. the height that buys is ~60% of the machine,
+        // standing on its floor.
+        cwrap.scale.setScalar((rackBox.max.z - rackBox.min.z) * 0.8 / csz.z);
+        cwrap.position.set(
+          rackBox.max.x - 0.01,                        // back BITTEN into the wall: no coplanar seam
+          rackBotY,                                    // standing on the machine's own floor
+          (rackBox.min.z + rackBox.max.z) * 0.5);      // centered: wall edge to wall edge
+        cwrap.visible = false;
+        cwrap.traverse(function(o){
+          if (!o.isMesh) return;
+          o.renderOrder = 20004;   // over the rack shell (20000), like the door
+          o.castShadow = false; o.receiveShadow = false;
+          depthSkip.push(o);   // sits out the dof pre-pass like every prop
+          var cm = Array.isArray(o.material) ? o.material : [o.material];
+          cm.forEach(function(m){
+            m.transparent = true; m.opacity = 0;
+            m.depthWrite = true;
+            m.side = THREE.FrontSide;   // ships doubleSided: back faces would double-blend through the fade
+            m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
+            if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            // the corpus wears the RACK'S OWN dark grey. the authored
+            // body is a light warm olive — sampled off the base map at
+            // linear (0.50, 0.50, 0.375) — so the tint is that albedo
+            // divided into the rack's Black_Metal_Plate (#272626): a
+            // per-channel multiply that lands the corpus exactly on the
+            // machine's color and kills the olive cast with the blue
+            // sitting a step above the other two. the screens are near
+            // black in the base map and carry their amber on the
+            // EMISSIVE map instead, so they survive the darkening and
+            // smear in the bloom like the door's construction lights.
+            if (m.color) m.color.set(0x393740).convertSRGBToLinear();
+            m.emissiveIntensity = 2;
+            m.userData.baseEmit = 2;
+            m.clippingPlanes = glitchPlanes;   // sliced by the rack's own glitch bands — it IS the rack
+            if (panelMats.indexOf(m) === -1) panelMats.push(m);
+          });
+        });
+        cwrap.updateMatrixWorld(true);
+        // ── the dashboards: OUR blue, and running ──
+        // one pass over the emissive map: each pixel keeps its own
+        // rec709 luminance (the glyphs, the gauge needles, the falloff —
+        // the art is untouched) and wears #a5b4fc. the screens are the
+        // only lit thing on the map, so recoloring it recolors exactly
+        // the displays and nothing else.
+        var pEm = panelMats.length ? panelMats[0].emissiveMap : null;
+        if (pEm && pEm.image && pEm.image.width){
+          var ew = pEm.image.width, eh = pEm.image.height;
+          panelBaseCv = document.createElement('canvas');
+          panelBaseCv.width = ew; panelBaseCv.height = eh;
+          var bcx = panelBaseCv.getContext('2d');
+          bcx.drawImage(pEm.image, 0, 0);
+          var eid = bcx.getImageData(0, 0, ew, eh), ed = eid.data;
+          // ...and the same pass MEASURES the screens: a coarse grid of
+          // lit cells, grown into rectangles, so the scan bands below
+          // can ride inside the displays instead of streaking across the
+          // metal (the emissive map is pure black off the screens)
+          var GC = 64, gw = Math.ceil(ew / GC), gh = Math.ceil(eh / GC), lit = new Uint8Array(gw * gh);
+          var lum = new Uint8Array(ew * eh);
+          for (var ei = 0; ei < ed.length; ei += 4){
+            var L = (ed[ei] * 0.2126 + ed[ei + 1] * 0.7152 + ed[ei + 2] * 0.0722) / 255;
+            var pi = ei >> 2;
+            lum[pi] = L * 255;
+            if (L > 0.06) lit[(((pi / ew) | 0) / GC | 0) * gw + ((pi % ew) / GC | 0)] = 1;
+            ed[ei] = 165 * L; ed[ei + 1] = 180 * L; ed[ei + 2] = 252 * L;   // var(--blue)
+          }
+          bcx.putImageData(eid, 0, 0);
+          // flood the lit cells into islands — one rectangle per display
+          for (var gi = 0; gi < lit.length; gi++){
+            if (lit[gi] !== 1) continue;
+            var stack = [gi], x0 = gw, x1 = -1, y0 = gh, y1 = -1;
+            lit[gi] = 2;
+            while (stack.length){
+              var c = stack.pop(), cx = c % gw, cy = (c / gw) | 0;
+              if (cx < x0) x0 = cx; if (cx > x1) x1 = cx;
+              if (cy < y0) y0 = cy; if (cy > y1) y1 = cy;
+              if (cx > 0 && lit[c - 1] === 1){ lit[c - 1] = 2; stack.push(c - 1); }
+              if (cx < gw - 1 && lit[c + 1] === 1){ lit[c + 1] = 2; stack.push(c + 1); }
+              if (cy > 0 && lit[c - gw] === 1){ lit[c - gw] = 2; stack.push(c - gw); }
+              if (cy < gh - 1 && lit[c + gw] === 1){ lit[c + gw] = 2; stack.push(c + gw); }
+            }
+            if ((x1 - x0 + 1) * (y1 - y0 + 1) < 2) continue;   // a stray lit speck, not a display
+            // tighten the cell rect onto the lit pixels themselves: the
+            // 64px cells overshoot onto the bezel, and a band that wide
+            // would streak the metal around the screen
+            var sxA = x0 * GC, sxB = Math.min(ew, (x1 + 1) * GC);
+            var syA = y0 * GC, syB = Math.min(eh, (y1 + 1) * GC);
+            var tx0 = sxB, tx1 = sxA - 1, ty0 = syB, ty1 = syA - 1;
+            for (var sy = syA; sy < syB; sy++){
+              for (var sx = sxA; sx < sxB; sx++){
+                if (lum[sy * ew + sx] <= 15) continue;
+                if (sx < tx0) tx0 = sx;
+                if (sx > tx1) tx1 = sx;
+                if (sy < ty0) ty0 = sy;
+                if (sy > ty1) ty1 = sy;
+              }
+            }
+            if (tx1 - tx0 < 8 || ty1 - ty0 < 8) continue;   // a speck, not a display
+            var PSC = document.createElement('canvas');
+            PSC.width = tx1 - tx0 + 1; PSC.height = ty1 - ty0 + 1;
+            panelScreens.push({x: tx0, y: ty0, w: PSC.width, h: PSC.height,
+                               cv: PSC, cx: PSC.getContext('2d'),
+                               ph: panelScreens.length * 0.37});   // each island sweeps on its own phase
+          }
+          // the art's own luminance, kept as an alpha MASK: the sweep is
+          // cut to it every frame, so the light rides the glyphs and the
+          // gauges and never touches the bezel between them (the
+          // displays share one packed island in this atlas)
+          panelMaskCv = document.createElement('canvas');
+          panelMaskCv.width = ew; panelMaskCv.height = eh;
+          var mcx = panelMaskCv.getContext('2d');
+          var mid = mcx.createImageData(ew, eh), md = mid.data;
+          for (var mi = 0; mi < lum.length; mi++){
+            md[mi * 4] = 255; md[mi * 4 + 1] = 255; md[mi * 4 + 2] = 255;
+            md[mi * 4 + 3] = lum[mi];
+          }
+          mcx.putImageData(mid, 0, 0);
+          // each island keeps its OWN slice of the mask, and the whole
+          // live region is measured once: the sweep used to composite the
+          // full 1024² mask per screen and repaint the entire map every
+          // frame to move three small displays
+          var pdx0 = ew, pdy0 = eh, pdx1 = 0, pdy1 = 0, pdw;
+          function pdGrow(x, y, w, h){
+            if (x < pdx0) pdx0 = x;
+            if (y < pdy0) pdy0 = y;
+            if (x + w > pdx1) pdx1 = x + w;
+            if (y + h > pdy1) pdy1 = y + h;
+          }
+          for (var pmk = 0; pmk < panelScreens.length; pmk++){
+            var PSm = panelScreens[pmk];
+            pdw = document.createElement('canvas');
+            pdw.width = PSm.w; pdw.height = PSm.h;
+            pdw.getContext('2d').drawImage(panelMaskCv, PSm.x, PSm.y, PSm.w, PSm.h, 0, 0, PSm.w, PSm.h);
+            PSm.mask = pdw;
+            pdGrow(PSm.x, PSm.y, PSm.w, PSm.h);
+          }
+          for (var pds = 0; pds < PD_SCR.length; pds++) pdGrow(PD_SCR[pds][0], PD_SCR[pds][1], PD_SCR[pds][2], PD_SCR[pds][3]);
+          if (pdx1 > pdx0) panelDirty = {x: pdx0, y: pdy0, w: pdx1 - pdx0, h: pdy1 - pdy0};
+          panelCv = document.createElement('canvas');
+          panelCv.width = ew; panelCv.height = eh;
+          panelCx = panelCv.getContext('2d');
+          panelCx.drawImage(panelBaseCv, 0, 0);
+          // ── the clean plate: the art minus its moving parts ──
+          // blacked with the same brush that paints them back, so a
+          // piece can never leave a ghost of where it was baked
+          panelCleanCv = document.createElement('canvas');
+          panelCleanCv.width = ew; panelCleanCv.height = eh;
+          var kcx = panelCleanCv.getContext('2d');
+          kcx.drawImage(panelBaseCv, 0, 0);
+          kcx.fillStyle = '#000';
+          var pdi;
+          for (pdi = 0; pdi < PD_BARS.length; pdi++)
+            kcx.fillRect(PD_BX0, PD_BARS[pdi][0], PD_BX1 - PD_BX0 + 1, PD_BARS[pdi][1] - PD_BARS[pdi][0] + 1);
+          for (pdi = 0; pdi < PD_RING.length; pdi++){
+            kcx.beginPath();
+            kcx.arc(PD_RING[pdi][0], PD_RING[pdi][1], PD_ROUT, 0, Math.PI * 2);
+            kcx.arc(PD_RING[pdi][0], PD_RING[pdi][1], PD_RIN, 0, Math.PI * 2, true);
+            kcx.fill();
+          }
+          // the needle, but ONLY outside the scale's own band (hub-r
+          // 30-39): the baked needle crosses the arc there and erasing
+          // it would cut a notch out of the scale — inside the band its
+          // two pixels are lost in the arc's own light anyway
+          kcx.save();
+          kcx.translate(PD_NDL[0], PD_NDL[1]);
+          kcx.rotate(PD_NA0 * Math.PI / 180);
+          kcx.fillRect(11, -2, 14.5, 4);     // the hub's edge to the scale's inner rim
+          kcx.fillRect(40.5, -2, 8, 4);      // past the scale to the tail's tip
+          kcx.restore();
+          // ...and the one place the baked needle still shows: the
+          // hairline the scale draws between its two bands, bridged
+          // where the needle crossed it. the scale is a circle of its
+          // own (7px below the hub), so the repair is a short dark arc
+          // on THAT circle, at the angle the needle was baked at.
+          kcx.strokeStyle = '#000'; kcx.lineWidth = 2.4;
+          kcx.beginPath();
+          kcx.arc(124.65, 463.55, 23.7, 65 * Math.PI / 180, 79 * Math.PI / 180);
+          kcx.stroke();
+          for (pdi = 0; pdi < PD_FADE.length; pdi++)
+            kcx.fillRect(PD_FADE[pdi][0], PD_FTOP, 10, 56);   // rail and knob; the label above stays
+          for (pdi = 0; pdi < PD_MARK.length; pdi++)
+            kcx.fillRect(PD_MARK[pdi], 451, 6, 48);
+          // the knob and the marker are the ART, cut out once and
+          // stamped wherever their value lands — drawing them by hand
+          // would be a second design of a thing that already exists
+          var pdKnob = document.createElement('canvas'); pdKnob.width = 5; pdKnob.height = 7;
+          pdKnob.getContext('2d').drawImage(panelBaseCv, 371, 496, 5, 7, 0, 0, 5, 7);
+          var pdMark = document.createElement('canvas'); pdMark.width = 5; pdMark.height = 6;
+          pdMark.getContext('2d').drawImage(panelBaseCv, 311, 493, 5, 6, 0, 0, 5, 6);
+          // the art's own two tones, read off the plate (the recolor
+          // already ran): a hand-picked blue would drift from it
+          var pdLitD = panelCx.getImageData(120, 232, 1, 1).data;
+          var pdDimD = panelCx.getImageData(176, 252, 1, 1).data;
+          var PD_LIT = 'rgb(' + pdLitD[0] + ',' + pdLitD[1] + ',' + pdLitD[2] + ')';
+          var PD_DIM = 'rgb(' + pdDimD[0] + ',' + pdDimD[1] + ',' + pdDimD[2] + ')';
+          // ── and the loop itself: every value is two incommensurate
+          // sines, so no two readings ever fall into step and the board
+          // never visibly repeats (the terminal holo's rule)
+          panelDashDraw = function(t){
+            var c = panelCx, i, v;
+            // the stat bars
+            for (i = 0; i < PD_BARS.length; i++){
+              var B = PD_BARS[i], bw = PD_BX1 - PD_BX0 + 1, bh = B[1] - B[0] + 1;
+              v = 0.5 + 0.5 * (0.68 * Math.sin(t * (0.21 + i * 0.063) + i * 2.3)
+                             + 0.32 * Math.sin(t * (0.53 + i * 0.11) + i * 1.7));
+              var fw = Math.round(bw * (0.14 + 0.78 * v));
+              c.fillStyle = PD_LIT;
+              c.fillRect(PD_BX0, B[0], fw, bh);
+              // the empty run keeps the inset outline the art draws
+              c.fillStyle = PD_DIM;
+              c.fillRect(PD_BX0 + fw, B[0], bw - fw, 1);
+              c.fillRect(PD_BX0 + fw, B[1], bw - fw, 1);
+              c.fillRect(PD_BX0 + fw, B[0], 1, bh);
+            }
+            // the ring gauges turn: the annulus is clipped and the ART
+            // is drawn through it rotated — pixel for pixel, its own
+            // flared end sweeping like a pointer
+            for (i = 0; i < PD_RING.length; i++){
+              var R = PD_RING[i];
+              var ra = 0.34 * Math.sin(t * (0.19 + i * 0.05) + i * 1.9)
+                     + 0.10 * Math.sin(t * (0.61 + i * 0.13) + i);
+              c.save();
+              c.beginPath();
+              c.arc(R[0], R[1], PD_ROUT, 0, Math.PI * 2);
+              c.arc(R[0], R[1], PD_RIN, 0, Math.PI * 2, true);
+              c.clip();
+              c.translate(R[0], R[1]); c.rotate(ra); c.translate(-R[0], -R[1]);
+              c.drawImage(panelBaseCv, R[0] - 22, R[1] - 22, 44, 44, R[0] - 22, R[1] - 22, 44, 44);
+              c.restore();
+            }
+            // the speedometer needle, tapered like the baked one, over
+            // the 45-139 degrees its scale actually covers
+            var na = (92 + 47 * (0.62 * Math.sin(t * 0.27) + 0.38 * Math.sin(t * 0.71 + 1.1))) * Math.PI / 180;
+            c.save();
+            c.translate(PD_NDL[0], PD_NDL[1]); c.rotate(na);
+            c.fillStyle = PD_LIT;
+            c.beginPath();
+            c.moveTo(10, -1.7); c.lineTo(44, -0.7); c.lineTo(44, 0.7); c.lineTo(10, 1.7);
+            c.closePath(); c.fill();
+            c.restore();
+            // the faders: the rail is lit down to the knob, like the art
+            for (i = 0; i < PD_FADE.length; i++){
+              var F = PD_FADE[i];
+              v = 0.5 + 0.5 * (0.7 * Math.sin(t * (0.23 + i * 0.09) + i * 2.6)
+                             + 0.3 * Math.sin(t * (0.47 + i * 0.05) + i));
+              var ky = Math.round(PD_FY0 + (PD_FY1 - PD_FY0) * v);
+              c.fillStyle = PD_LIT;
+              c.fillRect(F[0], PD_FTOP, F[1], ky + 4 - PD_FTOP);
+              c.drawImage(pdKnob, F[2], ky);
+            }
+            // the ladder markers step their scales
+            for (i = 0; i < PD_MARK.length; i++){
+              v = 0.5 + 0.5 * (0.66 * Math.sin(t * (0.17 + i * 0.06) + i * 1.3 + 0.7)
+                             + 0.34 * Math.sin(t * (0.39 + i * 0.08) + i * 2.2));
+              c.drawImage(pdMark, PD_MARK[i], Math.round(PD_MY0 + (PD_MY1 - PD_MY0) * v));
+            }
+          };
+          // ── and the blink: each display on its own clock ──
+          // painted LAST, over the scan band, so a screen goes dark
+          // whole — glyphs, needles and sweep together
+          panelScrBlink = function(t){
+            for (var i = 0; i < PD_SCR.length; i++){
+              var S = PD_SCR[i], b = ((t + S[5]) % S[4]) / S[4];
+              if (!((b >= 0.02 && b < 0.04) || (b >= 0.06 && b < 0.07))) continue;
+              panelCx.fillStyle = 'rgba(0,0,0,0.88)';
+              panelCx.fillRect(S[0], S[1], S[2], S[3]);
+            }
+          };
+          panelTex = new THREE.CanvasTexture(panelCv);
+          panelTex.flipY = false;   // the gltf uv convention of the map it replaces
+          panelTex.encoding = THREE.sRGBEncoding;
+          panelTex.wrapS = pEm.wrapS; panelTex.wrapT = pEm.wrapT;
+          // redrawn every visible frame: mipmaps would be rebuilt on
+          // every upload (the holo screen's lesson)
+          panelTex.generateMipmaps = false;
+          panelTex.minFilter = THREE.LinearFilter;
+          panelTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          for (var pmi = 0; pmi < panelMats.length; pmi++){
+            panelMats[pmi].emissiveMap = panelTex;
+            panelMats[pmi].needsUpdate = true;
+          }
+          pEm.dispose();   // the amber original: nothing points at it now
+        }
+        panelRoot = cwrap;
+        scene.add(cwrap);
+        // its own warm key, driven by the fade: this wall is the rack's
+        // shadowed side and the dark body reads as a hole without it
+        // (the door lamp's lesson)
+        panelLamp = new THREE.PointLight(0xffe6c0, 0, 7);
+        panelLamp.position.set(rackBox.max.x + 2.2, rackBotY + rackH * 0.32,
+                               (rackBox.min.z + rackBox.max.z) * 0.5);
+        scene.add(panelLamp);
+        renderer.compile(scene, camera);
+        frameDirtyFlag = true;
+      });
       loader.load('/models/pcb.glb', function(pg){
         var pr = pg.scene;
         var pb = new THREE.Box3().setFromObject(pr);
@@ -3125,6 +4316,239 @@
         frameCacheValid = false;   // the warm-up scribbled on the cache
         frameDirtyFlag = true;
         pcbRoot = pr;
+        // ── the SCHEME in the removed slab (slide 3): a clone of the
+        // board STANDS in the hidden column's volume, stretched to
+        // 100% x 100% of the hole, facing the lens side ──
+        if (s2Keep && s2Keep.slab) (function(){
+          var SL = s2Keep.slab;
+          var p3 = pr.clone(true);
+          p3.position.set(0, 0, 0); p3.rotation.set(0, 0, 0); p3.scale.set(1, 1, 1);
+          p3.visible = true;   // the source root is HIDDEN at clone time
+          p3.traverse(function(o){ o.visible = true; });
+          p3.updateMatrixWorld(true);
+          var pb3 = new THREE.Box3().setFromObject(p3);
+          var ps3 = new THREE.Vector3(); pb3.getSize(ps3);
+          var pc3 = new THREE.Vector3(); pb3.getCenter(pc3);
+          var w3 = new THREE.Group();
+          p3.position.sub(pc3);
+          w3.add(p3);
+          // thin axis turns toward the lens (x) so the face fills the hole
+          if (ps3.z <= ps3.x && ps3.z <= ps3.y) w3.rotation.y = Math.PI / 2;
+          else if (ps3.y <= ps3.x && ps3.y <= ps3.z) w3.rotation.z = Math.PI / 2;
+          w3.rotation.y += Math.PI;   // the CLEAN flat side faces the lens (final: "i need see back clean side!")
+          w3.updateMatrixWorld(true);
+          var wb3 = new THREE.Box3().setFromObject(w3);
+          var ws3 = new THREE.Vector3(); wb3.getSize(ws3);
+          var slabH = SL.y1 - SL.y0, slabD = SL.z1 - SL.z0;
+          var s3sy = slabH / Math.max(1e-4, ws3.y), s3sz = slabD / Math.max(1e-4, ws3.z);
+          // SLIM proportions kept (thickness on the small scale) and
+          // the black fixed at the root: the runtime anisotropic scale
+          // skewed the big faces' normals dark — so the scale is BAKED
+          // into cloned geometry and the normals rebuilt. geometries
+          // must be cloned: the deploy board shares them.
+          s3BandP = [new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e6),
+                     new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e6)];
+          s3BandTop = SL.y1; s3BandBot = SL.y0;
+          var s3bake = new THREE.Matrix4().makeScale(Math.min(s3sy, s3sz), s3sy, s3sz);
+          w3.traverse(function(o){
+            if (!o.isMesh) return;
+            o.geometry = o.geometry.clone();
+            o.geometry.applyMatrix4(s3bake);
+            o.geometry.computeVertexNormals();
+          });
+          // the recenter offset lives in PRE-bake units — scaled with
+          // the bake it lands the board EXACTLY on its approved seat
+          p3.position.multiply(new THREE.Vector3(Math.min(s3sy, s3sz), s3sy, s3sz));
+          w3.updateMatrixWorld(true);
+          var wb3b = new THREE.Box3().setFromObject(w3);
+          var ws3b = new THREE.Vector3(); wb3b.getSize(ws3b);
+          // the board keeps the LATTICE'S OWN SPACING: its face one
+          // cube-gap off the neighbour column, like cube to cube
+          w3.position.set(SL.nbr + SL.gap + ws3b.x / 2, (SL.y0 + SL.y1) / 2, (SL.z0 + SL.z1) / 2);   // a step clear of the crowd
+
+          // ── the POD GROUP card on the board (manager style) ──
+          // the real manager's group panel: a STAGE tab, a blue-bordered
+          // stack of pod rows with status dots and the REAL product
+          // icons (react-icons paths, the manager's own set), and the
+          // replica/deploy meta. a canvas plate standing on the board.
+          (function(){
+            var PR = [
+              {d: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12', vb: 24, n: 'shop-frontend-stage', ok: 1},
+              {d: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12', vb: 24, n: 'shop-backend-stage', ok: 1},
+              {d: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12', vb: 24, n: 'shop-landing-stage', ok: 1},
+              {d: 'M507.73 109.1c-2.24-9.03-13.54-12.09-20.12-5.51l-74.36 74.36-67.88-11.31-11.31-67.88 74.36-74.36c6.62-6.62 3.43-17.9-5.66-20.16-47.38-11.74-99.55.91-136.58 37.93-39.64 39.64-50.55 97.1-34.05 147.2L18.74 402.76c-24.99 24.99-24.99 65.51 0 90.5 24.99 24.99 65.51 24.99 90.5 0l213.21-213.21c50.12 16.71 107.47 5.68 147.37-34.22 37.07-37.07 49.7-89.32 37.91-136.73zM64 472c-13.25 0-24-10.75-24-24 0-13.26 10.75-24 24-24s24 10.74 24 24c0 13.25-10.75 24-24 24z', vb: 512, n: 'shop-worker-stage', ok: 1},
+              {d: 'M507.73 109.1c-2.24-9.03-13.54-12.09-20.12-5.51l-74.36 74.36-67.88-11.31-11.31-67.88 74.36-74.36c6.62-6.62 3.43-17.9-5.66-20.16-47.38-11.74-99.55.91-136.58 37.93-39.64 39.64-50.55 97.1-34.05 147.2L18.74 402.76c-24.99 24.99-24.99 65.51 0 90.5 24.99 24.99 65.51 24.99 90.5 0l213.21-213.21c50.12 16.71 107.47 5.68 147.37-34.22 37.07-37.07 49.7-89.32 37.91-136.73zM64 472c-13.25 0-24-10.75-24-24 0-13.26 10.75-24 24-24s24 10.74 24 24c0 13.25-10.75 24-24 24z', vb: 512, n: 'shop-recalc-worker', ok: 0},
+              {d: 'M23.5594 14.7228a.5269.5269 0 0 0-.0563-.1191c-.139-.2632-.4768-.3418-1.0074-.2321-1.6533.3411-2.2935.1312-2.5256-.0191 1.342-2.0482 2.445-4.522 3.0411-6.8297.2714-1.0507.7982-3.5237.1222-4.7316a1.5641 1.5641 0 0 0-.1509-.235C21.6931.9086 19.8007.0248 17.5099.0005c-1.4947-.0158-2.7705.3461-3.1161.4794a9.449 9.449 0 0 0-.5159-.0816 8.044 8.044 0 0 0-1.3114-.1278c-1.1822-.0184-2.2038.2642-3.0498.8406-.8573-.3211-4.7888-1.645-7.2219.0788C.9359 2.1526.3086 3.8733.4302 6.3043c.0409.818.5069 3.334 1.2423 5.7436.4598 1.5065.9387 2.7019 1.4334 3.582.553.9942 1.1259 1.5933 1.7143 1.7895.4474.1491 1.1327.1441 1.8581-.7279.8012-.9635 1.5903-1.8258 1.9446-2.2069.4351.2355.9064.3625 1.39.3772a.0569.0569 0 0 0 .0004.0041 11.0312 11.0312 0 0 0-.2472.3054c-.3389.4302-.4094.5197-1.5002.7443-.3102.064-1.1344.2339-1.1464.8115-.0025.1224.0329.2309.0919.3268.2269.4231.9216.6097 1.015.6331 1.3345.3335 2.5044.092 3.3714-.6787-.017 2.231.0775 4.4174.3454 5.0874.2212.5529.7618 1.9045 2.4692 1.9043.2505 0 .5263-.0291.8296-.0941 1.7819-.3821 2.5557-1.1696 2.855-2.9059.1503-.8707.4016-2.8753.5388-4.1012.0169-.0703.0357-.1207.057-.1362.0007-.0005.0697-.0471.4272.0307a.3673.3673 0 0 0 .0443.0068l.2539.0223.0149.001c.8468.0384 1.9114-.1426 2.5312-.4308.6438-.2988 1.8057-1.0323 1.5951-1.6698zM2.371 11.8765c-.7435-2.4358-1.1779-4.8851-1.2123-5.5719-.1086-2.1714.4171-3.6829 1.5623-4.4927 1.8367-1.2986 4.8398-.5408 6.108-.13-.0032.0032-.0066.0061-.0098.0094-2.0238 2.044-1.9758 5.536-1.9708 5.7495-.0002.0823.0066.1989.0162.3593.0348.5873.0996 1.6804-.0735 2.9184-.1609 1.1504.1937 2.2764.9728 3.0892.0806.0841.1648.1631.2518.2374-.3468.3714-1.1004 1.1926-1.9025 2.1576-.5677.6825-.9597.5517-1.0886.5087-.3919-.1307-.813-.5871-1.2381-1.3223-.4796-.839-.9635-2.0317-1.4155-3.5126zm6.0072 5.0871c-.1711-.0428-.3271-.1132-.4322-.1772.0889-.0394.2374-.0902.4833-.1409 1.2833-.2641 1.4815-.4506 1.9143-1.0002.0992-.126.2116-.2687.3673-.4426a.3549.3549 0 0 0 .0737-.1298c.1708-.1513.2724-.1099.4369-.0417.156.0646.3078.26.3695.4752.0291.1016.0619.2945-.0452.4444-.9043 1.2658-2.2216 1.2494-3.1676 1.0128zm2.094-3.988-.0525.141c-.133.3566-.2567.6881-.3334 1.003-.6674-.0021-1.3168-.2872-1.8105-.8024-.6279-.6551-.9131-1.5664-.7825-2.5004.1828-1.3079.1153-2.4468.079-3.0586-.005-.0857-.0095-.1607-.0122-.2199.2957-.2621 1.6659-.9962 2.6429-.7724.4459.1022.7176.4057.8305.928.5846 2.7038.0774 3.8307-.3302 4.7363-.084.1866-.1633.3629-.2311.5454zm7.3637 4.5725c-.0169.1768-.0358.376-.0618.5959l-.146.4383a.3547.3547 0 0 0-.0182.1077c-.0059.4747-.054.6489-.115.8693-.0634.2292-.1353.4891-.1794 1.0575-.11 1.4143-.8782 2.2267-2.4172 2.5565-1.5155.3251-1.7843-.4968-2.0212-1.2217a6.5824 6.5824 0 0 0-.0769-.2266c-.2154-.5858-.1911-1.4119-.1574-2.5551.0165-.5612-.0249-1.9013-.3302-2.6462.0044-.2932.0106-.5909.019-.8918a.3529.3529 0 0 0-.0153-.1126 1.4927 1.4927 0 0 0-.0439-.208c-.1226-.4283-.4213-.7866-.7797-.9351-.1424-.059-.4038-.1672-.7178-.0869.067-.276.1831-.5875.309-.9249l.0529-.142c.0595-.16.134-.3257.213-.5012.4265-.9476 1.0106-2.2453.3766-5.1772-.2374-1.0981-1.0304-1.6343-2.2324-1.5098-.7207.0746-1.3799.3654-1.7088.5321a5.6716 5.6716 0 0 0-.1958.1041c.0918-1.1064.4386-3.1741 1.7357-4.4823a4.0306 4.0306 0 0 1 .3033-.276.3532.3532 0 0 0 .1447-.0644c.7524-.5706 1.6945-.8506 2.802-.8325.4091.0067.8017.0339 1.1742.081 1.939.3544 3.2439 1.4468 4.0359 2.3827.8143.9623 1.2552 1.9315 1.4312 2.4543-1.3232-.1346-2.2234.1268-2.6797.779-.9926 1.4189.543 4.1729 1.2811 5.4964.1353.2426.2522.4522.2889.5413.2403.5825.5515.9713.7787 1.2552.0696.087.1372.1714.1885.245-.4008.1155-1.1208.3825-1.0552 1.717-.0123.1563-.0423.4469-.0834.8148-.0461.2077-.0702.4603-.0994.7662zm.8905-1.6211c-.0405-.8316.2691-.9185.5967-1.0105a2.8566 2.8566 0 0 0 .135-.0406 1.202 1.202 0 0 0 .1342.103c.5703.3765 1.5823.4213 3.0068.1344-.2016.1769-.5189.3994-.9533.6011-.4098.1903-1.0957.333-1.7473.3636-.7197.0336-1.0859-.0807-1.1721-.151zm.5695-9.2712c-.0059.3508-.0542.6692-.1054 1.0017-.055.3576-.112.7274-.1264 1.1762-.0142.4368.0404.8909.0932 1.3301.1066.887.216 1.8003-.2075 2.7014a3.5272 3.5272 0 0 1-.1876-.3856c-.0527-.1276-.1669-.3326-.3251-.6162-.6156-1.1041-2.0574-3.6896-1.3193-4.7446.3795-.5427 1.3408-.5661 2.1781-.463zm.2284 7.0137a12.3762 12.3762 0 0 0-.0853-.1074l-.0355-.0444c.7262-1.1995.5842-2.3862.4578-3.4385-.0519-.4318-.1009-.8396-.0885-1.2226.0129-.4061.0666-.7543.1185-1.0911.0639-.415.1288-.8443.1109-1.3505.0134-.0531.0188-.1158.0118-.1902-.0457-.4855-.5999-1.938-1.7294-3.253-.6076-.7073-1.4896-1.4972-2.6889-2.0395.5251-.1066 1.2328-.2035 2.0244-.1859 2.0515.0456 3.6746.8135 4.8242 2.2824a.908.908 0 0 1 .0667.1002c.7231 1.3556-.2762 6.2751-2.9867 10.5405zm-8.8166-6.1162c-.025.1794-.3089.4225-.6211.4225a.5821.5821 0 0 1-.0809-.0056c-.1873-.026-.3765-.144-.5059-.3156-.0458-.0605-.1203-.178-.1055-.2844.0055-.0401.0261-.0985.0925-.1488.1182-.0894.3518-.1226.6096-.0867.3163.0441.6426.1938.6113.4186zm7.9305-.4114c.0111.0792-.049.201-.1531.3102-.0683.0717-.212.1961-.4079.2232a.5456.5456 0 0 1-.075.0052c-.2935 0-.5414-.2344-.5607-.3717-.024-.1765.2641-.3106.5611-.352.297-.0414.6111.0088.6356.1851z', vb: 24, n: 'PostgreSQL', ok: 1},
+              {d: 'M22.71 13.145c-1.66 2.092-3.452 4.483-7.038 4.483-3.203 0-4.397-2.825-4.48-5.12.701 1.484 2.073 2.685 4.214 2.63 4.117-.133 6.94-3.852 6.94-7.239 0-4.05-3.022-6.972-8.268-6.972-3.752 0-8.4 1.428-11.455 3.685C2.59 6.937 3.885 9.958 4.35 9.626c2.648-1.904 4.748-3.13 6.784-3.744C8.12 9.244.886 17.05 0 18.425c.1 1.261 1.66 4.648 2.424 4.648.232 0 .431-.133.664-.365a100.49 100.49 0 0 0 5.54-6.765c.222 3.104 1.748 6.898 6.014 6.898 3.819 0 7.604-2.756 9.33-8.965.2-.764-.73-1.361-1.261-.73zm-4.349-5.013c0 1.959-1.926 2.922-3.685 2.922-.941 0-1.664-.247-2.235-.568 1.051-1.592 2.092-3.225 3.21-4.973 1.972.334 2.71 1.43 2.71 2.619z', vb: 24, n: 'Redis', ok: 1},
+              {d: 'M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 68.4l192 72v1.1l-192 78-192-78v-1.1l192-72zm32 356V275.5l160-65v133.9l-160 80z', vb: 512, n: 'S3 Storage', ok: 1},
+              {d: 'M12.004 0H.404v18.807h9.938l1.714 1.602v-.026L15.966 24v-5.193h7.63V0H12.003zm7.578 14.45H15.38L6.898 6.519v7.93H4.116V4.376h4.349l8.344 7.784V4.375h2.773V14.45z', vb: 24, n: 'NATS', ok: 1}
+            ];
+            // the manager's OWN deck geometry, scaled x2.3 for the canvas:
+            // CARD_W 386, CARD_H_APPROX 110, CARD_PEEK 44, group width
+            // CARD_W+20, label floating above the container at (-24, 17)
+            var pcv = document.createElement('canvas');
+            pcv.width = 940; pcv.height = 1300;
+            var pcx = pcv.getContext('2d');
+            var PB = '#a5b4fc';
+            function prr(x, y, w, h, r){
+              pcx.beginPath();
+              pcx.moveTo(x + r, y); pcx.arcTo(x + w, y, x + w, y + h, r);
+              pcx.arcTo(x + w, y + h, x, y + h, r); pcx.arcTo(x, y + h, x, y, r);
+              pcx.arcTo(x, y, x + w, y, r); pcx.closePath();
+            }
+            function picon(d, vb, cx2, cy2, size, col){
+              var pth = new Path2D(d);
+              pcx.save();
+              pcx.translate(cx2 - size / 2, cy2 - size / 2);
+              pcx.scale(size / vb, size / vb);
+              pcx.fillStyle = col; pcx.fill(pth); pcx.restore();
+            }
+            function podsDraw(dark, st){
+              pcx.clearRect(0, 0, 940, 1300);
+              // the entrance glitch: the logo band table clips the whole
+              // group — bands, shimmy, blank on the empty steps
+              if (st){
+                if (!st[1] && !st[2]) return;
+                pcx.save();
+                pcx.beginPath();
+                pcx.rect(0, 1300 * st[1] / 100, 940, 1300 * (st[2] - st[1]) / 100);
+                pcx.clip();
+                pcx.translate(st[3] * 5.6, 0);
+              }
+              pcx.textBaseline = 'middle';
+              var GX = 3, GY = 60, GW = 934, GH = 1234;
+              var CX = GX + 23, CW = 888, CH = 268, PEEK = 120, CY = GY + 8;
+              // the group container (.pod-canvas-group)
+              pcx.fillStyle = dark ? 'rgba(165,180,252,0.012)' : 'rgba(165,180,252,0.05)';
+              prr(GX, GY, GW, GH, 28); pcx.fill();
+              pcx.strokeStyle = dark ? 'rgba(165,180,252,0.12)' : 'rgba(165,180,252,0.6)';
+              pcx.lineWidth = 3;
+              pcx.shadowColor = 'rgba(165,180,252,0.4)'; pcx.shadowBlur = dark ? 0 : 18;
+              pcx.stroke(); pcx.shadowBlur = 0;
+              // the label chip floats ABOVE the container, left 17
+              // the chip hugs its label (measured), like the manager's
+              // inline-block group label — no dead space on the right
+              pcx.font = '600 32px "Space Grotesk", sans-serif';
+              var lblTxt = 'S T A G E', lblPad = 26;
+              var lblW = pcx.measureText(lblTxt).width + lblPad * 2;
+              pcx.fillStyle = 'rgb(30,29,29)';
+              prr(GX + 39, GY - 62, lblW, 66, 16); pcx.fill();
+              pcx.strokeStyle = dark ? 'rgba(165,180,252,0.12)' : 'rgba(165,180,252,0.55)';
+              pcx.lineWidth = 2; pcx.stroke();
+              pcx.fillStyle = dark ? 'rgba(165,180,252,0.12)' : PB;
+              pcx.textAlign = 'left';
+              pcx.fillText(lblTxt, GX + 39 + lblPad, GY - 28);
+              // the DECK:each card translateY = idx * PEEK, so only its
+              // header peeks; the last card stands fully open
+              for (var i = 0; i < PR.length; i++){
+                var R = PR[i], y = CY + i * PEEK, last = i === PR.length - 1;
+                pcx.fillStyle = 'rgba(30,29,29,1)';
+                prr(CX, y, CW, CH, 23); pcx.fill();
+                pcx.strokeStyle = 'rgba(255,255,255,0.1)'; pcx.lineWidth = 2; pcx.stroke();
+                var hy = y + 56;
+                pcx.beginPath(); pcx.arc(CX + 40, hy, 11, 0, Math.PI * 2);
+                if (R.ok){ pcx.fillStyle = '#11a32a'; pcx.shadowColor = '#11a32a'; pcx.shadowBlur = 14; }
+                else pcx.fillStyle = 'rgba(255,255,255,0.22)';
+                pcx.fill(); pcx.shadowBlur = 0;
+                picon(R.d, R.vb, CX + 92, hy, 44, dark ? 'rgba(165,180,252,0.12)' : PB);
+                pcx.fillStyle = '#e8e8e8';
+                pcx.font = '600 44px "Space Grotesk", sans-serif';
+                pcx.textAlign = 'left';
+                pcx.fillText(R.n, CX + 128, hy + 2);
+                if (last){
+                  var sy = y + 138;
+                  pcx.font = '400 34px "Space Grotesk", sans-serif';
+                  var sx = CX + 40;
+                  ['CPU 250m', 'Memory 512Mi'].forEach(function(st){
+                    var sp = st.indexOf(' ');
+                    pcx.fillStyle = 'rgba(255,255,255,0.66)';
+                    pcx.fillText(st.slice(0, sp + 1), sx, sy);
+                    var lw = pcx.measureText(st.slice(0, sp + 1)).width;
+                    pcx.fillStyle = 'rgba(255,255,255,0.82)';
+                    pcx.fillText(st.slice(sp + 1), sx + lw, sy);
+                    sx += lw + pcx.measureText(st.slice(sp + 1)).width + 34;
+                  });
+                  pcx.textAlign = 'right';
+                  pcx.fillStyle = 'rgba(255,255,255,0.82)';
+                  pcx.fillText('1 replica', CX + CW - 40, sy);
+                  pcx.font = '400 30px "Space Grotesk", sans-serif';
+                  pcx.fillStyle = 'rgba(255,255,255,0.66)';
+                  pcx.fillText('Deployed 13 d ago', CX + CW - 40, y + 204);
+                  pcx.textAlign = 'left';
+                }
+              }
+              if (st) pcx.restore();
+            }
+            podsDraw();
+            var ptex = new THREE.CanvasTexture(pcv);
+            ptex.encoding = THREE.sRGBEncoding;
+            ptex.minFilter = THREE.LinearMipmapLinearFilter;   // trilinear: the plate minifies ~2x on screen
+            ptex.generateMipmaps = true;
+            ptex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            s3PodsTex = ptex; s3PodsDraw = podsDraw;
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){
+              podsDraw(); ptex.needsUpdate = true; frameDirtyFlag = true;
+            });
+            s3PodsMat = new THREE.MeshBasicMaterial({
+              map: ptex, transparent: true, opacity: 0,
+              toneMapped: false, side: THREE.DoubleSide,
+              depthWrite: false, depthTest: false   // a floating panel, like every holo on this stage
+            });
+            s3PodsMat.stencilWrite = true; s3PodsMat.stencilRef = 1; s3PodsMat.stencilZPass = THREE.ReplaceStencilOp;
+            // covers the board's FACE: its full depth wide, the canvas
+            // aspect tall (≈ the slab height), dead center, a hair proud
+            var pw = (SL.z1 - SL.z0) * 0.98, ph = pw * (1300 / 940);
+            var pg = new THREE.PlaneGeometry(pw, ph);
+            var pmesh = new THREE.Mesh(pg, s3PodsMat);
+            pmesh.rotation.y = Math.PI / 2;   // face the lens (+x), like the board
+            pmesh.position.set(SL.nbr + SL.gap + ws3b.x + 0.03,
+                               (SL.y0 + SL.y1) / 2, (SL.z0 + SL.z1) / 2);
+            pmesh.renderOrder = 19994;   // over the board (19992), under the rack
+            pmesh.castShadow = false; pmesh.receiveShadow = false;
+            pmesh.frustumCulled = false;
+            pmesh.visible = false;
+            // scene.autoUpdate is OFF: bake the transform or the plate
+            // silently renders at the world origin
+            pmesh.updateMatrixWorld(true);
+            depthSkip.push(pmesh);
+            scene.add(pmesh);
+            s3Pods = pmesh;
+          })();
+          w3.visible = false;
+          w3.traverse(function(o){
+            if (!o.isMesh) return;
+            o.renderOrder = 19992;   // just above the cubes (19990/91), under the rack and every other prop
+            o.castShadow = false; o.receiveShadow = false;
+            o.frustumCulled = false;
+            depthSkip.push(o);
+            var m3 = Array.isArray(o.material) ? o.material : [o.material];
+            for (var mi3 = 0; mi3 < m3.length; mi3++){
+              var mm3 = m3[mi3].clone();
+              mm3.clippingPlanes = s3BandP;   // its OWN band pair (never the deploy planes)
+              mm3.transparent = true; mm3.opacity = 0;
+              // depth ON for self-occlusion — plus a NEGATIVE polygon
+              // offset pulling the board's depth a hair toward the
+              // camera: bobbing cube corners (a few cm) can never win
+              // against its face, geometry untouched
+              mm3.depthTest = true; mm3.depthWrite = true;
+              mm3.polygonOffset = true;
+              mm3.polygonOffsetFactor = 0;   // slope term OFF: it shifted the board's
+                                             // own polys unevenly = the 'pixeled' dither
+              mm3.polygonOffsetUnits = -400; // constant shift only — self-occlusion exact
+              mm3.stencilWrite = true; mm3.stencilRef = 1; mm3.stencilZPass = THREE.ReplaceStencilOp;
+              s3PcbMats.push(mm3);
+              if (Array.isArray(o.material)) o.material[mi3] = mm3; else o.material = mm3;
+            }
+          });
+          w3.updateMatrixWorld(true);
+          scene.add(w3);
+          s3Pcb = w3;
+          // the board lands AFTER the scroll may have settled: poke the
+          // change-detect so the settled frame picks it up once
+          s3CubeQ = -1;
+          frameDirtyFlag = true;
+          renderer.compile(scene, camera);
+        })();
         if (--dracoPending === 0) draco.dispose();   // free the decoder workers
       });
       // ── the calculator in the radial's right circle (the ride's last
@@ -3146,8 +4570,28 @@
           depthSkip.push(o);   // sits out the dof pre-pass like the pcb
           var cm2 = Array.isArray(o.material) ? o.material : [o.material];
           cm2.forEach(function(m){
-            // as-authored colors — the user swapped models and asked for
-            // no retinting; only the fade/stencil plumbing touches it
+            // ── the body wears the RACK's black metal plate, matte ──
+            // the glb ships this shell as polished metal: its MR map is
+            // 0.94 METAL / 0.57 rough, and the scene carries NO envmap,
+            // so metal here can only ever go pitch black (the lesson the
+            // light panel was built around — metal 0 is what lets the two
+            // point lights land at all). what read as metal was really
+            // the leftover gloss: a near-black body at 0.57 rough under
+            // the white key light is mostly one broad specular sweep.
+            m.metalness = 0; m.metalnessMap = null;   // map cleared too: a stale panel value cannot re-metal it
+            m.roughnessMap = null; m.roughness = 0.85;
+            // ...and matching the rack's ALBEDO is not the same as
+            // matching how dark the rack READS. Black_Metal_Plate is
+            // #272626 but also 68% METAL, so only (1 − 0.679) = 0.321 of
+            // it answers a light as diffuse; a dielectric carrying the
+            // same #272626 renders three times brighter — which is the
+            // pale shell this was. the calculator has to stay dielectric
+            // to be lit at all, so the albedo takes the 0.321 instead:
+            //   target = 0.321 × linear(#272626) = 0.00651 / 0.00622
+            //   gain   = target / linear(#202020, the map's flat value)
+            // ≈ #131313 on the body, landing it in the rack's own black
+            // dark grey rather than a lit-up grey of the same name.
+            m.color.setRGB(0.4394, 0.4198, 0.4198);
             m.transparent = true; m.opacity = 0;
             m.userData.baseA = 0.95;  // the body rests near-solid; the display stays solid
             m.userData.glyphBlink = true;   // the key glyphs ride the road-blink below
@@ -4377,7 +5821,7 @@
   }
   spots[current].classList.add('on');
 
-  var SPOTS_ON = true;   // TESTER MODE ON (false to ship; pairs with #spots{display:none})
+  var SPOTS_ON = false;   // testers retired (true + drop #spots{display:none} to bring them back)
   var v3 = new THREE.Vector3();
   var spotBehind = [], spotLastT = [];   // classList/style only touched on change
   function placeSpots(){
@@ -4605,36 +6049,75 @@
     doorOut.raw = Math.min(1, Math.max(0, (scrollNow - doorOut.start) / (doorOut.end - doorOut.start)));
     doorOut.p += (doorOut.raw - doorOut.p) * (1 - Math.exp(-dt * 6));
     if (Math.abs(doorOut.raw - doorOut.p) < 0.001) doorOut.p = doorOut.raw;
+    panelOut.raw = Math.min(1, Math.max(0, (scrollNow - panelOut.start) / (panelOut.end - panelOut.start)));
+    panelOut.p += (panelOut.raw - panelOut.p) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(panelOut.raw - panelOut.p) < 0.001) panelOut.p = panelOut.raw;
     macCloseWin.raw = Math.min(1, Math.max(0, (scrollNow - macCloseWin.start) / (macCloseWin.end - macCloseWin.start)));
     macCloseWin.p += (macCloseWin.raw - macCloseWin.p) * (1 - Math.exp(-dt * 6));
     if (Math.abs(macCloseWin.raw - macCloseWin.p) < 0.001) macCloseWin.p = macCloseWin.raw;
     // the machine cards: slideAwayP (any card but the first — plays the
-    // door's outer animation), s2P (the second card specifically — the
-    // zoom + one-line open). interaction damps, scroll does the gating.
-    var s2On = ((window.__machSlide || 0) === 1 && sceneMode === 2 && !scrubFree) ? 1 : 0;
-    s2P += (s2On - s2P) * (1 - Math.exp(-dt * 5));
-    if (Math.abs(s2On - s2P) < 0.003) s2P = s2On;
-    var slAwayOn = ((window.__machSlide || 0) !== 0 && sceneMode === 2 && !scrubFree) ? 1 : 0;
-    slideAwayP += (slAwayOn - slideAwayP) * (1 - Math.exp(-dt * 5));
-    if (Math.abs(slAwayOn - slideAwayP) < 0.003) slideAwayP = slAwayOn;
-    // the zoom/open factor: on with the click, held only while the
-    // machine frame stands (macWin in, the deploy departure out)
-    // ONE gate, SAME effect both directions: while the deploy flight
-    // is anywhere active (LEGS[3].p off zero) the slide-2 payload is
-    // simply OFF; the moment the gate flips — leaving OR returning —
-    // the zoom and the vertical opening play the same time-ramped
-    // animation. no graded scroll factors, no asymmetry.
-    // EVERYTHING rides the scroll: the zoom and the opening are pure
-    // scrub functions of the CAMERA LEGS — in with the leg-9 landing
-    // flight (macWin), out with whichever flight leaves (macWin's
-    // reversal upward, the deploy dive downward). zoom and camera
-    // move are ONE combined ride in every direction, no time gates.
-    s2Show = s2P * revealEase(Math.min(1, Math.max(0, macWin.p)))
+    // door's outer animation), s2P/s3P/s4P (that card's own payload).
+    //
+    // NO SEQUENCER. the whole thing rides machWant — the card under the
+    // cursor RIGHT NOW — so the incoming slide starts on the hover frame
+    // and the outgoing one retracts alongside it ("dont wait racks when i
+    // hover slides i need you start next slide animation imediatly").
+    // every one of these travels at the SAME MACH_SPEED, in both
+    // directions, so no pair of cards switches faster than another; the
+    // band glitches are the deliberate exception and hold their own
+    // timing (see MACH_GW). scroll still does all the gating below.
+    //
+    // the cost, accepted on purpose: slides 2 and 3 open the rack in
+    // opposite directions and now overlap mid-switch instead of taking
+    // turns. the s2Hand/s3Hand baton keeps the crowd hidden across the
+    // handover, which is what stops it reading as a tear.
+    var machGate = (sceneMode === 2 && !scrubFree) ? 1 : 0;
+    var machWant = window.__machSlide || 0;
+    var machInner = machWant;
+    var machOuter = (machWant !== 0) ? 1 : 0;
+    var machStep = dt * MACH_SPEED, machClear = dt * MACH_HANDOVER;
+    // rising rides MACH_SPEED, clearing rides MACH_HANDOVER — see above
+    var s2T = (machInner === 1) ? machGate : 0;
+    var s3T = (machInner === 2) ? machGate : 0;
+    var s4T = (machInner === 3) ? machGate : 0;
+    s2P = machRamp(s2P, s2T, s2T > s2P ? machStep : machClear);
+    s3P = machRamp(s3P, s3T, s3T > s3P ? machStep : machClear);
+    s4P = machRamp(s4P, s4T, s4T > s4P ? machStep : machClear);
+    slideAwayP = machRamp(slideAwayP, machGate ? machOuter : 0, machStep);
+    // the scroll's own gate on every slide payload, camera included —
+    // in with the leg-9 landing flight (macWin), out with whichever
+    // flight leaves (macWin's reversal upward, the deploy dive downward)
+    // and with the rack's own fade. this half is still PURE SCRUB: no
+    // time gates, no graded factors, identical in both directions, so
+    // scrolling away and back rewinds the whole thing exactly.
+    var machScroll = revealEase(Math.min(1, Math.max(0, macWin.p)))
       * (1 - revealEase(Math.min(1, (LEGS[3] ? LEGS[3].p : 0) / 0.45)))
       * Math.min(1, Math.max(0, (rackFade - 0.5) * 2));
-    var s2CamT = s2Show;
-    s2Cam += (s2CamT - s2Cam) * (1 - Math.exp(-dt * 5));
-    if (Math.abs(s2CamT - s2Cam) < 0.002) s2Cam = s2CamT;
+    // THE CAMERA DOES NOT WAIT ("dont wait to change camera to next
+    // slide, you can start it imediatly, but other animations will w8").
+    // the lens rides machWant — the card under the cursor RIGHT NOW —
+    // off a SINGLE damp, so the move starts on the hover, in step with
+    // the outgoing slide's own animation out. these three are weights,
+    // not lerp factors; the blend that consumes them is normalized, so
+    // the pose flies straight from the old slide's shot to the new one.
+    var s2CamT = ((machWant === 1) ? machGate : 0) * machScroll;
+    s2Cam = machRamp(s2Cam, s2CamT, machStep);
+    var s3CamT = ((machWant === 2) ? machGate : 0) * machScroll;
+    s3Cam = machRamp(s3Cam, s3CamT, machStep);
+    var s4CamT = ((machWant === 3) ? machGate : 0) * machScroll;
+    s4Cam = machRamp(s4Cam, s4CamT, machStep);
+    // the default framing takes whatever weight no slide is asking for —
+    // which is ZERO all the way through a card→card switch, so the blend
+    // below never passes through the default shot
+    var sBCamT = 1 - Math.max(s2CamT, Math.max(s3CamT, s4CamT));
+    sBCam = machRamp(sBCam, sBCamT, machStep);
+    // ...but every OTHER animation the slide owns — the rack's one-floor
+    // open, the cube wedges, the kiosk, the wall panel — still rides the
+    // SEQUENCED state (s2P/s3P/s4P), so it waits its turn behind the
+    // outgoing slide and the door's outer animation.
+    s2Show = s2P * machScroll;
+    s3Show = s3P * machScroll;
+    s4Show = s4P * machScroll;
     agentsWin.raw = Math.min(1, Math.max(0, (scrollNow - agentsWin.start) / (agentsWin.end - agentsWin.start)));
     agentsWin.p += (agentsWin.raw - agentsWin.p) * (1 - Math.exp(-dt * 6));
     if (Math.abs(agentsWin.raw - agentsWin.p) < 0.001) agentsWin.p = agentsWin.raw;
@@ -4687,7 +6170,7 @@
       calcWin.p = calcWin.raw; calcOut.p = calcOut.raw;
       metalWin.p = metalWin.raw; rackOutWin.p = rackOutWin.raw;
       rackLblWin.p = rackLblWin.raw; machineWin.p = machineWin.raw;
-      depWin.p = depWin.raw; macWin.p = macWin.raw; doorWin.p = doorWin.raw; doorOut.p = doorOut.raw; macCloseWin.p = macCloseWin.raw;
+      depWin.p = depWin.raw; macWin.p = macWin.raw; doorWin.p = doorWin.raw; doorOut.p = doorOut.raw; panelOut.p = panelOut.raw; macCloseWin.p = macCloseWin.raw;
       agentsWin.p = agentsWin.raw; prlxWin.p = prlxWin.raw; prlxWin2.p = prlxWin2.raw;
       prlxWinM.p = prlxWinM.raw;
       forWin.p = forWin.raw; prlxWin3.p = prlxWin3.raw;
@@ -4992,31 +6475,41 @@
         stz + srr * ssin * Math.cos(saz)
       );
       camera.lookAt(controls.target);
-      // slide 2's zoom: the second machine card pushes the lens to its
-      // own logged orbit re-aimed at the line's center (fov 8 both
-      // ends — a pure eye/target slide), damped on the click, unwound
-      // by the scroll either direction. the parallax pans ride along
-      // so the zoomed frame still drifts up with the scroll.
-      if (s2Cam > 0.001){
-        var s2f = revealEase(Math.min(1, s2Cam));
-        // the drift rides at 30%: full parallax lifted the cubes to
-        // the frame top by the lower cards — the row must hold NEAR
-        // CENTER through the whole container read, still breathing
-        s2TgtW.copy(S2_TGT); s2TgtW.y += s2PrlxDy * 0.3;
-        s2EyeW.copy(S2_EYE); s2EyeW.y += s2PrlxDy * 0.3;
-        // the line centers the RIGHT HALF of the display (the text
-        // owns the left) and rides 20% of the frame LOWER ("move rack
-        // more bottom on slide 2. + 10%" — walked 10 → 20): pan a
-        // quarter frame left and a fifth frame up in the view plane
-        var s2hh = S2_EYE.distanceTo(S2_TGT) * Math.tan(camera.fov * Math.PI / 360);
-        var s2hw = s2hh * camera.aspect;
-        s2Dir.copy(s2TgtW).sub(s2EyeW).normalize();
-        s2Right.crossVectors(s2Dir, S2_UP).normalize();
-        s2UpV.crossVectors(s2Right, s2Dir);
-        s2TgtW.addScaledVector(s2Right, -0.5 * s2hw).addScaledVector(s2UpV, 0.4 * s2hh);
-        s2EyeW.addScaledVector(s2Right, -0.5 * s2hw).addScaledVector(s2UpV, 0.4 * s2hh);
-        controls.target.lerp(s2TgtW, s2f);
-        camera.position.lerp(s2EyeW, s2f);
+      // the slide poses, blended by NORMALIZED WEIGHT. the old chain
+      // lerped base→s2→s3→s4 in order, so a card→card switch dipped back
+      // toward the default framing whenever the outgoing weight fell
+      // faster than the incoming one rose, and a backwards switch (3→2)
+      // could not move at all — the later lerp pinned it. now all four
+      // poses (the default framing is the fourth) carry a weight, the
+      // sum is divided out, and the lens flies pose→pose DIRECT:
+      // switching cards the base weight is flat zero the whole way.
+      // NOTE the camera rides machWant, not the sequencer — it leaves on
+      // the hover while the outgoing slide is still animating out.
+      var wB = revealEase(Math.min(1, Math.max(0, sBCam)));
+      var w2 = revealEase(Math.min(1, Math.max(0, s2Cam)));
+      var w3 = revealEase(Math.min(1, Math.max(0, s3Cam)));
+      var w4 = revealEase(Math.min(1, Math.max(0, s4Cam)));
+      var wSlides = w2 + w3 + w4;
+      if (wSlides > 0.001){
+        // controls.target / camera.position ARE the default pose here —
+        // scroll ride, parallax pans, footer spin and all
+        var wSum = wB + wSlides;
+        machAccTgt.copy(controls.target).multiplyScalar(wB);
+        machAccEye.copy(camera.position).multiplyScalar(wB);
+        if (w2 > 0.001){
+          machPose(1, s2TgtW, s2EyeW, s2PrlxDy);
+          machAccTgt.addScaledVector(s2TgtW, w2); machAccEye.addScaledVector(s2EyeW, w2);
+        }
+        if (w3 > 0.001){
+          machPose(2, s3TgtW, s3EyeW, s2PrlxDy);
+          machAccTgt.addScaledVector(s3TgtW, w3); machAccEye.addScaledVector(s3EyeW, w3);
+        }
+        if (w4 > 0.001){
+          machPose(3, s4TgtW, s4EyeW, s2PrlxDy);
+          machAccTgt.addScaledVector(s4TgtW, w4); machAccEye.addScaledVector(s4EyeW, w4);
+        }
+        controls.target.copy(machAccTgt).divideScalar(wSum);
+        camera.position.copy(machAccEye).divideScalar(wSum);
         camera.lookAt(controls.target);
       }
       // legs 4-5 nail the pcb cube to (0.25, 0.5) CONTINUOUSLY: the
@@ -5447,12 +6940,28 @@
       // double revealEase steepened the middle and read abrupt
       var s2Want = (!scrubFree && sceneMode === 2) ? Math.min(1, Math.max(0, (s2Show - 0.30) / 0.70)) : 0;
       s2Hand = 1 - Math.min(1, Math.max(0, s2Show / 0.30));
-      cubeNext = Math.round(cubeNext * s2Hand * 200) / 200;
-      hideNext = Math.round(hideNext * s2Hand * 200) / 200;
+      // slide 3's wedge rides the same shape on ITS scrub
+      var s3Want = (!scrubFree && sceneMode === 2) ? Math.min(1, Math.max(0, (s3Show - 0.30) / 0.70)) : 0;
+      s3Hand = 1 - Math.min(1, Math.max(0, s3Show / 0.30));
+      // slide 4 owns NO opening — no wedge, no vertical line, no wink.
+      // with s2 and s3 both off its shot inherits the machine leg's own
+      // sealed rack (macCloseWin shut the box before the leg landed), so
+      // the box stands solid; arriving from slide 2 or 3 just lets their
+      // opening close on its own falling scrub. no baton needed here —
+      // one would fight the deploy dive's re-open on the way out.
+      cubeNext = Math.round(cubeNext * s2Hand * s3Hand * 200) / 200;
+      hideNext = Math.round(hideNext * s2Hand * s3Hand * 200) / 200;
       var s2Prev = Math.max(0, s2LineQ);
-      var s2Can = cubeNext <= 0.001 || s2Prev > 0.001;
+      var s3Prev = Math.max(0, s3CubeQ);
+      // each slide's opening may only START with everything else at
+      // zero — the other slide's show included (the asyncs; the two
+      // share the corner plane in different modes)
+      var s2Can = (cubeNext <= 0.001 && s3Prev <= 0.001) || s2Prev > 0.001;
       var s2Cube = Math.round((s2Can ? s2Want : 0) * 200) / 200;
       if (s2Cube > 0.001){ cubeNext = s2Cube; hideNext = 0; }
+      var s3Can = ((cubeNext <= 0.001 || s3Prev > 0.001) && s2Cube <= 0.001);
+      var s3Cube = Math.round((s3Can ? s3Want : 0) * 200) / 200;
+      if (s3Cube > 0.001){ cubeNext = s3Cube; hideNext = 0; }
       // ...and the faq leg widens that wedge back out to the split's
       // FULL window, so the projects grid shows like in the split
       var faqCubeNext = (!scrubFree && sceneMode === 2)
@@ -5468,14 +6977,16 @@
       // section rides in, it pulls the rack out FIRST, ahead of the gray
       // cover that then takes the radial — whichever hide is deeper wins
       radHideNext = Math.max(radHideNext, Math.round((window.__addonsRackHide || 0) * 200) / 200);
-      if (rackFade !== rackNext || cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || revSeal !== sealNext || radialHide !== radHideNext || faqCube !== faqCubeNext || ctaWink !== ctaWinkNext || s2LineQ !== s2Cube){
+      if (rackFade !== rackNext || cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || revSeal !== sealNext || radialHide !== radHideNext || faqCube !== faqCubeNext || ctaWink !== ctaWinkNext || s2LineQ !== s2Cube || s3CubeQ !== s3Cube){
         var hideMoved = cubeHide !== hideNext;
         var s2LineMoved = s2LineQ !== s2Cube;
         s2LineQ = s2Cube;
+        var s3Moved = s3CubeQ !== s3Cube;
+        s3CubeQ = s3Cube;
         // the addons rack fade moves radialHide alone for whole windows of
         // scroll — the cube/pcb machinery (instance uploads included) only
         // wakes when one of ITS drivers actually stepped
-        var cubesMoved = cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || faqCube !== faqCubeNext || ctaWink !== ctaWinkNext || s2LineMoved;
+        var cubesMoved = cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || faqCube !== faqCubeNext || ctaWink !== ctaWinkNext || s2LineMoved || s3Moved;
         rackFade = rackNext;
         cubeFade = cubeNext;
         pcbFade = pcbNext;
@@ -5512,7 +7023,7 @@
           // the leg-4 wink-out: scale each machine down over a 0.2-wide
           // window past its own random threshold (els 0/5/10 — the bob
           // only ever writes 13, so the two never collide)
-          if (hideMoved || s2LineMoved){
+          if (hideMoved || s2LineMoved || s3Moved){
             for (var hr = 0; hr < cubeBob.length; hr++){
               var HR = cubeBob[hr], hA = HR.a.instanceMatrix.array, hB = HR.b.instanceMatrix.array;
               // slide 2's mask folds into the same scale writer — but
@@ -5523,6 +7034,7 @@
               // cubes will be like them are now")
               var HK = s2Keep ? (hr === 0 ? s2Keep.G : hr === 1 ? s2Keep.P : s2Keep.F) : null;
               var HW = s2Keep ? (hr === 0 ? s2Keep.WG : hr === 1 ? s2Keep.WP : s2Keep.WF) : null;
+              var HH2 = s2Keep ? (hr === 0 ? s2Keep.HG : hr === 1 ? s2Keep.HP : s2Keep.HF) : null;
               var FA = HR.a.geometry.getAttribute('aFade'), FB = HR.b.geometry.getAttribute('aFade');
               for (var hi = 0; hi < HR.n; hi++){
                 if (hi === HR.skip) continue;   // the free cube never hides
@@ -5531,6 +7043,17 @@
                   var s2d = Math.abs(HR.y[hi] - s2Keep.rowY);
                   var s2g = Math.min(1, Math.max(0, (s2d - freeC.py * 1.2) / (freeC.py * 2.2)));
                   lineK = 1 - s2LineQ * (1 - s2g);
+                }
+                // slide 3: the opened side's slab winks away with the
+                // wedge show, the rest of the crowd stands
+                // phase 1 (0 → 0.45): each slab cube winks at its own
+                // seeded moment, not the whole column at once
+                if (HH2 && HH2[hi] && s3CubeQ > 0){
+                  // the column starts winking only once the rack has
+                  // opened 20%; seeded start (0→0.6 of the phase), 0.4
+                  // to vanish, the LAST cube landing on the boundary
+                  var s3w = Math.min(1, Math.max(0, ((s3CubeQ - 0.2) / 0.35 - (HR.hide[hi] / 0.8) * 0.6) / 0.4));
+                  lineK *= (1 - s3w);
                 }
                 // the floor's opacity wave rides the same beat: front
                 // row eases to .4, deeper cubes toward full
@@ -5546,6 +7069,48 @@
               HR.a.instanceMatrix.needsUpdate = true;
               HR.b.instanceMatrix.needsUpdate = true;
               if (FA){ FA.needsUpdate = true; FB.needsUpdate = true; }
+            }
+            // slide 3's scheme fills the removed slab, on the wedge's ramp
+            if (s3Pcb){
+              // phase 2 (0.55 → 0.78) the board glitches in on the logo
+              // band table, phase 3 (0.78 → 1) the pod group does —
+              // both strictly AFTER the column has finished winking
+              // out; the outer plays it in reverse (group un-glitches,
+              // then the board, then the cubes come back)
+              var s3bT = Math.min(1, Math.max(0, (s3CubeQ - S3_BND_0) / S3_BND_W));
+              var s3gT = Math.min(1, Math.max(0, (s3CubeQ - S3_POD_0) / S3_POD_W));
+              var s3pv = s3bT > 0.001 && cubeVis;
+              if (s3Pcb.visible !== s3pv){ s3Pcb.visible = s3pv; bokehStamp++; }
+              // ALWAYS transparent: the opaque pass draws before the
+              // (always-transparent) crowd, which then paints over it
+              for (var spi = 0; spi < s3PcbMats.length; spi++) s3PcbMats[spi].opacity = 0.8 * s3bT;
+              var s3bQ = Math.round(s3bT * 200) / 200;
+              if (s3BandP && s3bQ !== s3BandQ){
+                s3BandQ = s3bQ;
+                if (s3bQ > 0 && s3bQ < 1){
+                  var s3gp = s3bQ * 0.61, s3st = GLITCH_STEPS[0];
+                  for (var sgi = 0; sgi < GLITCH_STEPS.length; sgi++){ if (s3gp >= GLITCH_STEPS[sgi][0]) s3st = GLITCH_STEPS[sgi]; }
+                  var s3bh = s3BandTop - s3BandBot;
+                  s3BandP[0].constant = s3BandTop - s3bh * (s3st[1] / 100);
+                  s3BandP[1].constant = -(s3BandTop - s3bh * (s3st[2] / 100));
+                } else { s3BandP[0].constant = 1e6; s3BandP[1].constant = 1e6; }
+              }
+              if (s3Pods){
+                var s3gv = s3gT > 0.001 && cubeVis;
+                if (s3Pods.visible !== s3gv){ s3Pods.visible = s3gv; bokehStamp++; }
+                s3PodsMat.opacity = 0.95 * s3gT;
+                var s3gQ = Math.round(s3gT * 200) / 200;
+                if (s3PodsDraw && s3gQ !== s3PodsGQ){
+                  s3PodsGQ = s3gQ;
+                  if (s3gQ > 0 && s3gQ < 1){
+                    var s3pp = s3gQ * 0.61;
+                    s3PodsStep = GLITCH_STEPS[0];
+                    for (var spg = 0; spg < GLITCH_STEPS.length; spg++){ if (s3pp >= GLITCH_STEPS[spg][0]) s3PodsStep = GLITCH_STEPS[spg]; }
+                  } else s3PodsStep = null;
+                  s3PodsDraw(s3PodsOff, s3PodsStep);
+                  s3PodsTex.needsUpdate = true;
+                }
+              }
             }
             // the floor logos ride the same beat: visible with the
             // line, opacity on its ramp
@@ -5648,17 +7213,32 @@
           // keep-all neutral would union-keep EVERYTHING); both
           // program flavors are pre-compiled at load.
           var s2uni = s2LineQ > 0.001 && !!freeC && !!s2Keep;
+          var s3own = !s2uni && s3CubeQ > 0.001;
           if (s2uni){
             var s2e = revealEase(s2LineQ);
             glitchPlanes[0].constant = s2Keep.rowY - freeC.cell * 0.75 * s2e;                    // keep BELOW the gap
             glitchPlanes[1].constant = -(s2Keep.rowY + (freeC.cell * 0.75 + freeC.py) * s2e);    // keep ABOVE the gap
             glitchPlanes[2].constant = -1e6;
+          } else if (s3own){
+            // slide 3: the split's wedge from the OTHER corner — the
+            // SAME plane object re-normaled (normal+constant are
+            // uniforms, no recompile); the asyncs guarantee no other
+            // show holds the planes while this runs
+            glitchPlanes[0].constant = 1e6; glitchPlanes[1].constant = 1e6;
+            glitchPlanes[2].normal.set(-1, 0, -1).normalize();
+            // the wedge is FULLY open by 20% — the moment the column
+            // starts winking out, so the hide plays in plain sight
+            // (it used to ease across the whole ride: barely cracked
+            // while the cubes were already going)
+            glitchPlanes[2].constant = s3CornerBase - cornerDepth * revealEase(Math.min(1, s3CubeQ / 0.2));
           } else {
             if (s2WasUni){ glitchPlanes[0].constant = 1e6; glitchPlanes[1].constant = 1e6; }
+            if (s3WasOwn) glitchPlanes[2].normal.set(1, 0, -1).normalize();
             glitchPlanes[2].constant = cubeVis
               ? cornerBase - (forCube > 0.001 ? cornerHalf + (cornerDepth - cornerHalf) * faqCube : cornerDepth) * cubeFade
               : 1e6;
           }
+          s3WasOwn = s3own;
           if (s2uni !== s2WasUni){
             s2WasUni = s2uni;
             for (var s2m = 0; s2m < rackMats.length; s2m++) rackMats[s2m].clipIntersection = s2uni;
@@ -5807,7 +7387,7 @@
       // animation); back-scroll / switching back replays it in reverse
       var dOutP = Math.min(1, Math.max(0, Math.max(doorOut.p, slideAwayP)));
       var outOpen = revealEase(Math.min(1, dOutP / 0.55));
-      var ebT = Math.min(1, Math.max(0, (dOutP - 0.60) / 0.40));
+      var ebT = Math.min(1, Math.max(0, (dOutP - DOOR_RIP_0) / DOOR_RIP_W));
       var dorT = (!scrubFree && sceneMode === 2 && rackFade > 0.5)
         ? Math.min(1, dgT * 3) * (ebT >= 0.99 ? 0 : 1) * (1 - Math.min(1, agentsWin.p / 0.4)) : 0;
       doorP += (dorT - doorP) * (1 - Math.exp(-dt * 8));
@@ -5865,6 +7445,186 @@
         frameDirtyFlag = true;
       }
     }
+    // the wall control panel rides SLIDE 4's scrub — same staged shape
+    // as the kiosk: the slide's own ride gated by standing scroll
+    // (doorWin), so it materializes under the eye instead of inside the
+    // flight, and rewinds the way it came.
+    if (panelRoot){
+      var s4Seq = Math.min(s4Show, Math.max(0, doorWin.p));
+      // ...but it LEAVES early, on its own window: the slide's release
+      // runs to 45% of the deploy dive, and the panel is bolted to the
+      // wall the camera is about to swing past — it fades off while the
+      // machine still stands in frame and is gone as the dive starts,
+      // ahead of the flight instead of dragged through it. scrubbed like
+      // everything else, so scrolling back up brings it in on the ramp.
+      var s4Out = 1 - revealEase(Math.min(1, Math.max(0, panelOut.p)));
+      var cpq = Math.round(revealEase(Math.min(1, Math.max(0, s4Seq / 0.55))) * s4Out * 200) / 200;
+      if (cpq !== panelQ){
+        panelQ = cpq;
+        for (var cpi = 0; cpi < panelMats.length; cpi++){
+          panelMats[cpi].opacity = panelQ;
+          panelMats[cpi].transparent = panelQ < 0.999;
+        }
+        if (panelLamp) panelLamp.intensity = 1.2 * panelQ;
+        var cpv = panelQ > 0.001;
+        if (panelRoot.visible !== cpv){ panelRoot.visible = cpv; bokehStamp++; }
+        frameDirtyFlag = true;
+      }
+      // ── the dashboards RUN — the same board, live:
+      //   · every moving part reads a value: the needle sweeps its
+      //     scale, the ring gauges turn, the bars fill, the faders and
+      //     the ladder markers slide. nothing else is redrawn — the
+      //     plate under them is the authored art with exactly those
+      //     pieces blacked out (panelDashDraw, built at load)
+      //   · a scan band sweeps the screen art, CUT TO THE ART by the
+      //     luminance mask, so the light rides the glyphs and gauges and
+      //     never streaks the bezel they are packed against
+      //   · the whole map breathes, and drops out on the city roads'
+      //     blink pattern — the laptop's and the payment card's beat
+      if (panelQ > 0.001 && !reducedMotion){
+        var pT = clock.elapsedTime;
+        if (panelCx){
+          panelCx.globalCompositeOperation = 'source-over';
+          if (panelDirty) panelCx.drawImage(panelCleanCv, panelDirty.x, panelDirty.y, panelDirty.w, panelDirty.h,
+                                            panelDirty.x, panelDirty.y, panelDirty.w, panelDirty.h);
+          else panelCx.drawImage(panelCleanCv || panelBaseCv, 0, 0);   // wipe the last frame
+          if (panelDashDraw) panelDashDraw(pT);                   // needles, bars, faders at their value
+          for (var psi = 0; psi < panelScreens.length; psi++){
+            var PS = panelScreens[psi];
+            // 6s across the island, then a beat of dark before it restarts
+            var pt = ((pT / 6 + PS.ph) % 1.18) - 0.09;
+            if (pt < 0 || pt > 1) continue;
+            var band = PS.h * 0.22, by = pt * PS.h;   // scratch-local
+            var pg = PS.cx.createLinearGradient(0, by - band, 0, by + band);
+            pg.addColorStop(0, 'rgba(165,180,252,0)');
+            pg.addColorStop(0.5, 'rgba(165,180,252,0.55)');
+            pg.addColorStop(1, 'rgba(165,180,252,0)');
+            PS.cx.globalCompositeOperation = 'copy';   // replaces, clears included
+            PS.cx.fillStyle = pg;
+            PS.cx.fillRect(0, 0, PS.w, PS.h);
+            PS.cx.globalCompositeOperation = 'destination-in';
+            if (PS.mask) PS.cx.drawImage(PS.mask, 0, 0);            // keep only what the art lights
+            else PS.cx.drawImage(panelMaskCv, -PS.x, -PS.y);
+            panelCx.globalCompositeOperation = 'lighter';
+            panelCx.drawImage(PS.cv, PS.x, PS.y);
+          }
+          panelCx.globalCompositeOperation = 'source-over';
+          if (panelScrBlink) panelScrBlink(pT);   // each display drops on its own beat
+          panelTex.needsUpdate = true;
+        }
+        // the whole board only BREATHES — the dropouts moved into the
+        // canvas, per display: one emissive map can't blink three
+        // screens on three clocks
+        var pEi = 0.84 + 0.16 * Math.sin(pT * 1.7);
+        for (var cpe = 0; cpe < panelMats.length; cpe++)
+          panelMats[cpe].emissiveIntensity = (panelMats[cpe].userData.baseEmit || 2) * pEi;
+        ambientDirtyFlag = true;   // soft dirty: the sweep is an idle animator, it may hold a tick
+      }
+    }
+    // the money terminal rides slide 3's scrub — in and out with the
+    // same ride as the wedge and the camera
+    if (termRoot){
+      // the STAGES ride real standing scroll (doorWin: machine top
+      // 60→30vh), gated by the slide's presence — the insertion and
+      // the display switch play under the eye, not inside the flight
+      var s3Seq = Math.min(s3Show, Math.max(0, doorWin.p));
+      var tq2 = Math.round(revealEase(Math.min(1, Math.max(0, s3Seq / 0.55))) * 200) / 200;
+      if (tq2 !== termQ){
+        termQ = tq2;
+        for (var tqi = 0; tqi < termMats.length; tqi++){
+          termMats[tqi].opacity = termQ;
+          termMats[tqi].transparent = termQ < 0.999;
+        }
+        if (termLamp) termLamp.intensity = 1.4 * termQ;
+        if (termHoloMat && reducedMotion) termHoloMat.opacity = termQ * 0.92;
+        var tqVis = termQ > 0.001;
+        if (termRoot.visible !== tqVis){ termRoot.visible = tqVis; bokehStamp++; }
+        frameDirtyFlag = true;
+      }
+      // the CARD rides the middle of the ride (0.58-0.82): in after
+      // the body's opacity, out before it on the way back — sliding
+      // into the reader on the scroll, green .8, road-blinking
+      if (cardRoot && termRoot && termRoot.visible){
+        var cdT = revealEase(Math.min(1, Math.max(0, (s3Seq - 0.58) / 0.24)));
+        var cdQ2 = Math.round(cdT * 200) / 200;
+        if (cdQ2 !== cardQ){
+          cardQ = cdQ2;
+          cardRoot.position.z = cardZ0 + (cardZ1 - cardZ0) * cardQ;
+          cardRoot.updateMatrixWorld(true);
+          var cdo = Math.min(1, cardQ / 0.15) * 0.95;
+          for (var cdi = 0; cdi < cardMats.length; cdi++) cardMats[cdi].opacity = cdo * (cardNeonOff ? 0.12 : 1);
+          var cdv = cardQ > 0.001;
+          if (cardRoot.visible !== cdv){ cardRoot.visible = cdv; bokehStamp++; }
+          frameDirtyFlag = true;
+        }
+        if (!reducedMotion && cardRoot.visible){
+          var cnb = ((clock.elapsedTime + 3.7) % 10) / 10;   // its own beat, offset from the display's
+          var cnOff = (cnb >= 0.02 && cnb < 0.04) || (cnb >= 0.06 && cnb < 0.07);
+          if (cnOff !== cardNeonOff){
+            cardNeonOff = cnOff;
+            var cdo2 = Math.min(1, cardQ / 0.15) * 0.95 * (cnOff ? 0.12 : 1);
+            for (var cdi2 = 0; cdi2 < cardMats.length; cdi2++) cardMats[cdi2].opacity = cdo2;
+            ambientDirtyFlag = true;   // soft: a blink held one tick is invisible
+          }
+        }
+      }
+      // the pod-card ICONS ride the city roads' dropout too, on a
+      // THIRD phase (display 0s, card 3.7s, icons 6.4s) so no two
+      // blackouts land together. change-guarded: the canvas only
+      // repaints on the toggle frames.
+      if (s3Pods && s3Pods.visible && s3PodsDraw && !reducedMotion){
+        var pnb = ((clock.elapsedTime + 6.4) % 10) / 10;
+        var pnOff = (pnb >= 0.02 && pnb < 0.04) || (pnb >= 0.06 && pnb < 0.07);
+        if (pnOff !== s3PodsOff){
+          s3PodsOff = pnOff;
+          s3PodsDraw(pnOff, s3PodsStep);
+          s3PodsTex.needsUpdate = true;
+          ambientDirtyFlag = true;   // soft: a blink held one tick is invisible
+        }
+      }
+      // STAGED: the body lands at opacity 1 first (s3Show 0-0.6),
+      // THEN the display glitches ON across 0.65-1 (the logo band
+      // table, scrubbed — the outer plays it backwards: display rips
+      // off first, the kiosk fades after). while on: rings turn,
+      // charts drift, and the whole holo blinks on the city roads'
+      // pattern (10s cycle, dropouts at 2-4% and 6-7%, dim 0.12)
+      if (termHoloMat && termRoot.visible && !reducedMotion){
+        var dspT = Math.min(1, Math.max(0, (s3Seq - 0.85) / 0.15));
+        if (dspT <= 0.001){
+          if (termHoloMat.opacity !== 0){ termHoloMat.opacity = 0; frameDirtyFlag = true; }
+        } else {
+          var dst2 = null;
+          if (dspT < 0.999){
+            var dgp2 = dspT * 0.61;
+            dst2 = GLITCH_STEPS[0];
+            for (var dgi2 = 0; dgi2 < GLITCH_STEPS.length; dgi2++){ if (dgp2 >= GLITCH_STEPS[dgi2][0]) dst2 = GLITCH_STEPS[dgi2]; }
+          }
+          // the PAYMENT beat: once per 10s (display fully on), the
+          // green frame glitches in, holds, and is gone ~a second
+          // later — in 5.0-5.3 (bands run backward = materialize),
+          // hold to 5.8, out 5.8-6.05 (bands forward = rip away)
+          var payOn = false, payGp = -1;
+          if (dspT >= 0.999){
+            var payT = clock.elapsedTime % 10;
+            if (payT >= 5 && payT < 6.05){
+              payOn = true;
+              if (payT < 5.3) payGp = (1 - (payT - 5) / 0.3) * 0.61;
+              else if (payT >= 5.8) payGp = ((payT - 5.8) / 0.25) * 0.61;
+            }
+          }
+          if (payOn && payGp >= 0){
+            dst2 = GLITCH_STEPS[0];
+            for (var pgi = 0; pgi < GLITCH_STEPS.length; pgi++){ if (payGp >= GLITCH_STEPS[pgi][0]) dst2 = GLITCH_STEPS[pgi]; }
+          }
+          termHoloDraw(clock.elapsedTime, dst2, payOn);
+          termHoloTex.needsUpdate = true;
+          var thb = (clock.elapsedTime % 10) / 10;
+          var thOff = (thb >= 0.02 && thb < 0.04) || (thb >= 0.06 && thb < 0.07);
+          termHoloMat.opacity = 0.92 * (thOff ? 0.12 : 1);
+          ambientDirtyFlag = true;   // soft dirty: the dashboard is an idle animator
+        }
+      }
+    }
     // the floor logos float inside their translucent machines — an
     // ambient flourish on the slide-2 show (the cubeBob pattern:
     // seeded phases, frameDirtyFlag keeps the static gate live)
@@ -5875,7 +7635,7 @@
         SL.m.position.y = SL.y0 + Math.sin(slT * SL.sp + SL.ph) * SL.amp;
       }
       s2Logos.updateMatrixWorld(true);
-      frameDirtyFlag = true;
+      ambientDirtyFlag = true;   // soft dirty, like the cube bob it rides with
     }
     // scene-1 rack glitch flash — same band pattern as the logo glitch
     if (rackRoot && glitchStart >= 0 && (sceneMode !== 1 || scrollNow > 0)){
@@ -6121,8 +7881,13 @@
     // ~60hz. the camera commit stays BELOW this gate so a skipped
     // camera step is still "moved" next tick and can never be lost.
     ambClock += dt;
+    // the frame after a live one carries its cost in its own dt — learn it
+    if (liveCostLast){ liveCost += (Math.min(dt, 0.25) - liveCost) * 0.12; liveCostLast = false; }
     var ambientOnly = !camMoved && !frameDirtyFlag;
-    var skipOk = ambClock < 0.0161 && frameCacheValid &&
+    // scroll and the judder governor keep the fixed 60hz grid; only the
+    // idle animators ride the adaptive hold
+    var ambHold = liveCost > 0.02 ? liveCost * 2.2 : 0.0161;
+    var skipOk = ambClock < ((ambientOnly && frameLive) ? ambHold : 0.0161) && frameCacheValid &&
                  !renderer.shadowMap.needsUpdate;
     W.cap = liveCap;
     // static (grain-only) frames join the paced family too: replaying
@@ -6132,6 +7897,7 @@
     if (W.paced){ ambientDirtyFlag = false; return; }
     if (camMoved) staticPrevCam.copy(camera.matrixWorld);
     ambClock = 0;
+    liveCostLast = frameLive;
     frameDirtyFlag = false;
     ambientDirtyFlag = false;
     renderPass.enabled = bokeh.enabled = bloom.enabled = gammaPass.enabled = fxaa.enabled = frameLive;
