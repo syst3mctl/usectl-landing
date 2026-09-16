@@ -1260,7 +1260,181 @@
   // drawing over the rack's silhouette
   var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:false, stencil:true, powerPreference:'high-performance'});
   renderer.debug.checkShaderErrors = false;   // dev-only introspection, costs compile time
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+
+  // ── THE PHONE LADDER ────────────────────────────────────────────
+  // under 767 the page runs on a gpu a tenth of a laptop's behind a
+  // panel that asks for three device pixels per css one. nothing here
+  // guesses WHICH phone it is:
+  //   · every phone opens on the MIDDLE rung. not a heuristic — an
+  //     iphone 12 (A14, no slouch) lagged at the desktop settings, so
+  //     "is a phone" is reason enough to step down;
+  //   · the static probe (cores, ram, panel, gpu string) can push a
+  //     weak device down from there, never up;
+  //   · a live watchdog on the MEASURED frame cost has the last word,
+  //     and it can only walk down — a climb back up needs the frames to
+  //     have been clean for six seconds AND the ride to be settled, and
+  //     it locks itself out for good if a step-down follows.
+  // desktop and tablet never leave rung 2, which is the page as it was.
+  //
+  // what each rung moves, in order of what it buys:
+  //   dpr    the tail — fxaa into the cache, grade to the canvas — runs
+  //          at CANVAS resolution, so this one knob scales two
+  //          fullscreen passes at once. an iphone 12 at the old cap of
+  //          2 pushed 1.3M px through both; at 1.5 it is 0.74M.
+  //   chain  the supersample the beauty pass, dof and bloom render at.
+  //   wires  the city's hanging-wire strokes are 1.76M tris — 61% of
+  //          the city — hair-thin lines that on a 390px frame are
+  //          sub-pixel noise. the wireframe overlays double every
+  //          building's draw (measured 1.3-1.7ms/frame on a LAPTOP).
+  //   dof    a whole second geometry pass whenever the depth map goes
+  //          stale; bloom is 5 mips, two blurs each.
+  //   grain  with it off a static frame is pixel-identical to the one
+  //          already on the canvas, so the loop skips the draw ENTIRELY.
+  //   calm   the switch prefers-reduced-motion throws: with the ambient
+  //          animators down, a settled shot renders nothing at all.
+  var MOBILE = window.innerWidth <= 767;
+  var MQ = (function(){
+    var Q = [
+      // 0 — the bad phone: everything that can be off, is
+      {dpr: 1,   chain: 0.75, dof: false, bloom: false, fxaa: false, grain: 0,     wires: false, overlay: false, calm: true},
+      // 1 — every phone starts here
+      {dpr: 1.5, chain: 0.9,  dof: true,  bloom: true,  fxaa: true,  grain: 0.055, wires: false, overlay: true,  calm: false},
+      // 2 — the page as written (desktop always; a phone only by promotion)
+      {dpr: 2,   chain: 1,    dof: true,  bloom: true,  fxaa: true,  grain: 0.055, wires: true,  overlay: true,  calm: false}
+    ];
+    var M = {tier: 2, k: Q[2], mobile: MOBILE, forced: false, booted: false,
+             ceil: 2, why: 'desktop', gpu: '', cores: 0, mem: 0, panel: 0};
+    // the fxaa pass doubles as the static cache's filler, so the low rung
+    // cannot simply switch it off — it swaps the shader for a plain copy
+    // and the pass keeps feeding the cache
+    var copyMat = null;
+    function cheapMat(){
+      if (!copyMat && THREE.CopyShader) copyMat = new THREE.ShaderMaterial({
+        uniforms: THREE.UniformsUtils.clone(THREE.CopyShader.uniforms),
+        vertexShader: THREE.CopyShader.vertexShader,
+        fragmentShader: THREE.CopyShader.fragmentShader
+      });
+      return copyMat;
+    }
+    var fxaaMat = null, fxaaUni = null;
+    function probe(){
+      if (!MOBILE) return 2;
+      var f = /[?&]q=(0|1|2|low|mid|high)/i.exec(location.search || '');
+      if (f){ M.forced = true; M.why = 'forced ?q=' + f[1]; return {'0':0,'1':1,'2':2,low:0,mid:1,high:2}[f[1].toLowerCase()]; }
+      var t = 1;
+      var cores = navigator.hardwareConcurrency || 0;
+      var mem = navigator.deviceMemory || 0;           // chrome/android only — safari never reports it
+      var dpr = window.devicePixelRatio || 1;
+      var scr = window.screen || {width: 0, height: 0};
+      var panel = (scr.width * dpr) * (scr.height * dpr);   // device pixels the panel asks for
+      var gpu = '';
+      try {
+        var gl = renderer.getContext();
+        var ext = gl.getExtension('WEBGL_debug_renderer_info');
+        if (ext) gpu = String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || '');
+      } catch(e){}
+      M.gpu = gpu; M.cores = cores; M.mem = mem; M.panel = panel;
+      var g = gpu.toLowerCase();
+      var why = [];
+      // a budget soc, by any of its tells. safari masks the gpu to
+      // "apple gpu" and every iphone answers that, so the string only
+      // ever demotes an ANDROID — the watchdog is what catches a tired
+      // iphone, and it catches it from real numbers instead of a guess
+      if (cores && cores <= 4){ t--; why.push('cores ' + cores); }
+      if (mem && mem <= 3){ t--; why.push('ram ' + mem + 'gb'); }
+      if (/adreno \(tm\) [1-5]|mali-(4|t|g3|g5|g6)|powervr|videocore|swiftshader|llvmpipe/.test(g)){ t--; why.push('gpu ' + gpu); }
+      // a 1440p-class panel over anything but a flagship: the pixels are
+      // the load, and this is the device asking for the most of them
+      if (panel >= 3.4e6 && (!cores || cores <= 6)){ t--; why.push('panel ' + Math.round(panel / 1e6) + 'mp'); }
+      t = Math.max(0, Math.min(1, t));
+      M.why = why.length ? ('probe: ' + why.join(', ')) : 'probe: phone default';
+      return t;
+    }
+    // the city's two geometry families. both arrays live further down
+    // the file (the loader fills them), so this is called again from the
+    // load callback — at boot they are still undefined
+    function scene(){
+      var k = M.k;
+      var ws = cityWireStrokes, ov = cityWireMeshes;
+      if (ws) for (var i = 0; i < ws.length; i++) ws[i].visible = k.wires;
+      if (ov) for (var j = 0; j < ov.length; j++) ov[j].visible = k.overlay;
+      frameDirtyFlag = true;
+      if (typeof bokehStamp === 'number') bokehStamp++;
+    }
+    function apply(t, why){
+      t = Math.max(0, Math.min(2, t));
+      if (M.booted && t === M.tier) return;
+      M.tier = t; M.k = Q[t]; if (why) M.why = why;
+      var k = M.k;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, k.dpr));
+      if (M.booted){
+        // the tail: fxaa full or a plain copy (the pass still fills the
+        // cache either way), and the grain that decides whether a static
+        // frame has anything to draw at all
+        if (!fxaaMat){ fxaaMat = fxaa.material; fxaaUni = fxaa.uniforms; }
+        var cm = k.fxaa ? null : cheapMat();
+        fxaa.material = cm || fxaaMat;
+        fxaa.uniforms = cm ? cm.uniforms : fxaaUni;
+        grade.uniforms.grain.value = k.grain;
+        reducedMotion = prefersReducedMotion || k.calm;
+        controls.autoRotate = !reducedMotion;
+        lastRW = -1;        // the dpr moved: force the realloc past resize's guard
+        resize();
+        bokehStamp++; frameDirtyFlag = true; frameCacheValid = false;
+        scene();
+      }
+    }
+    // the watchdog. dt is wall-clock between rafs, so on a vsync-locked
+    // panel a healthy frame reads as the native tick whatever the gpu is
+    // actually doing — which means this can only ever detect the MISS,
+    // never the headroom. hence: stepping DOWN is measured, stepping up
+    // is a cautious one-shot that locks out the moment it is wrong.
+    var hot = 0, cool = 0, cd = 0, climbed = 0;
+    function watch(dt, cost, riding){
+      if (!M.mobile || M.forced) return;
+      if (cd > 0) cd -= dt;
+      if (climbed > 0) climbed -= dt;
+      var tick = Math.max(0.0166, nativeDt);   // judge against 60hz, never a 120hz panel's tick
+      if (riding && cost){
+        if (cost > tick * 1.7){ hot += dt; cool = 0; }
+        else if (cost < tick * 1.1){ cool += dt; hot = 0; }
+        else { hot = 0; }
+      } else { hot = 0; }
+      if (cd > 0) return;
+      if (hot > 1.2 && M.tier > 0){
+        // a step down that lands right after a climb means the climb was
+        // wrong: nail the ceiling shut so the two can never trade places
+        if (climbed > 0){ M.ceil = M.tier - 1; }
+        hot = cool = 0; cd = 5;
+        apply(M.tier - 1, 'watchdog: ' + Math.round(cost * 1000) + 'ms frames');
+      } else if (cool > 6 && !riding && M.tier < M.ceil){
+        cool = 0; cd = 10; climbed = 20;
+        apply(M.tier + 1, 'watchdog: headroom');
+      }
+    }
+    M.apply = apply; M.watch = watch; M.scene = scene;
+    // the ceiling is where the PROBE put us: the watchdog may walk down
+    // from there and back up to it, never past it. a phone that opens on
+    // rung 1 is never promoted into the settings that are the reason
+    // this ladder exists — only a device that dipped (a hot battery, a
+    // background tab) climbs back out
+    M.boot = function(){ var t = probe(); M.booted = true; M.ceil = t; M.tier = -1; apply(t); };
+    M.set = function(t){ M.forced = true; apply(t, 'manual'); return M.why; };
+    M.info = function(){ return {tier: M.tier, why: M.why, gpu: M.gpu, cores: M.cores,
+      mem: M.mem, panel: M.panel, dpr: renderer.getPixelRatio(), chain: CHAIN_RES, k: M.k}; };
+    M.tier = probe();      // read once here so the shadow map and the
+    M.k = Q[M.tier];       // first pixel ratio below already obey it
+    return M;
+  })();
+  window.__mq = MQ;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, MQ.k.dpr));
+  // one anisotropy budget for the whole scene. the desktop takes the
+  // driver's max (16 everywhere that matters); a phone caps at 4 — the
+  // grazing angles that need 16 are the city's road texture read across
+  // a 390px frame, where the difference is a pixel wide and the sampler
+  // cost is per-fragment on the tightest gpu in the ladder
+  var ANISO = MOBILE ? Math.min(4, renderer.capabilities.getMaxAnisotropy())
+                     : renderer.capabilities.getMaxAnisotropy();
   renderer.toneMapping = THREE.ReinhardToneMapping;   // sketchfab: reinhard, exposure 1
   renderer.toneMappingExposure = 1;
   renderer.shadowMap.enabled = true;
@@ -1297,7 +1471,11 @@
   // the pixels and pays the same 2048² depth pass otherwise. the shadow
   // still falls exactly where it does on the desktop — it is only softer
   // at the edge, which on a phone-sized rack is under a pixel anyway.
-  var SHADOW_PX = window.innerWidth <= 767 ? 1024 : (window.innerWidth <= 1024 ? 1536 : 2048);
+  // (a phone drops to 512: the rack is a few hundred px tall there, and
+  // the map is re-rendered on every scene mutation — the rack fades, the
+  // glitch that used to fire. enabled stays ON at every rung: switching
+  // shadows off recompiles every program in the scene mid-ride)
+  var SHADOW_PX = MOBILE ? 512 : (window.innerWidth <= 1024 ? 1536 : 2048);
   spotB.shadow.mapSize.set(SHADOW_PX, SHADOW_PX);
   spotB.shadow.bias = -0.0004;
   spotB.shadow.camera.near = 0.2; spotB.shadow.camera.far = 30;
@@ -1381,7 +1559,11 @@
     // budget is tightest. the age is spent the moment scrolling stops, so
     // the settled shot still re-renders at the final pose.
     if (fresh){ bokehCamAge = 0; }
-    else if (bokehSceneSame && bokehCamAge < (scrollActive ? 3 : 1)){ bokehCamAge++; fresh = true; }
+    // ...and on a phone it rides longer still: that second geometry pass
+    // is the single most expensive thing in a scrolling frame there, and
+    // a blur radius five frames old under a moving camera is invisible
+    // on a 390px screen. the age is spent the instant scrolling stops
+    else if (bokehSceneSame && bokehCamAge < (scrollActive ? (MOBILE ? 5 : 3) : (MOBILE ? 2 : 1))){ bokehCamAge++; fresh = true; }
     if (!fresh){
       bokehCamAge = 0;
       bokehPrevCam.copy(camera.matrixWorld);
@@ -1629,9 +1811,13 @@
   // fragment budget nothing survives. NOTHING is switched off — every
   // pass, every effect, every leg still runs; only the chain's pixel
   // count moves with the frame it has to fill.
+  // ...and on a phone the rung's own multiplier rides on top of it: the
+  // ladder's chain factor (1 / 0.9 / 0.75) is what turns the beauty pass,
+  // the dof gather and the bloom mips down together
   function chainRes(){
     var w = window.innerWidth;
-    return w <= 767 ? 1 : (w <= 1024 ? 1.25 : 1.5);
+    var base = w <= 767 ? 1 : (w <= 1024 ? 1.25 : 1.5);
+    return MOBILE ? base * MQ.k.chain : base;
   }
   var CHAIN_HI = chainRes(), CHAIN_LAP = CHAIN_HI, CHAIN_RES = CHAIN_HI;
   var lastRW = -1, lastRH = -1, lastRC = -1;
@@ -1669,10 +1855,14 @@
     // at pixelRatio 1, so the chain is cw×ch, not w*pr×h*pr). this was set
     // to the device-pixel size before — taps landed half a texel apart,
     // inside one pixel, and fxaa never engaged; msaa was covering for it.
-    fxaa.uniforms.resolution.value.set(1 / cw, 1 / ch);
+    // (the low rung swaps this pass's shader for a plain copy, which has
+    // no resolution uniform to feed)
+    if (fxaa.uniforms.resolution) fxaa.uniforms.resolution.value.set(1 / cw, 1 / ch);
     camera.aspect = w/h; camera.updateProjectionMatrix();
   }
   window.addEventListener('resize', resize); resize();
+  // the ladder can only take its rung once resize() and the passes exist
+  MQ.boot();
   var addonsMidY = -1;   // scroll y where the addons section is centered — measured in measureScrub
   function setChainRes(r){
     if (r === CHAIN_RES) return;
@@ -2212,7 +2402,7 @@
   // the city is seen through itself dozens of times over, so sub-step
   // alpha accumulates into real tone (12.5% of the hero frame moved).
   // zero times any number of layers is still zero.
-  var cityAllMeshes = [], cityWireMeshes = [];
+  var cityAllMeshes = [], cityWireMeshes = [], cityWireStrokes = [];
   function cityCullInvisible(){
     for (var i = 0; i < cityAllMeshes.length; i++){
       var e = cityAllMeshes[i], mm = e.o.material;
@@ -2330,7 +2520,10 @@
     // lines and they stay. cityWireMeshes is kept for the cull below.
     cityCullInvisible();
   }
-  var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  // the low rung stands the ambient animators down exactly as the os
+  // switch does — with nothing breathing, a settled shot renders nothing
+  var reducedMotion = prefersReducedMotion || MQ.k.calm;
 
   // the endless lap: constant-speed azimuth spin around the target, along the
   // orbit the user traced (r stays 4.6944, target [-1.5675, 1.6158, 0.8588]);
@@ -2952,7 +3145,7 @@
       o.renderOrder = ++orderSeq;
       fixVertexColors(o.geometry);
       var mats = Array.isArray(o.material) ? o.material : [o.material];
-      var maxAniso = renderer.capabilities.getMaxAnisotropy();
+      var maxAniso = ANISO;
       var HOME = new THREE.Color(0x1e1d1d).convertSRGBToLinear();
       mats.forEach(function(m){
         if (EMIT[m.name]) m.emissiveIntensity = EMIT[m.name];
@@ -2988,6 +3181,7 @@
         o.castShadow = false;
         o.renderOrder = 10000 + orderSeq;   // wires: stable slot above the buildings
         depthSkip.push(o);
+        cityWireStrokes.push(o);   // ...and the phone ladder's first geometry cut
         return;
       }
       // the demo's wireframe overlay, recolored to the manager green
@@ -3000,6 +3194,7 @@
       wireOverlays.push(w);
     });
     overlays.forEach(function(x){ x.parent.add(x.mesh); });
+    MQ.scene();   // the rung decides whether the strokes and overlays draw at all
     scene.add(g.scene);
     // no asphalt, nothing in its place: the ground is just the #1e1d1d void.
     // neon street ribbons stay.
@@ -3162,7 +3357,7 @@
         var cx2 = cv.getContext('2d');
         var tex = new THREE.CanvasTexture(cv);
         tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
-        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        tex.anisotropy = ANISO;
         tex.encoding = THREE.sRGBEncoding;
         var mat = new THREE.MeshBasicMaterial({map: tex, transparent: true, opacity: 0});
         mat.toneMapped = false;
@@ -3652,7 +3847,7 @@
             // alone can't win when another mesh biases its depth forward
             m.polygonOffset = true; m.polygonOffsetFactor = 0; m.polygonOffsetUnits = -1600;
             m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
-            if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            if (m.map) m.map.anisotropy = ANISO;
             if (termMats.indexOf(m) === -1) termMats.push(m);
           });
         });
@@ -3670,7 +3865,7 @@
           termHoloTex.flipY = true;   // OUR plane, standard canvas orientation
           termHoloTex.minFilter = THREE.LinearFilter;
           termHoloTex.generateMipmaps = false;
-          termHoloTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          termHoloTex.anisotropy = ANISO;
           termHoloMat = new THREE.MeshBasicMaterial({
             map: termHoloTex, transparent: true, opacity: 0,
             toneMapped: false, side: THREE.DoubleSide,
@@ -3982,7 +4177,7 @@
             m.transparent = true; m.opacity = 0;
             m.depthWrite = true;   // blend materials lose it in the loader
             m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
-            if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            if (m.map) m.map.anisotropy = ANISO;
             // the construction lights are baked accent green in the
             // emissive: driven hot so they cross the bloom threshold
             // and smear like the city road neons
@@ -4052,7 +4247,7 @@
             m.depthWrite = true;
             m.side = THREE.FrontSide;   // ships doubleSided: back faces would double-blend through the fade
             m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
-            if (m.map) m.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            if (m.map) m.map.anisotropy = ANISO;
             // the corpus wears the RACK'S OWN dark grey. the authored
             // body is a light warm olive — sampled off the base map at
             // linear (0.50, 0.50, 0.375) — so the tint is that albedo
@@ -4308,7 +4503,7 @@
           // every upload (the holo screen's lesson)
           panelTex.generateMipmaps = false;
           panelTex.minFilter = THREE.LinearFilter;
-          panelTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          panelTex.anisotropy = ANISO;
           for (var pmi = 0; pmi < panelMats.length; pmi++){
             panelMats[pmi].emissiveMap = panelTex;
             panelMats[pmi].needsUpdate = true;
@@ -4554,7 +4749,7 @@
             ptex.encoding = THREE.sRGBEncoding;
             ptex.minFilter = THREE.LinearMipmapLinearFilter;   // trilinear: the plate minifies ~2x on screen
             ptex.generateMipmaps = true;
-            ptex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            ptex.anisotropy = ANISO;
             s3PodsTex = ptex; s3PodsDraw = podsDraw;
             if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){
               podsDraw(); ptex.needsUpdate = true; frameDirtyFlag = true;
@@ -4712,7 +4907,7 @@
         // crisp at the pendulum's angles: no mip shimmer, full anisotropy
         // (the minification moiré on the digits read as constant glitching)
         dtex.minFilter = THREE.LinearFilter; dtex.generateMipmaps = false;
-        dtex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        dtex.anisotropy = ANISO;
         dtex.encoding = THREE.sRGBEncoding;   // canvas colors are sRGB; keep them honest through the gamma pass
         var dmat = new THREE.MeshBasicMaterial({map: dtex, transparent: true, opacity: 0});
         dmat.toneMapped = false;   // neon: skip reinhard, feed the bloom raw
@@ -4764,7 +4959,7 @@
         ttex = new THREE.CanvasTexture(tcv);
         calcTextDraw(null);
         ttex.minFilter = THREE.LinearFilter; ttex.generateMipmaps = false;
-        ttex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        ttex.anisotropy = ANISO;
         ttex.encoding = THREE.sRGBEncoding;
         calcTextMat = new THREE.MeshBasicMaterial({map: ttex, transparent: true, opacity: 0});
         calcTextMat.toneMapped = false;
@@ -4848,7 +5043,7 @@
         };
         ltex = new THREE.CanvasTexture(lcv);
         ltex.minFilter = THREE.LinearFilter; ltex.generateMipmaps = false;
-        ltex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        ltex.anisotropy = ANISO;
         ltex.encoding = THREE.sRGBEncoding;
         var lmat = new THREE.MeshBasicMaterial({map: ltex, transparent: true, opacity: 0});
         lmat.toneMapped = false;
@@ -5047,7 +5242,7 @@
           var stex = new THREE.CanvasTexture(scv);
           // the calculator's crispness recipe: no mip shimmer at fov 8
           stex.minFilter = THREE.LinearFilter; stex.generateMipmaps = false;
-          stex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          stex.anisotropy = ANISO;
           stex.encoding = THREE.sRGBEncoding;
           lapScreenMat = new THREE.MeshBasicMaterial({map: stex, transparent: true, opacity: 0});
           lapScreenMat.toneMapped = false;   // self-lit like the city's signs
@@ -5172,7 +5367,7 @@
           // tick (all of them in one go was a long task in this callback)
           var pt6 = new THREE.CanvasTexture(pc);
           pt6.minFilter = THREE.LinearFilter; pt6.generateMipmaps = false;
-          pt6.anisotropy = renderer.capabilities.getMaxAnisotropy();
+          pt6.anisotropy = ANISO;
           pt6.encoding = THREE.sRGBEncoding;
           lapDioPlates.push({draw: doDraw, tex: pt6});
           return dioObj(new THREE.Mesh(new THREE.PlaneGeometry(w6, h6),
@@ -5785,7 +5980,7 @@
             var tex = new THREE.CanvasTexture(cv);
             // the calculator's crispness recipe: no mip shimmer at fov 8
             tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
-            tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            tex.anisotropy = ANISO;
             tex.encoding = THREE.sRGBEncoding;
             tex.wrapS = THREE.RepeatWrapping;
             tex.repeat.x = 2;   // the message twice around the drum
@@ -8111,6 +8306,10 @@
     ambClock += dt;
     // the frame after a live one carries its cost in its own dt — learn it
     if (liveCostLast){ liveCost += (Math.min(dt, 0.25) - liveCost) * 0.12; liveCostLast = false; }
+    // the phone ladder judges from exactly this number, and only while
+    // the page is actually riding — a settled shot is a cache replay and
+    // says nothing about what the device can carry
+    if (MOBILE) MQ.watch(dt, liveCost, scrollActive || camMoved);
     var ambientOnly = !camMoved && !frameDirtyFlag;
     // scroll and the judder governor keep the fixed 60hz grid; only the
     // idle animators ride the adaptive hold
@@ -8128,7 +8327,17 @@
     liveCostLast = frameLive;
     frameDirtyFlag = false;
     ambientDirtyFlag = false;
-    renderPass.enabled = bokeh.enabled = bloom.enabled = gammaPass.enabled = fxaa.enabled = frameLive;
+    renderPass.enabled = gammaPass.enabled = fxaa.enabled = frameLive;
+    // dof and bloom are the rung's to keep: the dof pass re-renders the
+    // whole scene whenever its depth map goes stale, bloom is five mips
+    // blurred twice each. both are gone on the low rung.
+    bokeh.enabled = frameLive && MQ.k.dof;
+    bloom.enabled = frameLive && MQ.k.bloom;
+    // ...and with the grain off, a static frame's grade output is
+    // pixel-identical to the image already on the canvas. the paced
+    // return above holds it for 16ms; this drops the draw for good — a
+    // settled shot on the low rung costs the gpu nothing at all
+    if (!frameLive && !MQ.k.grain && frameCacheValid) return;
     if (frameLive) frameCacheValid = true;
     composer.render();
   }
