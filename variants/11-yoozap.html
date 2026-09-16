@@ -66,6 +66,11 @@
   .nav-links a:hover{color:var(--accent) !important}
   .nav-cta-btn{
     position:relative;color:#fff;padding:9px 20px;border-radius:8px;font-size:.85rem;font-weight:600;transition:all .3s;border:none;background:#11a329e1;cursor:pointer;white-space:nowrap;text-decoration:none;
+  }
+  /* the glitch KIT — the seven clip polygons and the shimmy the overlay
+     runs on. shared with the page's own "Create a machine" (.btn.primary),
+     which wears this button's skin at the page's own button size */
+  .nav-cta-btn,.btn.primary,.btn.ghost{
     --shimmy-distance:5;
     --clip-one:polygon(0 2%, 100% 2%, 100% 95%, 95% 95%, 95% 90%, 85% 90%, 85% 95%, 8% 95%, 0 70%);
     --clip-two:polygon(0 78%, 100% 78%, 100% 100%, 95% 100%, 95% 90%, 85% 90%, 85% 100%, 8% 100%, 0 78%);
@@ -75,11 +80,11 @@
     --clip-six:polygon(0 40%, 100% 40%, 100% 85%, 95% 85%, 95% 85%, 85% 85%, 85% 85%, 8% 85%, 0 70%);
     --clip-seven:polygon(0 63%, 100% 63%, 100% 80%, 95% 80%, 95% 80%, 85% 80%, 85% 80%, 8% 80%, 0 70%);
   }
-  .nav-cta-btn:hover .glitch{display:flex;animation:glitch 2s infinite}
-  .nav-cta-btn .glitch{display:none;position:absolute;inset:0;align-items:center;justify-content:center;pointer-events:none;background:#1e1d1d;border-radius:inherit;z-index:10}
-  .nav-cta-btn .letters{display:flex;color:var(--accent);font-weight:700;white-space:nowrap}
-  .nav-cta-btn .letters span:nth-of-type(2n){scale:1 -1}
-  .nav-cta-btn .letters span:nth-of-type(3n){scale:-1 -1}
+  .nav-cta-btn:hover .glitch,.btn.primary:hover .glitch,.btn.ghost:hover .glitch{display:flex;animation:glitch 2s infinite}
+  .nav-cta-btn .glitch,.btn.primary .glitch,.btn.ghost .glitch{display:none;position:absolute;inset:0;align-items:center;justify-content:center;pointer-events:none;background:#1e1d1d;border-radius:inherit;z-index:10}
+  .nav-cta-btn .letters,.btn.primary .letters,.btn.ghost .letters{display:flex;color:var(--accent);font-weight:700;white-space:nowrap}
+  .nav-cta-btn .letters span:nth-of-type(2n),.btn.primary .letters span:nth-of-type(2n),.btn.ghost .letters span:nth-of-type(2n){scale:1 -1}
+  .nav-cta-btn .letters span:nth-of-type(3n),.btn.primary .letters span:nth-of-type(3n),.btn.ghost .letters span:nth-of-type(3n){scale:-1 -1}
   @keyframes glitch{
     0%{clip-path:var(--clip-one)}
     2%,8%{clip-path:var(--clip-two);transform:translate(calc(var(--shimmy-distance) * -1%), 0)}
@@ -97,7 +102,7 @@
     60%{clip-path:var(--clip-seven);transform:translate(0, 0)}
     31%,61%,100%{clip-path:var(--clip-four)}
   }
-  .nav-cta-btn::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(90deg,rgba(17,163,42,.6) 0%,rgba(17,163,42,.08) 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+  .nav-cta-btn::before,.btn.primary::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(90deg,rgba(17,163,42,.6) 0%,rgba(17,163,42,.08) 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
   .nav-cta-btn:hover{background:#11A32A90;color:#fff;box-shadow:0 0 20px rgba(17,163,42,.35)}
   .mobile-menu-btn{display:none;background:none;border:none;color:var(--text);cursor:pointer;padding:0}
   .hamburger{width:32px;height:32px;padding:2px;cursor:pointer;display:flex;align-items:center;justify-content:center}
@@ -339,7 +344,10 @@
 
   /* ── panels: naked, no glass ────────────────────── */
   .panel{}
-  .rail{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--dim);margin-bottom:18px}
+  /* the section rails read LOWERCASE — the mono label sits quieter under
+     the display headline than a shouted one. the markup keeps its normal
+     capitals so the text is still legible in the source */
+  .rail{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:lowercase;color:var(--dim);margin-bottom:18px}
   .rail .led{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent-hover);box-shadow:0 0 8px var(--accent-hover);margin-right:8px;vertical-align:1px}
   .rail .led.blue{background:var(--blue);box-shadow:0 0 8px var(--blue)}
 
@@ -353,10 +361,32 @@
   @media (max-width:1700px){h1{font-size:65px}.sub{font-size:16px;margin:10px 0 30px 0}.hero-over{padding-left:50px}}
   .ctas{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
   .btn{font-family:var(--display);font-weight:600;font-size:14.5px;letter-spacing:.02em;text-decoration:none;padding:11px 18px;border-radius:var(--radius-sm);border:1px solid transparent;display:inline-block}
-  .btn.primary{background:var(--accent);color:#fff;box-shadow:0 0 0 1px rgba(17,163,42,.35),0 2px 24px rgba(17,163,42,.3)}
-  .btn.primary:hover{background:var(--accent-hover)}
-  .btn.ghost{border:1px solid var(--border);color:var(--text);background:rgba(255,255,255,0.04)}
-  .btn.ghost:hover{border-color:var(--accent);color:#d9f5de}
+  /* the header button's skin, verbatim: the accent at 88%, the hairline
+     gradient edge (::before, up with the nav rules), the glow on hover and
+     the letters glitch over it. the SIZE stays the page's own — .btn's
+     14.5px/11-18 and its whole responsive ladder — so the row still reads
+     level with the ghost beside it */
+  .btn.primary{position:relative;background:#11a329e1;color:#fff;transition:all .3s}
+  .btn.primary:hover{background:#11A32A90;color:#fff;box-shadow:0 0 20px rgba(17,163,42,.35)}
+  /* .btn keeps a 1px transparent border so the row sits level with the
+     ghost; an absolutely positioned layer resolves inset:0 against the
+     PADDING box, so both would land inside it — the edge a pixel in, and
+     a green rim left around the glitch. they step out by that border */
+  .btn.primary .glitch,.btn.primary::before{inset:-1px}
+  /* the ghost wears the same glitch as "Create a machine" — but its own
+     border is the row's level line, so it stays exactly as it is on hover.
+     the overlay sits at inset:0, i.e. the PADDING box, so the 1px edge
+     still shows around the glitching letters */
+  .btn.ghost{position:relative;border:1px solid var(--border);color:var(--text);background:rgba(255,255,255,0.04);transition:background .3s,color .3s}
+  /* the fill lifts its opacity on hover — the glitch clips away for most of
+     its cycle, so the skin under it is what the eye actually reads. the
+     border is untouched */
+  .btn.ghost:hover{background:rgba(255,255,255,0.10);color:#d9f5de}
+  /* the company's own name, wherever it reads on the page: a link out to
+     systemctl.sh in a new tab. it wears the sentence's own color until
+     the hover, which is the page's green — the nav links' hover, verbatim */
+  a.co{color:inherit;text-decoration:none;transition:color .2s}
+  a.co:hover{color:var(--accent)}
   .note{font-family:var(--mono);font-size:12px;color:var(--muted)}
   .note a{color:var(--muted)}
   .note a:hover{color:var(--text)}
@@ -570,20 +600,26 @@
   .cta-panel h2{font-size:clamp(32px,4vw,48px);margin-bottom:10px}
   .cta-panel .lead{margin:0 auto 24px}
   .cta-panel .ctas{justify-content:center}
-  /* the footer: the real site's anatomy on the nav's container metrics
-     (1920px / 117px gutters) — brand + credit left, link columns and
-     socials right, attribution bar under a hairline. links stay live
-     (pointer-events restored like the addons board). */
+  /* the footer: ONE line, the apple bar — brand + credit left, the links
+     inline in the middle behind hairline dividers, socials right. it sits
+     on the nav's container metrics (1920px / 117px gutters) and wraps
+     into stacked rows only on a phone. links stay live (pointer-events
+     restored like the addons board). */
   footer{border-top:1px solid var(--hair)}
   /* the header's container verbatim: 1920 max, and the SAME gutter
      ladder as .nav-inner at every step (117 → 50 → 40 → 32 → 24 → 20);
      the steps below 1700 live in the responsive ladder at the foot of
      this sheet, so the narrow ones are never out-ordered by a wider
      rule declared after them */
-  .f-inner{max-width:1920px;margin:0 auto;padding:44px 117px 40px;display:flex;justify-content:space-between;gap:40px 64px;flex-wrap:wrap}
-  @media (max-width:1700px){.f-inner{padding:44px 50px 40px}}
-  .f-brand{display:flex;flex-direction:column;gap:14px;max-width:340px}
-  .f-logo img{height:22px;width:auto}   /* the nav logo's exact size */
+  .f-inner{max-width:1920px;margin:0 auto;padding:26px 117px;display:flex;align-items:center;justify-content:space-between;gap:14px 40px;flex-wrap:wrap}
+  @media (max-width:1700px){.f-inner{padding:26px 50px}}
+  .f-brand{display:flex;align-items:center;gap:14px}
+  /* the nav's own recipe: the mark is INLINE by default, so its box
+     carries the baseline's descender gap under it and the image rides
+     a few px high against the credit beside it. flex + block kills the
+     gap and centers the mark on the row for real */
+  .f-logo{display:flex;align-items:center}
+  .f-logo img{height:22px;width:auto;display:block}   /* the nav logo's exact size */
   /* the MARK's own step, both logos at once: 22 on the full desktop,
      the manager app's 18 from 1700 down — the manager holds 18 at
      every width, so this one rule carries the laptop, ipad and phone
@@ -592,12 +628,14 @@
      lose to .f-logo img further down the sheet */
   @media (max-width:1700px){.nav-logo img,.f-logo img{height:18px}}
   /* the header's own type everywhere: the nav-links recipe verbatim */
-  .f-copy{font-size:.88rem;font-weight:500;color:var(--dim)}
-  .f-cols{display:flex;gap:96px;flex-wrap:wrap}
-  .f-col{display:flex;flex-direction:column;gap:12px}
-  .f-col b{font-family:var(--display);font-weight:600;font-size:.88rem;color:var(--text)}
-  .f-col a{font-size:.88rem;font-weight:500;color:rgba(255,255,255,.7);text-decoration:none;transition:color .2s}
-  .f-col a:hover{color:var(--accent)}
+  .f-copy{font-size:.88rem;font-weight:500;color:var(--dim);white-space:nowrap}
+  /* the link row: no column headings any more — one run of links, each
+     one after the first carrying a hairline divider on its left, the
+     way the apple bar separates its legal links */
+  .f-links{display:flex;align-items:center;flex-wrap:wrap;gap:6px 22px}
+  .f-links a{position:relative;font-size:.88rem;font-weight:500;color:rgba(255,255,255,.7);text-decoration:none;white-space:nowrap;transition:color .2s}
+  .f-links a:hover{color:var(--accent)}
+  .f-links a + a::before{content:'';position:absolute;left:-11.5px;top:50%;margin-top:-6px;width:1px;height:12px;background:var(--hair)}
   /* the real site's icons, verbatim — plain white marks, no boxes */
   .f-social{display:flex;gap:16px;align-items:center}
   .f-social a{display:inline-flex;align-items:center;opacity:.85}
@@ -644,9 +682,12 @@
     .after #math h2,.after #machine h2,.after #for h2,.after #addons h2{font-size:42px}
     .after #machine .points,.after #agents .points{gap:24px;margin:30px 0}
     .after #machine .grid3{gap:18px}
-    .f-inner{padding:40px 40px 36px}
-    .f-cols{gap:56px}
-  }
+    .f-inner{padding:24px 40px}
+    .f-links{gap:6px 20px}
+    /* the credit drops UNDER the mark from the laptop down: the one line
+       runs out of room for logo + credit + links + marks side by side,
+       and the brand reads as a stacked block instead of a squeezed row */
+    .f-brand{flex-direction:column;align-items:flex-start;gap:8px}
 
   /* ── ≤1024 · ipad landscape ──────────────────────────────────────── */
   @media (max-width:1024px){
@@ -668,8 +709,8 @@
     .after #machine .grid3 .card > b,
     .after #machine .points div b,.after #agents .points div b{font-size:17px}
     .lead{font-size:15.5px}
-    .f-inner{padding:36px 32px 32px}
-    .f-cols{gap:40px}
+    .f-inner{padding:22px 32px}
+    .f-links{gap:6px 18px}
     /* the pcb's pod column rides a smaller frame too */
     #pods{gap:6px}
     .pod{padding:6px 8px}
@@ -733,9 +774,8 @@
     .stage::after{
       background:linear-gradient(180deg, rgba(30,29,29,.62) 0%, rgba(30,29,29,.42) 42%, rgba(30,29,29,.16) 74%, rgba(30,29,29,0) 100%);
     }
-    .f-inner{padding:32px 24px 28px;gap:28px 40px}
-    .f-brand{max-width:none}
-    .f-cols{gap:24px 44px}
+    .f-inner{padding:20px 24px;gap:14px 28px}
+    .f-links{gap:6px 16px}
   }
 
   /* ── short frames · a phone turned sideways ──────────────────────── */
@@ -755,7 +795,7 @@
   /* ── ≤767 · phones ───────────────────────────────────────────────── */
   @media (max-width:767px){
     .nav-inner{padding:0 20px;height:50px}
-    .f-inner{padding:28px 20px 26px}
+    .f-inner{padding:20px 20px}
     h1{font-size:34px;letter-spacing:-.01em}
     .sub{font-size:14.5px;margin:8px 0 20px 0}
     .hero-over{padding:56px 0 14% 20px}
@@ -788,7 +828,12 @@
     .ledger .price{text-align:left}
     .faq dt{font-size:15.5px}
     .faq dd{font-size:14px}
-    .f-cols{flex-direction:column;gap:22px}
+    /* the one line gives up here and stacks, centered — the row never
+       fits a phone with the credit and the marks on it */
+    .f-inner{flex-direction:column;align-items:center;gap:16px;text-align:center}
+    .f-links{justify-content:center}
+    /* the stacked brand centers with everything else here */
+    .f-brand{align-items:center}
   }
 </style>
 </head>
@@ -890,6 +935,14 @@
     cards.forEach(function(c, i){
       c.addEventListener('click', function(){ window.__machPick(i); });
     });
+    // ...and while the pointer is parked ON the stack the autoplay beat
+    // holds where it is (the scene reads this flag every frame): you are
+    // reading the card, the rack must not slide out from under you.
+    // mouse only — a touch tap leaves a phantom hover that would stop the
+    // beat for good.
+    mc.addEventListener('pointerenter', function(ev){ if (ev.pointerType !== 'touch') window.__machHover = true; });
+    mc.addEventListener('pointerleave', function(){ window.__machHover = false; });
+    mc.addEventListener('pointercancel', function(){ window.__machHover = false; });
     }
   })();
 </script>
@@ -954,8 +1007,8 @@
     <h1>Your machine.<br>Your <span class="b">wires.</span> Your <span class="w">walls.</span></h1>
     <p class="sub">Every project gets one: a private slice of a real server, with its own Postgres, Redis, S3 and domain. One command to deploy. One flat price.</p>
     <div class="ctas">
-      <a class="btn primary" href="https://manager.usectl.com">Create a machine</a>
-      <a class="btn ghost" href="https://docs.usectl.com">Read the docs</a>
+      <a class="btn primary" href="https://manager.usectl.com"><span>Create a machine</span><div class="glitch" aria-hidden="true"><span class="letters"><span>C</span><span>r</span><span>e</span><span>a</span><span>t</span><span>e</span><span>&nbsp;</span><span>a</span><span>&nbsp;</span><span>m</span><span>a</span><span>c</span><span>h</span><span>i</span><span>n</span><span>e</span></span></div></a>
+      <a class="btn ghost" href="https://docs.usectl.com"><span>Read the docs</span><div class="glitch" aria-hidden="true"><span class="letters"><span>R</span><span>e</span><span>a</span><span>d</span><span>&nbsp;</span><span>t</span><span>h</span><span>e</span><span>&nbsp;</span><span>d</span><span>o</span><span>c</span><span>s</span></span></div></a>
     </div>
     <p class="note" style="margin-top:20px">30 days free. No card.</p>
   </div>
@@ -1117,7 +1170,7 @@
       <dt>Do I need Docker?</dt>
       <dd>Not for Next.js, Vite, Node or static sites. For anything else, a Dockerfile.</dd>
       <dt>Who is behind this?</dt>
-      <dd>systemctl, a team in Tbilisi, Georgia. We own and run our servers at Hetzner ourselves.</dd>
+      <dd><a class="co" href="https://systemctl.sh/" target="_blank" rel="noopener">systemctl</a>, a team in Tbilisi, Georgia. We own and run our servers at Hetzner ourselves.</dd>
       <dt>What happens to my data if you shut down?</dt>
       <dd>Your Dockerfile, your Postgres dump and your bucket already run anywhere. Backups are yours to download any time — from the Postgres panel, or straight over the S3 API.</dd>
     </dl>
@@ -1128,8 +1181,8 @@
     <h2>Your machine.<br>Your <span class="o">wires.</span> Your <span class="b">walls.</span></h2>
     <p class="lead">30 days free, up to 2 vCPU and 4 GB. No card. Delete it when you are done.</p>
     <div class="ctas">
-      <a class="btn primary" href="https://manager.usectl.com">Create a machine</a>
-      <a class="btn ghost" href="https://docs.usectl.com">Read the docs</a>
+      <a class="btn primary" href="https://manager.usectl.com"><span>Create a machine</span><div class="glitch" aria-hidden="true"><span class="letters"><span>C</span><span>r</span><span>e</span><span>a</span><span>t</span><span>e</span><span>&nbsp;</span><span>a</span><span>&nbsp;</span><span>m</span><span>a</span><span>c</span><span>h</span><span>i</span><span>n</span><span>e</span></span></div></a>
+      <a class="btn ghost" href="https://docs.usectl.com"><span>Read the docs</span><div class="glitch" aria-hidden="true"><span class="letters"><span>R</span><span>e</span><span>a</span><span>d</span><span>&nbsp;</span><span>t</span><span>h</span><span>e</span><span>&nbsp;</span><span>d</span><span>o</span><span>c</span><span>s</span></span></div></a>
     </div>
   </section>
 
@@ -1137,28 +1190,19 @@
     <div class="f-inner">
       <div class="f-brand">
         <div class="f-logo"><img src="/img/logo.svg" alt="usectl logo" width="83" height="22" loading="lazy"></div>
-        <div class="f-copy">© 2026 systemctl. All rights reserved.</div>
+        <div class="f-copy">© 2026 <a class="co" href="https://systemctl.sh/" target="_blank" rel="noopener">systemctl</a>. All rights reserved.</div>
       </div>
-      <div class="f-cols">
-        <div class="f-col">
-          <b>Resources</b>
-          <a href="https://docs.usectl.com">Documentation</a>
-          <a href="https://github.com/syst3mctl">GitHub</a>
-          <a href="https://status.usectl.com">Status</a>
-        </div>
-        <div class="f-col">
-          <b>Legal</b>
-          <a href="#">Privacy policy</a>
-          <a href="#">Terms of use</a>
-        </div>
-        <div class="f-col">
-          <b>Social</b>
-          <div class="f-social">
-            <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener" aria-label="GitHub"><svg width="22" height="21" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a>
-            <a href="https://x.com/usectlcloud" target="_blank" rel="noopener" aria-label="X/Twitter"><svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-            <a href="https://discord.gg/nJzSsQXMG" target="_blank" rel="noopener" aria-label="Discord"><svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.8732.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg></a>
-          </div>
-        </div>
+      <nav class="f-links" aria-label="Footer">
+        <a href="https://docs.usectl.com">Documentation</a>
+        <a href="https://github.com/syst3mctl">GitHub</a>
+        <a href="https://status.usectl.com">Status</a>
+        <a href="#">Privacy policy</a>
+        <a href="#">Terms of use</a>
+      </nav>
+      <div class="f-social">
+        <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener" aria-label="GitHub"><svg width="22" height="21" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a>
+        <a href="https://x.com/usectlcloud" target="_blank" rel="noopener" aria-label="X/Twitter"><svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        <a href="https://discord.gg/nJzSsQXMG" target="_blank" rel="noopener" aria-label="Discord"><svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.8732.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg></a>
       </div>
     </div>
   </footer>
@@ -1756,13 +1800,32 @@
       // soft key from the left-front, glow cranked to 4, zero metal —
       // the model is authored 93% FULL METAL, which renders pitch black
       // under point lights with no envmap; metal 0 lets the light land
-      key:  {i: 0.8, c: '#ffffff', fwd: 2, up: 1.2, right: -3.2},
-      fill: {i: 0,    c: '#a5b4fc', fwd: -1.5, up: -0.8, right: 2.6},
+      // ...and the POWER is what stopped it reading like the rack ("its
+      // to dark ... not have color like rack"): nothing else lights the
+      // radial's right circle — the city key is dimmed and the warm spot
+      // is aimed at the machine — so this rig is the calculator's whole
+      // world, and it was carrying a tenth of the rack's light.
+      // the arithmetic, since it is the whole fix (three r128, legacy
+      // lights: diffuse = albedo × Σ intensity × falloff × N·L, the π
+      // cancelling out). the rack's shell stands in rackSpot 2.4 + the
+      // city's spotB 2.9 + rackLamp 0.55, spots with cutoff 0 = NO
+      // falloff: ~3 of irradiance on the same #272626, which renders
+      // the mid-grey plate you see. the calculator had 0.8 × 0.36 =
+      // 0.29. the key is 7 now — × 0.44 of falloff at the rig's distance
+      // it lands ~2.5 of irradiance on the body, the rack's own order —
+      // and the fill, dead at 0 since the day it was logged, comes up to
+      // 1.8 in a soft green-grey instead of the blue it shipped with, so
+      // the shadow side picks up the scene's cast instead of going void.
+      // the panel's power slider now runs to 16 to hold these; tune it
+      // there and hit "log to console" to bake a new pair in.
+      key:  {i: 7, c: '#ffffff', fwd: 2, up: 1.2, right: -3.2},
+      fill: {i: 1.8, c: '#b9c7b4', fwd: -1.5, up: -0.8, right: 2.6},
       emis: 4,
       metal: 0,
       // saved panel settings from BEFORE this version are discarded: a
       // stale glow-0 in localStorage kept blanking the display's neon
-      v: 2
+      // (v3: and a stale key-0.8 save would keep the body black)
+      v: 3
     };
     try {
       var s = JSON.parse(localStorage.getItem('calcLight') || 'null');
@@ -1847,6 +1910,11 @@
   // exactly; past ITS end the tail resumes on its own window. px units.
   var prlxWin = {raw: 0, p: 0};
   var prlxWinM = {raw: 0, p: 0};   // the 'what you get' tail (order rewire)
+  // ...and that ONE tail rides at half the others' rate: the machine
+  // section is read standing still on slide 1, four cards deep, and at
+  // the shared 30% the rack climbed out of the frame while you scrolled
+  // it ("its scrolls to fast when i scroll"). 0.5 × 0.3 = 15% of scroll
+  var MACH_PRLX = 0.5;
   var prlxWin6 = {raw: 0, p: 0};   // the modes tail (order rewire)
   var prlxWin7 = {raw: 0, p: 0};   // the math tail (order rewire)
   var prlxWin2 = {raw: 0, p: 0};
@@ -1874,7 +1942,7 @@
   // construction glitches in, stands OPEN, panels seal top + bottom.
   var doorRoot = null, doorMats = [], doorLamp = null, doorP = 0, doorQ = 0;
   var doorUp = null, doorDown = null, doorLock = null, doorUpTravel = 0, doorDownTravel = 0;
-  var doorGP = null, doorGTop = 0, doorGBot = 0, doorGlitchQ = -1, doorCloseQ = -1;
+  var doorGP = null, doorCloseQ = -1;
   // slide 2 of #machine ('everything inside'): the second card zooms
   // the lens to its own logged shot and opens the rack ONE LINE — the
   // free cube's own front row. interaction-damped on the click,
@@ -1923,7 +1991,8 @@
   // 0.80s and slide 3's two bands are ~0.31s each; those are the numbers
   // the widths below preserve at any speed.
   var MACH_GW = MACH_SPEED / 0.5;
-  // the door's rip-away, anchored to the END of the outer animation
+  // the door's fade-away (was the band rip), anchored to the END of the
+  // outer animation — same range, opacity instead of clip bands
   var DOOR_RIP_W = Math.min(0.55, 0.40 * MACH_GW), DOOR_RIP_0 = 1 - DOOR_RIP_W;
   // slide 3's board band then its pod group — back to back, both strictly
   // after the column has finished winking out (that ends at 0.45), so the
@@ -2077,41 +2146,12 @@
     [0.60, 63,  80,  0],
     [0.61,  0,   0,  0]
   ];
-  // the machine-leg rack glitch, on a GSAP clock: every 10s, while the
-  // 'what you get' frame stands, the rack rips through the same band
-  // table over 0.6s and heals — the scene-1 flash's exact planes and
-  // shimmy. a temporal ambient flourish (allowed off the scroll, like
-  // the pcb's pulse); the gate keeps it silent everywhere else, and the
-  // heal writes only once so the static-frame cache stays asleep.
-  var rackGlitchP = {t: 1}, rackGlitchDirty = false;
-  function rackGlitchApply(){
-    if (!rackRoot) return;
-    var on = machineWin.p > 0.95 && sceneMode === 2 && !scrubFree &&
-             rackFade > 0.99 && rackGlitchP.t < 1 && !reducedMotion;
-    if (!on){
-      if (rackGlitchDirty){
-        rackGlitchDirty = false;
-        glitchPlanes[0].constant = 1e6; glitchPlanes[1].constant = 1e6;
-        rackRoot.position.x = rackBaseX;
-        rackRoot.updateMatrixWorld(true);
-        frameDirtyFlag = true;
-      }
-      return;
-    }
-    var gp = rackGlitchP.t * 0.61;   // the table ends whole at 0.61
-    var st = GLITCH_STEPS[0];
-    for (var gi = 0; gi < GLITCH_STEPS.length; gi++){ if (gp >= GLITCH_STEPS[gi][0]) st = GLITCH_STEPS[gi]; }
-    var gh = rackTopY - rackBotY;
-    glitchPlanes[0].constant = rackTopY - gh * (st[1] / 100);      // keep y below the band top
-    glitchPlanes[1].constant = -(rackTopY - gh * (st[2] / 100));   // keep y above the band bottom
-    rackRoot.position.x = rackBaseX + st[3] * 0.016;               // the logo's shimmy, in meters
-    rackRoot.updateMatrixWorld(true);
-    rackGlitchDirty = true;
-    frameDirtyFlag = true;
-  }
-  if (window.gsap) gsap.timeline({repeat: -1, repeatDelay: 9.4})
-    .fromTo(rackGlitchP, {t: 0}, {t: 1, duration: 0.6, ease: 'none',
-      onUpdate: rackGlitchApply, onComplete: rackGlitchApply});
+  // the machine-leg rack glitch is GONE ("remove all rack glitches …
+  // i mean big rack. main"): the big rack used to rip through the band
+  // table on a 10s GSAP clock while the 'what you get' frame stood.
+  // glitchPlanes[0..1] stay neutral for the rack now — slide 2's floor
+  // gap is their only driver, and it parks them at 1e6 on the way out.
+  // (the scene-1 hero flash below is already dead: glitchNext Infinity.)
   var annexWire = [];   // the demolished annex's rooftop lattice (mast + braces), hidden in scene 2
   // scene 2 carves just this one building out of the city. the city's meshes
   // are layered (one mesh's windows or wires span many buildings), so hiding
@@ -2145,47 +2185,11 @@
     ];
   }
   var clipPlanes = boxPlanes(CLIP_BOX), wirePlanes = boxPlanes(WIRE_BOX);
-  // ── the near wipe: the city standing between the lens and the rack ──
-  // the rack's stencil stamp used to kill those buildings by forbidding
-  // the ghosted city from painting on the rack's pixels — but that stamp
-  // masks a filled block around the rack, and everything behind it fell
-  // through to the #1e1d1d void: the flat slab with a straight line under
-  // the machine. this takes the same buildings out GEOMETRICALLY instead.
-  // the carve box already discards the city inside it (clipIntersection);
-  // here it simply grows from the rack toward the camera along whichever
-  // horizontal axis the lens sits on, so every city fragment between the
-  // two is discarded and nothing is left to draw across the rack. only
-  // the DOMINANT axis opens, so the wipe stays a corridor roughly the
-  // rack's own width instead of eating the city to the sides.
-  // per-fragment, so the city's layered meshes are untouched everywhere
-  // else, and it is gated to the ghost ('bg') mode — scene 1 never sees it.
-  var wipeOn = false;
-  function updateNearWipe(){
-    var on = sceneMode === 2 && rackFade > 0;
-    var maxX = CLIP_BOX.maxX, minX = CLIP_BOX.minX;
-    var maxZ = CLIP_BOX.maxZ, minZ = CLIP_BOX.minZ;
-    var wmaxX = WIRE_BOX.maxX, wminX = WIRE_BOX.minX;
-    var wmaxZ = WIRE_BOX.maxZ, wminZ = WIRE_BOX.minZ;
-    if (on){
-      var cx = (CLIP_BOX.minX + CLIP_BOX.maxX) * 0.5;
-      var cz = (CLIP_BOX.minZ + CLIP_BOX.maxZ) * 0.5;
-      var dx = camera.position.x - cx, dz = camera.position.z - cz;
-      if (Math.abs(dx) >= Math.abs(dz)){
-        if (dx > 0){ maxX = Math.max(maxX, camera.position.x); wmaxX = Math.max(wmaxX, camera.position.x); }
-        else       { minX = Math.min(minX, camera.position.x); wminX = Math.min(wminX, camera.position.x); }
-      } else {
-        if (dz > 0){ maxZ = Math.max(maxZ, camera.position.z); wmaxZ = Math.max(wmaxZ, camera.position.z); }
-        else       { minZ = Math.min(minZ, camera.position.z); wminZ = Math.min(wminZ, camera.position.z); }
-      }
-    }
-    if (on !== wipeOn){ wipeOn = on; frameDirtyFlag = true; }
-    if (clipPlanes[0].constant !== -maxX){ clipPlanes[0].constant = -maxX; frameDirtyFlag = true; }
-    if (clipPlanes[1].constant !==  minX){ clipPlanes[1].constant =  minX; frameDirtyFlag = true; }
-    if (clipPlanes[4].constant !== -maxZ){ clipPlanes[4].constant = -maxZ; frameDirtyFlag = true; }
-    if (clipPlanes[5].constant !==  minZ){ clipPlanes[5].constant =  minZ; frameDirtyFlag = true; }
-    wirePlanes[0].constant = -wmaxX; wirePlanes[1].constant =  wminX;
-    wirePlanes[4].constant = -wmaxZ; wirePlanes[5].constant =  wminZ;
-  }
+  // NOTE: no near wipe. an earlier pass grew the carve box from the rack
+  // toward the lens so the city standing in front of the machine was
+  // discarded — deliberately reverted: the buildings in front of the rack
+  // are wanted, they are what 'bg' mode is. the carve stays the static
+  // CLIP_BOX/WIRE_BOX around the demolished building and nothing else.
   var cityMats = [];
   // ── the ghost city's cheap twin ──
   // behind the rack the city is a 10%-alpha backdrop whose fragments run a
@@ -2432,7 +2436,12 @@
       endAt: 0.6,
       // pan baked into the logged shot: +10% of the frame height along
       // camUp ("move rack more to bottom" — 20% was too much, halved)
-      eye: [20.1690, 14.0078, 37.5940], target: [-6.5917, 2.3051, -3.1492] },
+      // ...and one more +5% of the frame on the same axis (slide 1's rack
+      // "more bottom + 5%"), then a 2% step BACK up ("to bottom, move it
+      // up + 2%") — +3% net, 0.2103 world units at fov 8, r 50.13, where
+      // the frame is 7.011 tall. panning the rig UP the view plane drops
+      // the rack DOWN in frame — same orbit, same fov, framing untouched
+      eye: [20.1420, 14.2123, 37.5530], target: [-6.6187, 2.5096, -3.1902] },
     { el: 'deploy',   // leg 4: "the lights come on" — dive toward the free cube
       loggedFov: 8,   // framed in free-cam at the narrow ride fov
       startAt: 0.8,   // was 1 — the CAMERA waits +20% longer on the zoomed
@@ -3948,8 +3957,10 @@
           doorUpTravel = (upB.max.y - upB.min.y) * 0.92;
           doorDownTravel = (dnB.max.y - dnB.min.y) * 0.92;
         }
-        // clip rig: the glitch pair (neutral until the entrance bands
-        // run) rides EVERY door material; the panel material also gets
+        // clip rig: doorGP stays NEUTRAL for good now that the entrance
+        // is an opacity fade — the pair is kept (and kept on every door
+        // material) so the programs still compile with the same plane
+        // count as the pocket users. the panel material also gets
         // the pocket pair — world planes at the doorway's top and floor
         // (the fit maps them onto rackTopY/rackBotY exactly), so the
         // open panels vanish into the crown and the ground
@@ -3976,17 +3987,13 @@
             // emissive: driven hot so they cross the bloom threshold
             // and smear like the city road neons
             m.emissiveIntensity = 2;
-            // frame wears the glitch pair alone; the sliding panels add
+            // frame wears the neutral pair alone; the sliding panels add
             // the pocket clips (same live plane objects in both arrays)
             m.clippingPlanes = m.name.indexOf('Frame') !== -1 ? doorGP : doorGP.concat(doorPocket);
             if (doorMats.indexOf(m) === -1) doorMats.push(m);
           });
         });
         dwrap.updateMatrixWorld(true);
-        // the entrance glitch bands ride the whole construction's
-        // world extents (crown included), like the rack flash rides its
-        var dgb = new THREE.Box3().setFromObject(dwrap);
-        doorGTop = dgb.max.y; doorGBot = dgb.min.y;
         doorRoot = dwrap;
         scene.add(dwrap);
         // its own warm key, driven by the fade — dark panels read as a
@@ -4633,7 +4640,7 @@
           depthSkip.push(o);   // sits out the dof pre-pass like the pcb
           var cm2 = Array.isArray(o.material) ? o.material : [o.material];
           cm2.forEach(function(m){
-            // ── the body wears the RACK's black metal plate, matte ──
+            // ── the body wears the RACK's plate color, lit like a prop ──
             // the glb ships this shell as polished metal: its MR map is
             // 0.94 METAL / 0.57 rough, and the scene carries NO envmap,
             // so metal here can only ever go pitch black (the lesson the
@@ -4642,7 +4649,7 @@
             // the leftover gloss: a near-black body at 0.57 rough under
             // the white key light is mostly one broad specular sweep.
             m.metalness = 0; m.metalnessMap = null;   // map cleared too: a stale panel value cannot re-metal it
-            m.roughnessMap = null; m.roughness = 0.85;
+            m.roughnessMap = null; m.roughness = 0.7;
             // ...and the baked albedo goes with the gloss. that map is a
             // photo-scan: a flat #202020 shell, but with GREY panel
             // patches (display bezel, side bands) and grunge streaks
@@ -4655,14 +4662,17 @@
             // the key bevels, the emissive map still holds the glyphs,
             // and our own plate below owns the display.
             m.map = null;
-            // that one color is the rack's — read the way the rack
-            // RENDERS, not the way it is named. Black_Metal_Plate is
-            // #272626 but also 68% METAL, so only (1 − 0.679) of it ever
-            // answers a light as diffuse; a dielectric carrying the same
-            // #272626 comes back three times brighter. the calculator
-            // has to stay dielectric to be lit at all (no envmap), so it
-            // wears that diffuse fraction as its albedo instead.
-            m.color.set(0x272626).convertSRGBToLinear().multiplyScalar(1 - 0.6785442);
+            // that one color is the RACK'S OWN, verbatim — the same
+            // #272626 the shell's Black_Metal_Plate is set to up in the
+            // rack loader. it used to be knocked down by the plate's
+            // metal fraction (× 0.32, "a dielectric comes back three
+            // times brighter"), and that math is what made this thing a
+            // black hole on screen: the rack stands in the city key, the
+            // rack lamp AND the warm spot, while the calculator has only
+            // its own small lamp — a third of the albedo under a tenth
+            // of the light. same albedo as the rack now, and the LIGHT
+            // is the knob that matches them (calcLightCfg, below).
+            m.color.set(0x272626).convertSRGBToLinear();
             m.transparent = true; m.opacity = 0;
             m.userData.baseA = 0.95;  // the body rests near-solid; the display stays solid
             m.userData.glyphBlink = true;   // the key glyphs ride the road-blink below
@@ -4904,8 +4914,15 @@
         // the rig: key + fill, both in the scene from asset load so the
         // light count stays constant (no shader recompile mid-ride).
         // colors/energy come from calcLightCfg — play via the panel
-        calcLamp = new THREE.PointLight(new THREE.Color(calcLightCfg.key.c), 0, 10, 2);
-        calcFill = new THREE.PointLight(new THREE.Color(calcLightCfg.fill.c), 0, 10, 2);
+        // cutoff 12, not 10: r128's non-physical falloff is
+        // pow(1 − d/cutoff, decay), and this rig hangs ~4 units off a
+        // body ~3 units tall at the focus plane — 10 threw away 64% of
+        // the light on the way in, 12 throws away 56%. it stays SHORT
+        // deliberately: the power below is 9× what it was, and a long
+        // cutoff would carry all of that onto the ghosted city standing
+        // behind the right circle. past 12 units this rig lights nothing
+        calcLamp = new THREE.PointLight(new THREE.Color(calcLightCfg.key.c), 0, 12, 2);
+        calcFill = new THREE.PointLight(new THREE.Color(calcLightCfg.fill.c), 0, 12, 2);
         scene.add(calcLamp); scene.add(calcFill);
         for (var cei = 0; cei < calcMats.length; cei++){
           calcMats[cei].emissiveIntensity = calcLightCfg.emis;
@@ -6154,6 +6171,16 @@
     lapForBtns(lapSlideIdx);
     frameDirtyFlag = true;
   }
+  // the pointer parked on the stack holds the 5s beat where it is — same
+  // deal as the machine cards: you are reading, the glass must not flip.
+  // the whole stack, not just the active card, so crossing the gap between
+  // two cards does not blink the pause off and on
+  var forHover = false, forGrid = document.querySelector('#for .grid3');
+  if (forGrid){
+    forGrid.addEventListener('pointerenter', function(ev){ if (ev.pointerType !== 'touch') forHover = true; });
+    forGrid.addEventListener('pointerleave', function(){ forHover = false; });
+    forGrid.addEventListener('pointercancel', function(){ forHover = false; });
+  }
   forCards.forEach(function(fc, fci){
     fc.addEventListener('click', function(){
       if (lapSlideOn) lapSlideStep(fci);
@@ -6278,6 +6305,7 @@
       var machNow = window.__machSlide || 0;
       if (machNow !== machSeen){ machSeen = machNow; machBeatAt = clock.elapsedTime + MACH_BEAT; }
       if (machBeatAt < 0) machBeatAt = clock.elapsedTime + MACH_BEAT;
+      else if (window.__machHover) machBeatAt += dt;   // pointer on the cards: the deadline walks with the clock, so the beat resumes with whatever was left on it
       else if (clock.elapsedTime >= machBeatAt){
         if (scrollActive) machBeatAt = clock.elapsedTime + 0.5;   // the beat waits for quiet
         else window.__machPick((machNow + 1) % (window.__machCount || 4));
@@ -6509,7 +6537,8 @@
           }
           // the beat also sleeps while the slides are faded out (faq and
           // beyond) — an invisible rip would still wake the static cache
-          if (!reducedMotion && lapDioQ > 0.001 && clock.elapsedTime >= lapSlideAt){
+          if (forHover) lapSlideAt += dt;   // pointer on the cards: the deadline walks with the clock, so the beat resumes with whatever was left on it
+          else if (!reducedMotion && lapDioQ > 0.001 && clock.elapsedTime >= lapSlideAt){
             if (scrollActive) lapSlideAt = clock.elapsedTime + 0.5;   // the beat waits for quiet
             else lapSlideStep((lapSlideIdx + 1) % 3);
           }
@@ -6661,7 +6690,7 @@
       var prlxU10 = LEGS[10].p * LEGS[10].p * (3 - 2 * LEGS[10].p);
       var prlxU11 = LEGS[11].p * LEGS[11].p * (3 - 2 * LEGS[11].p);
       var prlx14 = LEGS[12].p * LEGS[12].p * (3 - 2 * LEGS[12].p);
-      sty -= (prlxWinM.p * (1 - prlxM3) + prlxWin.p * (1 - prlx10) + prlxWin2.p * (1 - prlx12) + prlxWin3.p * (1 - prlx13) + prlxWin6.p * (1 - prlxU10) + prlxWin7.p * (1 - prlxU11) + prlxWin4.p * (1 - prlx14) + prlxWin5.p) / vpH() * sw * 2 * 0.3;
+      sty -= (prlxWinM.p * MACH_PRLX * (1 - prlxM3) + prlxWin.p * (1 - prlx10) + prlxWin2.p * (1 - prlx12) + prlxWin3.p * (1 - prlx13) + prlxWin6.p * (1 - prlxU10) + prlxWin7.p * (1 - prlxU11) + prlxWin4.p * (1 - prlx14) + prlxWin5.p) / vpH() * sw * 2 * 0.3;
       // the footer ride: the city slides up 5% of the frame (a pure pan
       // on the parallax axis — the orbit never turns), so it stands a
       // touch higher inside the lifted circle
@@ -7593,23 +7622,29 @@
     }
     // the isolation door — slide-0 choreography, ALL on the scroll
     // scrub (reversible), riding doorWin (machine top 58→18vh — the
-    // leg-9 camera is LANDED before it opens): the construction
-    // GLITCHES IN over 0-0.30 (the logo band table), stands OPEN,
-    // then the panels SEAL from top and bottom over 0.40-1. another
-    // card, the addons cover or free-cam takes it away (short damp).
+    // leg-9 camera is LANDED before it opens): the construction FADES
+    // IN over 0-0.30, stands OPEN, then the panels SEAL from top and
+    // bottom over 0.40-1. another card, the addons cover or free-cam
+    // takes it away (short damp).
+    // NO BAND GLITCH here any more ("remove glitch from first slide …
+    // hide door construction with opacity", "on scroll"): the logo
+    // table used to clip the construction in and rip it out — both
+    // ends are a plain opacity ramp now, on the same windows.
     if (doorRoot){
       var dgT = Math.min(1, Math.max(0, doorWin.p / 0.30));
       // EXIT ("outer animation"): panels OPEN back into their pockets
-      // (0→0.55), then the construction rips away on the same band
-      // table (0.60→1) and parks hidden. TWO drivers share it: the
+      // (0→0.55), then the construction FADES away over the rip's old
+      // range (0.60→1) and parks hidden. TWO drivers share it: the
       // scroll (doorOut — the deploy departure) and the CARD SWITCH
       // (slideAwayP — any card but the first plays the same outer
       // animation); back-scroll / switching back replays it in reverse
       var dOutP = Math.min(1, Math.max(0, Math.max(doorOut.p, slideAwayP)));
       var outOpen = revealEase(Math.min(1, dOutP / 0.55));
       var ebT = Math.min(1, Math.max(0, (dOutP - DOOR_RIP_0) / DOOR_RIP_W));
+      // the whole entrance ramp is the fade now (it used to snap opaque
+      // by 0.10 — dgT * 3 — and let the band table do the reveal)
       var dorT = (!scrubFree && sceneMode === 2 && rackFade > 0.5)
-        ? Math.min(1, dgT * 3) * (ebT >= 0.99 ? 0 : 1) * (1 - Math.min(1, agentsWin.p / 0.4)) : 0;
+        ? revealEase(dgT) * (1 - revealEase(ebT)) * (1 - Math.min(1, agentsWin.p / 0.4)) : 0;
       doorP += (dorT - doorP) * (1 - Math.exp(-dt * 8));
       if (Math.abs(dorT - doorP) < 0.003) doorP = dorT;
       var dorNext = Math.round(doorP * 200) / 200;
@@ -7624,36 +7659,9 @@
         if (doorRoot.visible !== dorVis){ doorRoot.visible = dorVis; bokehStamp++; }
         frameDirtyFlag = true;
       }
-      // the band glitch — the ENTRANCE plays the logo table across
-      // doorWin, the EXIT replays it on its own phase and parks on
-      // clip-all past the last blink-off (empty steps hide whole)
-      var bandT = ebT > 0.001 ? ebT : dgT;
-      var dgQ = Math.round(bandT * 200) / 200 + (ebT > 0.001 ? 2 : 0);   // exit keyed apart
-      if (doorGP && dgQ !== doorGlitchQ){
-        doorGlitchQ = dgQ;
-        var bq = dgQ >= 2 ? dgQ - 2 : dgQ;
-        if (bq > 0 && bq < 1){
-          var dgp = bq * 0.61;
-          var dst = GLITCH_STEPS[0];
-          for (var dgi = 0; dgi < GLITCH_STEPS.length; dgi++){ if (dgp >= GLITCH_STEPS[dgi][0]) dst = GLITCH_STEPS[dgi]; }
-          var dgh = doorGTop - doorGBot;
-          doorGP[0].constant = doorGTop - dgh * (dst[1] / 100);
-          doorGP[1].constant = -(doorGTop - dgh * (dst[2] / 100));
-          doorRoot.position.x = -0.35 + dst[3] * 0.016;
-        } else if (dgQ >= 3){
-          // exit complete: parked dead until scrolled back
-          doorGP[0].constant = doorGBot - 1; doorGP[1].constant = 1e6;
-          doorRoot.position.x = -0.35;
-        } else {
-          doorGP[0].constant = 1e6; doorGP[1].constant = 1e6;
-          doorRoot.position.x = -0.35;
-        }
-        doorRoot.updateMatrixWorld(true);
-        frameDirtyFlag = true;
-      }
       // the panels: born OPEN (slid into the pockets), sealed by the
       // scroll as the section reads — and OPENED AGAIN by the exit
-      // before the construction rips away
+      // before the construction fades away
       var dcT = revealEase(Math.min(1, Math.max(0, (doorWin.p - 0.40) / 0.60)));
       var dcQ = Math.round(Math.min(dcT, 1 - outOpen) * 200) / 200;
       if (doorUp && doorDown && dcQ !== doorCloseQ){
@@ -8068,7 +8076,6 @@
     // frames render the whole chain and refill the cache; static frames
     // replay the cache through the grain pass only. pixel-identical.
     camera.updateMatrixWorld();   // the gate must see the LIVE matrix — render passes are skipped on static frames
-    updateNearWipe();   // the corridor follows the lens; must run before the static-frame gate
     var camMoved = !staticPrevCam.equals(camera.matrixWorld);
     var frameLive = camMoved || renderer.shadowMap.needsUpdate || frameDirtyFlag ||
                     (!reducedMotion && !ghostCalm) || cubeBobbing || ambientDirtyFlag ||
@@ -8141,13 +8148,13 @@
       frameDirtyFlag = true;
     };
     var fk = gui.addFolder('key light');
-    fk.add(calcLightCfg.key, 'i', 0, 8, 0.05).name('power').onChange(calcSave);
+    fk.add(calcLightCfg.key, 'i', 0, 16, 0.05).name('power').onChange(calcSave);
     fk.addColor(calcLightCfg.key, 'c').name('color').onChange(function(v){ if (calcLamp) calcLamp.color.set(v); calcSave(); });
     fk.add(calcLightCfg.key, 'fwd', -2, 8, 0.1).name('front').onChange(calcSave);
     fk.add(calcLightCfg.key, 'up', -6, 6, 0.1).onChange(calcSave);
     fk.add(calcLightCfg.key, 'right', -8, 8, 0.1).name('side').onChange(calcSave);
     var ff = gui.addFolder('fill light');
-    ff.add(calcLightCfg.fill, 'i', 0, 8, 0.05).name('power').onChange(calcSave);
+    ff.add(calcLightCfg.fill, 'i', 0, 16, 0.05).name('power').onChange(calcSave);
     ff.addColor(calcLightCfg.fill, 'c').name('color').onChange(function(v){ if (calcFill) calcFill.color.set(v); calcSave(); });
     ff.add(calcLightCfg.fill, 'fwd', -2, 8, 0.1).name('front').onChange(calcSave);
     ff.add(calcLightCfg.fill, 'up', -6, 6, 0.1).onChange(calcSave);
