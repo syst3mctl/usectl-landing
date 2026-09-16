@@ -60,91 +60,6 @@
   .nav-left{display:flex;align-items:center;gap:12px}
   .nav-logo{display:flex;align-items:center}
   .nav-logo img{height:22px;width:auto}
-  /* the soundtrack player: a white play mark where the Beta pill used to
-     sit. hovering it (or playing) slides the transport out to its right —
-     arrows, a note, and the track name in the site's green terminal type,
-     scrolling left to right. */
-  .nav-music{position:relative;display:flex;align-items:center;gap:10px;height:34px}
-  /* the audio frame: in the viewport (never throttled), invisible */
-  #ytHost{position:fixed;right:0;bottom:0;width:180px;height:101px;opacity:0;pointer-events:none;overflow:hidden}
-  #ytHost iframe{width:100%;height:100%;border:0;display:block}
-  .nav-play{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;padding:0;border:0;background:none;color:#fff;cursor:pointer;opacity:.9;transition:opacity .2s,transform .2s}
-  .nav-play:hover{opacity:1;transform:scale(1.12);color:var(--accent);filter:drop-shadow(0 0 7px rgba(17,163,42,.55))}
-  .nav-play svg{display:block;width:13px;height:13px;fill:currentColor}
-  .nav-play .ico-pause{display:none}
-  .nav-music.playing .nav-play .ico-play{display:none}
-  .nav-music.playing .nav-play .ico-pause{display:block}
-  /* the transport: clipped to nothing except while hovered — playing
-     does NOT hold it open, it lives on hover alone */
-  .nav-player{display:flex;align-items:center;gap:10px;max-width:0;opacity:0;overflow:hidden;pointer-events:none;transition:max-width .5s cubic-bezier(.19,1,.22,1),opacity .3s ease-in-out}
-  .nav-music:hover .nav-player,.nav-music:has(:focus-visible) .nav-player{max-width:320px;opacity:1;pointer-events:auto}
-  /* skip back / skip forward, the transport glyphs — the play mark's own
-     16px box and 13px art, so the three read as one row of buttons.
-     prev is the same path flipped. */
-  .np-arrows{display:flex;align-items:center;gap:8px}
-  .np-arrow{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;padding:0;border:0;background:none;color:rgba(255,255,255,.75);cursor:pointer;transition:color .2s,transform .2s}
-  .np-arrow:hover{color:var(--accent);transform:scale(1.12);filter:drop-shadow(0 0 7px rgba(17,163,42,.5))}
-  .np-arrow svg{display:block;width:13px;height:13px;fill:currentColor}
-  #npPrev svg{transform:scaleX(-1)}
-  /* the transport buttons wear the CTA's glitch, verbatim: the same seven
-     clip polygons, the same shimmy, the same 2s loop — only the copy on
-     top is an icon instead of letters. no background on the overlay, so
-     the green cut-up rides over the white mark instead of hiding it. */
-  .nav-play,.np-arrow,.np-nudge{
-    position:relative;
-    --shimmy-distance:5;
-    --clip-one:polygon(0 2%, 100% 2%, 100% 95%, 95% 95%, 95% 90%, 85% 90%, 85% 95%, 8% 95%, 0 70%);
-    --clip-two:polygon(0 78%, 100% 78%, 100% 100%, 95% 100%, 95% 90%, 85% 90%, 85% 100%, 8% 100%, 0 78%);
-    --clip-three:polygon(0 44%, 100% 44%, 100% 54%, 95% 54%, 95% 54%, 85% 54%, 85% 54%, 8% 54%, 0 54%);
-    --clip-four:polygon(0 0, 100% 0, 100% 0, 95% 0, 95% 0, 85% 0, 85% 0, 8% 0, 0 0);
-    --clip-five:polygon(0 0, 100% 0, 100% 0, 95% 0, 95% 0, 85% 0, 85% 0, 8% 0, 0 0);
-    --clip-six:polygon(0 40%, 100% 40%, 100% 85%, 95% 85%, 95% 85%, 85% 85%, 85% 85%, 8% 85%, 0 70%);
-    --clip-seven:polygon(0 63%, 100% 63%, 100% 80%, 95% 80%, 95% 80%, 85% 80%, 85% 80%, 8% 80%, 0 70%);
-  }
-  .nav-play .glitch,.np-arrow .glitch{display:none;position:absolute;inset:0;align-items:center;justify-content:center;pointer-events:none;z-index:10;color:var(--accent)}
-  .nav-play:hover .glitch,.np-arrow:hover .glitch{display:flex;animation:glitch 2s infinite}
-  /* "play me": the bar's nudge while the soundtrack sits idle. it cuts in
-     on the CTA's own clip polygons, holds one second, cuts back out, then
-     stays gone for the rest of the ten-second lap. sits where the
-     transport lands, so hover hands the space over — and playing retires
-     it entirely. */
-  .np-nudge{
-    position:absolute;left:26px;top:0;bottom:0;display:flex;align-items:center;
-    font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--accent);
-    text-shadow:0 0 10px rgba(17,163,42,.45);white-space:nowrap;pointer-events:none;
-    opacity:0;animation:np-nudge 15s linear infinite;
-  }
-  .nav-music:hover .np-nudge,.nav-music.playing .np-nudge{animation:none;opacity:0}
-  @keyframes np-nudge{
-    0%,0.93%   {opacity:0;clip-path:var(--clip-four);transform:translateX(0)}
-    1.07%      {opacity:1;clip-path:var(--clip-two);transform:translateX(calc(var(--shimmy-distance) * -1%))}
-    1.33%      {opacity:1;clip-path:var(--clip-six);transform:translateX(calc(var(--shimmy-distance) * 1%))}
-    1.6%       {opacity:1;clip-path:var(--clip-three);transform:translateX(calc(var(--shimmy-distance) * -1%))}
-    1.87%,8.53%{opacity:1;clip-path:var(--clip-one);transform:translateX(0)}    /* the steady second */
-    8.8%       {opacity:1;clip-path:var(--clip-seven);transform:translateX(calc(var(--shimmy-distance) * 1%))}
-    9.07%      {opacity:1;clip-path:var(--clip-three);transform:translateX(calc(var(--shimmy-distance) * -1%))}
-    9.33%,100% {opacity:0;clip-path:var(--clip-five);transform:translateX(0)}
-  }
-  /* the cover: the track's own frame, racked in a hairline card like
-     every other pod on the page. the note sits underneath as the
-     fallback for a thumbnail that never arrives. */
-  .np-art{position:relative;flex:0 0 auto;width:34px;height:34px;border:1px solid var(--hair);border-radius:5px;overflow:hidden;background:#0d0d0d;display:flex;align-items:center;justify-content:center;transition:border-color .3s,box-shadow .3s}
-  .nav-music.playing .np-art{border-color:rgba(17,163,42,.55);box-shadow:0 0 10px rgba(17,163,42,.22)}
-  /* the cover is the way out to the track on youtube. the second selector
-     is only there to outrank .nav-music.playing .np-art, which would
-     otherwise hold its own border while the cover is hovered. */
-  .np-art{cursor:pointer;text-decoration:none}
-  .np-art:hover,.nav-music.playing .np-art:hover{border-color:var(--accent);box-shadow:0 0 14px rgba(17,163,42,.4)}
-  .np-art:hover img{filter:brightness(1.12)}
-  .np-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;z-index:1}
-  .np-art img[hidden]{display:none}
-  .np-note{display:inline-flex;align-items:center;color:var(--accent);opacity:.85}
-  .np-note svg{display:block;width:15px;height:15px;fill:currentColor}
-  /* the name, in the terminal green — a two-copy track sliding rightwards */
-  .np-title{position:relative;width:168px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 14px),transparent 100%)}
-  .np-marquee{display:flex;width:max-content;font-family:var(--mono);font-size:11px;line-height:22px;letter-spacing:.04em;color:var(--accent);text-shadow:0 0 10px rgba(17,163,42,.45);white-space:nowrap;animation:np-run 14s linear infinite}
-  .np-marquee span{padding-right:28px}
-  @keyframes np-run{from{transform:translateX(-50%)}to{transform:translateX(0)}}
   .nav-right{display:flex;align-items:center;gap:32px}
   .nav-links{display:flex;align-items:center;gap:32px;color:rgba(255,255,255,.7)}
   .nav-links a{color:inherit;font-size:.88rem;font-weight:500;text-decoration:none;transition:color .2s}
@@ -193,7 +108,7 @@
   .hamburger-line::before{right:0;background-color:var(--text)}
   .mobile-menu-btn.active .hamburger-line:first-of-type{transform:translateY(5.3px) rotate(135deg)}
   .mobile-menu-btn.active .hamburger-line:last-of-type{transform:translateY(-5.3px) rotate(45deg)}
-  .mobile-menu{display:flex;pointer-events:none;position:absolute;top:64px;left:0;height:calc(100vh - 64px);width:100%;background:#1e1d1d;padding:24px;flex-direction:column;gap:20px;z-index:99;justify-content:center;align-items:center;transition:.3s ease-in-out;opacity:0}
+  .mobile-menu{display:flex;pointer-events:none;position:absolute;top:64px;left:0;height:calc(100vh - 64px);height:calc(100svh - 64px);width:100%;background:#1e1d1d;padding:24px;flex-direction:column;gap:20px;z-index:99;justify-content:center;align-items:center;transition:.3s ease-in-out;opacity:0}
   .mobile-menu.active{pointer-events:all;opacity:1}
   .mobile-menu a{color:var(--text);font-size:26px;font-weight:500;text-decoration:none}
   @media (max-width:1700px){
@@ -209,11 +124,12 @@
   @media (max-width:767px){
     .mobile-menu a{font-size:18px}
     .nav-inner{padding:0 20px;height:50px}
-    /* no room for the transport beside an 85px logo — play mark only */
-    .np-nudge{display:none}
-    .nav-music:hover .nav-player,.nav-music:has(:focus-visible) .nav-player{max-width:0;opacity:0;pointer-events:none}
-    .nav-logo{width:85px}
-    .mobile-menu{top:50px;height:calc(100vh - 50px)}
+    /* the 85px width this used to force was SQUASHING the mark: the
+       img is a flex item, so it shrank horizontally to the box while
+       its height rule held — 85 wide against the 112 the 18px height
+       actually asks for. the aspect is the logo's own now, at every
+       width, exactly like the manager */
+    .mobile-menu{top:50px;height:calc(100vh - 50px);height:calc(100svh - 50px)}
   }
 
   /* ── the stage: the city, full size ─────────────── */
@@ -304,7 +220,6 @@
     87.5%{box-shadow:0 0 8px var(--card-glow)}
     100%{box-shadow:0 0 16px var(--card-glow)}
   }
-  @media (max-width:640px){.hero-over{padding-left:20px}}
 
   /* the pcb's addon pods: the manager machine page's pod-canvas-card,
      copied 1:1 from the manager's globals.css (pcc-*), worn in the blue
@@ -613,7 +528,6 @@
   .after #for .grid3 .card:hover{border-color:rgba(17,163,42,.55)}
   .after #for .grid3 .card.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 22px rgba(17,163,42,.18)}
   @media (max-width:1700px){.after{gap:200px;padding:250px 0 0}.after #split,.after #deploy,.after #modes,.after #agents,.after #faq{margin-right:50px}.after #math,.after #machine,.after #for{margin-left:50px}.after #addons{width:calc(100% - 100px);margin-left:50px}.after #split h2,.after #deploy h2,.after #modes h2,.after #agents h2,.after #faq h2,.after #math h2,.after #machine h2,.after #for h2,.after #addons h2{font-size:50px}}
-  @media (max-width:640px){.after #split,.after #deploy,.after #modes,.after #agents,.after #faq{margin-right:20px}.after #math,.after #machine,.after #for{margin-left:20px}.after #addons{width:calc(100% - 40px);margin-left:20px}}
   .lead{font-size:16.5px;line-height:1.6;max-width:62ch;margin:0 0 20px;color:rgba(255,255,255,.72)}
   .points{display:grid;grid-template-columns:1fr 1fr;gap:16px 26px;margin:0 0 18px}
   .points div b{display:block;font-family:var(--display);font-weight:600;font-size:15.5px;margin-bottom:4px;color:var(--text)}
@@ -661,17 +575,23 @@
      socials right, attribution bar under a hairline. links stay live
      (pointer-events restored like the addons board). */
   footer{border-top:1px solid var(--hair)}
-  /* the header's container verbatim: 1920 max, 117 → 50 → 40 → 20
-     gutters — the SAME breakpoints as .nav-inner, all four */
+  /* the header's container verbatim: 1920 max, and the SAME gutter
+     ladder as .nav-inner at every step (117 → 50 → 40 → 32 → 24 → 20);
+     the steps below 1700 live in the responsive ladder at the foot of
+     this sheet, so the narrow ones are never out-ordered by a wider
+     rule declared after them */
   .f-inner{max-width:1920px;margin:0 auto;padding:44px 117px 40px;display:flex;justify-content:space-between;gap:40px 64px;flex-wrap:wrap}
   @media (max-width:1700px){.f-inner{padding:44px 50px 40px}}
-  @media (max-width:1024px){.f-inner{padding:44px 40px 40px}}
-  @media (max-width:767px){.f-inner{padding:32px 20px 28px}.f-cols{gap:24px 40px}}
   .f-brand{display:flex;flex-direction:column;gap:14px;max-width:340px}
   .f-logo img{height:22px;width:auto}   /* the nav logo's exact size */
+  /* the MARK's own step, both logos at once: 22 on the full desktop,
+     the manager app's 18 from 1700 down — the manager holds 18 at
+     every width, so this one rule carries the laptop, ipad and phone
+     rungs too. declared HERE, after both 22px base rules, because a
+     media query adds no specificity: in the nav's 1700 block it would
+     lose to .f-logo img further down the sheet */
+  @media (max-width:1700px){.nav-logo img,.f-logo img{height:18px}}
   /* the header's own type everywhere: the nav-links recipe verbatim */
-  .f-credit{font-size:.88rem;font-weight:500;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:8px}
-  .f-credit .led{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
   .f-copy{font-size:.88rem;font-weight:500;color:var(--dim)}
   .f-cols{display:flex;gap:96px;flex-wrap:wrap}
   .f-col{display:flex;flex-direction:column;gap:12px}
@@ -690,8 +610,186 @@
   .screen-note a{color:var(--muted);text-decoration-color:rgba(255,255,255,.25)}
   .screen-note a:hover{color:var(--text)}
 
-  @media (max-width:760px){.grid3{grid-template-columns:1fr 1fr}.cols2,.points{grid-template-columns:1fr}}
-  @media (max-width:640px){.panel{padding:22px 20px 24px}.top .tag{display:none}.grid3{grid-template-columns:1fr}.cta-panel{padding:30px 20px}}
+  /* ══════════════════════════════════════════════════════════════════
+     THE RESPONSIVE LADDER — four steps under the 1700 desktop trim:
+        ≤1250  laptop          (13"/14" macbooks, 1280/1366/1440 windows)
+        ≤1024  ipad landscape
+        ≤768   ipad portrait   — the docked halves stop being halves and
+                                 stack into full-width cards
+        ≤767   phones
+     NOTHING is switched off on the way down: every scroll leg, every
+     glitch, every slider, the commercial and the whole city run at every
+     width. Only the FRAME changes — and the ride's camera widens to match
+     (frameFit() in the scene script keeps the logged compositions inside
+     a narrow viewport instead of cropping them).
+     ══════════════════════════════════════════════════════════════════ */
+
+  /* ── ≤1250 · the laptop trim ─────────────────────────────────────── */
+  @media (max-width:1250px){
+    .nav-inner{padding:0 40px}
+    .nav-right{gap:24px}
+    .nav-links{gap:24px}
+    h1{font-size:54px}
+    .sub{font-size:15.5px;max-width:54ch;margin:10px 0 28px 0}
+    .hero-over{padding:60px 0 16% 40px}
+    .hero-over .panel{width:74%}
+    .rail.demo-rail,.hero-demo{width:82vw}
+    .rail.demo-rail{margin:-30vh auto 12px}
+    .after{gap:170px;padding:220px 0 0}
+    .after #split,.after #deploy,.after #modes,.after #agents,.after #faq{width:54%;margin-right:40px}
+    .after #math,.after #machine{width:54%;margin-left:40px}
+    .after #for{width:38%;margin-left:40px}
+    .after #addons{width:calc(100% - 80px);margin-left:40px}
+    .after #split h2,.after #deploy h2,.after #modes h2,.after #agents h2,.after #faq h2,
+    .after #math h2,.after #machine h2,.after #for h2,.after #addons h2{font-size:42px}
+    .after #machine .points,.after #agents .points{gap:24px;margin:30px 0}
+    .after #machine .grid3{gap:18px}
+    .f-inner{padding:40px 40px 36px}
+    .f-cols{gap:56px}
+  }
+
+  /* ── ≤1024 · ipad landscape ──────────────────────────────────────── */
+  @media (max-width:1024px){
+    .nav-inner{padding:0 32px}
+    h1{font-size:46px}
+    .sub{font-size:15px;margin:10px 0 24px 0}
+    .hero-over{padding:60px 0 13% 32px}
+    .hero-over .panel{width:86%}
+    .rail.demo-rail,.hero-demo{width:88vw}
+    .rail.demo-rail{margin:-25vh auto 10px}
+    .after{gap:140px;padding:180px 0 0}
+    .after #split,.after #deploy,.after #modes,.after #agents,.after #faq{width:58%;margin-right:32px}
+    .after #math,.after #machine{width:58%;margin-left:32px}
+    .after #for{width:46%;margin-left:32px}
+    .after #addons{width:calc(100% - 64px);margin-left:32px}
+    .after #cta{width:70%}
+    .after #split h2,.after #deploy h2,.after #modes h2,.after #agents h2,.after #faq h2,
+    .after #math h2,.after #machine h2,.after #for h2,.after #addons h2{font-size:36px}
+    .after #machine .grid3 .card > b,
+    .after #machine .points div b,.after #agents .points div b{font-size:17px}
+    .lead{font-size:15.5px}
+    .f-inner{padding:36px 32px 32px}
+    .f-cols{gap:40px}
+    /* the pcb's pod column rides a smaller frame too */
+    #pods{gap:6px}
+    .pod{padding:6px 8px}
+    .pod .pcc-name{font-size:.64rem}
+    .pod .pcc-stat{font-size:.54rem}
+  }
+
+  /* ── ≤768 · ipad portrait — the halves stop being halves ─────────── */
+  /* the docked 50% columns go full width and stay NAKED: no card, no
+     border, no plate behind the type — the same bare text over the city
+     the desktop ride has, just spanning the frame instead of half of it.
+     the scene's own radial carries the contrast, exactly as it does up
+     at 1920. */
+  @media (max-width:768px){
+    .nav-inner{padding:0 24px}
+    .after{gap:110px;padding:150px 0 0}
+    .after #split,.after #deploy,.after #modes,.after #agents,.after #faq,
+    .after #math,.after #machine,.after #for,.after #addons{
+      width:calc(100% - 48px);margin:0 auto;padding:24px 0 26px;
+    }
+    .after #cta{width:calc(100% - 48px);margin:0 auto}
+    .cta-panel{padding:32px 0 34px}
+    .cta-panel h2{font-size:clamp(28px,5.2vw,40px)}
+    .after #split h2,.after #deploy h2,.after #modes h2,.after #agents h2,.after #faq h2,
+    .after #math h2,.after #machine h2,.after #for h2,.after #addons h2{font-size:32px}
+    h1{font-size:40px}
+    .sub{font-size:15px;max-width:none;margin:10px 0 24px 0}
+    .hero-over{padding:64px 0 12% 24px}
+    .hero-over .panel{width:calc(100% - 24px)}
+    .rail{flex-wrap:wrap;row-gap:4px}
+    .rail.demo-rail,.hero-demo{width:calc(100% - 40px)}
+    .rail.demo-rail{margin:-16vh auto 10px}
+    /* one column everywhere */
+    .grid3,.cols2,.points{grid-template-columns:1fr}
+    .after #machine .points,.after #agents .points{gap:22px;margin:26px 0}
+    .after #machine .grid3{gap:14px}
+    .after #for h2{margin-bottom:24px}
+    .term-chat{max-width:100%}
+    .after #deploy pre.term,.after #agents pre.term{padding:14px 15px;font-size:12px}
+    .lead,p.body,.small,.faq dd,.intro{max-width:none}
+    /* touch: a vertical swipe scrolls the page, a sideways one still
+       drags the pod (touch-action:none would eat the scroll entirely) */
+    .bpod{touch-action:pan-y}
+    /* the see-through circle on a narrow frame. two changes, both to the
+       SCENE's own layer — no plate is ever put behind the copy:
+         · the 22↔78 swing is 56% of a 390px screen, which parks the city
+           entirely off to one side while the text runs the full width.
+           the travel is compressed to a third — same choreography, a
+           third of the distance — by widening the divisor the layer's
+           transform already uses (1.56 → 3.6).
+         · the wash comes in closer, because the copy has no half of its
+           own to sit in here. the city still reads through the middle;
+           it just stops competing with the type at the edges. */
+    .stage::before{
+      transform:translate(calc((var(--holeX) - 50%) / 3.6), calc((var(--holeY) - 50%) / 2.04));
+      background:radial-gradient(44.872% 39.216% at 50% 50%, rgba(30,29,29,0) 0%, rgba(30,29,29,.3) 24%, rgba(30,29,29,.88) 56%, #1e1d1d 100%);
+    }
+    /* the hero's veil turns with the text: the copy runs the full width
+       now, so the wash comes down the frame instead of across it. it is
+       the same --veil layer the ride already lifts on the first leg. */
+    .stage::after{
+      background:linear-gradient(180deg, rgba(30,29,29,.62) 0%, rgba(30,29,29,.42) 42%, rgba(30,29,29,.16) 74%, rgba(30,29,29,0) 100%);
+    }
+    .f-inner{padding:32px 24px 28px;gap:28px 40px}
+    .f-brand{max-width:none}
+    .f-cols{gap:24px 44px}
+  }
+
+  /* ── short frames · a phone turned sideways ──────────────────────── */
+  /* 844x390 is a real resolution: the width ladder puts it on the ≤1024
+     step, but the HEIGHT is what runs out — the hero would overflow its
+     own 100svh box and clip. this trims the vertical stack only. */
+  @media (max-height:560px) and (orientation:landscape){
+    h1{font-size:30px}
+    .sub{font-size:13.5px;margin:6px 0 14px 0}
+    .hero-over{padding:48px 0 5% 32px}
+    .note{font-size:11px}
+    .btn{font-size:13px;padding:8px 14px}
+    .rail.demo-rail{margin:-7vh auto 8px}
+    .after{padding-top:140px}
+  }
+
+  /* ── ≤767 · phones ───────────────────────────────────────────────── */
+  @media (max-width:767px){
+    .nav-inner{padding:0 20px;height:50px}
+    .f-inner{padding:28px 20px 26px}
+    h1{font-size:34px;letter-spacing:-.01em}
+    .sub{font-size:14.5px;margin:8px 0 20px 0}
+    .hero-over{padding:56px 0 14% 20px}
+    .hero-over .panel{width:calc(100% - 20px)}
+    .btn{font-size:13.5px;padding:10px 15px}
+    .ctas{gap:10px 12px}
+    .rail{font-size:10px;letter-spacing:.04em}
+    /* the commercial is a 1920x1080 film fitted by WIDTH — on a phone
+       every pixel of frame counts, so it goes edge to edge */
+    .hero-demo{width:100vw;margin-left:calc(50% - 50vw);border-radius:0;border-left:0;border-right:0}
+    .rail.demo-rail{width:calc(100% - 32px);margin:-11vh auto 8px}
+    .after{gap:90px;padding:120px 0 0}
+    .after #split,.after #deploy,.after #modes,.after #agents,.after #faq,
+    .after #math,.after #machine,.after #for,.after #addons{
+      width:calc(100% - 32px);padding:20px 0 22px;
+    }
+    .after #cta{width:calc(100% - 32px)}
+    .cta-panel{padding:28px 0 30px}
+    .after #split h2,.after #deploy h2,.after #modes h2,.after #agents h2,.after #faq h2,
+    .after #math h2,.after #machine h2,.after #for h2,.after #addons h2{font-size:26px}
+    .cta-panel h2{font-size:26px}
+    .lead{font-size:15px;margin:0 0 16px}
+    .after #machine .grid3 .card > b,
+    .after #machine .points div b,.after #agents .points div b{font-size:16px}
+    .after #machine .grid3 .card li{font-size:13px}
+    .after #deploy pre.term,.after #agents pre.term{padding:12px 13px;font-size:11px;line-height:1.7}
+    .term-chat-header{padding:8px 13px}
+    /* the ledger stops being a two-column table */
+    .ledger li{grid-template-columns:1fr;gap:2px}
+    .ledger .price{text-align:left}
+    .faq dt{font-size:15.5px}
+    .faq dd{font-size:14px}
+    .f-cols{flex-direction:column;gap:22px}
+  }
 </style>
 </head>
 <body>
@@ -704,42 +802,9 @@
         <a href="/" class="nav-logo" aria-label="usectl home">
           <img src="/img/logo.svg" alt="usectl logo" width="83" height="22">
         </a>
-        <div class="nav-music" id="navMusic">
-          <button class="nav-play" id="navPlay" type="button" aria-label="Play soundtrack">
-            <svg class="ico-play" viewBox="0 0 12 14" aria-hidden="true"><path d="M1 .8 11.3 7 1 13.2Z"/></svg>
-            <svg class="ico-pause" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.2 1h3.2v12H1.2zm6.2 0h3.2v12H7.4z"/></svg>
-            <span class="glitch" aria-hidden="true">
-              <svg class="ico-play" viewBox="0 0 12 14"><path d="M1 .8 11.3 7 1 13.2Z"/></svg>
-              <svg class="ico-pause" viewBox="0 0 12 14"><path d="M1.2 1h3.2v12H1.2zm6.2 0h3.2v12H7.4z"/></svg>
-            </span>
-          </button>
-          <span class="np-nudge" aria-hidden="true">play me</span>
-          <div class="nav-player">
-            <div class="np-arrows">
-              <button class="np-arrow" id="npPrev" type="button" aria-label="Previous track">
-                <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M.6 1.6 6 7 .6 12.4Zm5.4 0L11.4 7 6 12.4Zm6 0h1.8v10.8h-1.8z"/></svg>
-                <span class="glitch" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M.6 1.6 6 7 .6 12.4Zm5.4 0L11.4 7 6 12.4Zm6 0h1.8v10.8h-1.8z"/></svg></span>
-              </button>
-              <button class="np-arrow" id="npNext" type="button" aria-label="Next track">
-                <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M.6 1.6 6 7 .6 12.4Zm5.4 0L11.4 7 6 12.4Zm6 0h1.8v10.8h-1.8z"/></svg>
-                <span class="glitch" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M.6 1.6 6 7 .6 12.4Zm5.4 0L11.4 7 6 12.4Zm6 0h1.8v10.8h-1.8z"/></svg></span>
-              </button>
-            </div>
-            <a class="np-art" id="npArtLink" href="https://www.youtube.com/watch?v=etk-D9ARsGs"
-               target="_blank" rel="noopener noreferrer" aria-label="Open this track on YouTube">
-              <span class="np-note" aria-hidden="true">
-                <svg viewBox="0 0 14 14"><path d="M12.4.6 5.6 2.2v7.3a2.5 2.5 0 1 0 1.2 2.1V4.6l4.4-1v4.3a2.5 2.5 0 1 0 1.2 2.1Z"/></svg>
-              </span>
-              <img id="npArt" alt="" decoding="async" onerror="this.hidden=true">
-            </a>
-            <span class="np-title"><span class="np-marquee" id="npMarquee"><span>—</span><span>—</span></span></span>
-          </div>
-        </div>
       </div>
       <div class="nav-right">
         <div class="nav-links">
-          <a href="#machine">How it works</a>
-          <a href="#addons">Features</a>
           <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer">GitHub</a>
           <a href="https://docs.usectl.com" target="_blank">Docs</a>
         </div>
@@ -763,8 +828,6 @@
       </button>
     </div>
     <div class="mobile-menu" id="mobile-menu" role="menu">
-      <a href="#machine" role="menuitem" onclick="document.getElementById('mobile-menu').classList.remove('active')">How it works</a>
-      <a href="#addons" role="menuitem" onclick="document.getElementById('mobile-menu').classList.remove('active')">Features</a>
       <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer" role="menuitem">GitHub</a>
       <a href="https://docs.usectl.com" target="_blank" role="menuitem">Docs</a>
       <a href="https://manager.usectl.com/login" class="nav-cta-btn" role="menuitem" style="text-align:center">
@@ -778,145 +841,19 @@
     </div>
   </nav>
 </header>
-<!-- the soundtrack engine: a real youtube iframe, built by hand so it
-     carries allow="autoplay" — the api's own generated iframe does not,
-     and a cross-origin frame without it refuses every playVideo() the
-     parent asks for. kept on-screen at zero opacity: a 1px offscreen
-     frame gets throttled. src stays empty until the first hover, so
-     page load still costs nothing. -->
-<div id="ytHost" aria-hidden="true">
-  <iframe id="ytAudio" title="Soundtrack player" frameborder="0"
-          allow="autoplay; encrypted-media"></iframe>
-</div>
 <script>
+  // ONE honest viewport height for the whole page. the stage is sized in
+  // svh, so its box does NOT breathe when a phone's url bar slides away —
+  // window.innerHeight does, and every scroll window measured against it
+  // would shift mid-ride (every leg start/end, every show window). anything
+  // that measures in "viewport heights" asks here instead.
   (function(){
-    var TRACKS = [
-      {id:'etk-D9ARsGs', name:'The Matrix Soundtrack Track 7. "Mindfields" The Prodigy'},
-      {id:'Sc6_NOhCZPM', name:'The Matrix Soundtrack Track 6. "Leave You Far Behind" Lunatic Calm'},
-      {id:'F4Br683kDVU', name:'The Matrix Soundtrack Track 4. "Clubbed to Death (Kurayamino Mix)" Rob D'},
-      {id:'hyhfx_XDDdE', name:'The Matrix Soundtrack Track 5. "Prime Audio Soup" Meat Beat Manifesto'}
-    ];
-    var wrap = document.getElementById('navMusic');
-    if (!wrap) return;
-    var btn = document.getElementById('navPlay'),
-        marquee = document.getElementById('npMarquee'),
-        art = document.getElementById('npArt'),
-        artLink = document.getElementById('npArtLink'),
-        frame = document.getElementById('ytAudio'),
-        i = 0, yt = null, ready = false, want = false, booted = false, dead = 0,
-        intent = false;   // the user's last instruction: play (true) or pause (false)
-
-    function label(){
-      var n = TRACKS[i].name;
-      art.hidden = false;
-      art.src = 'https://i.ytimg.com/vi/' + TRACKS[i].id + '/mqdefault.jpg';
-      art.alt = n;
-      if (artLink){
-        artLink.href = 'https://www.youtube.com/watch?v=' + TRACKS[i].id;
-        artLink.title = n;                                   // the full name on hover
-        artLink.setAttribute('aria-label', 'Open on YouTube: ' + n);
-      }
-      marquee.innerHTML = '';
-      for (var k = 0; k < 2; k++){
-        var s = document.createElement('span');
-        s.textContent = n;
-        marquee.appendChild(s);
-      }
-      // pace the scroll by length so long and short names read alike
-      marquee.style.animationDuration = Math.max(9, n.length * 0.42).toFixed(1) + 's';
-    }
-    label();
-
-    function on(v){ wrap.classList.toggle('playing', v); }
-
-    // the api arrives once, on the first hover or the first click. BOTH
-    // gates must be open before attaching: the api itself, and the
-    // iframe's own load. attaching to a frame that has not loaded yet
-    // loses the postMessage handshake — onReady never fires and every
-    // button goes dead, which is exactly what happened.
-    var apiUp = false, frameUp = false, guard = 0;
-
-    function boot(){
-      if (booted) return;
-      booted = true;
-      frame.addEventListener('load', function(){ frameUp = true; attach(); });
-      var u = 'https://www.youtube.com/embed/' + TRACKS[i].id +
-              '?enablejsapi=1&controls=0&disablekb=1&playsinline=1&rel=0&modestbranding=1';
-      if (location.protocol.indexOf('http') === 0) u += '&origin=' + encodeURIComponent(location.origin);
-      frame.src = u;
-      if (window.YT && window.YT.Player){ apiUp = true; attach(); return; }
-      var prev = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = function(){
-        if (typeof prev === 'function') prev();
-        apiUp = true; attach();
-      };
-      var s = document.createElement('script');
-      s.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(s);
-    }
-    wrap.addEventListener('pointerenter', boot);
-
-    function attach(){
-      if (!apiUp || !frameUp || yt) return;
-      yt = new YT.Player(frame, {events:{onReady:onReady, onStateChange:onState, onError:onError}});
-      // if youtube never answers, stop lying to the user with a pause icon
-      guard = setTimeout(function(){ if (!ready){ want = intent = false; on(false); } }, 8000);
-    }
-
-    function onReady(){
-      ready = true;
-      clearTimeout(guard);
-      yt.setVolume(55);
-      if (want){ want = false; yt.playVideo(); }
-    }
-
-    // `intent` is what the user last asked for, and it is the ONLY thing the
-    // toggle reads. getPlayerState() cannot be trusted here: a freshly
-    // loaded embed sits in BUFFERING while it preloads, so asking the
-    // player "are you playing?" answers yes before anything has started —
-    // the first click then paused a video that never played and the button
-    // ran a click out of phase with its own icon from then on.
-    function onState(e){
-      var S = YT.PlayerState;
-      if (e.data === S.PLAYING){
-        dead = 0; intent = true; on(true);
-        // youtube knows the real title — take it verbatim
-        var d = yt.getVideoData && yt.getVideoData();
-        if (d && d.title && d.title !== TRACKS[i].name){ TRACKS[i].name = d.title; label(); }
-      }
-      else if (e.data === S.PAUSED){ intent = false; on(false); }
-      else if (e.data === S.ENDED) step(1);
-    }
-
-    // embedding disabled, region block, dead video: walk to the next one,
-    // but stop after a full lap so a bad playlist cannot spin forever
-    function onError(){
-      if (++dead >= TRACKS.length){ on(false); return; }
-      step(1);
-    }
-
-    function step(d){
-      i = (i + d + TRACKS.length) % TRACKS.length;
-      label();
-      intent = true; on(true);
-      boot();
-      if (ready) yt.loadVideoById(TRACKS[i].id);   // loadVideoById autoplays
-      else want = true;
-    }
-
-    btn.addEventListener('click', function(){
-      boot();
-      intent = !intent;
-      on(intent);
-      if (!ready){ want = intent; return; }        // onReady picks it up
-      if (intent) yt.playVideo(); else yt.pauseVideo();
-    });
-    document.getElementById('npPrev').addEventListener('click', function(){ step(-1); });
-    document.getElementById('npNext').addEventListener('click', function(){ step(1); });
-
+    var st = null;
+    window.__vpH = function(){
+      if (!st) st = document.getElementById('stage');
+      return (st && st.clientHeight) || window.innerHeight;
+    };
   })();
-</script>
-<script>
   // the nav's black gradient: on whenever the page is scrolled off the top
   (function(){
     var nav = document.getElementById('nav'), on = false;
@@ -938,22 +875,20 @@
     var mc = document.getElementById('machCards');
     if (!mc) return;
     var cards = Array.prototype.slice.call(mc.children);
-    // the door slide opens the container; HOVER picks the slide from here
-    // (the card is the button — no click). the pick is sticky: the mouse
-    // leaving the stack holds the last slide, it does not snap back.
+    // the door slide opens the container; CLICK picks the slide from
+    // here, exactly like the laptop slider's #for cards. the scene's
+    // autoplay picks through the same door (window.__machPick), so the
+    // active card always mirrors whatever the rack is showing.
     window.__machSlide = 0;
+    window.__machCount = cards.length;
     cards.forEach(function(x, j){ x.classList.toggle('on', j === 0); });
-    function mcPick(i){
+    window.__machPick = function(i){
       if ((window.__machSlide || 0) === i) return;
       window.__machSlide = i;
       cards.forEach(function(x, j){ x.classList.toggle('on', j === i); });
-    }
+    };
     cards.forEach(function(c, i){
-      c.addEventListener('pointerenter', function(ev){
-        if (ev.pointerType === 'touch') return;   // touch has no hover — it taps below
-        mcPick(i);
-      });
-      c.addEventListener('click', function(){ mcPick(i); });   // touch / keyboard-less taps
+      c.addEventListener('click', function(){ window.__machPick(i); });
     });
     }
   })();
@@ -1045,7 +980,7 @@
   <section class="panel" id="machine">
     <div class="rail"><span><span class="led"></span>What you get</span><span>One namespace · one bill</span></div>
     <h2>A machine is a computer that is <span class="o">only yours.</span></h2>
-    <p class="lead">A machine has its own resources, its own addons, its own domains, its own team and one bill. Underneath, it is Kubernetes — run by us, invisible to you. You see a box with a slider.</p>
+    <p class="lead">A machine is one dedicated Kubernetes namespace — <code>kdeploy-&lt;project&gt;-&lt;group&gt;</code> — with its own resources, its own addons, its own domains, its own team and one bill. Everything you run lives inside it as a pod. The Kubernetes part is run by us and invisible to you: you see a box with a slider.</p>
     <div class="grid3 big" id="machCards">
       <div class="card on"><b>Isolated by default</b><span>Bare-metal speed behind ironclad kernel and network walls — no leaky multi-tenant hosts.</span>
         <ul>
@@ -1061,11 +996,11 @@
           <li><b>Full-stack telemetry</b> — Grafana dashboards for metrics, logs and traces, plus Sentry-compatible error tracking, all in one CLI.</li>
         </ul>
       </div>
-      <div class="card"><b>One bill</b><span>One budget, unlimited apps — no multi-app tax.</span>
+      <div class="card"><b>One bill</b><span>One budget, unlimited pods — no per-pod tax.</span>
         <ul>
           <li><b>Unified resource wallet</b> — a machine is a fixed budget of vCPU, RAM and storage on one predictable subscription.</li>
-          <li><b>Apps without bills</b> — extra web services, workers or databases share the machine's budget. No new fees.</li>
-          <li><b>Stage and prod groups</b> — sibling groups with isolated networks, each with its own database and namespace, on the same budget.</li>
+          <li><b>Pods without bills</b> — every extra web, worker or release pod shares the machine's budget. No new fees.</li>
+          <li><b>Stage and prod groups</b> — sibling machines with isolated networks, each its own namespace and database, on the same budget.</li>
         </ul>
       </div>
       <div class="card"><b>Workloads and previews</b><span>Zero-downtime rollouts and an instant preview for every pull request.</span>
@@ -1076,7 +1011,7 @@
         </ul>
       </div>
     </div>
-    <p class="small">Apps inside a machine can be web, worker or release. Each has its own repo, branch, port, replicas and rollout. PR previews get their own namespace and URL.</p>
+    <p class="small">A pod is one workload inside a machine: web, worker or release. Each pod has its own repo, branch, port, replicas and rollout. PR previews get their own namespace and URL.</p>
   </section>
 
   <section class="panel" id="deploy">
@@ -1094,7 +1029,7 @@
   <section class="panel" id="addons">
     <div class="rail"><span><span class="led"></span>Addons</span><span>Managed or dedicated</span></div>
     <h2>The stack, <span class="b">one toggle each.</span></h2>
-    <p class="lead">Managed on shared instances, or dedicated inside your machine with its own volume and size. Attach to any app in one command.</p>
+    <p class="lead">Managed on shared instances, or dedicated inside your machine with its own volume and size. Attach to any pod in one command.</p>
     <!-- the manager machine page's pod canvas: dotted board, pcc pods,
          draggable, with the colored-dot halo + calm waves + drag ripples -->
     <div class="pods-board" id="podsBoard">
@@ -1106,10 +1041,10 @@
       <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="17" width="17"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path><path d="M12 22V12"></path><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"></path><path d="m7.5 4.27 9 5.15"></path></svg></span><span class="pcc-name">S3 storage</span></div><p class="bpod-desc">Your own bucket and IAM user on SeaweedFS, with a CDN URL.</p></div>
       <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg fill="currentColor" viewBox="0 0 24 24" height="17" width="17"><path d="M12.004 0H.404v18.807h9.938l1.714 1.602v-.026L15.966 24v-5.193h7.63V0H12.003zm7.578 14.45H15.38L6.898 6.519v7.93H4.116V4.376h4.349l8.344 7.784V4.375h2.773V14.45z"></path></svg></span><span class="pcc-name">NATS</span></div><p class="bpod-desc">JetStream on its own volume, WebSocket in.</p></div>
       <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg fill="currentColor" viewBox="0 0 24 24" height="17" width="17"><path d="M17.193 9.555c-1.264-5.58-4.252-7.414-4.573-8.115-.28-.394-.53-.954-.735-1.44-.036.495-.055.685-.523 1.184-.723.566-4.438 3.682-4.74 10.02-.282 5.912 4.27 9.435 4.888 9.884l.07.05A73.49 73.49 0 0111.91 24h.481c.114-1.032.284-2.056.51-3.07.417-.296.604-.463.85-.693a11.342 11.342 0 003.639-8.464c.01-.814-.103-1.662-.197-2.218zm-5.336 8.195s0-8.291.275-8.29c.213 0 .49 10.695.49 10.695-.381-.045-.765-1.76-.765-2.405z"></path></svg></span><span class="pcc-name">MongoDB</span></div><p class="bpod-desc">Per machine database, or dedicated.</p></div>
-      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M2 20h20v-4H2zm2-3h2v2H4zM2 4v4h20V4zm4 3H4V5h2zm-4 7h20v-4H2zm2-3h2v2H4z"></path></svg></span><span class="pcc-name">SQL Server</span></div><p class="bpod-desc">For the apps that need it.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M2 20h20v-4H2zm2-3h2v2H4zM2 4v4h20V4zm4 3H4V5h2zm-4 7h20v-4H2zm2-3h2v2H4z"></path></svg></span><span class="pcc-name">SQL Server</span></div><p class="bpod-desc">For the pods that need it.</p></div>
       <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg fill="currentColor" viewBox="0 0 24 24" height="17" width="17"><path d="m6.505 18.998 4.434-11.345a4.168 4.168 0 0 1 3.882-2.651h2.674l-4.434 11.345a4.169 4.169 0 0 1-3.883 2.651H6.505Zm6.505 0 4.434-11.345a4.169 4.169 0 0 1 3.883-2.651H24l-4.434 11.345a4.168 4.168 0 0 1-3.882 2.651H13.01Zm-13.01 0L4.434 7.653a4.168 4.168 0 0 1 3.882-2.651h2.674L6.556 16.347a4.169 4.169 0 0 1-3.883 2.651H0Z"></path></svg></span><span class="pcc-name">Meilisearch</span></div><p class="bpod-desc">Search with its own persistent volume.</p></div>
-      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2M12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8"></path><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path></svg></span><span class="pcc-name">Cron</span></div><p class="bpod-desc">Scheduled jobs from your app image, with run history.</p></div>
-      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2m-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1z"></path></svg></span><span class="pcc-name">OAuth2 proxy</span></div><p class="bpod-desc">GitHub or Google login in front of any app, no code.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2M12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8"></path><path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path></svg></span><span class="pcc-name">Cron</span></div><p class="bpod-desc">Scheduled jobs from your pod image, with run history.</p></div>
+      <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2m-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1z"></path></svg></span><span class="pcc-name">OAuth2 proxy</span></div><p class="bpod-desc">GitHub or Google login in front of any pod, no code.</p></div>
       <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M21 8c-1.45 0-2.26 1.44-1.93 2.51l-3.55 3.56c-.3-.09-.74-.09-1.04 0l-2.55-2.55C12.27 10.45 11.46 9 10 9c-1.45 0-2.27 1.44-1.93 2.52l-4.56 4.55C2.44 15.74 1 16.55 1 18c0 1.1.9 2 2 2 1.45 0 2.26-1.44 1.93-2.51l4.55-4.56c.3.09.74.09 1.04 0l2.55 2.55C12.73 16.55 13.54 18 15 18c1.45 0 2.27-1.44 1.93-2.52l3.56-3.55c1.07.33 2.51-.48 2.51-1.93 0-1.1-.9-2-2-2"></path><path d="m15 9 .94-2.07L18 6l-2.06-.93L15 3l-.92 2.07L12 6l2.08.93zM3.5 11 4 9l2-.5L4 8l-.5-2L3 8l-2 .5L3 9z"></path></svg></span><span class="pcc-name">Grafana</span></div><p class="bpod-desc">Dedicated per machine, wired read only to your own telemetry.</p></div>
       <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5s-.96.06-1.41.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20zm-6 8h-4v-2h4zm0-4h-4v-2h4z"></path></svg></span><span class="pcc-name">GlitchTip</span></div><p class="bpod-desc">Sentry compatible error tracking, one DSN per environment.</p></div>
       <div class="bpod"><div class="pcc-header"><span class="pcc-dot"></span><span class="pcc-icon"><svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3M7.5 11.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5S9.83 13 9 13s-1.5-.67-1.5-1.5M16 17H8v-2h8zm-1-4c-.83 0-1.5-.67-1.5-1.5S14.17 10 15 10s1.5.67 1.5 1.5S15.83 13 15 13"></path></svg></span><span class="pcc-name">AI</span></div><p class="bpod-desc">An OpenAI compatible endpoint in the cluster: a current open model for chat, one for embeddings, metered per machine.</p></div>
@@ -1170,7 +1105,7 @@
     <h2>Questions <span class="b">people ask</span></h2>
     <dl class="faq">
       <dt>Is a machine a VM?</dt>
-      <dd>No. It is a Kubernetes namespace with a network policy, a quota and its own secrets on nodes we operate. Container isolation, not a microVM. We say that plainly because it matters for some workloads.</dd>
+      <dd>No. A machine is a dedicated Kubernetes namespace — <code>kdeploy-&lt;project&gt;-&lt;group&gt;</code> — with a network policy, a quota and its own secrets on nodes we operate. The pods you run live inside it. Container isolation, not a microVM. We say that plainly because it matters for some workloads.</dd>
       <dt>Can I leave?</dt>
       <dd>Yes. Your Dockerfile, your Postgres dump and your bucket run anywhere. If we disappeared tomorrow your stack still works.</dd>
       <dt>Where is my data?</dt>
@@ -1202,7 +1137,6 @@
     <div class="f-inner">
       <div class="f-brand">
         <div class="f-logo"><img src="/img/logo.svg" alt="usectl logo" width="83" height="22" loading="lazy"></div>
-        <div class="f-credit"><span class="led"></span>Built by systemctl · Tbilisi, Georgia</div>
         <div class="f-copy">© 2026 systemctl. All rights reserved.</div>
       </div>
       <div class="f-cols">
@@ -1315,7 +1249,12 @@
   spotB.position.set(-0.004, 2.245, -0.934);
   spotB.target.position.set(-0.661, -5.728, -0.934);
   spotB.castShadow = true;
-  spotB.shadow.mapSize.set(2048, 2048);
+  // the key's shadow map follows the frame: a phone renders a fraction of
+  // the pixels and pays the same 2048² depth pass otherwise. the shadow
+  // still falls exactly where it does on the desktop — it is only softer
+  // at the edge, which on a phone-sized rack is under a pixel anyway.
+  var SHADOW_PX = window.innerWidth <= 767 ? 1024 : (window.innerWidth <= 1024 ? 1536 : 2048);
+  spotB.shadow.mapSize.set(SHADOW_PX, SHADOW_PX);
   spotB.shadow.bias = -0.0004;
   spotB.shadow.camera.near = 0.2; spotB.shadow.camera.far = 30;
   scene.add(spotB); scene.add(spotB.target);
@@ -1325,7 +1264,20 @@
   controls.dampingFactor = 0.06;
   controls.enableZoom = false;               // enabled on click, so the page can scroll
   controls.target.fromArray(START.target);
-  canvas.addEventListener('pointerdown', function(){ controls.enableZoom = true; });
+  // TOUCH. the stage is a full-screen canvas and OrbitControls claims a
+  // one-finger drag for the orbit — on a phone that means the hero simply
+  // cannot be scrolled past, and the scroll IS the ride. on a coarse
+  // pointer the orbit is handed back to the page entirely: one finger
+  // scrolls, the hero's own lap keeps turning on its own clock (autoRotate
+  // runs inside update(), which does not care whether input is enabled),
+  // and every scroll-driven leg plays exactly as it does with a mouse.
+  var coarsePointer = !!(window.matchMedia && window.matchMedia('(pointer:coarse)').matches);
+  if (coarsePointer){
+    controls.enabled = false;
+    canvas.style.touchAction = 'pan-y';
+    stage.style.touchAction = 'pan-y';
+  }
+  canvas.addEventListener('pointerdown', function(){ if (!coarsePointer) controls.enableZoom = true; });
   stage.addEventListener('pointerleave', function(){ controls.enableZoom = false; });
 
   // ── the demo's post stack: dof → bloom → grade (grain/vignette/ca) ──
@@ -1603,6 +1555,12 @@
   }
 
   var stageW = 0, stageH = 0;   // cached for placeSpots, no layout reads per frame
+  // the ride's ruler. every leg start/end and every show window is stated
+  // in "viewport heights" — and on a phone window.innerHeight breathes
+  // with the url bar on every single scroll, which would slide all of them
+  // underneath the ride. the stage is sized in svh (the SMALL, stable
+  // viewport), so its own box is the honest height to measure against.
+  function vpH(){ return stageH || window.innerHeight; }
   // the chain's supersample: the post chain renders at CHAIN_RES × css px
   // and fxaa downstream lands it in the device-px frame cache. 1 was the
   // old css-px chain (edges read as 2×2 device-pixel steps on retina);
@@ -1622,9 +1580,27 @@
   // led racks and the CALCULATOR (the original "i see pixels" content)
   // now live below the addons midpoint. LAP runs at 1.5 = full quality
   // everywhere; bonus: the under-cover chain reallocs are gone entirely.
-  var CHAIN_HI = 1.5, CHAIN_LAP = 1.5, CHAIN_RES = CHAIN_HI;
+  // ...and the supersample now steps DOWN with the viewport: a phone runs
+  // a 2x device ratio over a mobile gpu, and 1.5x on top of that is a
+  // fragment budget nothing survives. NOTHING is switched off — every
+  // pass, every effect, every leg still runs; only the chain's pixel
+  // count moves with the frame it has to fill.
+  function chainRes(){
+    var w = window.innerWidth;
+    return w <= 767 ? 1 : (w <= 1024 ? 1.25 : 1.5);
+  }
+  var CHAIN_HI = chainRes(), CHAIN_LAP = CHAIN_HI, CHAIN_RES = CHAIN_HI;
+  var lastRW = -1, lastRH = -1, lastRC = -1;
   function resize(){
     var w = stage.clientWidth, h = stage.clientHeight;
+    // the width ladder may have crossed a step (rotate / window drag)
+    var cr = chainRes();
+    if (cr !== CHAIN_HI){ CHAIN_HI = CHAIN_LAP = CHAIN_RES = cr; }
+    // a phone fires `resize` on every url-bar slide, and the stage is svh
+    // so its box never actually changed — realloc'ing the whole post chain
+    // on those is pure stall. nothing moved, nothing to do.
+    if (w === lastRW && h === lastRH && CHAIN_RES === lastRC) return;
+    lastRW = w; lastRH = h; lastRC = CHAIN_RES;
     stageW = w; stageH = h;
     renderer.setSize(w, h, false);
     var cw = Math.round(w * CHAIN_RES), ch = Math.round(h * CHAIN_RES);
@@ -1756,6 +1732,7 @@
   var lapTermQ = -1, lapTermCount = 0;
   var lapDio = null, lapDioGroups = [], lapDioMats = [], lapDioClip = null;
   var lapDioShow = null, lapDioTop = 1, lapDioBot = 0, lapDioQ = -1, lapDioBaseX = 0;
+  var lapDioAnim = null;   // per-frame motion for whichever slide is up
   // the display's neon 200$: its own layer so the logo band glitch can
   // rip the digits without touching the panel
   var calcTextMat = null, calcTextDraw = null, calcBlinkAt = -1, calcBlinkStart = -1;
@@ -1936,6 +1913,8 @@
   // immediately. OPENING is always MACH_SPEED; only the clearing out is
   // quick, and it is quick on every slide alike.
   var MACH_HANDOVER = 2.8;
+  // the autoplay beat: the same 5s the laptop slider runs on
+  var MACH_BEAT = 5, machBeatAt = -1, machSeen = -1;
   // ...and the band tables are tuned in SECONDS, not in ride fraction.
   // every glitch lives in a LATE sub-range of its slide's ride, so raising
   // MACH_SPEED to make the OTHER animations faster would drag the rips
@@ -2058,14 +2037,20 @@
     else { TGT = S4_TGT; EYE = S4_EYE; panR = 0.1; panU = 0.2; pxR = 0; }
     tgtOut.copy(TGT); tgtOut.y += prlxDy * 0.3; tgtOut.add(scrubOff);
     eyeOut.copy(EYE); eyeOut.y += prlxDy * 0.3; eyeOut.add(scrubOff);
-    var hh = EYE.distanceTo(TGT) * Math.tan(camera.fov * Math.PI / 360);
+    // the responsive frame reaches the slide poses too. these are absolute
+    // eye/target pairs (not a pose.w like the legs), so the widening is a
+    // plain scale of the eye's offset from the look point — same orbit,
+    // same fov, just further out. the pans below ride the widened frame,
+    // so the composition walks with it instead of off the edge.
+    if (frameFitK !== 1) eyeOut.sub(tgtOut).multiplyScalar(frameFitK).add(tgtOut);
+    var hh = eyeOut.distanceTo(tgtOut) * Math.tan(camera.fov * Math.PI / 360);
     var hw = hh * camera.aspect;
     s2Dir.copy(tgtOut).sub(eyeOut).normalize();
     s2Right.crossVectors(s2Dir, S2_UP).normalize();
     s2UpV.crossVectors(s2Right, s2Dir);
     // pixels → view-plane units via the frame's own half-height, so the
     // walk holds at any viewport
-    var dR = panR * hw + pxR * (hh / (window.innerHeight / 2));
+    var dR = panR * hw + pxR * (hh / (vpH() / 2));
     var dU = panU * hh;
     tgtOut.addScaledVector(s2Right, dR).addScaledVector(s2UpV, dU);
     eyeOut.addScaledVector(s2Right, dR).addScaledVector(s2UpV, dU);
@@ -2160,6 +2145,47 @@
     ];
   }
   var clipPlanes = boxPlanes(CLIP_BOX), wirePlanes = boxPlanes(WIRE_BOX);
+  // ── the near wipe: the city standing between the lens and the rack ──
+  // the rack's stencil stamp used to kill those buildings by forbidding
+  // the ghosted city from painting on the rack's pixels — but that stamp
+  // masks a filled block around the rack, and everything behind it fell
+  // through to the #1e1d1d void: the flat slab with a straight line under
+  // the machine. this takes the same buildings out GEOMETRICALLY instead.
+  // the carve box already discards the city inside it (clipIntersection);
+  // here it simply grows from the rack toward the camera along whichever
+  // horizontal axis the lens sits on, so every city fragment between the
+  // two is discarded and nothing is left to draw across the rack. only
+  // the DOMINANT axis opens, so the wipe stays a corridor roughly the
+  // rack's own width instead of eating the city to the sides.
+  // per-fragment, so the city's layered meshes are untouched everywhere
+  // else, and it is gated to the ghost ('bg') mode — scene 1 never sees it.
+  var wipeOn = false;
+  function updateNearWipe(){
+    var on = sceneMode === 2 && rackFade > 0;
+    var maxX = CLIP_BOX.maxX, minX = CLIP_BOX.minX;
+    var maxZ = CLIP_BOX.maxZ, minZ = CLIP_BOX.minZ;
+    var wmaxX = WIRE_BOX.maxX, wminX = WIRE_BOX.minX;
+    var wmaxZ = WIRE_BOX.maxZ, wminZ = WIRE_BOX.minZ;
+    if (on){
+      var cx = (CLIP_BOX.minX + CLIP_BOX.maxX) * 0.5;
+      var cz = (CLIP_BOX.minZ + CLIP_BOX.maxZ) * 0.5;
+      var dx = camera.position.x - cx, dz = camera.position.z - cz;
+      if (Math.abs(dx) >= Math.abs(dz)){
+        if (dx > 0){ maxX = Math.max(maxX, camera.position.x); wmaxX = Math.max(wmaxX, camera.position.x); }
+        else       { minX = Math.min(minX, camera.position.x); wminX = Math.min(wminX, camera.position.x); }
+      } else {
+        if (dz > 0){ maxZ = Math.max(maxZ, camera.position.z); wmaxZ = Math.max(wmaxZ, camera.position.z); }
+        else       { minZ = Math.min(minZ, camera.position.z); wminZ = Math.min(wminZ, camera.position.z); }
+      }
+    }
+    if (on !== wipeOn){ wipeOn = on; frameDirtyFlag = true; }
+    if (clipPlanes[0].constant !== -maxX){ clipPlanes[0].constant = -maxX; frameDirtyFlag = true; }
+    if (clipPlanes[1].constant !==  minX){ clipPlanes[1].constant =  minX; frameDirtyFlag = true; }
+    if (clipPlanes[4].constant !== -maxZ){ clipPlanes[4].constant = -maxZ; frameDirtyFlag = true; }
+    if (clipPlanes[5].constant !==  minZ){ clipPlanes[5].constant =  minZ; frameDirtyFlag = true; }
+    wirePlanes[0].constant = -wmaxX; wirePlanes[1].constant =  wminX;
+    wirePlanes[4].constant = -wmaxZ; wirePlanes[5].constant =  wminZ;
+  }
   var cityMats = [];
   // ── the ghost city's cheap twin ──
   // behind the rack the city is a 10%-alpha backdrop whose fragments run a
@@ -2330,6 +2356,54 @@
   // NO rotation while the page is scrolled — the scroll alone drives; the
   // hero lap exists only at the very top.
   var HOME_FOV = 50;
+  // ── THE RESPONSIVE FRAME ────────────────────────────────────────
+  // every leg was framed by hand on a wide desktop. a pose carries the
+  // frame's half-HEIGHT (pose.w) and three.js fov is vertical, so the
+  // horizontal extent is that times the aspect — which means the SAME
+  // pose on a laptop, an ipad or a phone crops the shot sideways until
+  // the rack, the split's cube grid or the laptop walks out of frame.
+  //
+  // frameFit widens the frame as the viewport narrows: the rig pulls
+  // straight back along its own orbit — no turn, no pan, the composition
+  // is untouched — until most of the logged width is back. FULL
+  // compensation (pow 1) holds every pixel of width but letterboxes the
+  // subject into a sliver of a phone's height; 0.88 is the middle that
+  // measured best — ~1.5% of the width given up on an ipad landscape, ~8%
+  // on ipad portrait, ~15% on a phone, and the subject still reads.
+  //
+  // the reference is 3:2, NOT 16:9, and that matters: every desktop and
+  // laptop frame worth naming sits at or above it (1920x1080 = 1.78,
+  // 1366x768 = 1.78, 1440x900 = 1.6, 1280x800 = 1.6, a 14" macbook's
+  // 1512x982 = 1.54), so all of them return exactly 1 and every shot the
+  // free-cam logged stays bit-identical to how it was framed. the fit only
+  // engages where the frame genuinely stops being wide — tablets down.
+  var DESIGN_ASPECT = 1.5, FIT_POW = 0.88, frameFitK = 1;
+  function frameFit(){
+    var a = camera.aspect || DESIGN_ASPECT;
+    return a >= DESIGN_ASPECT ? 1 : Math.pow(DESIGN_ASPECT / a, FIT_POW);
+  }
+  // the screen anchors (a leg's anchor, the free cube's pin, the
+  // calculator's spot) were picked for a frame with half its width free
+  // for text. once the sections stack into full-width cards the subject
+  // belongs in the MIDDLE instead — this walks every anchored screen x
+  // toward 0.5 as the viewport narrows, on the same aspect ramp.
+  function anchorX(x){
+    var a = camera.aspect || DESIGN_ASPECT;
+    var k = Math.max(0.28, Math.min(1, (a - 0.45) / (1.5 - 0.45)));
+    return 0.5 + (x - 0.5) * k;
+  }
+  // re-applied on every resize, ahead of the leg measuring + anchor solve
+  function applyFrameFit(){
+    var f = frameFit();
+    if (Math.abs(f - frameFitK) < 1e-4) return;
+    var ratio = f / frameFitK;
+    frameFitK = f;
+    for (var fi = 0; fi < LEGS.length; fi++) LEGS[fi].pose.w = LEGS[fi].pose.w0 * f;
+    // the LIVE rig rides with it, so a resize mid-hero (or mid-ride) pulls
+    // back on the spot instead of waiting for the next leg to blend in
+    camera.position.sub(controls.target).multiplyScalar(ratio).add(controls.target);
+    if (scrubHome){ scrubHome.w *= ratio; scrubHome.r *= ratio; }
+  }
   var LEGS = [
     { el: 'split', showFov: 8,   // near-ortho: houses read flat, like a 2d map
       endAt: 1,       // was 0.55 → 0.8 → 1 — the hero→map flight completes
@@ -2419,7 +2493,14 @@
       // (was [0.3898, 0.1885, 12.5587] → [-0.4351, 1.1936, -4.4644]);
       // then panned +0.18 along screen-up (3 × 2.5% of the fov-8 frame)
       // so the laptop lands lower ("more down 2-3%", asked three times)
-      eye: [0.5229, 0.3673, 12.5628], target: [-0.302, 1.3724, -4.4603] },
+      // ...and now a step BACK up: −0.0597 along the same axis, one more
+      // 2.5% of the frame ("laptop move top + 2-3%"), leaving the walk at
+      // +0.12 net. panning the rig DOWN the view plane lifts the laptop
+      // UP in frame — same orbit, same fov, so the framing is untouched
+      // otherwise. 2.5% of the frame = 0.0597 world units here (fov 8 at
+      // 17.07 out: the frame is 2.388 tall), which is the unit every one
+      // of these nudges has used.
+      eye: [0.5227, 0.3077, 12.5593], target: [-0.3022, 1.3128, -4.4638] },
     { el: 'modes',    // 'our metal, or yours' — pull wide and level,
       loggedFov: 8,   // framed in free-cam; the look center sits between
                       // the rack and its clone, both racks in frame
@@ -2468,7 +2549,10 @@
     var logged = L.loggedFov || HOME_FOV;
     L.pose = {
       tx: L.target[0], ty: L.target[1], tz: L.target[2],
-      w: r * Math.tan(logged * Math.PI / 360),   // frame width survives fov swaps
+      // w0 is the frame as LOGGED; w is w0 widened for the live viewport
+      // (see applyFrameFit) — every read downstream uses w
+      w0: r * Math.tan(logged * Math.PI / 360),
+      w: r * Math.tan(logged * Math.PI / 360) * frameFitK,   // frame width survives fov swaps
       fov: L.showFov || logged,
       // polar stays off the exact pole: lookAt degenerates at 0 and the
       // screen heading would land wherever the fallback points it
@@ -2498,7 +2582,7 @@
     anchorCam.updateProjectionMatrix();
     anchorPt.fromArray(L.anchor.point);
     var t = new THREE.Vector3(P.tx, P.ty, P.tz);
-    var ndcX = L.anchor.x * 2 - 1, ndcY = 1 - L.anchor.y * 2;
+    var ndcX = anchorX(L.anchor.x) * 2 - 1, ndcY = 1 - L.anchor.y * 2;
     for (var i = 0; i < 2; i++){
       anchorCam.position.set(t.x + ox, t.y + oy, t.z + oz);
       anchorCam.lookAt(t);
@@ -2513,6 +2597,9 @@
     L.solved = {x: t.x, y: t.y, z: t.z};
   }
   function measureScrub(){
+    // the frame first: the legs' poses and every anchor solve below read
+    // pose.w, so the viewport's fit has to be in before either runs
+    applyFrameFit();
     // each leg ends when its section's top reaches 55% of the viewport
     var prev = 0;
     for (var mi = 0; mi < LEGS.length; mi++){
@@ -2522,16 +2609,16 @@
       // `endAt` is the viewport fraction the section top must reach for the
       // leg to be done (default 0.55 = lower middle; 1 = the moment the
       // section enters from the bottom).
-      L.start = Math.max(0, prev - (L.early || 0) * window.innerHeight);
+      L.start = Math.max(0, prev - (L.early || 0) * vpH());
       // `startAt` (viewport fraction) delays a leg past the previous end:
       // it begins only once its section's top reaches that line —
       // `startEl` points that measurement at ANOTHER section (leg 10
       // starts off the addons top, so it rides under the gray cover)
       var sN = L.startEl ? document.getElementById(L.startEl) : L.node;
       if (L.startAt && sN) L.start = Math.max(L.start,
-        sN.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * L.startAt);
+        sN.getBoundingClientRect().top + window.pageYOffset - vpH() * L.startAt);
       L.end = Math.max(L.start + 1, L.node ?
-        L.node.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * (L.endAt || 0.55) : L.start + 1);
+        L.node.getBoundingClientRect().top + window.pageYOffset - vpH() * (L.endAt || 0.55) : L.start + 1);
       prev = L.end;
       if (L.anchor) solveAnchor(L);
     }
@@ -2540,12 +2627,12 @@
     if (calcNode){
       var calcRect = calcNode.getBoundingClientRect();
       var calcTop = calcRect.top + window.pageYOffset;
-      calcWin.start = calcTop - window.innerHeight * 0.55;
-      calcWin.end = Math.max(calcWin.start + 1, calcTop - window.innerHeight * 0.25);
+      calcWin.start = calcTop - vpH() * 0.55;
+      calcWin.end = Math.max(calcWin.start + 1, calcTop - vpH() * 0.25);
       // the rack leaves over math top 75% → 50% vh ("delay is so big" —
       // the whole math train moved 10% vh earlier)
-      rackOutWin.start = calcTop - window.innerHeight * 0.75;
-      rackOutWin.end = Math.max(rackOutWin.start + 1, calcTop - window.innerHeight * 0.5);
+      rackOutWin.start = calcTop - vpH() * 0.75;
+      rackOutWin.end = Math.max(rackOutWin.start + 1, calcTop - vpH() * 0.5);
       // the release point: once the math panel's bottom passes the
       // calculator's bottom, the whole composition scrolls out with it
       calcMathBot = calcTop + calcRect.height;
@@ -2556,21 +2643,21 @@
       var metalTop = metalNode.getBoundingClientRect().top + window.pageYOffset;
       // order rewire: shifted LATER (was 0.9→0.6) — 'for' now precedes
       // modes, and the early window played the clone show over its tail
-      metalWin.start = metalTop - window.innerHeight * 0.72;
-      metalWin.end = Math.max(metalWin.start + 1, metalTop - window.innerHeight * 0.45);
+      metalWin.start = metalTop - vpH() * 0.72;
+      metalWin.end = Math.max(metalWin.start + 1, metalTop - vpH() * 0.45);
       // the plates start typing the moment the CLONING starts (metalWin
       // p 0.4 ≈ top 78% vh): '[ our metal ]' writes while the clone
       // slides, '[ your metal ]' picks up right as it lands
-      rackLblWin.start = metalTop - window.innerHeight * 0.6;
-      rackLblWin.end = Math.max(rackLblWin.start + 1, metalTop - window.innerHeight * 0.35);
+      rackLblWin.start = metalTop - vpH() * 0.6;
+      rackLblWin.end = Math.max(rackLblWin.start + 1, metalTop - vpH() * 0.35);
     }
     // the deploy show window: deploy top 100% → 55% vh (the dive leg's
     // ORIGINAL span, frozen — "only camera" gets delayed, not the shows)
     var depNode = document.getElementById('deploy');
     if (depNode){
       var depTop = depNode.getBoundingClientRect().top + window.pageYOffset;
-      depWin.start = depTop - window.innerHeight * 1.0;
-      depWin.end = Math.max(depWin.start + 1, depTop - window.innerHeight * 0.55);
+      depWin.start = depTop - vpH() * 1.0;
+      depWin.end = Math.max(depWin.start + 1, depTop - vpH() * 0.55);
     }
     // the machine show window: machine top 90% → 60% vh (the zoom leg's
     // original span, frozen — the box-close stays put while the camera
@@ -2578,17 +2665,17 @@
     var macNode = document.getElementById('machine');
     if (macNode){
       var macTop = macNode.getBoundingClientRect().top + window.pageYOffset;
-      macWin.start = macTop - window.innerHeight * 0.9;
-      macWin.end = Math.max(macWin.start + 1, macTop - window.innerHeight * 0.6);
+      macWin.start = macTop - vpH() * 0.9;
+      macWin.end = Math.max(macWin.start + 1, macTop - vpH() * 0.6);
       // the split's rack seal: earlier than the machine show but NOT
       // rushed — starts as the split leaves (105vh), lands at 70vh
       // (115→80 closed too early/fast — "ending end so fast")
-      macCloseWin.start = macTop - window.innerHeight * 1.05;
-      macCloseWin.end = Math.max(macCloseWin.start + 1, macTop - window.innerHeight * 0.70);
+      macCloseWin.start = macTop - vpH() * 1.05;
+      macCloseWin.end = Math.max(macCloseWin.start + 1, macTop - vpH() * 0.70);
       // the door show starts the moment the leg-9 camera lands (60vh)
       // and seals by 30vh — the earlier/tighter ride ("its to late")
-      doorWin.start = macTop - window.innerHeight * 0.60;
-      doorWin.end = Math.max(doorWin.start + 1, macTop - window.innerHeight * 0.30);
+      doorWin.start = macTop - vpH() * 0.60;
+      doorWin.end = Math.max(doorWin.start + 1, macTop - vpH() * 0.30);
       // the exit rides the DEPLOY leg's departure ("make it when rack
       // is start goin to next leg"): it begins the moment the camera
       // starts pulling away and completes just past mid-flight —
@@ -2612,8 +2699,8 @@
     var machNode = document.getElementById('math');
     if (machNode){
       var machTop = machNode.getBoundingClientRect().top + window.pageYOffset;
-      machineWin.start = machTop - window.innerHeight * 0.9;
-      machineWin.end = Math.max(machineWin.start + 1, machTop - window.innerHeight * 0.6);
+      machineWin.start = machTop - vpH() * 0.9;
+      machineWin.end = Math.max(machineWin.start + 1, machTop - vpH() * 0.6);
     }
     // the agents window rides EXACTLY leg 10's span (measured above):
     // the radial's crossing to the left happens with the camera switch,
@@ -2626,8 +2713,8 @@
     var agTermNode = document.querySelector('#agents .term-chat');
     if (agTermNode){
       var agTermTop = agTermNode.getBoundingClientRect().top + window.pageYOffset;
-      agTermWin.start = agTermTop - window.innerHeight * 0.95;
-      agTermWin.end = Math.max(agTermWin.start + 1, agTermTop - window.innerHeight * 0.7);
+      agTermWin.start = agTermTop - vpH() * 0.95;
+      agTermWin.end = Math.max(agTermWin.start + 1, agTermTop - vpH() * 0.7);
     }
     // the 'who it is for' window: top 90% → 45% vh, in step with its leg
     // (was → 60%: stretched with the leg's endAt so the un-type, the lid
@@ -2636,28 +2723,28 @@
     var forNode = document.getElementById('for');
     if (forNode){
       var forTop = forNode.getBoundingClientRect().top + window.pageYOffset;
-      forWin.start = forTop - window.innerHeight * 0.9;
-      forWin.end = Math.max(forWin.start + 1, forTop - window.innerHeight * 0.45);
+      forWin.start = forTop - vpH() * 0.9;
+      forWin.end = Math.max(forWin.start + 1, forTop - vpH() * 0.45);
     }
     // the faq window: top 90% → 45% vh, in step with its leg — radial
     // back left, lid shut, laptop opacity 0, all on the same beat
     var faqNode = document.getElementById('faq');
     if (faqNode){
       var faqTop = faqNode.getBoundingClientRect().top + window.pageYOffset;
-      faqWin.start = faqTop - window.innerHeight * 0.9;
-      faqWin.end = Math.max(faqWin.start + 1, faqTop - window.innerHeight * 0.45);
+      faqWin.start = faqTop - vpH() * 0.9;
+      faqWin.end = Math.max(faqWin.start + 1, faqTop - vpH() * 0.45);
     }
     // the cta window: top 90% → 60% vh (the section is last — 60 stays
     // reachable with just the footer and the band's padding below it)
     var ctaNode = document.getElementById('cta');
     if (ctaNode){
       var ctaTop = ctaNode.getBoundingClientRect().top + window.pageYOffset;
-      ctaWin.start = ctaTop - window.innerHeight * 0.9;
-      ctaWin.end = Math.max(ctaWin.start + 1, ctaTop - window.innerHeight * 0.6);
+      ctaWin.start = ctaTop - vpH() * 0.9;
+      ctaWin.end = Math.max(ctaWin.start + 1, ctaTop - vpH() * 0.6);
       // the footer window: whatever scroll remains AFTER the cta leg
       // lands (the footer + the band's padding — ~0.3vh) — pinned to the
       // document's true end so "at the very bottom" is always p = 1
-      var footMaxS = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      var footMaxS = Math.max(1, document.documentElement.scrollHeight - vpH());
       footWin.start = ctaWin.end;
       footWin.end = Math.max(footWin.start + 1, footMaxS);
     }
@@ -2668,7 +2755,7 @@
     var adNode = document.getElementById('addons');
     if (adNode){
       var adTop = adNode.getBoundingClientRect().top + window.pageYOffset;
-      addonsMidY = adTop + adNode.offsetHeight * 0.5 - window.innerHeight * 0.5;
+      addonsMidY = adTop + adNode.offsetHeight * 0.5 - vpH() * 0.5;
       setChainRes((window.pageYOffset || 0) > addonsMidY ? CHAIN_LAP : CHAIN_HI);
     }
   }
@@ -2683,7 +2770,10 @@
   window.__scrubDbg = function(){
     return {legs: LEGS.map(function(L){ return {el: L.el, start: L.start, end: L.end,
               raw: L.raw, p: L.p, solved: L.solved || null}; }),
-            aspect: camera.aspect, fov: camera.fov, free: scrubFree, ms: +(dbgDt * 1000).toFixed(2),
+            aspect: +camera.aspect.toFixed(3), fov: camera.fov, free: scrubFree, ms: +(dbgDt * 1000).toFixed(2),
+            // the responsive frame's live state: fit 1 = the shot exactly
+            // as logged, >1 = pulled back for a narrow viewport
+            fit: +frameFitK.toFixed(3), chain: CHAIN_RES, coarse: coarsePointer, vpH: vpH(),
             rackFade: rackFade, cubeFade: cubeFade, pcbFade: pcbFade, cubeHide: cubeHide, revFade: revFade, revSeal: revSeal, radialHide: radialHide, calcWin: calcWin.p, metalWin: metalWin.p, rackOutWin: rackOutWin.p, rack2Op: rack2Op, agentsWin: agentsWin.p, forWin: forWin.p, faqWin: faqWin.p, faqCube: faqCube, ctaWin: ctaWin.p, footWin: footWin.p, holeY: holeYQ, lapLid: lapLidQ, lapVert: lapLidVertQ,
             cam: camera.position.toArray(), tgt: controls.target.toArray()};
   };
@@ -2711,6 +2801,7 @@
   // orbit/pan/zoom to hunt for a pose (release logs it to the console).
   // the ride stays hands-off until the page is back at the very top.
   stage.addEventListener('pointerdown', function(ev){
+    if (coarsePointer) return;   // touch scrolls the page; it never grabs the cam
     if (scrubHome && !scrubFree && ev.target === canvas){
       scrubFree = true;
       controls.enabled = true;
@@ -2991,8 +3082,21 @@
         rm.forEach(function(m){
           // the rack stamps its pixels into the stencil; the ghosted city
           // is forbidden from drawing on them, so nothing in front of the
-          // rack leaves lines across it on the leg-3 reveal
-          m.stencilWrite = true;
+          // rack leaves lines across it on the leg-3 reveal.
+          // ...measured: that stamp covers a FILLED BLOCK around the rack
+          // (and around the clone, and the space between them), not the
+          // rack's silhouette — visualised by painting every stencil==1
+          // pixel, and confirmed by the city's own pixels: the gap between
+          // the two racks reads 28 (the #1e1d1d void) with the stamp on and
+          // 61 (city) with it off. everything behind that block is rejected,
+          // so the frame falls through to the background: the flat slab with
+          // a straight line under the rack.
+          // NOT foreground buildings — clipping every city fragment nearer
+          // to the camera than the rack leaves the slab untouched (28 -> 28).
+          // FLIP THIS BACK TO true to restore the old behaviour: the slab
+          // returns, and the ghosted city stops drawing across the rack's
+          // flank on the machine legs.
+          m.stencilWrite = false;
           m.stencilRef = 1;
           m.stencilZPass = THREE.ReplaceStencilOp;
           if (m.name === 'Black_Metal_Plate') m.color.set(0x272626).convertSRGBToLinear();
@@ -4539,18 +4643,26 @@
             // the white key light is mostly one broad specular sweep.
             m.metalness = 0; m.metalnessMap = null;   // map cleared too: a stale panel value cannot re-metal it
             m.roughnessMap = null; m.roughness = 0.85;
-            // ...and matching the rack's ALBEDO is not the same as
-            // matching how dark the rack READS. Black_Metal_Plate is
-            // #272626 but also 68% METAL, so only (1 − 0.679) = 0.321 of
-            // it answers a light as diffuse; a dielectric carrying the
-            // same #272626 renders three times brighter — which is the
-            // pale shell this was. the calculator has to stay dielectric
-            // to be lit at all, so the albedo takes the 0.321 instead:
-            //   target = 0.321 × linear(#272626) = 0.00651 / 0.00622
-            //   gain   = target / linear(#202020, the map's flat value)
-            // ≈ #131313 on the body, landing it in the rack's own black
-            // dark grey rather than a lit-up grey of the same name.
-            m.color.setRGB(0.4394, 0.4198, 0.4198);
+            // ...and the baked albedo goes with the gloss. that map is a
+            // photo-scan: a flat #202020 shell, but with GREY panel
+            // patches (display bezel, side bands) and grunge streaks
+            // painted into it. no tint on m.color can fix that — a gain
+            // dark enough to sink the patches into the rack's black
+            // crushes the body to nothing, and a gain that keeps the
+            // body leaves the patches reading three stops brighter,
+            // which is the dirty, off-color shell this was. dropped:
+            // the body is ONE flat color now. the normal map still cuts
+            // the key bevels, the emissive map still holds the glyphs,
+            // and our own plate below owns the display.
+            m.map = null;
+            // that one color is the rack's — read the way the rack
+            // RENDERS, not the way it is named. Black_Metal_Plate is
+            // #272626 but also 68% METAL, so only (1 − 0.679) of it ever
+            // answers a light as diffuse; a dielectric carrying the same
+            // #272626 comes back three times brighter. the calculator
+            // has to stay dielectric to be lit at all (no envmap), so it
+            // wears that diffuse fraction as its albedo instead.
+            m.color.set(0x272626).convertSRGBToLinear().multiplyScalar(1 - 0.6785442);
             m.transparent = true; m.opacity = 0;
             m.userData.baseA = 0.95;  // the body rests near-solid; the display stays solid
             m.userData.glyphBlink = true;   // the key glyphs ride the road-blink below
@@ -5266,7 +5378,7 @@
             g.stroke();
             g.setLineDash([]);
             dioText(g, 'client-' + 'abc'[m8], W6*0.68, H6*mvs8[m8] - H6*0.018, H6*0.032, '#7dffa8', m8 === 0 ? 7 : 0, 'left', '700');
-            dioText(g, 'pg · app · domain', W6*0.68, H6*mvs8[m8] + H6*0.022, H6*0.026, '#6f7a6f');
+            dioText(g, 'pg · pod · domain', W6*0.68, H6*mvs8[m8] + H6*0.022, H6*0.026, '#6f7a6f');
           }
           dioChrome(g, W6, H6, 'one physical server · many isolated machines', 2);
           g.restore();
@@ -5328,13 +5440,135 @@
           }
           return fr8;
         }
+        var dioCubes9 = [];
         for (var mc8 = 0; mc8 < 3; mc8++){
           var cub8 = dioObj(new THREE.Mesh(new THREE.BoxGeometry(dioCubeS, dioCubeS, dioCubeS), dioCubeWallM), DIO_RO + 1);
           cub8.position.set(0.125, 0.096 - mc8 * 0.102, 0.020);
           cub8.rotation.y = 0.55;
           cub8.add(dioCubeFrame());
           dioC.add(cub8);
+          dioCubes9.push(cub8);
         }
+        // ══ the slides RUN ══════════════════════════════════════════
+        // every scene keeps moving while it stands, the way the terminal
+        // holo and the wall panel do. NOTHING here repaints a plate per
+        // frame — those raster at 2048px with heavy shadowBlur and one
+        // redraw costs more than the whole rack — so every live piece is
+        // REAL geometry riding a transform, and a tick is a handful of
+        // matrix writes plus one updateMatrixWorld on a small subtree.
+        //
+        // plate space: the canvas frame is 1.0 × 0.56 centred on the
+        // group and BOTH axes carry 2048 px per local unit (H6 is
+        // 0.56·2048), so canvas (cx, cy) → local (cx/2048 − 0.5,
+        // 0.28 − cy/2048). every constant below is read straight off the
+        // draw functions above rather than eyeballed, so the moving parts
+        // land exactly on the art they belong to.
+        var DIO_W6 = 2048, DIO_H6 = Math.round(0.56 * 2048);
+        function dioLX(cx9){ return cx9 / DIO_W6 - 0.5; }
+        function dioLY(cy9){ return 0.28 - cy9 / DIO_W6; }
+        function dioQuad(w9, h9, col9, a9, ro9){
+          return dioObj(new THREE.Mesh(new THREE.PlaneGeometry(w9, h9),
+            dioMat(new THREE.MeshBasicMaterial({
+              color: new THREE.Color(col9).convertSRGBToLinear(), side: THREE.DoubleSide
+            }), a9)), ro9);
+        }
+        // a live material writes its own opacity every tick, so it has to
+        // fold in the ride's fade itself (the fade loop only runs on a
+        // CHANGE of lapDioQ and would be stale between steps)
+        function dioLit(o9, q9, k9){ o9.material.opacity = o9.material.userData.a * q9 * k9; }
+
+        // ── slide 1: a playhead sweeps the chart, a marker rides the
+        // green series under it, and the brush window breathes
+        var dioAx9 = DIO_W6 * 0.1364, dioAw9 = DIO_W6 * 0.4472;   // chart x span (c0x, cw8)
+        var dioAy9 = DIO_H6 * 0.3552, dioAh9 = DIO_H6 * 0.2184;   // chart y span (c0y, ch8)
+        var DIO_GP9 = [0.82,0.70,0.76,0.58,0.62,0.44,0.50,0.34,0.40,0.24,0.28,0.12];
+        var dioPlay9 = dioQuad(0.0022, dioAh9 / DIO_W6, '#7dffa8', 0.5, DIO_RO + 1);
+        dioPlay9.position.set(0, dioLY(dioAy9 + dioAh9 / 2), 0.010);
+        dioA.add(dioPlay9);
+        var dioMark9 = dioQuad(0.0105, 0.0105, '#7dffa8', 1, DIO_RO + 2);
+        dioMark9.position.z = 0.013;
+        dioA.add(dioMark9);
+
+        // ── slide 2: the hex core turns on its own axis, a packet climbs
+        // each spoke out to its chip, and a runner laps the dashed orbit
+        var dioBx9 = DIO_W6 * 0.335, dioBy9 = DIO_H6 * 0.50, dioBr9 = DIO_H6 * 0.20;
+        var DIO_SAT9 = [-0.80, 0.25, 1.45];   // the spoke angles, in π
+        var dioPkt9 = [];
+        for (var pk9 = 0; pk9 < 3; pk9++){
+          var pq9 = dioQuad(0.0095, 0.0095, '#a5b4fc', 1, DIO_RO + 2);
+          pq9.position.z = 0.017;
+          dioB.add(pq9); dioPkt9.push(pq9);
+        }
+        var dioRun9 = dioQuad(0.0085, 0.0085, '#7dffa8', 1, DIO_RO + 2);
+        dioRun9.position.z = 0.017;
+        dioB.add(dioRun9);
+
+        // ── slide 3: the machines turn on their seats, the tower's slot
+        // lamps blink on clocks that share no beat, and a packet runs
+        // each dashed connector out to its cube
+        var dioTx9 = DIO_W6 * 0.16, dioTw9 = DIO_W6 * 0.14;
+        var dioTy9 = DIO_H6 * 0.24, dioTh9 = DIO_H6 * 0.5;
+        var dioLed9 = [];
+        for (var ld9 = 0; ld9 < 5; ld9++){
+          var lq9 = dioQuad(0.0064, 0.0064, ld9 === 3 ? '#a5b4fc' : '#0ec435', 1, DIO_RO + 2);
+          lq9.position.set(dioLX(dioTx9 + dioTw9 * 0.16 + 3.5),
+                           dioLY(dioTy9 + dioTh9 * (0.06 + ld9 * 0.185 + 0.045) + 3.5), 0.010);
+          dioC.add(lq9); dioLed9.push(lq9);
+        }
+        var DIO_MVS9 = [0.328, 0.510, 0.693];   // the cubes' seats, as the connectors use them
+        var dioCn9 = [], dioCnA9 = [dioLX(dioTx9 + dioTw9), dioLY(dioTy9 + dioTh9 * 0.5)];
+        for (var cx9 = 0; cx9 < 3; cx9++){
+          var cq9 = dioQuad(0.0085, 0.0085, '#7dffa8', 1, DIO_RO + 2);
+          cq9.position.z = 0.015;
+          dioC.add(cq9); dioCn9.push(cq9);
+        }
+        var dioSeatY9 = [0.096, 0.096 - 0.102, 0.096 - 0.204];
+        lapDioAnim = function(t9, q9){
+          // slide 1 — the sweep, and the series read under it
+          var ta9 = (t9 * 0.14) % 1;                      // ~7s per pass
+          var ax9 = dioAx9 + dioAw9 * ta9;
+          dioPlay9.position.x = dioLX(ax9);
+          var gi9 = ta9 * (DIO_GP9.length - 1), gf9 = Math.floor(gi9);
+          var gv9 = DIO_GP9[gf9] + (DIO_GP9[Math.min(DIO_GP9.length - 1, gf9 + 1)] - DIO_GP9[gf9]) * (gi9 - gf9);
+          dioMark9.position.x = dioLX(ax9);
+          dioMark9.position.y = dioLY(dioAy9 + dioAh9 * gv9);
+          dioLit(dioPlay9, q9, 1);
+          dioLit(dioMark9, q9, 0.75 + 0.25 * Math.sin(t9 * 7.1));
+          dioLit(dioSel, q9, 0.72 + 0.28 * Math.sin(t9 * 1.9));
+          // slide 2 — the core turns, the packets climb, the runner laps
+          dioHex.rotation.y = t9 * 0.5;
+          var bcx9 = dioLX(dioBx9), bcy9 = dioLY(dioBy9), br9 = dioBr9 / DIO_W6;
+          for (var pi9 = 0; pi9 < 3; pi9++){
+            var ph9 = (t9 * 0.5 + pi9 / 3) % 1;
+            var sa9 = DIO_SAT9[pi9] * Math.PI;
+            var rr9 = br9 * (0.42 + 0.58 * ph9);
+            dioPkt9[pi9].position.x = bcx9 + Math.cos(sa9) * rr9;
+            dioPkt9[pi9].position.y = bcy9 - Math.sin(sa9) * rr9;   // canvas y runs down
+            // fades up out of the core and lands hot on the chip
+            dioLit(dioPkt9[pi9], q9, Math.min(1, ph9 / 0.12) * (0.55 + 0.45 * ph9));
+          }
+          var ra9 = t9 * 0.33 * Math.PI * 2;
+          dioRun9.position.x = bcx9 + Math.cos(ra9) * br9;
+          dioRun9.position.y = bcy9 - Math.sin(ra9) * br9;
+          dioLit(dioRun9, q9, 1);
+          // slide 3 — the machines turn, the lamps blink, the links run
+          for (var ci9 = 0; ci9 < 3; ci9++){
+            dioCubes9[ci9].rotation.y = 0.55 + Math.sin(t9 * 0.33 + ci9 * 1.1) * 0.42;
+            dioCubes9[ci9].position.y = dioSeatY9[ci9] + Math.sin(t9 * 0.8 + ci9 * 2.1) * 0.0035;
+            var cp9 = (t9 * 0.42 + ci9 * 0.27) % 1;
+            dioCn9[ci9].position.x = dioCnA9[0] + (dioLX(DIO_W6 * 0.585) - dioCnA9[0]) * cp9;
+            dioCn9[ci9].position.y = dioCnA9[1] + (dioLY(DIO_H6 * DIO_MVS9[ci9]) - dioCnA9[1]) * cp9;
+            // dark at both ends so it reads as leaving the tower and
+            // arriving, not as a bead parked on the line
+            dioLit(dioCn9[ci9], q9, Math.min(1, Math.min(cp9, 1 - cp9) / 0.14));
+          }
+          for (var li9 = 0; li9 < 5; li9++){
+            // five periods with no common beat, the panel-screen trick
+            var lp9 = (t9 / (2.7 + li9 * 0.63) + li9 * 0.37) % 1;
+            dioLit(dioLed9[li9], q9, lp9 < 0.08 ? 0.2 : 0.7 + 0.3 * Math.sin(t9 * 2.2 + li9));
+          }
+          lapDio.updateMatrixWorld(true);   // scene.autoUpdate is off — bake the movers
+        };
         lapDioGroups = [dioA, dioB, dioC];
         for (var dg3 = 0; dg3 < 3; dg3++){
           lapDioGroups[dg3].visible = dg3 === 0;
@@ -5981,7 +6215,7 @@
     calcWin.raw = Math.min(1, Math.max(0, (scrollNow - calcWin.start) / (calcWin.end - calcWin.start)));
     calcWin.p += (calcWin.raw - calcWin.p) * (1 - Math.exp(-dt * 6));
     if (Math.abs(calcWin.raw - calcWin.p) < 0.001) calcWin.p = calcWin.raw;
-    calcOut.raw = Math.min(1, Math.max(0, (0.85 - (calcMathBot - scrollNow) / window.innerHeight) / 0.4));
+    calcOut.raw = Math.min(1, Math.max(0, (0.85 - (calcMathBot - scrollNow) / vpH()) / 0.4));
     calcOut.p += (calcOut.raw - calcOut.p) * (1 - Math.exp(-dt * 6));
     if (Math.abs(calcOut.raw - calcOut.p) < 0.001) calcOut.p = calcOut.raw;
     metalWin.raw = Math.min(1, Math.max(0, (scrollNow - metalWin.start) / (metalWin.end - metalWin.start)));
@@ -6031,6 +6265,24 @@
     // turns. the s2Hand/s3Hand baton keeps the crowd hidden across the
     // handover, which is what stops it reading as a tear.
     var machGate = (sceneMode === 2 && !scrubFree) ? 1 : 0;
+    // the scroll's own gate on every slide payload, camera included —
+    // hoisted above the picks so the autoplay below can share it
+    var machScroll = revealEase(Math.min(1, Math.max(0, macWin.p)))
+      * (1 - revealEase(Math.min(1, (LEGS[3] ? LEGS[3].p : 0) / 0.45)))
+      * Math.min(1, Math.max(0, (rackFade - 0.5) * 2));
+    // ── AUTOPLAY, the laptop slider's beat verbatim ── MACH_BEAT seconds
+    // per card, restarted by any pick (yours or its own), held while the
+    // page is actually scrolling, and asleep unless the rack is really on
+    // stage — an unseen advance would still wake the static frame cache.
+    if (window.__machPick && !reducedMotion && machGate && machScroll > 0.9){
+      var machNow = window.__machSlide || 0;
+      if (machNow !== machSeen){ machSeen = machNow; machBeatAt = clock.elapsedTime + MACH_BEAT; }
+      if (machBeatAt < 0) machBeatAt = clock.elapsedTime + MACH_BEAT;
+      else if (clock.elapsedTime >= machBeatAt){
+        if (scrollActive) machBeatAt = clock.elapsedTime + 0.5;   // the beat waits for quiet
+        else window.__machPick((machNow + 1) % (window.__machCount || 4));
+      }
+    } else machBeatAt = -1;   // off stage: the beat restarts on the next arrival
     var machWant = window.__machSlide || 0;
     var machInner = machWant;
     var machOuter = (machWant !== 0) ? 1 : 0;
@@ -6043,15 +6295,11 @@
     s3P = machRamp(s3P, s3T, s3T > s3P ? machStep : machClear);
     s4P = machRamp(s4P, s4T, s4T > s4P ? machStep : machClear);
     slideAwayP = machRamp(slideAwayP, machGate ? machOuter : 0, machStep);
-    // the scroll's own gate on every slide payload, camera included —
-    // in with the leg-9 landing flight (macWin), out with whichever
-    // flight leaves (macWin's reversal upward, the deploy dive downward)
-    // and with the rack's own fade. this half is still PURE SCRUB: no
-    // time gates, no graded factors, identical in both directions, so
-    // scrolling away and back rewinds the whole thing exactly.
-    var machScroll = revealEase(Math.min(1, Math.max(0, macWin.p)))
-      * (1 - revealEase(Math.min(1, (LEGS[3] ? LEGS[3].p : 0) / 0.45)))
-      * Math.min(1, Math.max(0, (rackFade - 0.5) * 2));
+    // machScroll (hoisted above) is in with the leg-9 landing flight
+    // (macWin), out with whichever flight leaves — macWin's reversal
+    // upward, the deploy dive downward — and with the rack's own fade.
+    // this half is still PURE SCRUB: no time gates, no graded factors,
+    // identical both directions, so scrolling away and back rewinds it.
     // THE CAMERA DOES NOT WAIT ("dont wait to change camera to next
     // slide, you can start it imediatly, but other animations will w8").
     // the lens rides machWant — the card under the cursor RIGHT NOW —
@@ -6251,6 +6499,14 @@
               lapDioMats[dmf].opacity = lapDioMats[dmf].userData.a * dioNext;
             frameDirtyFlag = true;
           }
+          // ...and the slide that is up KEEPS MOVING while it stands —
+          // real-geometry motion only, so this costs a few matrix writes.
+          // soft-dirty like the holo dashboard: it keeps the static-frame
+          // gate live without pretending the scene mutated.
+          if (lapDioAnim && lapDioQ > 0.001 && !reducedMotion){
+            lapDioAnim(clock.elapsedTime, lapDioQ);
+            ambientDirtyFlag = true;
+          }
           // the beat also sleeps while the slides are faded out (faq and
           // beyond) — an invisible rip would still wake the static cache
           if (!reducedMotion && lapDioQ > 0.001 && clock.elapsedTime >= lapSlideAt){
@@ -6405,7 +6661,7 @@
       var prlxU10 = LEGS[10].p * LEGS[10].p * (3 - 2 * LEGS[10].p);
       var prlxU11 = LEGS[11].p * LEGS[11].p * (3 - 2 * LEGS[11].p);
       var prlx14 = LEGS[12].p * LEGS[12].p * (3 - 2 * LEGS[12].p);
-      sty -= (prlxWinM.p * (1 - prlxM3) + prlxWin.p * (1 - prlx10) + prlxWin2.p * (1 - prlx12) + prlxWin3.p * (1 - prlx13) + prlxWin6.p * (1 - prlxU10) + prlxWin7.p * (1 - prlxU11) + prlxWin4.p * (1 - prlx14) + prlxWin5.p) / window.innerHeight * sw * 2 * 0.3;
+      sty -= (prlxWinM.p * (1 - prlxM3) + prlxWin.p * (1 - prlx10) + prlxWin2.p * (1 - prlx12) + prlxWin3.p * (1 - prlx13) + prlxWin6.p * (1 - prlxU10) + prlxWin7.p * (1 - prlxU11) + prlxWin4.p * (1 - prlx14) + prlxWin5.p) / vpH() * sw * 2 * 0.3;
       // the footer ride: the city slides up 5% of the frame (a pure pan
       // on the parallax axis — the orbit never turns), so it stands a
       // touch higher inside the lifted circle
@@ -6494,7 +6750,7 @@
           pinP.set(freeC.x, freeC.y, freeC.z).project(camera);
           var pinHalfH = pinD * Math.tan(camera.fov * Math.PI / 360);
           var pinHalfW = pinHalfH * camera.aspect;
-          var pinDx = (pinP.x - (0.25 * 2 - 1)) * pinHalfW * pinW;
+          var pinDx = (pinP.x - (anchorX(0.25) * 2 - 1)) * pinHalfW * pinW;
           var pinDy = (pinP.y - (1 - 0.5 * 2)) * pinHalfH * pinW;
           pinAx.setFromMatrixColumn(camera.matrixWorld, 0);
           camera.position.addScaledVector(pinAx, pinDx);
@@ -6510,7 +6766,12 @@
         // does not breathe with the pcb while the scroll moves
         if (podsEl && pcbFade > 0){
           var podHalfW = 0.42 * Math.tan(HOME_FOV * Math.PI / 360) * camera.aspect;
-          var podW = ((pcbW || freeC.cell * 0.78) * 0.8 * stageW / (2 * podHalfW)).toFixed(1) + 'px';
+          var podWpx = (pcbW || freeC.cell * 0.78) * 0.8 * stageW / (2 * podHalfW);
+          // a narrow frame projects the board small enough that the pcc
+          // type inside stops reading — floor it, and clamp to the frame
+          if (stageW < 900) podWpx = Math.max(podWpx, Math.min(260, stageW - 40));
+          podWpx = Math.min(podWpx, stageW - 24);
+          var podW = podWpx.toFixed(1) + 'px';
           if (podsEl.style.width !== podW) podsEl.style.width = podW;
           camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
           pinP.set(freeC.x, freeC.y, freeC.z).project(camera);
@@ -6550,7 +6811,7 @@
           var labelT = Math.min(1, Math.max(0, (calcT - 0.2) / 0.6));
           var bodyT  = Math.min(1, Math.max(0, (calcT - 0.4) / 0.6));
           camera.updateMatrixWorld(true);
-          calcV.set(0.84 * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
+          calcV.set(anchorX(0.84) * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
           calcRoot.position.copy(camera.position).addScaledVector(calcV, srr);
           // stand upright, face the lens — then turn -20° about the
           // vertical, a three-quarter view like the rack's (not flat-on)
@@ -6571,7 +6832,7 @@
           // 0.70/0.5 the same way, half the viewport tall, each cube
           // levitating on its own phase (the rack lattice's bob)
           if (calcCubes){
-            calcV.set(0.66 * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
+            calcV.set(anchorX(0.66) * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
             calcCubes.position.copy(camera.position).addScaledVector(calcV, srr);
             calcCubes.rotation.y = Math.atan2(camera.position.x - calcCubes.position.x, camera.position.z - calcCubes.position.z) + 0.5;
             calcCubes.scale.setScalar((0.5 * 2 * srr * Math.tan(camera.fov * Math.PI / 360) / 12.9) * (0.8 + 0.2 * cubesT));
@@ -6592,7 +6853,7 @@
           // breathing on the pod-glow keyframes — 10s cycle, 16↔8 glow
           // every 12.5%, the two neon dropouts at 2-4% and 6-7%
           if (calcGlow){
-            calcV.set(0.84 * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
+            calcV.set(anchorX(0.84) * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
             calcGlow.position.copy(camera.position).addScaledVector(calcV, srr + 1.6);
             // the halo turns WITH the calculator: same -20° stance, same
             // infinite pendulum — it reads as the body's own shadow
@@ -6626,7 +6887,7 @@
           // between the cube column's right edge and the calculator's
           // left edge; reads bottom-up, small terminal type
           if (calcLabel){
-            calcV.set(0.725 * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
+            calcV.set(anchorX(0.725) * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
             calcLabel.position.copy(camera.position).addScaledVector(calcV, srr);
             calcLabel.rotation.set(0,
               Math.atan2(camera.position.x - calcLabel.position.x, camera.position.z - calcLabel.position.z),
@@ -6708,7 +6969,7 @@
         // back at the top: the controls resume the lap from this exact orbit
         scrubHome = null;
         scrubFree = false;
-        controls.enabled = true;
+        controls.enabled = !coarsePointer;
         camera.fov = HOME_FOV; camera.updateProjectionMatrix();
         if (!reducedMotion) controls.autoRotate = true;
         bokeh.uniforms['focus'].value = camera.position.distanceTo(controls.target);
@@ -7807,6 +8068,7 @@
     // frames render the whole chain and refill the cache; static frames
     // replay the cache through the grain pass only. pixel-identical.
     camera.updateMatrixWorld();   // the gate must see the LIVE matrix — render passes are skipped on static frames
+    updateNearWipe();   // the corridor follows the lens; must run before the static-frame gate
     var camMoved = !staticPrevCam.equals(camera.matrixWorld);
     var frameLive = camMoved || renderer.shadowMap.needsUpdate || frameDirtyFlag ||
                     (!reducedMotion && !ghostCalm) || cubeBobbing || ambientDirtyFlag ||
@@ -7922,13 +8184,25 @@
   var GAP = 16, PAD = 24, PAD_Y = 100;   // roomy water above and below the pods
   var CARD_W = 310;
   var GREEN = 'rgb(17,163,42)';
+  // the water's top/bottom margin is a desktop luxury: on a phone the
+  // board already runs twelve rows tall, and 100px of empty grid at each
+  // end is 200px of nothing to scroll past
+  function padY(){ return board.clientWidth < 700 ? 40 : 100; }
 
   // ── layout: a plain grid to start from; every card owns {x,y} after ──
   var pos = [];
   var zTop = 1;
-  function cardW(){ return board.clientWidth < 700 ? 230 : 310; }
+  // under 560 the fixed 230 leaves a dead stripe of grid beside a single
+  // column — the card takes the board's own width instead (floored so the
+  // pcc header never wraps)
+  function cardW(){
+    var W = board.clientWidth;
+    if (W < 560) return Math.max(200, Math.min(300, W - PAD * 2));
+    return W < 700 ? 230 : 310;
+  }
   function layout(){
     CARD_W = cardW();
+    PAD_Y = padY();
     for (var i = 0; i < cards.length; i++) cards[i].style.width = CARD_W + 'px';
     var W = board.clientWidth;
     var cols = Math.max(1, Math.min(cards.length, Math.floor((W - PAD * 2 + GAP) / (CARD_W + GAP))));
@@ -8272,7 +8546,7 @@
   function ease(t){ return t * t * (3 - 2 * t); }
   function coverTick(){
     if (!cover) return;
-    var vh = window.innerHeight;
+    var vh = (window.__vpH ? window.__vpH() : window.innerHeight);
     var r = addonsSec.getBoundingClientRect();
     // entry: rack fades over section top 75%→50% vh (+20% later per user —
     // was 95→70; the seal completes at 75, so revert → fade → cover chain
