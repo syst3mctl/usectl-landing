@@ -54,18 +54,29 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
     <link rel="stylesheet" href="../commercial/gsap/commercial.css">
     <!-- start the model downloads in parallel with the script tags below;
-         GLTFLoader's fetch then hits the http cache instead of the network -->
+         GLTFLoader's fetch then hits the http cache instead of the network.
+         THE FIRST FRAME NEEDS EXACTLY THESE TWO — 11.07 of the 18.47 MB —
+         and they are the only two that ask for the bandwidth at full price -->
     <link rel="preload" href="../models/virtual-city.glb" as="fetch" crossorigin>
     <link rel="preload" href="../models/server_racking_system.glb" as="fetch" crossorigin>
     <!-- the late-loading props start their downloads at t=0 too: their
-         loader.load calls in the rack callback then hit the http cache -->
-    <link rel="preload" href="../models/pcb.glb" as="fetch" crossorigin>
-    <link rel="preload" href="../models/calculator.glb" as="fetch" crossorigin>
-    <link rel="preload" href="../models/laptop.glb" as="fetch" crossorigin>
-    <link rel="preload" href="../models/qblock.glb" as="fetch" crossorigin>
-    <link rel="preload" href="../models/door.glb" as="fetch" crossorigin>
-    <link rel="preload" href="../models/terminal.glb" as="fetch" crossorigin>
-    <link rel="preload" href="../models/card.glb" as="fetch" crossorigin>
+         loader.load calls in the rack callback then hit the http cache.
+         they are DEMOTED, not dropped: `as=fetch` preloads default to HIGH
+         priority, so these seven (7.40 MB of props the ride does not reach
+         for several screens) were sharing the pipe with the city the hero
+         cannot draw without — on a constrained link the opening shot waits
+         behind the calculator. at fetchpriority=low the browser serves the
+         city and the rack first and warms these out of what is left, so the
+         loader chain below still hits a warm cache when it gets to them.
+         (unsupported in older browsers, where it is ignored — i.e. exactly
+         the behaviour this line had before.) -->
+    <link rel="preload" href="../models/pcb.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="../models/calculator.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="../models/laptop.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="../models/qblock.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="../models/door.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="../models/terminal.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="../models/card.glb" as="fetch" crossorigin fetchpriority="low">
 <style>
   :root{
     /* manager-usectl dark theme */
@@ -111,7 +122,7 @@
   /* the glitch KIT — the seven clip polygons and the shimmy the overlay
      runs on. shared with the page's own "Create a machine" (.btn.primary),
      which wears this button's skin at the page's own button size */
-  .nav-cta-btn,.btn.primary,.btn.ghost{
+  .nav-cta-btn,.btn.primary,.btn.ghost,.f-social a{
     --shimmy-distance:5;
     --clip-one:polygon(0 2%, 100% 2%, 100% 95%, 95% 95%, 95% 90%, 85% 90%, 85% 95%, 8% 95%, 0 70%);
     --clip-two:polygon(0 78%, 100% 78%, 100% 100%, 95% 100%, 95% 90%, 85% 90%, 85% 100%, 8% 100%, 0 78%);
@@ -159,11 +170,19 @@
   .mobile-menu a{color:var(--text);font-size:26px;font-weight:500;text-decoration:none}
   @media (max-width:1700px){
     .nav-inner{padding:0 50px}
-    .nav-links a{font-size:.82rem}
+    .nav-links a{font-size:13px}
     .nav-cta-btn{font-size:.8rem;padding:8px 18px}
   }
   @media (max-width:1024px){
     .nav-inner{padding:0 40px}
+  }
+  /* the burger is the PHONE's nav, not a tablet's ("dont make burger in
+     ipad and ipad pro"): an ipad has room for GitHub · Docs · the cta
+     across the top, and it was swapping them for a menu button from
+     1024 down — every ipad in either orientation. 767 is where the
+     links genuinely stop fitting, and it is the same line the rest of
+     the sheet and MOBILE in the scene script call a phone */
+  @media (max-width:767px){
     .nav-right{display:none}
     .mobile-menu-btn{display:flex;align-items:center;justify-content:center}
   }
@@ -578,10 +597,11 @@
   .after #machine .small{margin-top:26px}   /* the note breathes off the card stack */
   /* the cards ARE the slider: HOVERING one drives the scene (no click
      needed), so the whole card — and every glyph inside it — wears the
-     hand, and the hover nudges it a hair off the stack */
+     hand. the card itself STAYS PUT: only its border lights up, so the
+     text you are reading never slides under the pointer */
   .after #machine .grid3 .card,.after #machine .grid3 .card *{cursor:pointer}
-  .after #machine .grid3 .card{transition:background .2s,border-color .2s,box-shadow .25s,transform .25s cubic-bezier(.19,1,.22,1)}
-  .after #machine .grid3 .card:hover{border-color:rgba(165,180,252,.55);transform:translateX(5px)}
+  .after #machine .grid3 .card{transition:background .2s,border-color .2s,box-shadow .25s}
+  .after #machine .grid3 .card:hover{border-color:rgba(165,180,252,.55)}
   .after #machine .grid3 .card.on{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 22px rgba(165,180,252,.18)}
   /* the machine cards carry li lists now: the site's round blue dots
      do the marking, so the title drops its cube glyph; the title
@@ -654,7 +674,9 @@
      rule declared after them */
   .f-inner{max-width:1920px;margin:0 auto;padding:26px 117px;display:flex;align-items:center;justify-content:space-between;gap:14px 40px;flex-wrap:wrap}
   @media (max-width:1700px){.f-inner{padding:26px 50px}}
-  .f-brand{display:flex;align-items:center;gap:14px}
+  /* the credit sits UNDER the mark at every width now — the brand is a
+     stacked block, not a row that survives until the frame runs out */
+  .f-brand{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
   /* the nav's own recipe: the mark is INLINE by default, so its box
      carries the baseline's descender gap under it and the image rides
      a few px high against the credit beside it. flex + block kills the
@@ -668,7 +690,10 @@
      media query adds no specificity: in the nav's 1700 block it would
      lose to .f-logo img further down the sheet */
   @media (max-width:1700px){.nav-logo img,.f-logo img{height:18px}}
-  /* the header's own type everywhere: the nav-links recipe verbatim */
+  /* the header's own type everywhere: the nav-links recipe verbatim.
+     (the hairline that used to stand between the mark and the credit
+     went with the stack — a vertical 1px divider only reads when the
+     two sit side by side) */
   .f-copy{font-size:.88rem;font-weight:500;color:var(--dim);white-space:nowrap}
   /* the link row: no column headings any more — one run of links, each
      one after the first carrying a hairline divider on its left, the
@@ -677,10 +702,29 @@
   .f-links a{position:relative;font-size:.88rem;font-weight:500;color:rgba(255,255,255,.7);text-decoration:none;white-space:nowrap;transition:color .2s}
   .f-links a:hover{color:var(--accent)}
   .f-links a + a::before{content:'';position:absolute;left:-11.5px;top:50%;margin-top:-6px;width:1px;height:12px;background:var(--hair)}
+  /* the footer row takes the nav's own 1700 step — 13px, the same number
+     the header links drop to, so the two ends of the page keep reading
+     as one type size. declared HERE, after the .88rem base above: a
+     media query adds no specificity, so a block further up the sheet
+     would simply lose to it */
+  @media (max-width:1700px){.f-links a,.f-copy{font-size:13px}}
   /* the real site's icons, verbatim — plain white marks, no boxes */
   .f-social{display:flex;gap:16px;align-items:center}
-  .f-social a{display:inline-flex;align-items:center;opacity:.85}
-  .f-social a:hover{opacity:1}
+  /* the marks ship with a hard white fill baked into the svg; currentColor
+     takes it off the anchor instead (a presentation attribute loses to any
+     rule), so the hover can carry them to the page's green */
+  .f-social a{position:relative;display:inline-flex;align-items:center;opacity:.85;color:#fff;transition:color .2s}
+  .f-social a svg{fill:currentColor}
+  .f-social a:hover{opacity:1;color:var(--accent)}
+  /* ...and the glitch is "Create a machine"'s, verbatim: OUR DARK GRAY —
+     the same #1e1d1d the button's .glitch layer is — laid over the mark
+     and ripped by the same seven clips on the same shimmy. it HAS to be
+     an overlay: that table spends half its cycle on clip-four/five, which
+     are zero-height polygons, and the blink-off IS the effect — it is how
+     the thing underneath shows through. run on the mark itself (the last
+     take) it only made the icon vanish. */
+  .f-social a::after{content:'';position:absolute;inset:-2px;background:#1e1d1d;border-radius:2px;pointer-events:none;z-index:2;display:none}
+  .f-social a:hover::after{display:block;animation:glitch 2s infinite}
 
   /* the commercial, racked like a monitor pod */
   .screen{border:1px solid var(--hair);border-radius:var(--radius-sm);overflow:hidden;background:#0d0d0d;margin-top:6px}
@@ -725,10 +769,7 @@
     .after #machine .grid3{gap:18px}
     .f-inner{padding:24px 40px}
     .f-links{gap:6px 20px}
-    /* the credit drops UNDER the mark from the laptop down: the one line
-       runs out of room for logo + credit + links + marks side by side,
-       and the brand reads as a stacked block instead of a squeezed row */
-    .f-brand{flex-direction:column;align-items:flex-start;gap:8px}
+
 
   /* ── ≤1024 · ipad landscape ──────────────────────────────────────── */
   @media (max-width:1024px){
@@ -765,7 +806,13 @@
      the desktop ride has, just spanning the frame instead of half of it.
      the scene's own radial carries the contrast, exactly as it does up
      at 1920. */
-  @media (max-width:768px){
+  /* 767, not 768: an ipad portrait is exactly 768 css px wide and was
+     landing on the PHONE rung — full-width stacked cards — while every
+     wider ipad kept its text docked right ("make same in ipad like in
+     ipad +, in right, text i mean"). the rest of the sheet already says
+     767, and so does MOBILE in the scene script; this was the one rule
+     off by one */
+  @media (max-width:767px){
     .nav-inner{padding:0 24px}
     .after{gap:110px;padding:150px 0 0}
     .after #split,.after #deploy,.after #modes,.after #agents,.after #faq,
@@ -834,6 +881,28 @@
   }
 
   /* ── ≤767 · phones ───────────────────────────────────────────────── */
+  /* ── TALL FRAMES ─────────────────────────────────────────────────
+     the ride is measured in VIEWPORT HEIGHTS: every leg ends when its
+     section's top crosses a vh line, and every show window reaches back
+     from one. the width ladder SHRINKS the gaps as the frame narrows
+     (250 → 200 → 170 → 140 → 110) — which is backwards for a tall frame,
+     where a viewport height is the big number. two sections then land
+     inside one screen and their windows collide: on an ipad portrait the
+     machine's close FINISHED before the split's reveal began (the rack
+     never opened at all) and the machine leg itself collapsed to 1px of
+     scroll, i.e. an instant camera snap. measured, the ride needs about
+     half a viewport height between section tops to stay itself.
+     below 3:2 the gap grows with the frame's own height instead. */
+  @media (max-aspect-ratio: 3/2){
+    /* 34vh, walked back from 46: 46 was sized to rescue the split's
+       reveal when the rack still sat low and late in the shot. with the
+       rack lifted 16% of the frame on these same tall frames the reveal
+       reads early, and the rest was dead air under the section ("u can
+       make less space in bottom of split in ipad"). measured after the
+       trim: the grid still peaks well clear of the desktop's own peak */
+    .after{gap:max(140px, 26vh)}
+  }
+
   @media (max-width:767px){
     .nav-inner{padding:0 20px;height:50px}
     .f-inner{padding:20px 20px}
@@ -1730,13 +1799,31 @@
   // fxaa: the composer bypasses msaa, this brings the edges back
   var fxaa = new THREE.ShaderPass(THREE.FXAAShader);
   composer.addPass(fxaa);
-  // grain 0.15 animated · vignette lens [0.8, 0.25] · chromatic aberration 0.0028
-  var grade = new THREE.ShaderPass({
-    uniforms: { tDiffuse: {value:null}, time: {value:0}, grain: {value: 0.055} },
+  // ── the tail, split in two ──────────────────────────────────────
+  // this used to be ONE pass: chromatic aberration + vignette + grain,
+  // all of it at canvas resolution, three texture fetches per fragment.
+  // and it is the ONE pass a settled frame still runs — the whole point
+  // of the static cache below is that a resting shot replays through it
+  // so the film grain keeps living. which meant a resting shot was
+  // paying, sixty times a second, to recompute two effects that CANNOT
+  // have changed: both the aberration and the vignette are pure
+  // functions of vUv, fixed for the life of the viewport.
+  //   · LENS (here) — aberration + vignette, run once per LIVE frame at
+  //     chain resolution, straight into the cache.
+  //   · GRADE (below) — one fetch plus the grain, and nothing else.
+  // a static frame is now one texture read per pixel instead of three.
+  // NOTE THE ORDER: the aberration still runs AFTER fxaa, exactly as it
+  // did. that is the whole reason for a second pass rather than folding
+  // it into fxaa's own shader — the r/b taps land on an ANTI-ALIASED
+  // image, not a raw one. the only thing that moved is that the fringe
+  // is computed in chain pixels and magnified with everything else; at
+  // 6 canvas px in the corner and 0 at centre it is a soft colour shift,
+  // not detail, so the magnification cannot show.
+  var lens = new THREE.ShaderPass({
+    uniforms: { tDiffuse: {value:null} },
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: [
-      'uniform sampler2D tDiffuse; uniform float time; uniform float grain; varying vec2 vUv;',
-      'float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }',
+      'uniform sampler2D tDiffuse; varying vec2 vUv;',
       'void main(){',
       '  vec2 c = vUv - 0.5; float r = length(c); vec2 dir = c / max(r, 1e-5);',
       '  float ca = 0.0028 * r;',
@@ -1745,9 +1832,22 @@
       '  float cb = texture2D(tDiffuse, vUv - dir * ca).b;',
       '  vec3 col = vec3(cr, base.g, cb);',
       '  col *= smoothstep(1.08, 0.42, r);',
-      '  float g = hash(vUv * 941.7 + fract(time) * 17.0);',
-      '  col += (g - 0.5) * grain;',
       '  gl_FragColor = vec4(col, base.a);',
+      '}'
+    ].join('\n')
+  });
+  composer.addPass(lens);
+  // grain 0.15 animated — the only thing in the tail that moves
+  var grade = new THREE.ShaderPass({
+    uniforms: { tDiffuse: {value:null}, time: {value:0}, grain: {value: 0.055} },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: [
+      'uniform sampler2D tDiffuse; uniform float time; uniform float grain; varying vec2 vUv;',
+      'float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }',
+      'void main(){',
+      '  vec4 base = texture2D(tDiffuse, vUv);',
+      '  float g = hash(vUv * 941.7 + fract(time) * 17.0);',
+      '  gl_FragColor = vec4(base.rgb + (g - 0.5) * grain, base.a);',
       '}'
     ].join('\n')
   });
@@ -1764,14 +1864,28 @@
   var frameCache = new THREE.WebGLRenderTarget(1, 1, {
     minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat
   });
+  // ...and the cache is now TWO targets, because the tail is two passes.
+  // frameCache holds the anti-aliased frame; lensCache holds it again
+  // with the aberration and the vignette on it. only grade runs on a
+  // static frame, and it reads lensCache — so the resting cost is one
+  // fetch and the grain, nothing else. both are filled together on every
+  // live frame, so they can never disagree about which frame they hold.
+  var lensCache = new THREE.WebGLRenderTarget(1, 1, {
+    minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat
+  });
   var frameCacheRB = {texture: frameCache.texture};
+  var lensCacheRB = {texture: lensCache.texture};
   var shaderPassRender = THREE.ShaderPass.prototype.render;
   fxaa.render = function(r2, wb, rb, dt2, mask){
     shaderPassRender.call(fxaa, r2, frameCache, rb, dt2, mask);
   };
   fxaa.needsSwap = false;
+  lens.render = function(r2, wb, rb, dt2, mask){
+    shaderPassRender.call(lens, r2, lensCache, frameCacheRB, dt2, mask);
+  };
+  lens.needsSwap = false;
   grade.render = function(r2, wb, rb, dt2, mask){
-    shaderPassRender.call(grade, r2, wb, frameCacheRB, dt2, mask);
+    shaderPassRender.call(grade, r2, wb, lensCacheRB, dt2, mask);
   };
   var staticPrevCam = new THREE.Matrix4().makeScale(0, 0, 0);
   var frameDirtyFlag = true, frameCacheValid = false;
@@ -1828,6 +1942,23 @@
   // underneath the ride. the stage is sized in svh (the SMALL, stable
   // viewport), so its own box is the honest height to measure against.
   function vpH(){ return stageH || window.innerHeight; }
+  // ...and the RIDE's own ruler, which is not the same thing. every leg
+  // line and every show window is stated in "viewport heights", and that
+  // unit stops working when the viewport is tall: on a 1024x1366 ipad
+  // the machine leg's 0.6 line sits 820px above its section while the
+  // sections are only 678px apart, so the whole approach lands before
+  // the section arrives and what is left for the rack to close in is
+  // SIXTY-FOUR PIXELS — a flick, not an animation ("when i am scrolin on
+  // ipad you dont make racks closin animation").
+  // capping the ruler at 0.75 of the viewport WIDTH makes a tall frame
+  // measure its ride in the proportions a 4:3 one does, and the floor at
+  // 0.55 of the real height keeps a phone from going to the other
+  // extreme. a 16:9 desktop and a 4:3 ipad landscape both return exactly
+  // vpH(), so neither changes by a pixel.
+  function rideH(){
+    var h = vpH();
+    return Math.min(h, Math.max((stageW || window.innerWidth) * 0.75, h * 0.55));
+  }
   // the chain's supersample: the post chain renders at CHAIN_RES × css px
   // and fxaa downstream lands it in the device-px frame cache. 1 was the
   // old css-px chain (edges read as 2×2 device-pixel steps on retina);
@@ -1890,7 +2021,21 @@
     if (bokeh.uniforms.textureWidth) bokeh.uniforms.textureWidth.value = cw;
     if (bokeh.uniforms.textureHeight) bokeh.uniforms.textureHeight.value = ch;
     var pr = renderer.getPixelRatio();
-    frameCache.setSize(w * pr, h * pr);
+    // the cache is filled BY the chain, so it can never hold more than the
+    // chain put into it. sized at DEVICE pixels while the chain runs at
+    // CHAIN_RES × css px, the two disagree: on a retina 1512×982 stage the
+    // chain is 2268×1473 and the cache was 3024×1964 — fxaa magnified
+    // 2268→3024 on the way in and stored the upscale. 2.6M fragments a live
+    // frame of pure resample, and a 23.8MB target holding 13.4MB of picture.
+    // clamped to min(chain, canvas) the SAME bilinear magnification still
+    // happens, one stage later, inside grade — which already samples the
+    // cache — so the image is identical (marginally sharper for losing a
+    // resample stage). the min matters BOTH ways: on a 1× monitor the chain
+    // is larger than the canvas and the cache belongs at canvas size, which
+    // is where the supersample actually resolves.
+    var cacheW = Math.min(cw, Math.round(w * pr)), cacheH = Math.min(ch, Math.round(h * pr));
+    frameCache.setSize(cacheW, cacheH);
+    lensCache.setSize(cacheW, cacheH);   // the tail's second half, same grid
     frameDirtyFlag = true;   // the cache died with the old size
     // fxaa taps step in the CHAIN's texels (a custom-target composer runs
     // at pixelRatio 1, so the chain is cw×ch, not w*pr×h*pr). this was set
@@ -1964,6 +2109,25 @@
   // board through these two planes every few seconds, then healing
   var pcbPlanes = [new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e6), new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e6)];
   var pcbTopY = 0, pcbBotY = 0, pcbBaseX = 0, pcbW = 0, pcbGlitchNext = 1e9, pcbGlitchStart = -1;
+  var pcbBaseS = null, pcbBaseP = null, pcbScaleQ = -1;   // the settled scale/position the reveal grows into
+  // how far off the free cube's center leg 5 settles, in metres. it is a
+  // SHARED number: the leg's re-aim below places the camera at it, and
+  // the pods column sizes its dom cards from the board's projected width
+  // at it. they were two literals — the camera moved and the cards
+  // stayed sized for the old 0.42, so on a 1130px frame the column came
+  // out 461px over a board projecting at 248 ("our pods are to long,
+  // and psd zoom is not correct").
+  // the value itself: 0.42 was the logged settle. 0.525 is that shot as
+  // framed (the width-fit clamps at 0.8 on a ~2:1 window, so 0.42 / 0.8
+  // undoes exactly the 25% it pulls in there) — and it still read as too
+  // big, so 0.70 stands the board a third further out than logged.
+  // NOTE the pod column no longer rides this number. the two were one
+  // knot: tied together, pulling the board back took the cards with it
+  // ("pods are to little width now"), and sizing the cards for a board
+  // the camera had left is what made them 461px over a 248px board.
+  // the board is a backdrop and the cards are the content, so each gets
+  // its own rule — the board a distance, the column a share of the frame
+  var PCB_SETTLE = 0.70;
   // scratch for the legs-4/5 continuous screen pin
   var pinV = new THREE.Vector3(), pinP = new THREE.Vector3(), pinAx = new THREE.Vector3();
   // leg 6's payload: the SAME grey free cube tints to green — per-
@@ -2212,6 +2376,23 @@
   // immediately. OPENING is always MACH_SPEED; only the clearing out is
   // quick, and it is quick on every slide alike.
   var MACH_HANDOVER = 2.8;
+  // ...and slide 3 ('one bill') runs its own pace on both ends — the
+  // corner wedge opening and closing, the slab's cubes, the board and
+  // the pod group ("One bill outer and iner animation of rack is to
+  // fast ... when i switch slides"). the multipliers ride on top of the
+  // two shared speeds, so the whole rig stays one system:
+  //   in  — 0.6/s × 0.6 = 0.36/s, the ride takes 2.8s instead of 1.7
+  //   out — 2.8/s × 0.45 = 1.26/s, 0.8s instead of 0.36
+  // the out is the one with a price. clearing IS the handover: slide 2's
+  // floor gap and this wedge share one set of clip planes in opposite
+  // modes, so the incoming opening is held at zero until this one is
+  // fully shut. at 1.26/s that wait is ~0.8s — still inside the incoming
+  // slide's own ride, so it opens from zero rather than popping in, but
+  // this is the number to raise if a 3→2 switch ever reads as hanging.
+  // NOTE the band tables below are widened by MACH_GW to hold their
+  // duration at the SHARED speed; running slower stretches them with the
+  // ride, which is the point here.
+  var S3_IN = 0.6, S3_OUT = 0.45;
   // the autoplay beat: the same 5s the laptop slider runs on
   var MACH_BEAT = 5, machBeatAt = -1, machSeen = -1;
   // ...and the band tables are tuned in SECONDS, not in ride fraction.
@@ -2247,7 +2428,8 @@
   var S3_TGT = new THREE.Vector3(-2.6939, 2.2994, 0.2608);
   // re-logged shot (az 40.2) with the eye pulled 5.5% down the view
   // axis — the same framing, a touch closer ("more zoom in + 5-6 %")
-  var S3_EYE = new THREE.Vector3(24.1017, 8.9299, 32.3982);   // +10% closer again
+  // ...then pulled back 5% and 8% with every other slide: r 42.3648 → 48.0418
+  var S3_EYE = new THREE.Vector3(27.6923, 9.8184, 36.7046);   // was +10% closer again
   var s3TgtW = new THREE.Vector3(), s3EyeW = new THREE.Vector3();
   // slide 4's payload: a sci-fi control panel bolted to the rack's
   // RIGHT-hand wall (+x — the face this slide's camera turns to the
@@ -2301,7 +2483,9 @@
   // the payment card: slides into the kiosk's reader on the scroll,
   // site green at 0.8, blinking on the city roads' pattern
   var cardRoot = null, cardMats = [], cardQ = -1, cardNeonOff = false, cardZ0 = 0, cardZ1 = 0;
-  var S2_EYE = new THREE.Vector3(6.4551, 5.7053, 8.7048);
+  // pulled back 5% then 8% on its own orbit with every other slide:
+  // r 17.9712 → 20.3794, same az/pol/fov
+  var S2_EYE = new THREE.Vector3(7.9572, 6.2965, 10.4918);
   var S2_TGT = new THREE.Vector3(-4.7548, 1.2931, -4.6307);
   var s2TgtW = new THREE.Vector3(), s2EyeW = new THREE.Vector3();
   // slide 4 ('workloads and previews'): the user-logged three-quarter
@@ -2312,7 +2496,12 @@
   // logged in free-cam at fov 8: r 28.1057, az 56.3, pol 80.4
   var s4P = 0, s4Show = 0, s4Cam = 0;
   var S4_TGT = new THREE.Vector3(-2.4496, 1.5576, -0.3413);
-  var S4_EYE = new THREE.Vector3(20.6125, 6.2434, 15.0247);
+  // ...pulled back 5% along its own orbit ("little zoom out of rack -5%
+  // on slide 4") and 8% more with the others: r 28.1057 → 31.8719,
+  // same az/pol, same fov, so nothing about the framing turns. the
+  // pans in machPose are fractions of the frame's own half-width, so
+  // they grow with it and the composition holds
+  var S4_EYE = new THREE.Vector3(23.7028, 6.8713, 17.0837);
   var s4TgtW = new THREE.Vector3(), s4EyeW = new THREE.Vector3();
   var s2Dir = new THREE.Vector3(), s2Right = new THREE.Vector3(), s2UpV = new THREE.Vector3(), S2_UP = new THREE.Vector3(0, 1, 0);
   // the BASE weight of the camera blend below — the default framing is
@@ -2328,13 +2517,25 @@
   function machPose(i, tgtOut, eyeOut, prlxDy){
     var TGT, EYE, panR, panU, pxR;
     // slide 2: the line centers the display's RIGHT HALF (the text owns
-    // the left) and rides 20% of the frame lower
-    if (i === 1){ TGT = S2_TGT; EYE = S2_EYE; panR = -0.5; panU = 0.4; pxR = 0; }
-    // slide 3: the wide crowd shot, content 14% righter / 24% up, plus a
-    // 4px nudge left in real pixels
+    // the left) and rides 20% of the frame lower. -0.5 → -0.56 is the
+    // shared 3% of the width to the right — it pushes this one FURTHER
+    // right, since its walk already goes that way
+    if (i === 1){ TGT = S2_TGT; EYE = S2_EYE; panR = -0.56; panU = 0.4; pxR = 0; }
+    // slide 3: the wide crowd shot. panR/panU are fractions of the frame's
+    // HALF width/height and they move the RIG, so the content goes the
+    // other way — positive panR walks it LEFT, positive panU walks it
+    // DOWN (slide 4's "a tenth left / a fifth low" reads this correctly;
+    // the note that used to sit here had both backwards).
+    // 0.14 → 0.30 → 0.24 → 0.14: 8% of the full frame width left, then
+    // 3% back right with every other slide, then 5% more right ("one
+    // bill slide more to right + 5%") — which lands it exactly back on
+    // the value it was logged at. plus a 4px nudge in real pixels.
     else if (i === 2){ TGT = S3_TGT; EYE = S3_EYE; panR = 0.14; panU = 0.24; pxR = 4; }
-    // slide 4: the sealed rack right of center, a tenth left / a fifth low
-    else { TGT = S4_TGT; EYE = S4_EYE; panR = 0.1; panU = 0.2; pxR = 0; }
+    // slide 4: the sealed rack right of center, a fifth low — and its
+    // walk left goes 0.1 → 0.26, the same 8% of the full frame width
+    // slides 1 and 3 took, then back 0.04 ("move to right +2%") and
+    // 0.06 more ("move all to right +3%") = 0.16, a net 3% left
+    else { TGT = S4_TGT; EYE = S4_EYE; panR = 0.16; panU = 0.2; pxR = 0; }
     tgtOut.copy(TGT); tgtOut.y += prlxDy * 0.3; tgtOut.add(scrubOff);
     eyeOut.copy(EYE); eyeOut.y += prlxDy * 0.3; eyeOut.add(scrubOff);
     // the responsive frame reaches the slide poses too. these are absolute
@@ -2527,7 +2728,20 @@
       var m = cityMats[di];
       if (!m.userData.__dim) m.userData.__dim = {op: m.opacity, tr: m.transparent, dw: m.depthWrite, ei: m.emissiveIntensity};
       var b = m.userData.__dim;
-      m.opacity = b.op * f;
+      // ── the ghost pays its back faces back ──────────────────────
+      // the x-ray look was built on a city that drew BOTH sides of every
+      // wall, so a sightline through a closed hull laid down two coats
+      // of the same alpha. culling the back face (above) takes one of
+      // them away and the ghost would simply read thinner.
+      // this is the exact compositing identity for it, not a fudged
+      // number: two coats of a over the same ground come out at
+      // 1 - (1-a)², so one coat at that value is bit-for-bit the image
+      // the two used to make. it needs no tuning and it cannot drift —
+      // at a = 1 it is the identity (the opaque city is untouched) and
+      // it only ever does anything while the fade is actually under way.
+      var a = b.op * f;
+      if (m.userData.__culled) a = 1 - (1 - a) * (1 - a);
+      m.opacity = a;
       m.transparent = ghost || b.tr;
       // depth writing stays ON until the city is genuinely faint: flipping
       // it at the start of the fade made every wall blend through every
@@ -2615,19 +2829,124 @@
   // 1512x982 = 1.54), so all of them return exactly 1 and every shot the
   // free-cam logged stays bit-identical to how it was framed. the fit only
   // engages where the frame genuinely stops being wide — tablets down.
-  var DESIGN_ASPECT = 1.5, FIT_POW = 0.88, frameFitK = 1;
+  // ...and the fit is now EXACTLY to width (pow 1, not the old 0.88).
+  // that one exponent is the difference between "a taller window changes
+  // the shot" and "a taller window only adds room above and below":
+  // pose.w is a half-HEIGHT and the horizontal extent is w × aspect, so
+  // holding w × aspect constant — which is what pow 1 does — holds the
+  // subject's WIDTH IN PIXELS fixed for a given viewport width, whatever
+  // the height is. at 0.88 every height change (a window dragged taller,
+  // a landscape/portrait flip, one device's chrome vs another's) resized
+  // the whole scene. the price is the one the old comment named: on a
+  // tall frame the subject keeps its width and gives up height, so it
+  // sits smaller in more air. that is the trade the composition wants —
+  // the scene stays PUT.
+  // ...and it no longer stops at the design aspect either. that clamp is
+  // the other half of the same bug: with fit pinned at 1 the world frame
+  // is fixed in HEIGHT, so the subject's size in pixels rides the window
+  // height directly — measured at 1366 wide, 109 px per world metre at
+  // h768 against 128 at h900. the SAME shot, 17% bigger, for no reason
+  // but the window being taller.
+  // fitting to width at every aspect makes the whole scene a function of
+  // the viewport's WIDTH and nothing else: one constant world width
+  // (10.52m at the split's shot) on every frame, so the rack stands in
+  // the middle of the container's left half at the same size whatever
+  // the height does. THE TRADE, stated plainly: a 16:9 desktop used to
+  // see 12.48m of that shot and now sees 10.52m, i.e. the scene reads
+  // ~19% larger there than it did (every frame under 3:2 — ipads,
+  // phones, short laptop windows — is untouched, they were already
+  // fitted). if the 16:9 desktop should be the one that stays put
+  // instead, DESIGN_ASPECT is the single knob: 1.78 holds it bit-exact
+  // and shrinks everything narrower by the same logic.
+  // the 0.8 floor is the ultrawide guard — past ~21:9 pulling in any
+  // further would crop the subject off the top and bottom.
+  // ── AND A CEILING, WHICH IS THE OTHER HALF OF THE SAME ARGUMENT ──
+  // fitting purely to width has one failure mode and a tall frame is it.
+  // pose.w is a half-HEIGHT, so holding width constant means a taller
+  // window simply gets a taller WORLD — the subject keeps its width in
+  // pixels and everything else is air. measured, at the refrain's shot:
+  //     desktop  1512x982   frame 10.52 m wide x  6.83 m tall
+  //     ipad landscape      frame 10.52 m wide x  7.89 m tall
+  //     ipad portrait       frame 10.52 m wide x 14.02 m tall
+  // the rack is ~3.6 m from floor to top, so it fills 53% of the frame's
+  // height on a desktop and 26% on an ipad in portrait. HALF THE SIZE,
+  // for no reason but the window being tall ("when my scroll is center
+  // then rack must be full size of animation").
+  // the ceiling says: a frame may never stand TALLER than the one the
+  // shots were logged in. past that the fit stops adding height and the
+  // narrow frame closes in on the subject instead, which is what a narrow
+  // frame should do. a 16:9 and a 3:2 desktop are both already under it
+  // (0.843 and 0.974), so every desktop shot is bit-identical to before;
+  // an ipad landscape moves 1.125 -> 1 and an ipad portrait 2.0 -> 1.
+  // FIT_MAX is the single knob: raise it toward 2 to go back to pure
+  // width-fitting, lower it to crop tall frames in harder.
+  var DESIGN_ASPECT = 1.5, FIT_POW = 1, FIT_MAX = 1, frameFitK = 1;
   function frameFit(){
     var a = camera.aspect || DESIGN_ASPECT;
-    return a >= DESIGN_ASPECT ? 1 : Math.pow(DESIGN_ASPECT / a, FIT_POW);
+    return Math.min(FIT_MAX, Math.max(0.8, Math.pow(DESIGN_ASPECT / a, FIT_POW)));
   }
   // the screen anchors (a leg's anchor, the free cube's pin, the
   // calculator's spot) were picked for a frame with half its width free
   // for text. once the sections stack into full-width cards the subject
   // belongs in the MIDDLE instead — this walks every anchored screen x
-  // toward 0.5 as the viewport narrows, on the same aspect ramp.
+  // toward 0.5, on an aspect ramp.
+  // ...but it is keyed to the CSS LADDER and to WIDTH now, never to the
+  // aspect. two reasons, and they are the same reason:
+  //   · the cards only stack at 768 (the sheet's own breakpoint). above
+  //     it they are still docked to one half at 50-58% width, so the
+  //     subject KEEPS ITS OWN HALF — the scene sits in the middle of the
+  //     left side of the container, at every size, which is the whole
+  //     composition. the aspect ramp used to walk it to ~0.42 on any
+  //     tall frame and park it underneath the text.
+  //   · below 768 the stacked cards do want the subject centred, but
+  //     that ramp reads the WIDTH, because aspect is width/HEIGHT: on
+  //     the old one a window dragged taller, or a phone's url bar
+  //     sliding, moved the scene sideways. the width is the honest
+  //     question — "has the layout stacked, and how narrow is it" — and
+  //     it gives the same numbers at 768 and at 320 that the aspect ramp
+  //     did, without the height ever entering into it.
+  // the pcb's own spot, and it does NOT go through the ramp below: the
+  // board and its pod cards live at the CENTRE OF THE LEFT HALF at every
+  // size ("center of left container"). the single thing that may move it
+  // is the frame running out of room — under 900 the column is floored
+  // at 260px so its type still reads, and a 260px column centred at 25%
+  // of a 390px phone hangs 33px off the left edge. then, and only then,
+  // it steps right by exactly enough to stay on screen
+  // the split's two legs, horizontally: the rack keeps the LEFT HALF's
+  // centre everywhere the text is still docked to the right half — an
+  // ipad pro included ("in ipad pro i need see oopened rack animation by
+  // leftside center"). only the phone rung, where the cards stack full
+  // width and there is no right half to dock to, centres it.
+  function splitAnchor(x){
+    return function(){
+      if (window.innerWidth <= 767) return 0.5;
+      // ...and a tablet frame steps it left by 9% of the frame — 5%
+      // ("move more left rack plz in both ipads, - 5%") then 4% more.
+      // same under-3:2 test the vertical lift uses, so it catches an
+      // ipad either way up and an ipad pro either way up, and leaves a
+      // 16:9 desktop alone
+      return (camera.aspect || DESIGN_ASPECT) < DESIGN_ASPECT ? x - 0.09 : x;
+    };
+  }
+  // ...and vertically: a frame under 3:2 is tall, the text block at the
+  // top of it is long, and the rack at its logged 0.58/0.62 sat under
+  // all of it — on an ipad pro the whole opened-rack reveal played below
+  // the fold of the shot. it lifts 16% of the frame there ("u need to
+  // move it up, in split"). same threshold the sheet's tall-frame rule
+  // uses, so the layout and the camera agree on what "tall" means
+  function splitAnchorY(y){
+    return function(){
+      return (camera.aspect || DESIGN_ASPECT) < DESIGN_ASPECT ? y - 0.16 : y;
+    };
+  }
+  function pcbX(){
+    var w = stageW || window.innerWidth;
+    var col = w < 900 ? Math.min(260, w - 40) : 0;
+    return Math.max(0.25, (col / 2 + 12) / w);
+  }
   function anchorX(x){
-    var a = camera.aspect || DESIGN_ASPECT;
-    var k = Math.max(0.28, Math.min(1, (a - 0.45) / (1.5 - 0.45)));
+    if (window.innerWidth > 768) return x;
+    var k = Math.max(0.28, Math.min(1, (window.innerWidth - 320) / (768 - 320)));
     return 0.5 + (x - 0.5) * k;
   }
   // re-applied on every resize, ahead of the leg measuring + anchor solve
@@ -2643,13 +2962,15 @@
     if (scrubHome){ scrubHome.w *= ratio; scrubHome.r *= ratio; }
   }
   var LEGS = [
-    { el: 'split', showFov: 8,   // near-ortho: houses read flat, like a 2d map
+    { el: 'split',
+      minVH: 0.18,   // net only — the opening drop
+      showFov: 8,   // near-ortho: houses read flat, like a 2d map
       endAt: 1,       // was 0.55 → 0.8 → 1 — the hero→map flight completes
                       // the moment the split enters: less scroll spent on
                       // the arrival, more still-map time for the reading
       eye: [8.3293, 16.6845, -2.1475], target: [8.3293, 1.1489, -2.1475],
       // the 8 button holds this screen spot at every resolution
-      anchor: {x: 0.22, y: 0.58, point: [0.0165, 0.8547, -0.8369]} },
+      anchor: {x: 0.22, y: 0.58, fn: splitAnchor(0.22), fnY: splitAnchorY(0.58), point: [0.0165, 0.8547, -0.8369]} },
     { el: 'split',    // the rack building flight — THE SPLIT'S OWN SHOW:
       loggedFov: 8,   // the carve + the green/blue cube grid (the legend's
                       // colors) ride the split's ENTRANCE and the camera
@@ -2658,9 +2979,22 @@
                       // position" — split top ~15% vh)
       endAt: 0.15,
       eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
-      // the rack's center holds the middle of the left half at every aspect
-      anchor: {x: 0.25, y: 0.62, point: [-0.35, 1.6, -1.72]} },
-    { el: 'machine',  // 'what you get' — the section's OWN shot, re-logged
+      // the rack's center holds the middle of the left half at every
+      // aspect — and the middle of the WHOLE frame from a tablet down
+      anchor: {x: 0.25, y: 0.62, fn: splitAnchor(0.25), fnY: splitAnchorY(0.62), point: [-0.35, 1.6, -1.72]} },
+    { el: 'machine',
+      // the gate + rack right of centre — held at this screen spot at EVERY aspect. the pair
+      // below frames it exactly here on a 3:2 window; without the
+      // anchor the rack walks vertically as the window changes shape
+      // (measured across 4:3 -> 21:9 it moves up to a tenth of the
+      // frame's height), because the width-fit re-solves the camera's
+      // DISTANCE per aspect and the rack sits off the look-at centre.
+      // solving at 3:2 returns the logged pose exactly, so this costs
+      // the design frame nothing.
+      anchor: {x: 0.8171, y: 0.7498, point: [-0.35, 1.6, -1.72]},
+     
+      minVH: 0.18,   // net only — the combined turn+push
+      // 'what you get' — the section's OWN shot, re-logged
       loggedFov: 8,   // WIDER for the isolation door (user free-cam framing,
                       // 2026-09-16): the gate + rack read whole, right of
                       // center — the machine text owns the shadowed left
@@ -2668,15 +3002,36 @@
                       // combined move ("in 1 time, not 1 by 1"); the
                       // box-close rides its own fixed macWin
       endAt: 0.6,
-      // pan baked into the logged shot: +10% of the frame height along
-      // camUp ("move rack more to bottom" — 20% was too much, halved)
-      // ...and one more +5% of the frame on the same axis (slide 1's rack
-      // "more bottom + 5%"), then a 2% step BACK up ("to bottom, move it
-      // up + 2%") — +3% net, 0.2103 world units at fov 8, r 50.13, where
-      // the frame is 7.011 tall. panning the rig UP the view plane drops
-      // the rack DOWN in frame — same orbit, same fov, framing untouched
-      eye: [20.1420, 14.2123, 37.5530], target: [-6.6187, 2.5096, -3.1902] },
-    { el: 'deploy',   // leg 4: "the lights come on" — dive toward the free cube
+      // both pans are on the view plane of the LOGGED shot and every step
+      // is recomputed from that logged pose, so the walk never drifts.
+      // the VERTICAL steps are in % of the frame's height (7.011 at fov 8,
+      // r 50.13); the HORIZONTAL ones in % of its WIDTH, which the
+      // width-fit now holds at a constant 10.516 on every viewport — so a
+      // "3% left" is 3% of what the eye actually sees, at any size:
+      //   camUp  +10% ("move rack more to bottom", 20% was too much)
+      //          +5%  ("more bottom + 5%")
+      //          -2%  ("to bottom, move it up + 2%")
+      //          -2%  ("and more top + 2%")            = +1%, 0.0701
+      //   camRight +5% of the HEIGHT ("more left") — which was only 3.3%
+      //            of the width, and read as barely moving
+      //          +3% of the width ("man more left. + 3%")
+      //          +6% of the width ("more!") — doubled, to actually land
+      //          -3% of the width ("move all to right +3%"), measured on
+      //             the frame as it stands after the two pull-backs
+      //                                        = 1.2970 left, 0.3578 back
+      // the rig stepping UP the plane drops the rack DOWN in frame and
+      // stepping RIGHT walks it LEFT — orbit and fov untouched by either,
+      // and this leg carries no anchor, so the pans survive the solve
+      // ...and the whole shot pulled back 5% along its own orbit ("make
+      // all slides zoom out -5%", then "more"): r 50.1308 → 56.8483 in
+      // two steps, az/pol/fov untouched. the pans above are baked into
+      // the pair as absolute world distances, so they hold their
+      // direction and lose the same 13% of their reach in frame terms —
+      // the 12.33% walk left now reads as 10.9% of the width
+      eye: [24.5310, 15.6441, 42.5243], target: [-5.8156, 2.3733, -3.6785] },
+    { el: 'deploy',
+      minVH: 0.18,   // net only
+      // leg 4: "the lights come on" — dive toward the free cube
       loggedFov: 8,   // framed in free-cam at the narrow ride fov
       startAt: 0.8,   // was 1 — the CAMERA waits +20% longer on the zoomed
                       // machine shot; the rack re-open and wink-out keep
@@ -2684,23 +3039,51 @@
       eye: [0.2100, 2.5681, 17.3978], target: [1.4803, 1.8870, -4.6190] },
       // ends at the default 0.55 — the same panel, scrolled to its middle
     { el: 'deploy',   // leg 5: push INSIDE the free cube — the pcb look.
-      endAt: -0.05,   // walked 0.1 → -0.25 → -0.05: stretched past the
-                      // panel top, but -0.25 finished too late ("outer
-                      // animation… now its to late")
+      // walked 0.1 → -0.25 → -0.05: stretched past the panel top, but
+      // -0.25 finished too late ("outer animation… now its to late").
+      // now 0.2, and the reason is arithmetic, not taste: this section
+      // and the addons board are ~0.6 viewport heights apart, the push
+      // ran to 0.05 PAST the deploy top, and the revert that follows had
+      // to finish before the addons cover goes opaque — which left it
+      // ONE PIXEL long at every desktop width, a whole pull-back fired
+      // in a single frame. the section cannot be given more page (the
+      // gap below it has to match the gap above it), so the push gives
+      // up its tail instead and the two share the stretch
+      endAt: 0.2,
       // no fov override: the push lands at the home 50 while the frame
       // narrows — a dolly-zoom straight in, no rotation at all (the leg
       // is re-aimed along leg 4's exact heading once the grid is built)
       eye: [-0.35, 1.9, 0.1], target: [-0.35, 1.9, -1.0] },
-    { el: 'addons',   // the REVERT: pull all the way back out to LEG 3's
+    { el: 'addons',
+      minVH: 0.25,   // net only, and the highest — THE REVERT, the leg that measured 1px
+      // the REVERT: pull all the way back out to LEG 3's
       loggedFov: 8,   // shot — the rack standing left exactly as before the
                       // wink-out — while the crowd returns and the
                       // deployed cube comes back GREEN with a blink.
                       // (order rewire: rides the ADDONS approach now — the
                       // math panel moved to the tail of the page)
-      endAt: 0.75,    // reverted before the addons cover goes opaque
+      // the revert used to end at 0.75 and had one pixel of scroll to
+      // play in ("outer animation make more slowly. give me more scroll
+      // to out it"). it runs to 0.5 now — the last line that still
+      // clears the addons cover, which goes opaque at 45% — and the pcb
+      // push above hands it the rest. no page height was added: the gap
+      // under this section is the same one above it
+      endAt: 0.5,
       eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
       anchor: {x: 0.25, y: 0.62, point: [-0.35, 1.6, -1.72]} },
-    { el: 'agents',   // leg 10: 'built for agents', the SETUP — the camera
+    { el: 'agents',
+      // the street-level setup (under the cover) — held at this screen spot at EVERY aspect. the pair
+      // below frames it exactly here on a 3:2 window; without the
+      // anchor the rack walks vertically as the window changes shape
+      // (measured across 4:3 -> 21:9 it moves up to a tenth of the
+      // frame's height), because the width-fit re-solves the camera's
+      // DISTANCE per aspect and the rack sits off the look-at centre.
+      // solving at 3:2 returns the logged pose exactly, so this costs
+      // the design frame nothing.
+      anchor: {x: 0.1099, y: 0.2897, point: [-0.35, 1.6, -1.72]},
+     
+      minVH: 0.18,   // net only — the under-cover setup for leg 8
+      // leg 10: 'built for agents', the SETUP — the camera
       loggedFov: 8,   // switches to a low street-level frame on the LEFT
                       // (az -54) ENTIRELY under the addons flat: begins a
                       // hair after the cover is opaque (addons top 45% vh)
@@ -2710,8 +3093,33 @@
                       // section's top, not the leg's own)
       startEl: 'addons', startAt: 0.42,
       endAt: 0.85,
-      eye: [-43.1862, 1.7298, 34.5598], target: [6.8413, -0.2224, -1.2387] },
-    { el: 'agents',   // leg 11: the VISIBLE ride — from the street-level
+      // ...and PULLED IN along its own orbit, r 61.5475 -> 55.77. az, pol,
+      // fov and target all untouched, so nothing about the angle turns.
+      // the reason is the shape of the whole film rather than this shot:
+      // measured frame heights put this at 8.608 m against leg 10's
+      // 9.538 — the widest frame in the picture and its runner-up within
+      // 11% of each other, which leaves the film with two 'widest' shots
+      // cancelling each other out instead of one. at 7.800 m leg 10 leads
+      // by 22% and owns it outright.
+      // THE COST, because it is not free: this leg plays under the opaque
+      // addons cover and is never seen at full width — but it is the pose
+      // leg 8 BLENDS FROM, so its climb now starts 10% closer instead of
+      // 19%. the push is smaller. that is the trade; 55.77 is chosen to
+      // keep a real dolly in the move rather than flatten it to a pure
+      // orbit (r 50.1 would have matched leg 8 exactly and killed it).
+      // was: eye: [-43.1862, 1.7298, 34.5598]
+      eye: [-38.4901, 1.5465, 31.1994], target: [6.8413, -0.2224, -1.2387] },
+    { el: 'agents',
+      // the settled laptop shot — held at this screen spot at EVERY aspect. the pair
+      // below frames it exactly here on a 3:2 window; without the
+      // anchor the rack walks vertically as the window changes shape
+      // (measured across 4:3 -> 21:9 it moves up to a tenth of the
+      // frame's height), because the width-fit re-solves the camera's
+      // DISTANCE per aspect and the rack sits off the look-at centre.
+      // solving at 3:2 returns the logged pose exactly, so this costs
+      // the design frame nothing.
+      anchor: {x: 0.0728, y: 0.5940, point: [-0.35, 1.6, -1.72]},
+        // leg 11: the VISIBLE ride — from the street-level
       loggedFov: 8,   // start it climbs and orbits right (az -54 → -35)
                       // to the settled laptop shot while the reveal plays
                       // and the section reads
@@ -2720,8 +3128,26 @@
       // 1.5153, -1.1268]) panned HALF A METER along screen-UP in the
       // view plane (same orbit, same fov): the CONTENT lands lower in
       // the frame — "more bottom", 1m was "to much"
-      eye: [-22.7296, 12.8090, 39.0390], target: [5.1257, 2.0036, -1.2155] },
-    { el: 'for',      // leg 12: 'who it is for' — a near-frontal shot at
+      // ...and then, on the same plane ("move rack more right + 5% and
+      // more top + 5%"): 5% of the frame's WIDTH along −camRight (0.5258
+      // — the rig steps left, the rack walks right) and 5% of its HEIGHT
+      // along −camUp (0.3505 — the rig steps down, the rack lifts). the
+      // frame here is 7.011 tall by 10.516 wide at fov 8, r 50.13; the
+      // whole shot pans, laptop included, since the orbit never turns
+      eye: [-23.2050, 12.4667, 38.8019], target: [4.6503, 1.6613, -1.4526] },
+    { el: 'for',
+      // the near-frontal rack — held at this screen spot at EVERY aspect. the pair
+      // below frames it exactly here on a 3:2 window; without the
+      // anchor the rack walks vertically as the window changes shape
+      // (measured across 4:3 -> 21:9 it moves up to a tenth of the
+      // frame's height), because the width-fit re-solves the camera's
+      // DISTANCE per aspect and the rack sits off the look-at centre.
+      // solving at 3:2 returns the logged pose exactly, so this costs
+      // the design frame nothing.
+      anchor: {x: 0.4566, y: 0.3386, point: [-0.35, 1.6, -1.72]},
+     
+      minVH: 0.18,   // net only
+      // leg 12: 'who it is for' — a near-frontal shot at
       loggedFov: 8,   // the rack (az 2.8, just under level); the text owns
                       // the left, the radial crosses RIGHT, and the rack's
                       // front-left corner opens HALF its width onto the
@@ -2743,8 +3169,17 @@
       // otherwise. 2.5% of the frame = 0.0597 world units here (fov 8 at
       // 17.07 out: the frame is 2.388 tall), which is the unit every one
       // of these nudges has used.
-      eye: [0.5227, 0.3077, 12.5593], target: [-0.3022, 1.3128, -4.4638] },
-    { el: 'modes',    // 'our metal, or yours' — pull wide and level,
+      // ...and pulled back along its own orbit, 12% then 18% more ("make
+      // more zoom out of laptop", "more zoomout"): r 17.0727 → 22.5633,
+      // a third further out than logged, same az/pol/fov — the frame
+      // goes 2.388 → 3.156 tall and the laptop reads a quarter smaller.
+      // NOTE every pan note above is quoted in 2.5% steps of the OLD
+      // 2.388 frame (0.0597 units); they are baked into the pair, so
+      // they keep their world distance and lose a quarter of their reach
+      eye: [0.7880, -0.0155, 18.0340], target: [-0.3022, 1.3128, -4.4638] },
+    { el: 'modes',
+      minVH: 0.18,   // net only
+      // 'our metal, or yours' — pull wide and level,
       loggedFov: 8,   // framed in free-cam; the look center sits between
                       // the rack and its clone, both racks in frame
                       // (order rewire: now SEVENTH, just before the math;
@@ -2753,7 +3188,9 @@
       startAt: 0.72,
       endAt: 0.45,
       eye: [0.7027, 5.0724, 63.4526], target: [7.7103, 2.6830, -4.3409] },
-    { el: 'math',     // 'the math' — the wide leg-3 shot returns; the metal
+    { el: 'math',
+      minVH: 0.18,   // net only
+      // 'the math' — the wide leg-3 shot returns; the metal
       loggedFov: 8,   // show reverses on machineWin (re-anchored to #math),
                       // the sealed racks fade on rackOutWin and the
                       // calculator takes the right circle on calcWin
@@ -2761,7 +3198,19 @@
       endAt: 0.6,
       eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
       anchor: {x: 0.25, y: 0.62, point: [-0.35, 1.6, -1.72]} },
-    { el: 'faq',      // leg 13: faq — user-logged wide shot from the left
+    { el: 'faq',
+      // the wide shot from the left — held at this screen spot at EVERY aspect. the pair
+      // below frames it exactly here on a 3:2 window; without the
+      // anchor the rack walks vertically as the window changes shape
+      // (measured across 4:3 -> 21:9 it moves up to a tenth of the
+      // frame's height), because the width-fit re-solves the camera's
+      // DISTANCE per aspect and the rack sits off the look-at centre.
+      // solving at 3:2 returns the logged pose exactly, so this costs
+      // the design frame nothing.
+      anchor: {x: 0.2057, y: 0.7501, point: [-0.35, 1.6, -1.72]},
+     
+      minVH: 0.18,   // net only
+      // leg 13: faq — user-logged wide shot from the left
       loggedFov: 8,   // (az -40.5, pol 80.9, r 35.01; re-logged wider from
                       // the first r 17.97 take); the text is docked RIGHT,
                       // the radial slides back LEFT on faqWin, the laptop
@@ -2770,8 +3219,34 @@
       endAt: 0.45,   // the for-leg's stretched pace — same calm entry
       // panned +0.98 along screen-up (20% of the fov-8 frame, walked in
       // 5+5+10 steps) so the rack lands lower ("move rack lower +10%")
-      eye: [-18.8736, 7.8455, 24.1595], target: [3.5796, 2.2849, -2.1184] },
-    { el: 'cta',      // leg 15: the cta — the HERO's start camera, VERBATIM
+      // ...and 5% of the frame's WIDTH along −camRight, twice ("faq rack
+      // move to right + 5%", then again): 0.7344 world units in total —
+      // this shot stands closer than the others (r 35.01, frame 4.896
+      // tall by 7.344 wide), so a percentage here is a smaller step in
+      // metres than the same percentage on the wide legs. the rig goes
+      // left, the rack right
+      // ...and SWUNG FURTHER LEFT on its own orbit, az -40.5 -> -62.0.
+      // radius (35.0085), polar, fov, target and the anchor above are all
+      // untouched — every pan logged into this pair keeps its world
+      // distance, and the anchor keeps the rack on the same screen spot.
+      // ONLY THE FACE WE SEE CHANGES.
+      // why: at -40.5 this shot sat 11 degrees off the refrain that legs
+      // 2, 6 and 11 all share (-29.5). eleven degrees is under the angle
+      // at which two shots of one subject read as different shots — on a
+      // cut that is a jump cut, and on a continuous scrub it is worse,
+      // because the camera is seen to MOVE FOR NO REASON: too far to be a
+      // hold, too little to be a new angle, as the film's last statement
+      // before the cta. at -62 the swing is 32.5 degrees and it reads as
+      // what it is, a new look at the machine while the lid shuts on it.
+      // this was possible to do SAFELY only because of the anchor: without
+      // it, turning the orbit would have thrown away every "+5% right"
+      // that was panned into the logged pair.
+      // TO REVERT, one line — the anchor holds either way:
+      // was: eye: [-19.4320, 7.8455, 23.6825]
+      eye: [-27.4971, 7.8455, 13.6314], target: [3.0212, 2.2849, -2.5954] },
+    { el: 'cta',
+      minVH: 0.18,   // net only
+      // leg 15: the cta — the HERO's start camera, VERBATIM
                       // (the page-load view, fov 50): same eye, same
                       // target, no anchor, no re-aim. the radial circle
                       // slides to top center on the same window.
@@ -2825,7 +3300,8 @@
     anchorCam.updateProjectionMatrix();
     anchorPt.fromArray(L.anchor.point);
     var t = new THREE.Vector3(P.tx, P.ty, P.tz);
-    var ndcX = anchorX(L.anchor.x) * 2 - 1, ndcY = 1 - L.anchor.y * 2;
+    var ndcX = (L.anchor.fn ? L.anchor.fn() : anchorX(L.anchor.x)) * 2 - 1;
+    var ndcY = 1 - (L.anchor.fnY ? L.anchor.fnY() : L.anchor.y) * 2;
     for (var i = 0; i < 2; i++){
       anchorCam.position.set(t.x + ox, t.y + oy, t.z + oz);
       anchorCam.lookAt(t);
@@ -2839,10 +3315,95 @@
     }
     L.solved = {x: t.x, y: t.y, z: t.z};
   }
+  // ── SHOT LENGTH FLOORS ───────────────────────────────────────────
+  // until now no shot in this film had a length anyone CHOSE. a leg runs
+  // from the previous leg's end to its own section's top crossing a vh
+  // line, so its length is the distance between two section tops — i.e.
+  // whatever the copy in between happens to be tall. the only floor in
+  // the whole system was `Math.max(L.start + 1, ...)`: ONE PIXEL.
+  // that is not theoretical. leg 6 is the revert — the pull back out of
+  // the machine, the payoff for the one lens event in the film — and it
+  // measured ONE PIXEL LONG at every desktop width until #deploy was
+  // given a 50vh bottom margin by hand. the same failure on a tall frame
+  // is what the `max-aspect-ratio: 3/2` gap in the sheet is patching.
+  // two splints, one cause, and the next copy edit re-opens it silently.
+  // so: a leg may now state a `minVH`, and if the layout does not give it
+  // that much scroll, the deficit is injected as margin above its OWN
+  // section — which lengthens exactly that one ride and nothing else,
+  // because every other window is measured from its own section's top.
+  // it is iterated, because pushing a section down moves every section
+  // after it, and it is recomputed from zero on every measure so it can
+  // never accumulate across a resize.
+  // THESE FLOORS ARE A NET, NOT A PREFERENCE. the page's own answer to
+  // the short-revert problem is to rebalance the GATES — leg 5 gives up
+  // its tail at endAt 0.2 and leg 6 lands at 0.5, so the two share the
+  // stretch — precisely because the section cannot be handed more page
+  // without the gap below it disagreeing with the gap above it. that is
+  // the better fix and it is the one in force. the numbers below sit far
+  // underneath it: 0.18 of a viewport (0.25 for the revert) is about the
+  // point where a camera move stops being a move and becomes a snap, so
+  // on any frame where the gates do their job these add exactly nothing.
+  // they exist for the frame where the gates CANNOT do their job — a tall
+  // window where two section tops land inside one screen — and for the
+  // copy edit that quietly shortens a section a year from now.
+  // if you ever see the page grow, that is this firing, and the honest
+  // read is that the gates need rebalancing at that size, not that the
+  // net is wrong.
+  // only legs whose length is genuinely layout-dependent carry a floor:
+  // a leg measured top-to-top off ONE section (2, 5, 8) has a fixed span
+  // no amount of margin can change, and padding for it would just make
+  // the page longer for nothing.
+  var legPad = null;
+  function padSections(){
+    for (var id in legPad){
+      var n = document.getElementById(id);
+      if (n) n.style.marginTop = legPad[id] > 0.5 ? legPad[id].toFixed(1) + 'px' : '';
+    }
+  }
+  function layLegs(){
+    var prev = 0;
+    for (var mi = 0; mi < LEGS.length; mi++){
+      var L = LEGS[mi];
+      L.start = Math.max(0, prev - (L.early || 0) * vpH());
+      var sN = L.startEl ? document.getElementById(L.startEl) : L.node;
+      if (L.startAt && sN) L.start = Math.max(L.start,
+        sN.getBoundingClientRect().top + window.pageYOffset - vpH() * L.startAt);
+      L.end = Math.max(L.start + 1, L.node ?
+        L.node.getBoundingClientRect().top + window.pageYOffset - vpH() * (L.endAt || 0.55) : L.start + 1);
+      prev = L.end;
+    }
+  }
+  function floorLegs(){
+    if (!legPad){
+      legPad = {};
+      for (var i0 = 0; i0 < LEGS.length; i0++) if (LEGS[i0].el) legPad[LEGS[i0].el] = 0;
+    }
+    for (var z in legPad) legPad[z] = 0;
+    padSections();                      // start from the sheet's own spacing
+    for (var pass = 0; pass < 4; pass++){
+      layLegs();
+      // one top-up per SECTION per pass, the largest deficit asked of it —
+      // two legs can share a section (split, deploy, agents) and must not
+      // both bill it for the same gap
+      var need = null;
+      for (var li = 0; li < LEGS.length; li++){
+        var L = LEGS[li];
+        if (!L.minVH || !L.el) continue;
+        var miss = L.minVH * vpH() - (L.end - L.start);
+        if (miss > 1){ need = need || {}; need[L.el] = Math.max(need[L.el] || 0, miss); }
+      }
+      if (!need) break;
+      for (var k in need) legPad[k] += need[k];
+      padSections();
+    }
+  }
   function measureScrub(){
     // the frame first: the legs' poses and every anchor solve below read
     // pose.w, so the viewport's fit has to be in before either runs
     applyFrameFit();
+    // lay the legs out and top up any that came in under their floor;
+    // returns with every L.start / L.end final
+    floorLegs();
     // each leg ends when its section's top reaches 55% of the viewport
     var prev = 0;
     for (var mi = 0; mi < LEGS.length; mi++){
@@ -2852,16 +3413,16 @@
       // `endAt` is the viewport fraction the section top must reach for the
       // leg to be done (default 0.55 = lower middle; 1 = the moment the
       // section enters from the bottom).
-      L.start = Math.max(0, prev - (L.early || 0) * vpH());
+      L.start = Math.max(0, prev - (L.early || 0) * rideH());
       // `startAt` (viewport fraction) delays a leg past the previous end:
       // it begins only once its section's top reaches that line —
       // `startEl` points that measurement at ANOTHER section (leg 10
       // starts off the addons top, so it rides under the gray cover)
       var sN = L.startEl ? document.getElementById(L.startEl) : L.node;
       if (L.startAt && sN) L.start = Math.max(L.start,
-        sN.getBoundingClientRect().top + window.pageYOffset - vpH() * L.startAt);
+        sN.getBoundingClientRect().top + window.pageYOffset - rideH() * L.startAt);
       L.end = Math.max(L.start + 1, L.node ?
-        L.node.getBoundingClientRect().top + window.pageYOffset - vpH() * (L.endAt || 0.55) : L.start + 1);
+        L.node.getBoundingClientRect().top + window.pageYOffset - rideH() * (L.endAt || 0.55) : L.start + 1);
       prev = L.end;
       if (L.anchor) solveAnchor(L);
     }
@@ -2870,12 +3431,12 @@
     if (calcNode){
       var calcRect = calcNode.getBoundingClientRect();
       var calcTop = calcRect.top + window.pageYOffset;
-      calcWin.start = calcTop - vpH() * 0.55;
-      calcWin.end = Math.max(calcWin.start + 1, calcTop - vpH() * 0.25);
+      calcWin.start = calcTop - rideH() * 0.55;
+      calcWin.end = Math.max(calcWin.start + 1, calcTop - rideH() * 0.25);
       // the rack leaves over math top 75% → 50% vh ("delay is so big" —
       // the whole math train moved 10% vh earlier)
-      rackOutWin.start = calcTop - vpH() * 0.75;
-      rackOutWin.end = Math.max(rackOutWin.start + 1, calcTop - vpH() * 0.5);
+      rackOutWin.start = calcTop - rideH() * 0.75;
+      rackOutWin.end = Math.max(rackOutWin.start + 1, calcTop - rideH() * 0.5);
       // the release point: once the math panel's bottom passes the
       // calculator's bottom, the whole composition scrolls out with it
       calcMathBot = calcTop + calcRect.height;
@@ -2886,21 +3447,21 @@
       var metalTop = metalNode.getBoundingClientRect().top + window.pageYOffset;
       // order rewire: shifted LATER (was 0.9→0.6) — 'for' now precedes
       // modes, and the early window played the clone show over its tail
-      metalWin.start = metalTop - vpH() * 0.72;
-      metalWin.end = Math.max(metalWin.start + 1, metalTop - vpH() * 0.45);
+      metalWin.start = metalTop - rideH() * 0.72;
+      metalWin.end = Math.max(metalWin.start + 1, metalTop - rideH() * 0.45);
       // the plates start typing the moment the CLONING starts (metalWin
       // p 0.4 ≈ top 78% vh): '[ our metal ]' writes while the clone
       // slides, '[ your metal ]' picks up right as it lands
-      rackLblWin.start = metalTop - vpH() * 0.6;
-      rackLblWin.end = Math.max(rackLblWin.start + 1, metalTop - vpH() * 0.35);
+      rackLblWin.start = metalTop - rideH() * 0.6;
+      rackLblWin.end = Math.max(rackLblWin.start + 1, metalTop - rideH() * 0.35);
     }
     // the deploy show window: deploy top 100% → 55% vh (the dive leg's
     // ORIGINAL span, frozen — "only camera" gets delayed, not the shows)
     var depNode = document.getElementById('deploy');
     if (depNode){
       var depTop = depNode.getBoundingClientRect().top + window.pageYOffset;
-      depWin.start = depTop - vpH() * 1.0;
-      depWin.end = Math.max(depWin.start + 1, depTop - vpH() * 0.55);
+      depWin.start = depTop - rideH() * 1.0;
+      depWin.end = Math.max(depWin.start + 1, depTop - rideH() * 0.55);
     }
     // the machine show window: machine top 90% → 60% vh (the zoom leg's
     // original span, frozen — the box-close stays put while the camera
@@ -2908,17 +3469,43 @@
     var macNode = document.getElementById('machine');
     if (macNode){
       var macTop = macNode.getBoundingClientRect().top + window.pageYOffset;
-      macWin.start = macTop - vpH() * 0.9;
-      macWin.end = Math.max(macWin.start + 1, macTop - vpH() * 0.6);
+      macWin.start = macTop - rideH() * 0.9;
+      macWin.end = Math.max(macWin.start + 1, macTop - rideH() * 0.6);
       // the split's rack seal: earlier than the machine show but NOT
       // rushed — starts as the split leaves (105vh), lands at 70vh
       // (115→80 closed too early/fast — "ending end so fast")
-      macCloseWin.start = macTop - vpH() * 1.05;
-      macCloseWin.end = Math.max(macCloseWin.start + 1, macTop - vpH() * 0.70);
+      // ...and it is FLOORED on the split leg. the split's own show — the
+      // shell turning to glass, the machine grid coming up — runs over
+      // LEGS[1].p 0.7→1 and is multiplied by (1 - macClose). this window
+      // reaches 105% vh back from the machine's top, which on a tall
+      // frame is further than the whole split section: the close was
+      // already FINISHED before the reveal began, so the rack never
+      // opened at all. measured, as the fraction of this window already
+      // spent when the split leg ends: 0.89 on a 1920x1080 desktop (the
+      // brief peak the shot is built around — that is the look), but
+      // 1.03 on an ipad landscape and 1.60 in portrait, i.e. dead, and
+      // 0.99 on a phone. flooring the start at the reveal's own start —
+      // and the end just past the leg, capped at the machine leg's
+      // landing (the box must be shut when the shot arrives) — hands
+      // every frame the desktop's phasing instead of the layout's luck.
+      var l1 = LEGS[1];
+      var l1End = l1 ? l1.end : 0;
+      // the floor is the split leg's END, not the start of its reveal.
+      // flooring at the reveal's start still let the close run alongside
+      // it: the grid peaked at 0.35 halfway through and was shut again by
+      // the time the split's shot settled — which is exactly where the
+      // section is read, and where the rack was found sealed ("u need
+      // open fucken rack when i am in this position"). the split's own
+      // show now finishes whole, the box stands OPEN for the reading,
+      // and the close is what the machine's approach does afterwards
+      macCloseWin.start = Math.max(macTop - rideH() * 1.05, l1End);
+      var macCloseEnd = Math.max(macTop - rideH() * 0.70, l1End + rideH() * 0.04);
+      if (LEGS[2]) macCloseEnd = Math.min(macCloseEnd, LEGS[2].end);
+      macCloseWin.end = Math.max(macCloseWin.start + 1, macCloseEnd);
       // the door show starts the moment the leg-9 camera lands (60vh)
       // and seals by 30vh — the earlier/tighter ride ("its to late")
-      doorWin.start = macTop - vpH() * 0.60;
-      doorWin.end = Math.max(doorWin.start + 1, macTop - vpH() * 0.30);
+      doorWin.start = macTop - rideH() * 0.60;
+      doorWin.end = Math.max(doorWin.start + 1, macTop - rideH() * 0.30);
       // the exit rides the DEPLOY leg's departure ("make it when rack
       // is start goin to next leg"): it begins the moment the camera
       // starts pulling away and completes just past mid-flight —
@@ -2942,8 +3529,8 @@
     var machNode = document.getElementById('math');
     if (machNode){
       var machTop = machNode.getBoundingClientRect().top + window.pageYOffset;
-      machineWin.start = machTop - vpH() * 0.9;
-      machineWin.end = Math.max(machineWin.start + 1, machTop - vpH() * 0.6);
+      machineWin.start = machTop - rideH() * 0.9;
+      machineWin.end = Math.max(machineWin.start + 1, machTop - rideH() * 0.6);
     }
     // the agents window rides EXACTLY leg 10's span (measured above):
     // the radial's crossing to the left happens with the camera switch,
@@ -2956,8 +3543,8 @@
     var agTermNode = document.querySelector('#agents .term-chat');
     if (agTermNode){
       var agTermTop = agTermNode.getBoundingClientRect().top + window.pageYOffset;
-      agTermWin.start = agTermTop - vpH() * 0.95;
-      agTermWin.end = Math.max(agTermWin.start + 1, agTermTop - vpH() * 0.7);
+      agTermWin.start = agTermTop - rideH() * 0.95;
+      agTermWin.end = Math.max(agTermWin.start + 1, agTermTop - rideH() * 0.7);
     }
     // the 'who it is for' window: top 90% → 45% vh, in step with its leg
     // (was → 60%: stretched with the leg's endAt so the un-type, the lid
@@ -2966,28 +3553,28 @@
     var forNode = document.getElementById('for');
     if (forNode){
       var forTop = forNode.getBoundingClientRect().top + window.pageYOffset;
-      forWin.start = forTop - vpH() * 0.9;
-      forWin.end = Math.max(forWin.start + 1, forTop - vpH() * 0.45);
+      forWin.start = forTop - rideH() * 0.9;
+      forWin.end = Math.max(forWin.start + 1, forTop - rideH() * 0.45);
     }
     // the faq window: top 90% → 45% vh, in step with its leg — radial
     // back left, lid shut, laptop opacity 0, all on the same beat
     var faqNode = document.getElementById('faq');
     if (faqNode){
       var faqTop = faqNode.getBoundingClientRect().top + window.pageYOffset;
-      faqWin.start = faqTop - vpH() * 0.9;
-      faqWin.end = Math.max(faqWin.start + 1, faqTop - vpH() * 0.45);
+      faqWin.start = faqTop - rideH() * 0.9;
+      faqWin.end = Math.max(faqWin.start + 1, faqTop - rideH() * 0.45);
     }
     // the cta window: top 90% → 60% vh (the section is last — 60 stays
     // reachable with just the footer and the band's padding below it)
     var ctaNode = document.getElementById('cta');
     if (ctaNode){
       var ctaTop = ctaNode.getBoundingClientRect().top + window.pageYOffset;
-      ctaWin.start = ctaTop - vpH() * 0.9;
-      ctaWin.end = Math.max(ctaWin.start + 1, ctaTop - vpH() * 0.6);
+      ctaWin.start = ctaTop - rideH() * 0.9;
+      ctaWin.end = Math.max(ctaWin.start + 1, ctaTop - rideH() * 0.6);
       // the footer window: whatever scroll remains AFTER the cta leg
       // lands (the footer + the band's padding — ~0.3vh) — pinned to the
       // document's true end so "at the very bottom" is always p = 1
-      var footMaxS = Math.max(1, document.documentElement.scrollHeight - vpH());
+      var footMaxS = Math.max(1, document.documentElement.scrollHeight - rideH());
       footWin.start = ctaWin.end;
       footWin.end = Math.max(footWin.start + 1, footMaxS);
     }
@@ -2998,7 +3585,7 @@
     var adNode = document.getElementById('addons');
     if (adNode){
       var adTop = adNode.getBoundingClientRect().top + window.pageYOffset;
-      addonsMidY = adTop + adNode.offsetHeight * 0.5 - vpH() * 0.5;
+      addonsMidY = adTop + adNode.offsetHeight * 0.5 - rideH() * 0.5;
       setChainRes((window.pageYOffset || 0) > addonsMidY ? CHAIN_LAP : CHAIN_HI);
     }
   }
@@ -3008,6 +3595,17 @@
   // re-measure so the scroll windows stay exact (cheap, runs once)
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureScrub);
   measureScrub();
+  // testing hook: the renderer's own counters for the CURRENT frame —
+  // draw calls, triangles, programs, plus what the post chain is set to.
+  // three resets render.calls/triangles on every render(), so this reads
+  // whatever the last frame cost; call it after a frame has landed
+  window.__gpuDbg = function(){
+    var r = renderer.info.render, m = renderer.info.memory;
+    return {calls: r.calls, tris: r.triangles, lines: r.lines, points: r.points,
+            geometries: m.geometries, textures: m.textures, programs: renderer.info.programs.length,
+            chain: CHAIN_RES, dpr: renderer.getPixelRatio(), tier: MQ.tier,
+            dof: bokeh.enabled, bloom: bloom.enabled, live: !!(window.__liveWhy && window.__liveWhy.live)};
+  };
   // testing hook: read the ride's state from the console
   var dbgDt = 0.016;   // rolling frame-time average, testing only
   window.__scrubDbg = function(){
@@ -3207,6 +3805,34 @@
         }
         // the building bodies sit on the manager black, not the file's navy
         if (m.name === '20_-_sdsd' || m.name === '20_-_Default') m.color.copy(HOME);
+        // ── BACKFACE CULLING, and only where it is PROVEN safe ──────
+        // every one of the file's 14 materials ships doubleSided:true.
+        // that is the exporter's default, not a modelling decision, and
+        // it is the most expensive default in the scene: in the ghost
+        // state the city draws with depthWrite off, so a back face has
+        // nothing to reject it and blends exactly like a front one.
+        // WHICH materials can lose it is not a guess. counting how many
+        // edges of each material's welded geometry are shared by two
+        // triangles (closed) versus one (an open sheet, where the back
+        // face IS the other side of the thing):
+        //     FlatDeprecated  1,045,338 tris   0.02% open   -> CLOSED
+        //     Wire            1,779,856 tris   0.05% open   -> CLOSED
+        //     20_-_Default       25,696 tris  52.68% open   -> a SHEET
+        //     HyperGrid           6,924 tris  77.31% open   -> a SHEET
+        //     22_-_Defaultsd      6,682 tris  56.33% open   -> a SHEET
+        //     Light / Highlighter / Streamers / 20_-_sdsd ... all sheets
+        // so exactly two families lose their back faces — and they are
+        // 2,825,194 of the city's 2,878,852 triangles, 98.1% of it. the
+        // rest keep both sides, because for them both sides are real.
+        // shadowSide is pinned to DoubleSide so the shadow map still
+        // renders precisely what it rendered before (three flips the
+        // side for shadows when a material is single-sided, which would
+        // have moved the rack's shadow by the buildings' wall thickness).
+        if (m.name === 'FlatDeprecated' || m.name === 'Wire'){
+          m.side = THREE.FrontSide;
+          m.shadowSide = THREE.DoubleSide;
+          m.userData.__culled = true;   // applyCityDim pays the ghost back, below
+        }
         if (m.map) m.map.anisotropy = maxAniso;
         if (m.emissiveMap) m.emissiveMap.anisotropy = maxAniso;
         if (cityMats.indexOf(m) === -1) cityMats.push(m);
@@ -3699,20 +4325,26 @@
         cubeCol = [{r: 2, i: freeFi, wallOnly: false}];
         // aim leg 5 straight INTO the free cube along leg 4's exact
         // heading — azimuth and polar identical, so the blend is a pure
-        // dolly (no orbit around the cube), settling 0.42m off its
-        // center at the home fov: the board fills half the frame height
+        // dolly (no orbit around the cube). it settled 0.42m off the
+        // cube's center at the home fov, where the board filled half the
+        // frame height; 0.56 then 0.78 stand it back to where the board
+        // reads at ~27% of the frame ("psd is zoomin to much", "again
+        // its to big"). the free cube folds away entirely on this leg,
+        // so standing further out only ever shows more empty room — and
+        // the pin holds the cube at (0.25, 0.5) at any distance, so the
+        // spot on screen is untouched
         var P4 = LEGS[3].pose, s4 = Math.sin(P4.pol);
         LEGS[4].eye = [
-          freeC.x + s4 * Math.sin(P4.az) * 0.42,
-          freeC.y + Math.cos(P4.pol) * 0.42,
-          freeC.z + s4 * Math.cos(P4.az) * 0.42
+          freeC.x + s4 * Math.sin(P4.az) * PCB_SETTLE,
+          freeC.y + Math.cos(P4.pol) * PCB_SETTLE,
+          freeC.z + s4 * Math.cos(P4.az) * PCB_SETTLE
         ];
         LEGS[4].target = [freeC.x, freeC.y, freeC.z];
         // legs 4 AND 5 both pin the pcb cube to the center of the frame's
         // left half: the dive zooms straight at it (no swimming in from
         // the side) and the push stops on the same spot
-        LEGS[3].anchor = {x: 0.25, y: 0.5, point: [freeC.x, freeC.y, freeC.z]};
-        LEGS[4].anchor = {x: 0.25, y: 0.5, point: [freeC.x, freeC.y, freeC.z]};
+        LEGS[3].anchor = {x: 0.25, y: 0.5, fn: pcbX, point: [freeC.x, freeC.y, freeC.z]};
+        LEGS[4].anchor = {x: 0.25, y: 0.5, fn: pcbX, point: [freeC.x, freeC.y, freeC.z]};
         initLeg(LEGS[4], 4);
         // leg 6's azimuth chain hangs off leg 5's re-aimed pose
         initLeg(LEGS[5], 5);
@@ -4608,6 +5240,7 @@
         scene.updateMatrixWorld(true);
         pb.setFromObject(pr);
         pcbTopY = pb.max.y; pcbBotY = pb.min.y; pcbBaseX = pr.position.x;
+        pcbBaseS = pr.scale.clone(); pcbBaseP = pr.position.clone();
         pcbW = pb.max.x - pb.min.x;   // the board's true on-screen width driver
         pcbGlitchNext = clock.elapsedTime + 4;
         // warm the board now, in load idle: compile its programs AND
@@ -6442,6 +7075,53 @@
   // --holeX (circle stuck at 78%). for the first moments every frame
   // stays a jump cut, so wherever the restore lands is scroll-true.
   var bootSnap = performance.now() + 1500;
+  // ── THE RIDE REGISTRY ────────────────────────────────────────────
+  // every damped scroll window on the page, in one place. this used to be
+  // twenty-five hand-written triples in the loop — a raw, a damp and a snap
+  // each — plus a hand-maintained list further down that coverJump had to
+  // snap when the page re-emerges from under the addons cover. two lists,
+  // kept in step by hand, and a window added to one but not the other fails
+  // SILENTLY: it simply does not rewind, on one scroll direction, at one
+  // section, after one particular approach. (both lists were in fact
+  // complete when this was written — the point is that nothing made them so.)
+  // three shapes, and they are all here:
+  //   ·  e            the snap epsilon. 0.001 for a 0..1 window, 0.1 for the
+  //                   parallax tails, which are measured in PIXELS.
+  //   ·  leg          a parallax tail: it rides raw SCROLL DISTANCE past a
+  //                   leg's end rather than a range between two lines.
+  //   ·  fn           a window whose raw is its own formula.
+  // adding a window is now one row, and it is impossible to add it to the
+  // damp without adding it to the snap, because they read the same array.
+  var RIDE = [
+    {w: calcWin, e: 0.001},
+    // the one window that is not a scroll range: the release, measured off
+    // the math panel's BOTTOM crossing the frame rather than a section top
+    {w: calcOut, e: 0.001, fn: function(y){ return Math.min(1, Math.max(0, (0.85 - (calcMathBot - y) / vpH()) / 0.4)); }},
+    {w: metalWin, e: 0.001},
+    {w: rackOutWin, e: 0.001},
+    {w: rackLblWin, e: 0.001},
+    {w: machineWin, e: 0.001},
+    {w: depWin, e: 0.001},
+    {w: macWin, e: 0.001},
+    {w: doorWin, e: 0.001},
+    {w: doorOut, e: 0.001},
+    {w: panelOut, e: 0.001},
+    {w: macCloseWin, e: 0.001},
+    {w: agentsWin, e: 0.001},
+    {w: prlxWinM, e: 0.1, leg: 2},
+    {w: prlxWin, e: 0.1, leg: 5},
+    {w: prlxWin2, e: 0.1, leg: 7},
+    {w: forWin, e: 0.001},
+    {w: prlxWin3, e: 0.1, leg: 8},
+    {w: prlxWin6, e: 0.1, leg: 9},
+    {w: prlxWin7, e: 0.1, leg: 10},
+    {w: faqWin, e: 0.001},
+    {w: prlxWin4, e: 0.1, leg: 11},
+    {w: ctaWin, e: 0.001},
+    {w: prlxWin5, e: 0.1, leg: 12},
+    {w: footWin, e: 0.001},
+  ];
+
   function loop(){
     requestAnimationFrame(loop);
     var dt = Math.min(clock.getDelta(), 0.05);
@@ -6474,43 +7154,19 @@
       // amounts shimmers the thin ghost strokes behind the rack
       if (Math.abs(LL.raw - LL.p) < 0.001) LL.p = LL.raw;
     }
+    // every window in the registry, damped and snapped together. the damp
+    // factor is the legs' own — true exponential damping, so a frame-time
+    // spike advances each ride exactly as far as the missed time.
+    var rideDamp = 1 - Math.exp(-dt * 6);
+    for (var ri = 0; ri < RIDE.length; ri++){
+      var RD = RIDE[ri], RW = RD.w;
+      RW.raw = RD.fn !== undefined ? RD.fn(scrollNow)
+             : RD.leg !== undefined ? (LEGS[RD.leg].end > 1 ? Math.max(0, scrollNow - LEGS[RD.leg].end) : 0)
+             : Math.min(1, Math.max(0, (scrollNow - RW.start) / (RW.end - RW.start)));
+      RW.p += (RW.raw - RW.p) * rideDamp;
+      if (Math.abs(RW.raw - RW.p) < RD.e) RW.p = RW.raw;
+    }
     // the calculator's window damps exactly like a leg
-    calcWin.raw = Math.min(1, Math.max(0, (scrollNow - calcWin.start) / (calcWin.end - calcWin.start)));
-    calcWin.p += (calcWin.raw - calcWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(calcWin.raw - calcWin.p) < 0.001) calcWin.p = calcWin.raw;
-    calcOut.raw = Math.min(1, Math.max(0, (0.85 - (calcMathBot - scrollNow) / vpH()) / 0.4));
-    calcOut.p += (calcOut.raw - calcOut.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(calcOut.raw - calcOut.p) < 0.001) calcOut.p = calcOut.raw;
-    metalWin.raw = Math.min(1, Math.max(0, (scrollNow - metalWin.start) / (metalWin.end - metalWin.start)));
-    metalWin.p += (metalWin.raw - metalWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(metalWin.raw - metalWin.p) < 0.001) metalWin.p = metalWin.raw;
-    rackOutWin.raw = Math.min(1, Math.max(0, (scrollNow - rackOutWin.start) / (rackOutWin.end - rackOutWin.start)));
-    rackOutWin.p += (rackOutWin.raw - rackOutWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(rackOutWin.raw - rackOutWin.p) < 0.001) rackOutWin.p = rackOutWin.raw;
-    rackLblWin.raw = Math.min(1, Math.max(0, (scrollNow - rackLblWin.start) / (rackLblWin.end - rackLblWin.start)));
-    rackLblWin.p += (rackLblWin.raw - rackLblWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(rackLblWin.raw - rackLblWin.p) < 0.001) rackLblWin.p = rackLblWin.raw;
-    machineWin.raw = Math.min(1, Math.max(0, (scrollNow - machineWin.start) / (machineWin.end - machineWin.start)));
-    machineWin.p += (machineWin.raw - machineWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(machineWin.raw - machineWin.p) < 0.001) machineWin.p = machineWin.raw;
-    depWin.raw = Math.min(1, Math.max(0, (scrollNow - depWin.start) / (depWin.end - depWin.start)));
-    depWin.p += (depWin.raw - depWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(depWin.raw - depWin.p) < 0.001) depWin.p = depWin.raw;
-    macWin.raw = Math.min(1, Math.max(0, (scrollNow - macWin.start) / (macWin.end - macWin.start)));
-    macWin.p += (macWin.raw - macWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(macWin.raw - macWin.p) < 0.001) macWin.p = macWin.raw;
-    doorWin.raw = Math.min(1, Math.max(0, (scrollNow - doorWin.start) / (doorWin.end - doorWin.start)));
-    doorWin.p += (doorWin.raw - doorWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(doorWin.raw - doorWin.p) < 0.001) doorWin.p = doorWin.raw;
-    doorOut.raw = Math.min(1, Math.max(0, (scrollNow - doorOut.start) / (doorOut.end - doorOut.start)));
-    doorOut.p += (doorOut.raw - doorOut.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(doorOut.raw - doorOut.p) < 0.001) doorOut.p = doorOut.raw;
-    panelOut.raw = Math.min(1, Math.max(0, (scrollNow - panelOut.start) / (panelOut.end - panelOut.start)));
-    panelOut.p += (panelOut.raw - panelOut.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(panelOut.raw - panelOut.p) < 0.001) panelOut.p = panelOut.raw;
-    macCloseWin.raw = Math.min(1, Math.max(0, (scrollNow - macCloseWin.start) / (macCloseWin.end - macCloseWin.start)));
-    macCloseWin.p += (macCloseWin.raw - macCloseWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(macCloseWin.raw - macCloseWin.p) < 0.001) macCloseWin.p = macCloseWin.raw;
     // the machine cards: slideAwayP (any card but the first — plays the
     // door's outer animation), s2P/s3P/s4P (that card's own payload).
     //
@@ -6556,7 +7212,7 @@
     var s3T = (machInner === 2) ? machGate : 0;
     var s4T = (machInner === 3) ? machGate : 0;
     s2P = machRamp(s2P, s2T, s2T > s2P ? machStep : machClear);
-    s3P = machRamp(s3P, s3T, s3T > s3P ? machStep : machClear);
+    s3P = machRamp(s3P, s3T, s3T > s3P ? machStep * S3_IN : machClear * S3_OUT);
     s4P = machRamp(s4P, s4T, s4T > s4P ? machStep : machClear);
     slideAwayP = machRamp(slideAwayP, machGate ? machOuter : 0, machStep);
     // machScroll (hoisted above) is in with the leg-9 landing flight
@@ -6589,47 +7245,8 @@
     s2Show = s2P * machScroll;
     s3Show = s3P * machScroll;
     s4Show = s4P * machScroll;
-    agentsWin.raw = Math.min(1, Math.max(0, (scrollNow - agentsWin.start) / (agentsWin.end - agentsWin.start)));
-    agentsWin.p += (agentsWin.raw - agentsWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(agentsWin.raw - agentsWin.p) < 0.001) agentsWin.p = agentsWin.raw;
     // the machine tail (order rewire): the rack drifts up while 'what
     // you get' reads — the deploy dive unwinds it back to its framing
-    prlxWinM.raw = LEGS[2].end > 1 ? Math.max(0, scrollNow - LEGS[2].end) : 0;
-    prlxWinM.p += (prlxWinM.raw - prlxWinM.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(prlxWinM.raw - prlxWinM.p) < 0.1) prlxWinM.p = prlxWinM.raw;   // px scale
-    prlxWin.raw = LEGS[5].end > 1 ? Math.max(0, scrollNow - LEGS[5].end) : 0;
-    prlxWin.p += (prlxWin.raw - prlxWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(prlxWin.raw - prlxWin.p) < 0.1) prlxWin.p = prlxWin.raw;   // px scale
-    prlxWin2.raw = LEGS[7].end > 1 ? Math.max(0, scrollNow - LEGS[7].end) : 0;
-    prlxWin2.p += (prlxWin2.raw - prlxWin2.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(prlxWin2.raw - prlxWin2.p) < 0.1) prlxWin2.p = prlxWin2.raw;   // px scale
-    forWin.raw = Math.min(1, Math.max(0, (scrollNow - forWin.start) / (forWin.end - forWin.start)));
-    forWin.p += (forWin.raw - forWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(forWin.raw - forWin.p) < 0.001) forWin.p = forWin.raw;
-    prlxWin3.raw = LEGS[8].end > 1 ? Math.max(0, scrollNow - LEGS[8].end) : 0;
-    prlxWin3.p += (prlxWin3.raw - prlxWin3.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(prlxWin3.raw - prlxWin3.p) < 0.1) prlxWin3.p = prlxWin3.raw;   // px scale
-    prlxWin6.raw = LEGS[9].end > 1 ? Math.max(0, scrollNow - LEGS[9].end) : 0;
-    prlxWin6.p += (prlxWin6.raw - prlxWin6.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(prlxWin6.raw - prlxWin6.p) < 0.1) prlxWin6.p = prlxWin6.raw;   // px scale
-    prlxWin7.raw = LEGS[10].end > 1 ? Math.max(0, scrollNow - LEGS[10].end) : 0;
-    prlxWin7.p += (prlxWin7.raw - prlxWin7.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(prlxWin7.raw - prlxWin7.p) < 0.1) prlxWin7.p = prlxWin7.raw;   // px scale
-    faqWin.raw = Math.min(1, Math.max(0, (scrollNow - faqWin.start) / (faqWin.end - faqWin.start)));
-    faqWin.p += (faqWin.raw - faqWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(faqWin.raw - faqWin.p) < 0.001) faqWin.p = faqWin.raw;
-    prlxWin4.raw = LEGS[11].end > 1 ? Math.max(0, scrollNow - LEGS[11].end) : 0;
-    prlxWin4.p += (prlxWin4.raw - prlxWin4.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(prlxWin4.raw - prlxWin4.p) < 0.1) prlxWin4.p = prlxWin4.raw;   // px scale
-    ctaWin.raw = Math.min(1, Math.max(0, (scrollNow - ctaWin.start) / (ctaWin.end - ctaWin.start)));
-    ctaWin.p += (ctaWin.raw - ctaWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(ctaWin.raw - ctaWin.p) < 0.001) ctaWin.p = ctaWin.raw;
-    prlxWin5.raw = LEGS[12].end > 1 ? Math.max(0, scrollNow - LEGS[12].end) : 0;
-    prlxWin5.p += (prlxWin5.raw - prlxWin5.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(prlxWin5.raw - prlxWin5.p) < 0.1) prlxWin5.p = prlxWin5.raw;   // px scale
-    footWin.raw = Math.min(1, Math.max(0, (scrollNow - footWin.start) / (footWin.end - footWin.start)));
-    footWin.p += (footWin.raw - footWin.p) * (1 - Math.exp(-dt * 6));
-    if (Math.abs(footWin.raw - footWin.p) < 0.001) footWin.p = footWin.raw;
     // back from under the addons flat: whatever the scroll did while the
     // cover was opaque already LANDED — snap every damped ride to its raw
     // so the scene re-emerges switched, no visible catch-up swoop. works
@@ -6638,17 +7255,7 @@
     if (coverJump){
       coverJump = false;
       for (var cj = 0; cj < LEGS.length; cj++) LEGS[cj].p = LEGS[cj].raw;
-      calcWin.p = calcWin.raw; calcOut.p = calcOut.raw;
-      metalWin.p = metalWin.raw; rackOutWin.p = rackOutWin.raw;
-      rackLblWin.p = rackLblWin.raw; machineWin.p = machineWin.raw;
-      depWin.p = depWin.raw; macWin.p = macWin.raw; doorWin.p = doorWin.raw; doorOut.p = doorOut.raw; panelOut.p = panelOut.raw; macCloseWin.p = macCloseWin.raw;
-      agentsWin.p = agentsWin.raw; prlxWin.p = prlxWin.raw; prlxWin2.p = prlxWin2.raw;
-      prlxWinM.p = prlxWinM.raw;
-      forWin.p = forWin.raw; prlxWin3.p = prlxWin3.raw;
-      prlxWin6.p = prlxWin6.raw; prlxWin7.p = prlxWin7.raw;
-      faqWin.p = faqWin.raw; prlxWin4.p = prlxWin4.raw;
-      ctaWin.p = ctaWin.raw; prlxWin5.p = prlxWin5.raw;
-      footWin.p = footWin.raw;
+      for (var cj2 = 0; cj2 < RIDE.length; cj2++) RIDE[cj2].w.p = RIDE[cj2].w.raw;
       frameDirtyFlag = true;
     }
     // leg 10's laptop: faded on the agents window, quantized like the
@@ -7015,7 +7622,7 @@
           pinP.set(freeC.x, freeC.y, freeC.z).project(camera);
           var pinHalfH = pinD * Math.tan(camera.fov * Math.PI / 360);
           var pinHalfW = pinHalfH * camera.aspect;
-          var pinDx = (pinP.x - (anchorX(0.25) * 2 - 1)) * pinHalfW * pinW;
+          var pinDx = (pinP.x - (pcbX() * 2 - 1)) * pinHalfW * pinW;
           var pinDy = (pinP.y - (1 - 0.5 * 2)) * pinHalfH * pinW;
           pinAx.setFromMatrixColumn(camera.matrixWorld, 0);
           camera.position.addScaledVector(pinAx, pinDx);
@@ -7026,12 +7633,20 @@
           camera.updateMatrixWorld(true);
         }
         // the pods column sits centered on the pcb, projected fresh
-        // every ride frame. its width is the BOARD's width at the
-        // SETTLED shot (0.42m at the home fov) — one steady size, it
-        // does not breathe with the pcb while the scroll moves
+        // every ride frame — but it is SIZED on its own, at a flat share
+        // of the frame. it used to be the board's projected width times
+        // 0.8, which made the cards a function of where the camera
+        // happened to stand: every pull-back shrank the content with the
+        // backdrop, and a stale distance in the formula stretched them
+        // to 31% of a 1130px frame, right across the terminal. 22% is
+        // the width that measured right at every desktop and laptop
+        // step, and it does not move when the board does.
         if (podsEl && pcbFade > 0){
-          var podHalfW = 0.42 * Math.tan(HOME_FOV * Math.PI / 360) * camera.aspect;
-          var podWpx = (pcbW || freeC.cell * 0.78) * 0.8 * stageW / (2 * podHalfW);
+          // 22% of a wide frame, 28% under 1200: on an ipad the column
+          // at 22% came out ~220px and read as a toy ("pod is so little
+          // in ipad"). the left half has the room — the docked text only
+          // takes 58% from here down
+          var podWpx = stageW * (stageW < 1200 ? 0.28 : 0.22);
           // a narrow frame projects the board small enough that the pcc
           // type inside stops reading — floor it, and clamp to the frame
           if (stageW < 900) podWpx = Math.max(podWpx, Math.min(260, stageW - 40));
@@ -7083,7 +7698,19 @@
           calcRoot.rotation.y = Math.atan2(camera.position.x - calcRoot.position.x, camera.position.z - calcRoot.position.z)
             - 20 * Math.PI / 180;
           // 45% of the viewport's height at the focus plane, times the scrub
-          var calcSc = calcUnit * 0.9 * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * bodyT);
+          // the whole calculator group — body, cubes, label, halo — is
+          // sized off the frame's HALF-HEIGHT, and that is what made it
+          // enormous on an ipad ("make the math calculator … more little
+          // … on i pad pro its sucks"). the frame fits to WIDTH now: a
+          // tall viewport holds the same world width and gains height,
+          // so anything measured against the height grows with the
+          // tallness. calcNarrow re-reads the same numbers against the
+          // WIDTH instead — aspect / 1.78, clamped at 1 — which leaves a
+          // 16:9 desktop bit-identical and takes an ipad portrait
+          // (0.75) to 42% of the size it had. the group scales together,
+          // so the composition holds.
+          var calcNarrow = Math.min(1, camera.aspect / 1.78);
+          var calcSc = calcUnit * 0.9 * calcNarrow * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * bodyT);
           calcRoot.scale.setScalar(calcSc);
           // no cloud float anymore (user cut it) — only the idle pendulum
           // turn survives: an endless +10°/-10° swing about its own
@@ -7100,7 +7727,7 @@
             calcV.set(anchorX(0.66) * 2 - 1, 0, 0.5).unproject(camera).sub(camera.position).normalize();
             calcCubes.position.copy(camera.position).addScaledVector(calcV, srr);
             calcCubes.rotation.y = Math.atan2(camera.position.x - calcCubes.position.x, camera.position.z - calcCubes.position.z) + 0.5;
-            calcCubes.scale.setScalar((0.5 * 2 * srr * Math.tan(camera.fov * Math.PI / 360) / 12.9) * (0.8 + 0.2 * cubesT));
+            calcCubes.scale.setScalar((0.5 * 2 * calcNarrow * srr * Math.tan(camera.fov * Math.PI / 360) / 12.9) * (0.8 + 0.2 * cubesT));
             for (var cbb = 0; cbb < calcCubes.children.length; cbb++){
               var CB = calcCubes.children[cbb];
               if (!reducedMotion)
@@ -7123,7 +7750,7 @@
             // the halo turns WITH the calculator: same -20° stance, same
             // infinite pendulum — it reads as the body's own shadow
             calcGlow.rotation.y = calcRoot.rotation.y;
-            calcGlow.scale.setScalar(0.34 * 2 * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * bodyT));
+            calcGlow.scale.setScalar(0.34 * 2 * calcNarrow * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * bodyT));
             var gph = reducedMotion ? 0 : (clock.elapsedTime % 10) / 10;
             var gDrop = (gph >= 0.02 && gph < 0.04) || (gph >= 0.06 && gph < 0.07);
             var gBreath = 12 + 4 * Math.cos(gph * 8 * Math.PI);   // 16↔8, period 2.5s
@@ -7157,7 +7784,7 @@
             calcLabel.rotation.set(0,
               Math.atan2(camera.position.x - calcLabel.position.x, camera.position.z - calcLabel.position.z),
               Math.PI / 2);
-            calcLabel.scale.setScalar(0.34 * 2 * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * labelT));
+            calcLabel.scale.setScalar(0.34 * 2 * calcNarrow * srr * Math.tan(camera.fov * Math.PI / 360) * (0.8 + 0.2 * labelT));
             calcLabel.updateMatrixWorld(true);
             // typed on the scrub, like the terminal window: characters
             // appear across calcT 0.35→0.85 and untype on the way back
@@ -7664,6 +8291,27 @@
             var pcbVis = pcbFade > 0;
             if (pcbRoot.visible !== pcbVis){ pcbRoot.visible = pcbVis; bokehStamp++; }
             for (var pmI = 0; pmI < pcbMats.length; pmI++) pcbMats[pmI].opacity = 0.4 * pcbFade;
+            // ...and it GROWS in on the same scrub (0.82 → 1) instead of
+            // arriving at full size on a pure opacity ramp ("psb is not
+            // animated scale"). the group's origin is the glb's, not the
+            // board's centre, so a bare scale would slide it off the
+            // cube — the position walks with it, lerp(cube centre, base
+            // pose, k), which lands exactly on the base pose at k = 1
+            // where the settled shot and the band glitch both expect it
+            if (pcbBaseS && freeC){
+              var pk = Math.round((0.82 + 0.18 * revealEase(pcbFade)) * 500) / 500;
+              if (pk !== pcbScaleQ){
+                pcbScaleQ = pk;
+                pcbRoot.scale.set(pcbBaseS.x * pk, pcbBaseS.y * pk, pcbBaseS.z * pk);
+                pcbRoot.position.set(
+                  freeC.x + (pcbBaseP.x - freeC.x) * pk,
+                  freeC.y + (pcbBaseP.y - freeC.y) * pk,
+                  freeC.z + (pcbBaseP.z - freeC.z) * pk
+                );
+                pcbRoot.updateMatrixWorld(true);
+                frameDirtyFlag = true;
+              }
+            }
           }
           // the addon pods ride the PRE-revert fade: during leg 6 the
           // container stays opaque and each pod leaves via its own
@@ -8368,7 +9016,11 @@
     liveCostLast = frameLive;
     frameDirtyFlag = false;
     ambientDirtyFlag = false;
-    renderPass.enabled = gammaPass.enabled = fxaa.enabled = frameLive;
+    // `lens` joins the live-only family: on a static frame it is skipped
+    // and grade replays lensCache, which already carries the aberration
+    // and the vignette from the last live frame. grade itself is the one
+    // pass that never switches off — it is where the grain lives.
+    renderPass.enabled = gammaPass.enabled = fxaa.enabled = lens.enabled = frameLive;
     // dof and bloom are the rung's to keep: the dof pass re-renders the
     // whole scene whenever its depth map goes stale, bloom is five mips
     // blurred twice each. both are gone on the low rung.
