@@ -2281,6 +2281,223 @@ select.founding-input option {
     color: var(--primary)
 }
 
+/* LEGAL PAGES (privacy.html, terms.html) */
+.legal {
+    padding: 140px 117px 120px;
+    position: relative;
+    --legal-line-scale: 0;
+}
+
+/* column divider, drawn from the nav line like the hero divider */
+.legal::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 64px;
+    bottom: 0;
+    width: 0;
+    border-left: 0.5px solid #11A32A47;
+    pointer-events: none;
+    transform: scaleY(var(--legal-line-scale));
+    transform-origin: top;
+}
+
+.legal-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start
+}
+
+.legal-aside {
+    position: sticky;
+    top: 104px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding-right: 30px
+}
+
+.legal-eyebrow {
+    font-family: var(--font-mono);
+    font-size: .75rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--primary)
+}
+
+.legal-title {
+    font-size: 58px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.1;
+    margin: 12px 0 28px;
+    text-wrap: balance
+}
+
+.legal-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 14px
+}
+
+.legal-meta dt {
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 2px
+}
+
+.legal-meta dd {
+    font-size: .95rem;
+    color: rgba(255, 255, 255, 0.85)
+}
+
+.legal-docs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    width: fit-content;
+    border: 1px solid var(--border);
+    border-radius: 8px
+}
+
+.legal-docs a {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: .8rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.68)
+}
+
+.legal-docs a:hover {
+    color: var(--primary)
+}
+
+.legal-docs a[aria-current="page"] {
+    color: var(--text);
+    background: linear-gradient(90deg, rgba(17, 163, 42, 0.1) 0%, rgba(0, 0, 0, 0.25) 100%);
+    box-shadow: inset 0 0 0 1px var(--border-green)
+}
+
+.legal-toc-label {
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 12px
+}
+
+.legal-toc {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px
+}
+
+.legal-toc a {
+    display: flex;
+    gap: 12px;
+    padding: 4px 0;
+    font-size: .9rem;
+    color: rgba(255, 255, 255, 0.68)
+}
+
+.legal-toc a:hover {
+    color: var(--primary)
+}
+
+.legal-num {
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums
+}
+
+.legal-body {
+    max-width: 720px
+}
+
+.legal-section {
+    padding: 40px 0;
+    border-bottom: 1px solid var(--border);
+    scroll-margin-top: 88px
+}
+
+.legal-section:first-child {
+    padding-top: 0
+}
+
+.legal-section:last-child {
+    border-bottom: none
+}
+
+.legal-section h2 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 16px
+}
+
+.legal-section p,
+.legal-list li {
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.7)
+}
+
+.legal-section p+p,
+.legal-section p+.legal-list {
+    margin-top: 20px
+}
+
+.legal-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px
+}
+
+.legal-list li {
+    position: relative;
+    padding-left: 22px
+}
+
+.legal-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: .72em;
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background: var(--primary)
+}
+
+.legal-body strong {
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 600
+}
+
+.legal-body code,
+.legal-meta code {
+    font-size: .85em;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 1px 6px;
+    white-space: nowrap;
+    /* JetBrains Mono would turn the "-<" in kdeploy-<name> into an arrow */
+    font-variant-ligatures: none
+}
+
 
 
 /* RESPONSIVE */
@@ -2336,6 +2553,14 @@ select.founding-input option {
     }
 
     .section-title {
+        font-size: 45px;
+    }
+
+    .legal {
+        padding: 140px 50px 100px;
+    }
+
+    .legal-title {
         font-size: 45px;
     }
 
@@ -2406,6 +2631,24 @@ select.founding-input option {
 
     .hero::after {
         display: none
+    }
+
+    .legal {
+        padding: 120px 40px 80px;
+    }
+
+    .legal::after {
+        display: none
+    }
+
+    .legal-inner {
+        grid-template-columns: 1fr;
+        gap: 56px
+    }
+
+    .legal-aside {
+        position: static;
+        padding-right: 0
     }
 
     .hero-inner {
@@ -2564,6 +2807,29 @@ select.founding-input option {
 
     .section {
         padding: 80px 20px
+    }
+
+    .legal {
+        padding: 90px 20px 60px;
+    }
+
+    .legal-title {
+        font-size: 34px;
+        margin-bottom: 24px
+    }
+
+    .legal-section {
+        padding: 32px 0;
+        scroll-margin-top: 74px
+    }
+
+    .legal-section h2 {
+        font-size: 22px
+    }
+
+    .legal-section p,
+    .legal-list li {
+        font-size: 15px
     }
 
     .nav-inner {

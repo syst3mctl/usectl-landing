@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- @site-head: shared head (gtag, charset, og/twitter, icons, manifest) injected from index.html by vite.config.js -->
+    <title>usectl · Terms of Service</title>
+    <meta name="description" content="The usectl terms of service: machine quotas, storage and availability, billing grace periods and archiving, account security and acceptable use.">
+    <meta name="robots" content="index, follow">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=3">
+</head>
+
+<body>
+
+    <!-- NAV -->
+    <header>
+        <nav class="nav" id="nav" aria-label="Main navigation">
+            <div class="nav-inner">
+                <div class="nav-left">
+                    <a href="/" class="nav-logo" aria-label="usectl home">
+                        <img src="img/logo.svg" alt="usectl logo" width="83" height="22">
+                    </a>
+                    <span class="nav-badge">Beta</span>
+                </div>
+                <div class="nav-right">
+                    <div class="nav-links">
+                        <a href="/#steps">How it Works</a>
+                        <a href="/#features">Features</a>
+                        <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer">Github</a>
+                        <a href="https://docs.usectl.com" target="_blank">Documentation</a>
+                    </div>
+                    <a href="https://manager.usectl.com/login" class="nav-cta-btn">
+                        <span>Login</span>
+                        <div class="glitch" aria-hidden="true">
+                            <span class="letters">
+                                <span>L</span><span>o</span><span>g</span><span>i</span><span>n</span>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+                <button class="mobile-menu-btn" aria-label="Toggle mobile menu" aria-expanded="false"
+                    onclick="var m=document.getElementById('mobile-menu');var n=document.getElementById('nav');m.classList.toggle('active');n.classList.toggle('active');this.classList.toggle('active');this.setAttribute('aria-expanded',m.classList.contains('active'))">
+                    <div class="hamburger">
+                        <div class="hamburger-container">
+                            <div class="hamburger-line"></div>
+                            <div class="hamburger-line"></div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+            <div class="mobile-menu" id="mobile-menu" role="menu">
+                <a href="/#steps" role="menuitem"
+                    onclick="document.getElementById('mobile-menu').classList.remove('active')">How it Works</a>
+                <a href="/#features" role="menuitem"
+                    onclick="document.getElementById('mobile-menu').classList.remove('active')">Features</a>
+
+                <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener noreferrer"
+                    role="menuitem">Github</a>
+                <a href="https://docs.usectl.com" target="_blank" role="menuitem">Documentation</a>
+                <a href="https://manager.usectl.com/register" class="nav-cta-btn" role="menuitem"
+                    style="text-align: center;">
+                    <span>Create a machine</span>
+                    <div class="glitch" aria-hidden="true">
+                        <span class="letters">
+                            <span>C</span><span>r</span><span>e</span><span>a</span><span>t</span><span>e</span><span>&nbsp;</span><span>a</span><span>&nbsp;</span><span>m</span><span>a</span><span>c</span><span>h</span><span>i</span><span>n</span><span>e</span>
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- TERMS OF SERVICE -->
+        <section class="legal" id="terms">
+            <div class="legal-inner">
+                <aside class="legal-aside">
+                    <div>
+                        <span class="legal-eyebrow">Legal</span>
+                        <h1 class="legal-title">Terms of Service &amp; Use</h1>
+                        <dl class="legal-meta">
+                            <div>
+                                <dt>Effective Date</dt>
+                                <dd>September 19, 2026</dd>
+                            </div>
+                            <div>
+                                <dt>Platform</dt>
+                                <dd><code>usectl.com</code></dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <nav class="legal-docs" aria-label="Legal documents">
+                        <a href="/privacy">Privacy Policy</a>
+                        <a href="/terms" aria-current="page">Terms of Service</a>
+                    </nav>
+                    <nav aria-labelledby="legal-toc-label">
+                        <div class="legal-toc-label" id="legal-toc-label">On this page</div>
+                        <ol class="legal-toc">
+                            <li><a href="#machine-quotas"><span class="legal-num">01</span> Machine Quotas &amp; Resource Allocation</a></li>
+                            <li><a href="#availability-storage-sla"><span class="legal-num">02</span> High Availability, Local Storage &amp; Service SLA</a></li>
+                            <li><a href="#billing-grace-archiving"><span class="legal-num">03</span> Billing, Grace Periods &amp; Machine Archiving</a></li>
+                            <li><a href="#account-security"><span class="legal-num">04</span> Account Security &amp; Session Revocation</a></li>
+                        </ol>
+                    </nav>
+                </aside>
+
+                <article class="legal-body">
+                    <section class="legal-section" id="machine-quotas">
+                        <h2><span class="legal-num">01</span> Machine Quotas &amp; Resource Allocation</h2>
+                        <ul class="legal-list">
+                            <li><strong>Machine Definition:</strong> A "Machine" on <code>usectl</code> represents a
+                                Kubernetes namespace (<code>kdeploy-&lt;name&gt;</code>) paired with a defined resource quota
+                                allocation (vCPU, RAM, block storage) and subscription billing plan. A machine holds no
+                                application code directly.</li>
+                            <li><strong>Pod Workloads:</strong> Workloads ("Pods") execute within a Machine's resource
+                                envelope. Pod deployments that exceed the Machine's vCPU or RAM quota preflight checks will be
+                                rejected until idle resources are cleared or the Machine plan is upgraded.</li>
+                            <li><strong>Storage Limits:</strong> Persistent block storage allocations across all volumes in a
+                                single project are hard-capped at an absolute ceiling of 250 GB.</li>
+                        </ul>
+                    </section>
+
+                    <section class="legal-section" id="availability-storage-sla">
+                        <h2><span class="legal-num">02</span> High Availability, Local Storage &amp; Service SLA</h2>
+                        <ul class="legal-list">
+                            <li><strong>Single-Node Local Storage:</strong> Default volume claims use <code>local-path</code>
+                                storage bound directly to a single physical node disk via node affinity. Single-pod stateful
+                                workloads bound to local disks will experience temporary downtime if the underlying host node
+                                becomes unavailable.</li>
+                            <li><strong>High Availability Addons:</strong> High availability and failover protection require
+                                multi-instance deployments. Dedicated PostgreSQL instances deploy as 2-instance CloudNativePG
+                                clusters (primary + streaming replica) with automated failover. Dedicated NATS instances deploy
+                                as a 3-node RAFT cluster; clients must explicitly configure streams with
+                                <code>Replicas: 3</code> to enable stream failover across broker losses.</li>
+                        </ul>
+                    </section>
+
+                    <section class="legal-section" id="billing-grace-archiving">
+                        <h2><span class="legal-num">03</span> Billing, Grace Periods &amp; Machine Archiving</h2>
+                        <ul class="legal-list">
+                            <li><strong>Billing Cycles:</strong> Subscriptions are billed on a recurring basis via Stripe.</li>
+                            <li><strong>Lapsed Billing &amp; Grace Period:</strong> If an invoice payment fails or a
+                                subscription lapses, the Machine enters a <strong>7-day grace period</strong>. Warning
+                                notifications are sent 3 days prior to grace period expiration.</li>
+                            <li><strong>Automated Archiving:</strong> Upon expiration of the 7-day grace period, all active
+                                workloads inside the Machine and its sibling group namespaces are automatically scaled to 0
+                                replicas, and the Machine is marked as archived.</li>
+                            <li><strong>Deployment Suspension:</strong> Deployments targeting archived Machines are rejected
+                                with an <code>HTTP 409 Conflict</code> status until billing is reinstated.</li>
+                        </ul>
+                    </section>
+
+                    <section class="legal-section" id="account-security">
+                        <h2><span class="legal-num">04</span> Account Security &amp; Session Revocation</h2>
+                        <ul class="legal-list">
+                            <li><strong>Refresh Token Rotation:</strong> Access tokens expire after 24 hours. Refreshing
+                                tokens consumes the active refresh token and issues a new token pair. Presenting a previously
+                                consumed refresh token indicates potential credential compromise and will result in the
+                                immediate revocation of the entire token family session.</li>
+                            <li><strong>Acceptable Use:</strong> Users are prohibited from attempting lateral network probes
+                                across tenant namespaces, bypassing NetworkPolicies, or launching unauthorized compute tasks on
+                                unprivileged build nodes. Violations result in immediate account termination.</li>
+                        </ul>
+                    </section>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer-inner">
+            <div class="footer-col">
+                <div class="footer-logo"><img src="img/logo.svg" alt="usectl logo" width="120" height="32"
+                        loading="lazy"></div>
+                <div class="footer-info">Built by systemctl · Tbilisi, Georgia</div>
+                <div class="footer-info">© 2026 systemctl. All rights reserved.</div>
+            </div>
+            <div class="footer-col">
+                <div class="footer-heading" style="margin-top:8px">Social</div>
+                <div class="footer-social-icons">
+                    <a href="https://github.com/syst3mctl/" target="_blank" rel="noopener" aria-label="GitHub">
+                        <svg width="22" height="21" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)">
+                            <path
+                                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                        </svg>
+                    </a>
+                    <a href="https://x.com/usectlcloud" target="_blank" rel="noopener" aria-label="X/Twitter">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </a>
+                    <a href="https://discord.gg/nJzSsQXMG" target="_blank" rel="noopener" aria-label="Discord">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="rgba(255, 255, 255, 1)">
+                            <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.8732.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <a href="https://docs.usectl.com" class="footer-link" target="_blank">Documentation</a>
+                <a href="/privacy" class="footer-link">Privacy Policy</a>
+                <a href="/terms" class="footer-link" aria-current="page">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script type="module" src="/js/animations.js"></script>
+</body>
+
+</html>
