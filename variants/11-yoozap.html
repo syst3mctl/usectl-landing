@@ -2604,8 +2604,18 @@
   // the dof gather and the bloom mips down together
   function chainRes(){
     var w = window.innerWidth;
-    var base = w <= 767 ? 1 : (w <= 1024 ? 1.25 : 1.5);
-    return MOBILE ? base * MQ.k.chain : base;
+    if (MOBILE){
+      // THE PHONE PIXELATION FIX ("quality sucks, its pixeled"): base 1
+      // meant the whole chain — beauty, dof, bloom, fxaa — rendered at
+      // RAW CSS PIXELS, 390 wide, stretched onto a 1170px retina panel:
+      // a third of device resolution, far below the desktop's own 0.75.
+      // the chain now sizes itself to the CANVAS — the rung's dpr cap —
+      // times the rung's chain factor, so rung 2 renders 1:1 with the
+      // device pixels the canvas actually shows (2× css, the desktop
+      // cap) and the lower rungs scale down from THAT, not from css.
+      return Math.min(window.devicePixelRatio || 1, MQ.k.dpr) * MQ.k.chain;
+    }
+    return w <= 1024 ? 1.25 : 1.5;
   }
   var CHAIN_HI = chainRes(), CHAIN_LAP = CHAIN_HI, CHAIN_RES = CHAIN_HI;
   var lastRW = -1, lastRH = -1, lastRC = -1;
