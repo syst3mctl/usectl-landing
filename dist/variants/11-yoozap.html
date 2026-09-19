@@ -2015,7 +2015,7 @@
     // survives the visit, so the next load opens on the learned rung
     // instead of re-janking its way down. keyed on the device's own
     // shape; a week old and it re-measures.
-    var MEM_KEY = 'yz_mq1';
+    var MEM_KEY = 'yz_mq2';   /* v2: v1 tiers were chosen by the strict thresholds */
     function memSig(){ return [M.gpu, navigator.hardwareConcurrency || 0, (screen.width || 0) + 'x' + (screen.height || 0), window.devicePixelRatio || 1].join('|'); }
     function memRead(){
       try {
@@ -2072,7 +2072,7 @@
       // generous at the top — the watchdog owns the fine corrections.
       var bm = bench();
       if (bm > 0){
-        var bt = bm < 45 ? 2 : (bm < 120 ? 1 : 0);
+        var bt = bm < 130 ? 2 : (bm < 320 ? 1 : 0);   /* loosened: q=2 confirmed good on the 12 — the bench only catches the truly weak, the watchdog owns the rest */
         t = Math.min(t, bt);
         why.push('bench ' + Math.round(bm) + 'ms→' + bt);
       }
