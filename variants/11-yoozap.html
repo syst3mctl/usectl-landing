@@ -53,6 +53,7 @@
   }
   html{color-scheme:dark}
   *{box-sizing:border-box}
+  html{overflow-x:clip}
   body{margin:0;background:var(--ground);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
   a{color:inherit}
   :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
@@ -67,6 +68,17 @@
      pill!) must never ghost through behind the logo — then fades below */
   .nav::before{content:'';position:absolute;left:0;right:0;top:0;height:180px;background:linear-gradient(180deg,rgba(30,29,29,.85) 0,rgba(30,29,29,.72) 44px,rgba(30,29,29,.42) 90px,rgba(30,29,29,.16) 134px,rgba(30,29,29,0) 100%);opacity:0;transition:opacity .4s ease-in-out;pointer-events:none;z-index:-1}
   .nav.scrolled::before{opacity:1}
+  /* ── the bar goes solid with the menu ─────────────────────────────
+     the menu is a flat #1e1d1d sheet, but it starts UNDER the bar — so
+     with the bar left to its gradient the city ran straight through the
+     50px strip across the top of an otherwise opaque screen. this is the
+     same flat #1e1d1d on its own layer: it crossfades with the menu on
+     the menu's own .3s rather than fighting the scrolled gradient for
+     ::before (a gradient cannot transition into a colour anyway — that
+     one would snap). painted after ::before at the same z-index, so
+     open it simply covers it, scrolled or not. */
+  .nav::after{content:'';position:absolute;inset:0;background:#1e1d1d;opacity:0;transition:opacity .3s ease-in-out;pointer-events:none;z-index:-1}
+  .nav.active::after{opacity:1}
   .nav-inner{max-width:1920px;margin:0 auto;padding:0 117px;height:64px;display:flex;align-items:center;justify-content:space-between}
   .nav-left{display:flex;align-items:center;gap:12px}
   .nav-logo{display:flex;align-items:center}
@@ -122,8 +134,13 @@
   .hamburger-line::before,.hamburger-line::after{position:absolute;top:0;content:'';width:100%;height:100%;transition:all 900ms cubic-bezier(.19,1,.22,1)}
   .hamburger-line::after{background-color:var(--text);left:calc(100% + 8px)}
   .hamburger-line::before{right:0;background-color:var(--text)}
-  .mobile-menu-btn.active .hamburger-line:first-of-type{transform:translateY(5.3px) rotate(135deg)}
-  .mobile-menu-btn.active .hamburger-line:last-of-type{transform:translateY(-5.3px) rotate(45deg)}
+  /* the film's sheet closes with the SAME control: the same two lines,
+     the same 900ms cubic-bezier draw into the same x. one rule, two
+     buttons — the nav's and the sheet's. */
+  .mobile-menu-btn.active .hamburger-line:first-of-type,
+  .demo-close.active .hamburger-line:first-of-type{transform:translateY(5.3px) rotate(135deg)}
+  .mobile-menu-btn.active .hamburger-line:last-of-type,
+  .demo-close.active .hamburger-line:last-of-type{transform:translateY(-5.3px) rotate(45deg)}
   .mobile-menu{display:flex;pointer-events:none;position:absolute;top:64px;left:0;height:calc(100vh - 64px);height:calc(100svh - 64px);width:100%;background:#1e1d1d;padding:24px;flex-direction:column;gap:20px;z-index:99;justify-content:center;align-items:center;transition:.3s ease-in-out;opacity:0}
   .mobile-menu.active{pointer-events:all;opacity:1}
   .mobile-menu a{color:var(--text);font-size:26px;font-weight:500;text-decoration:none}
@@ -212,11 +229,34 @@
     overflow:hidden;
   }
   .hero-over .panel{width:60%;pointer-events:auto}   /* hero ctas click; the wrapper stays transparent for the city grab */
+  .hero-over .note{margin-top:20px}   /* was inline on the tag; out here a rung can trim it on a short phone */
+  /* the film's opener and its sheet's close: both exist only on a
+     portrait phone, where the commercial is out of the page (see the
+     ≤767 portrait rung). at every other width they generate nothing. */
+  .demo-open,.demo-close{display:none}
+  .demo-open .led{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent-hover);box-shadow:0 0 8px var(--accent-hover);margin-right:8px;vertical-align:1px}
+  /* parked exactly where the nav's own burger sits on a phone — the bar
+     is 50px tall with 20px of inner padding, so a 32px burger lands at
+     top 9, right 20. the 4px of padding here is the tap target around
+     it, hence 5/16. the two controls are then the same control in the
+     same place: the one under the sheet is the one on top of it. */
+  .demo-close{
+    position:absolute;top:calc(5px + env(safe-area-inset-top,0px));right:16px;z-index:2;
+    align-items:center;justify-content:center;
+    background:none;border:0;padding:4px;color:var(--text);cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
   /* the commercial loop at the bottom of the hero, railway style.
      real html: the animation engine mounts right here, no iframe. */
   /* the 'how it ships' rail rides on top of the commercial (its section
      was removed; the little title with the dot lives here now). it takes
      over the -36vh hero pull so the video itself doesn't move. */
+  /* the rail + the film are wrapped in one box that DOES NOT EXIST at any
+     width but a portrait phone: display:contents makes the two children
+     lay out exactly as if they were still bare siblings of the hero.
+     on a phone the wrapper wakes up and becomes the film's own half of
+     the first screen (see the ≤767 portrait rung at the bottom). */
+  .hero-demo-wrap{display:contents}
   .rail.demo-rail{position:relative;z-index:5;width:72vw;margin:-36vh auto 12px}
   .hero-demo{
     position:relative;z-index:5;
@@ -249,6 +289,12 @@
      copied 1:1 from the manager's globals.css (pcc-*), worn in the blue
      group color — border, glow and icon all --blue */
   #pods{position:absolute;left:0;top:0;z-index:4;pointer-events:none;opacity:0;display:flex;flex-direction:column;gap:14px;will-change:transform}
+  /* the board shot's room under the deploy terminal: PHONE ONLY — every
+     rung above 768 docks the copy to one half and the board stands in
+     the other, which needs no room made for it. svh, like the stage and
+     every gate the ride is measured against, so a url bar sliding away
+     cannot change the slot the board was solved into mid-scroll. */
+  .board-slot{display:none}
   .pod{
     padding:14px 16px;border-radius:10px;
     border:1px solid rgba(165,180,252,.4);
@@ -571,6 +617,11 @@
   .after #machine .grid3 .card li{position:relative;padding-left:18px;font-size:13.5px;line-height:1.5;color:var(--muted)}
   .after #machine .grid3 .card li::before{content:"";position:absolute;left:0;top:7px;width:7px;height:7px;border-radius:50%;background:var(--blue)}
   .after #machine .grid3 .card li b{display:inline;font-family:inherit;font-size:inherit;letter-spacing:0;color:var(--text);margin:0;font-weight:600}
+  /* the em dash that joins an li's title to its sentence. it is only
+     marked up so the phone rung can drop it when the title takes its own
+     line — and it has to say `inline` out loud, because the card's own
+     `.card span` rule is a block */
+  .after #machine .grid3 .card li .dash{display:inline}
   .after #for h2{margin-bottom:40px}
   /* ...and double as the laptop-screen slider's buttons: the active card
      mirrors the slide on the glass */
@@ -604,7 +655,7 @@
   .col.b b{color:#d8b4fe}
   .col span{display:block;font-size:15px;line-height:1.55;color:var(--muted)}
   .under{margin:0;font-size:15px;color:rgba(255,255,255,.72)}
-  .faq{margin:0;border-top:1px solid var(--hair)}
+  .faq{margin:0}   /* the hairline under the title is gone — every resolution */
   .faq dt{font-family:var(--display);font-weight:600;font-size:16.5px;margin:0;padding:14px 0 4px}
   .faq dd{margin:0;padding:0 0 14px;color:var(--muted);font-size:15px;line-height:1.6;max-width:66ch;border-bottom:1px solid var(--hair)}
   .faq dd:last-child{border-bottom:0}
@@ -730,6 +781,21 @@
     .f-links{gap:6px 20px}
 
 
+  /* an ipad pro portrait is 1032 css px — it lands on THIS rung, not the
+     1024 one below, so the footer stack is repeated for it. keyed to the
+     orientation as well as the width: a laptop window dragged under 1250
+     is still landscape and keeps the one-line row. */
+  @media (orientation:portrait){
+    .f-inner{flex-direction:column;align-items:center;gap:16px;text-align:center}
+    /* ...and the link run gets air above AND below it on a tablet: the
+       column's 16px gap is the phone's number, and on an ipad the three
+       blocks read as one crowded clump. the margin stacks on top of the
+       gap (flex gap and margin add, they do not collapse), so the nav
+       sits 28px clear of the mark above and the marks below */
+    .f-links{justify-content:center;margin:12px 0}
+    .f-brand{align-items:center}
+  }
+
   /* ── ≤1024 · ipad landscape ──────────────────────────────────────── */
   @media (max-width:1024px){
     .nav-inner{padding:0 32px}
@@ -752,6 +818,22 @@
     .lead{font-size:15.5px}
     .f-inner{padding:22px 32px}
     .f-links{gap:6px 18px}
+    /* ── the footer stacks on a tablet ──────────────────────────────
+       the one-line row (brand · links · marks) only reads while the
+       frame is wide enough to keep the credit and the link run apart;
+       on an ipad it crowds. the three blocks stack and centre — but the
+       LINK RUN ITSELF STAYS INLINE ("but nav will be inline, nav of
+       footer"): it is still a flex row with its hairline dividers, just
+       centred under the mark. the phone rung already does exactly this;
+       this is the same recipe, one step earlier. */
+    .f-inner{flex-direction:column;align-items:center;gap:16px;text-align:center}
+    /* ...and the link run gets air above AND below it on a tablet: the
+       column's 16px gap is the phone's number, and on an ipad the three
+       blocks read as one crowded clump. the margin stacks on top of the
+       gap (flex gap and margin add, they do not collapse), so the nav
+       sits 28px clear of the mark above and the marks below */
+    .f-links{justify-content:center;margin:12px 0}
+    .f-brand{align-items:center}
     /* the pcb's pod column rides a smaller frame too */
     #pods{gap:6px}
     .pod{padding:6px 8px}
@@ -793,7 +875,7 @@
     /* one column everywhere */
     .grid3,.cols2,.points{grid-template-columns:1fr}
     .after #machine .points,.after #agents .points{gap:22px;margin:26px 0}
-    .after #machine .grid3{gap:14px}
+    .after #machine .grid3{gap:50px}   /* each card owns its own stretch of page now — they are read one at a time, not compared side by side */
     .after #for h2{margin-bottom:24px}
     .term-chat{max-width:100%}
     .after #deploy pre.term,.after #agents pre.term{padding:14px 15px;font-size:12px}
@@ -801,18 +883,89 @@
     /* touch: a vertical swipe scrolls the page, a sideways one still
        drags the pod (touch-action:none would eat the scroll entirely) */
     .bpod{touch-action:pan-y}
+    /* ── the addon board on a phone: the WATER IS UNTOUCHED — same
+       full-bleed dotted grid, same hairlines — only what rides inside
+       it changes. twelve absolutely placed, draggable pods would stand
+       twelve rows tall here, so the cards leave the grid and ride a
+       swiper instead: 1.2 in frame, free slide with momentum. the DOM
+       for it is built (and swiper fetched) by the board script at this
+       rung only — see enterSlider — so the desktop page pays nothing */
+    #addons .pods-board.board-slider{height:auto!important;padding:34px 0}
+    #addons .pods-board.board-slider .pods-board-dots{display:none}   /* the halo/ripple water only ever paints under a DRAG */
+    /* swiper's core layout, the handful of rules these rows actually
+       need, inlined so the phone pays one script and no stylesheet.
+       BOTH phone sliders wear .pswiper: the addon board's free-slide
+       row, and 'who it is for' below */
+    /* contain:inline-size is THE load-bearing rule: .after is a GRID,
+       and its auto column sizes to the widest item's MAX-CONTENT — which
+       overflow:hidden does NOT cap. without containment the wrapper's
+       intrinsic width (every card's text on one line, side by side)
+       inflated the track to ~2000px and EVERY %-width section followed:
+       the whole site laid out double-wide. containment makes this box
+       contribute nothing to intrinsic sizing; its used width still
+       fills the container, which is all swiper reads. */
+    .pswiper{position:relative;z-index:1;display:block;margin:0;overflow:hidden;touch-action:pan-y;contain:inline-size;max-width:100%}
+    .pswiper .swiper-wrapper{position:relative;z-index:1;display:flex;align-items:stretch;box-sizing:content-box;transition-property:transform}
+    /* the 82% IS the pre-init width, and it is not cosmetic: swiper
+       writes each slide's width inline, and until its script lands (it
+       is fetched on demand) a slide with flex-shrink:0 and no width
+       sizes to its own CONTENT — a card's paragraph laid out on one
+       line, i.e. a row several screens wide. 82% is what swiper itself
+       computes for 1.2-per-view at this gap, so the row is right from
+       the first paint and swiper's inline value simply confirms it. */
+    .pswiper .swiper-slide{flex-shrink:0;position:relative;display:flex;height:auto;width:82%;max-width:82%;min-width:0;transition-property:transform}
+    .pswiper .swiper-slide > *{min-width:0}
+    /* swiper never arrived (cdn blocked): a row falls back to a native
+       momentum scroller, same cards in frame — no loop, but readable */
+    .pswiper.no-swiper{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .pswiper.no-swiper::-webkit-scrollbar{display:none}
+    .pswiper.no-swiper .swiper-wrapper{gap:12px;padding:0 16px}
+    /* the addon row's 16px inset is the swiper's OWN padding (it measures
+       container padding out of the size it divides by slidesPerView), and
+       it comes off in the fallback, where padding-right on a flex
+       scroller is not honoured at the end of the scroll */
+    #addons .bpod-swiper:not(.no-swiper){padding:0 16px}
+    #addons .bpod-swiper .bpod{position:static;width:auto!important;flex:1 1 auto;transform:none!important;will-change:auto;touch-action:pan-y}
+    /* ── 'who it is for': the three cards become a LOOPING row ────────
+       and the slide you are on IS the slide on the laptop's glass — the
+       scene owns that index, this row is another way to move it (see the
+       #for slider script). no inset of its own: the section already
+       stands in the 16px gutters. */
+    .after #for .grid3.for-slider{display:block}
+    .after #for .for-swiper .card{flex:1 1 auto;margin:0}
+    /* full bleed, the addons row's recipe: the section is centered in
+       symmetric gutters, so 50% - 50vw walks the row back to the screen
+       edge; the 16px inset is the swiper's own padding, which it
+       measures out of the size it divides — the active card rides the
+       edge instead of sitting boxed inside the body's gutter */
+    .after #for .for-swiper{width:100vw;margin-left:calc(50% - 50vw);padding:0 16px}
+    /* the room under the row is the LAPTOP'S ("i need our laptop be in
+       this place"): the scene parks it at ~57% across / 69% down of the
+       frame through this section, and the cards used to stand on top of
+       it. an empty viewport-height block under the swiper hands it that
+       stretch of the page — svh like the board slot, so a url bar
+       sliding away cannot breathe the gap mid-scroll */
+    .after #for .for-swiper{margin-bottom:34vh;margin-bottom:34svh}   /* 55 was too much */
     /* the see-through circle on a narrow frame. two changes, both to the
        SCENE's own layer — no plate is ever put behind the copy:
-         · the 22↔78 swing is 56% of a 390px screen, which parks the city
-           entirely off to one side while the text runs the full width.
-           the travel is compressed to a third — same choreography, a
-           third of the distance — by widening the divisor the layer's
-           transform already uses (1.56 → 3.6).
+         · the 22↔78 swing is 56% of a 390px screen, which parked the city
+           entirely off to one side back when EVERY section ran its copy
+           edge to edge. the travel is compressed by widening the divisor
+           the layer's transform already uses: 1.56 → 2. the circle then
+           swings 28↔72 instead of 22↔78 — still a real side-to-side,
+           which the split now needs, since its copy is docked right at
+           65% and the left third of the frame is the city's again (the
+           rack's own anchor goes with it, splitAnchorX in the scene
+           script). it was 3.6 before that — a third of the travel — and
+           at that setting the split's circle sat at 38%, all but centred
+           under the copy. bounds hold at 2: the layer is 156% wide at
+           left:-28%, so the widest throw (±14% of its own width ≈ ±22%
+           of the frame) still covers both edges.
          · the wash comes in closer, because the copy has no half of its
            own to sit in here. the city still reads through the middle;
            it just stops competing with the type at the edges. */
     .stage::before{
-      transform:translate(calc((var(--holeX) - 50%) / 3.6), calc((var(--holeY) - 50%) / 2.04));
+      transform:translate(calc((var(--holeX) - 50%) / 2), calc((var(--holeY) - 50%) / 2.04));
       background:radial-gradient(44.872% 39.216% at 50% 50%, rgba(30,29,29,0) 0%, rgba(30,29,29,.3) 24%, rgba(30,29,29,.88) 56%, #1e1d1d 100%);
     }
     /* the hero's veil turns with the text: the copy runs the full width
@@ -863,11 +1016,25 @@
   }
 
   @media (max-width:767px){
+    /* the page's own body copy comes down one step with the frame —
+       everything sized in px states its own size and is untouched; this
+       is for the running text that just inherits (rem stays on :root, so
+       the pod cards and the hud keep their numbers) */
+    body{font-size:15px}
     .nav-inner{padding:0 20px;height:50px}
     .f-inner{padding:20px 20px}
-    h1{font-size:34px;letter-spacing:-.01em}
+    h1{font-size:clamp(23px,7.2vw,28px);letter-spacing:-.01em}
     .sub{font-size:14.5px;margin:8px 0 20px 0}
-    .hero-over{padding:56px 0 14% 20px}
+    /* ── the narrow hero is a stack ───────────────────────────────
+       the box gives up its height: the copy sits straight under the
+       bar and the commercial follows it in normal flow, so both land
+       in the first screen. no negative pull, so nothing can ever
+       overlap — the video simply starts where the text ends, at any
+       text height. this is what a phone TURNED SIDEWAYS keeps (and
+       any narrow-but-landscape window); a phone held upright takes
+       its screen back one rung further down, in the portrait block at
+       the bottom of the sheet. */
+    .hero-over{padding:72px 0 0 20px;height:auto}
     .hero-over .panel{width:calc(100% - 20px)}
     .btn{font-size:13.5px;padding:10px 15px}
     .ctas{gap:10px 12px}
@@ -875,22 +1042,81 @@
     /* the commercial is a 1920x1080 film fitted by WIDTH — on a phone
        every pixel of frame counts, so it goes edge to edge */
     .hero-demo{width:100vw;margin-left:calc(50% - 50vw);border-radius:0;border-left:0;border-right:0}
-    .rail.demo-rail{width:calc(100% - 32px);margin:-11vh auto 8px}
+    .rail.demo-rail{width:calc(100% - 32px);margin:26px auto 8px}
     .after{gap:90px;padding:120px 0 0}
     .after #split,.after #deploy,.after #modes,.after #agents,.after #faq,
     .after #math,.after #machine,.after #for,.after #addons{
       width:calc(100% - 32px);padding:20px 0 22px;
     }
+    /* 'our metal or yours': room under the copy for the TWO-RACK shot.
+       MUST stand after the blanket padding above — a first-rung copy of
+       this rule was silently losing to it by sheet order */
+    .after #modes{padding-bottom:34vh;padding-bottom:34svh}   /* 60 was too much once it actually applied */
+    /* the split is the one section that shares its screen with the thing
+       it is describing: the copy gives the grid back a third of the
+       frame, and reads a step smaller inside it */
+    .after #split{width:calc(65% - 32px);margin:0 16px 0 auto}   /* docked right, like it is at every width above — 16px is the gutter the centred sections already sit in */
+    .after #split p{font-size:14px}
     .after #cta{width:calc(100% - 32px)}
     .cta-panel{padding:28px 0 30px}
     .after #split h2,.after #deploy h2,.after #modes h2,.after #agents h2,.after #faq h2,
-    .after #math h2,.after #machine h2,.after #for h2,.after #addons h2{font-size:26px}
-    .cta-panel h2{font-size:26px}
+    .after #math h2,.after #machine h2,.after #for h2,.after #addons h2{font-size:22px}
+    .cta-panel h2{font-size:26px}   /* the closing line keeps its size — it is the one h2 that is not a section label */
     .lead{font-size:15px;margin:0 0 16px}
     .after #machine .grid3 .card > b,
     .after #machine .points div b,.after #agents .points div b{font-size:16px}
     .after #machine .grid3 .card li{font-size:13px}
+    /* ── 'what you get': the cards dock, and they alternate ───────────
+       the four cards are the section's slider — tapping one drives the
+       scene — and stacked full width they read as a wall of text with
+       the machine hidden behind it. they take the split's own shape
+       instead: the same 65% column in the same 16px gutters, docked
+       LEFT, RIGHT, LEFT, RIGHT down the stack, so every one of them
+       leaves the opposite side of the frame to the scene it is talking
+       about. the grid stays one column — this is the item's width and
+       its justify-self inside that column, not a second column. */
+    .after #machine .grid3 .card{
+      width:calc(65% - 32px);
+      /* naked, like the split: no plate, no border, no glow, no inner
+         padding — the type sits straight on the city */
+      border:0;background:none;box-shadow:none;border-radius:0;padding:0;
+      /* ...which takes the selected state's chrome with it, and these
+         four are the section's SLIDER. the unselected ones step back in
+         weight instead, and the live one is the one at full strength */
+      opacity:.45;transition:opacity .25s;
+    }
+    .after #machine .grid3 .card:hover,
+    .after #machine .grid3 .card.on{border:0;background:none;box-shadow:none}
+    .after #machine .grid3 .card.on{opacity:1}
+    .after #machine .grid3 .card:nth-child(even){justify-self:end}
+    /* the first card gets the same air above it that the 50px gap gives
+       every card below — the lead paragraph sat right on top of it */
+    .after #machine .grid3 .card:first-child{margin-top:50px}
+    /* nothing to press here: the scroll is the picker */
+    .after #machine .grid3 .card,.after #machine .grid3 .card *{cursor:default}
+    /* every point's title takes its own line, and the dash that joined it
+       to the sentence goes with it */
+    .after #machine .grid3 .card li b{display:block}
+    .after #machine .grid3 .card li .dash{display:none}
+    /* ── 'built for agents': the points take the machine cards' shape ──
+       the same 65% column in the same 16px gutters the 'what you get'
+       cards stand in, but docked RIGHT all the way down instead of
+       alternating: this section is read against the scene on the LEFT
+       of the frame, so no point ever lies over it. one column still —
+       this is the item's width and its justify-self inside it. */
+    .after #agents .points div{width:calc(65% - 32px);justify-self:end}
+    /* ── faq: the questions and answers take the same column ──────────
+       the agents points' exact shape — 65% in the same gutters, docked
+       RIGHT — so the scene keeps the left of the frame down the whole
+       list. the dl is not a grid, so the dock is margin-left:auto. */
+    .faq dt,.faq dd{width:calc(65% - 32px);margin-left:auto}
     .after #deploy pre.term,.after #agents pre.term{padding:12px 13px;font-size:11px;line-height:1.7}
+    /* ...and the session gets a machine under it (see the block in the
+       markup). 36% of the screen is what puts the board's own middle at
+       ~0.79 of the frame once the ride has walked #deploy's top to its
+       settle line — clear of the terminal's bottom edge, with the pod
+       column standing on the board inside the same block. */
+    .after #deploy .board-slot{display:block;height:36vh;height:36svh}
     .term-chat-header{padding:8px 13px}
     /* the ledger stops being a two-column table */
     .ledger li{grid-template-columns:1fr;gap:2px}
@@ -903,6 +1129,124 @@
     .f-links{justify-content:center}
     /* the stacked brand centers with everything else here */
     .f-brand{align-items:center}
+  }
+
+  /* ── ≤767 PORTRAIT · the hero is one screen, the film is a sheet ──
+     the film does not fit this frame and nothing makes it fit: it is a
+     1920x1080 stage fitted BY WIDTH (scale = w/1920, see
+     commercial.js), so edge to edge on a phone it is 56.25vw ≈ 26vh
+     tall — a postage stamp inside the half a screen it was given, and
+     illegible at any size that half can offer. so on a phone upright it
+     leaves the page entirely:
+
+       · the hero is one honest screen — 100svh — with the copy centred
+         between the bar and the link. svh, not vh or dvh: svh is the
+         viewport with the browser's own furniture SHOWN (safari's url
+         bar, chrome's bar, the android navigation bar), so the hero
+         always fits between them and it never re-lays-out when one of
+         those bars slides away mid-scroll (dvh does, on every scroll
+         frame). it is also the unit the fixed stage is already in and
+         the unit __vpH() hands to every leg of the ride, so the hero
+         box and the camera agree by construction. the plain 100vh line
+         before it is the fallback for a browser too old to know svh.
+
+       · the film becomes a LINK, bottom left of that screen: the rail's
+         own green led and its own lowercase mono, underlined so it
+         reads as a link and nothing else. tapping it opens the film as
+         a full sheet over the page.
+
+       · nothing is unmounted or re-mounted to do that. the commercial
+         keeps its place in the dom and simply stops having a box
+         (display:none) — its own IntersectionObserver parks the
+         timeline while it is hidden, and its ResizeObserver refits the
+         1920 stage the instant the sheet gives it width again.
+
+     the ride doesn't care: every leg is measured off its section's own
+     page offset and floorLegs() tops up any that comes in under its
+     minVH, so the opening drop keeps its 18% of a viewport. */
+  @media (max-width:767px) and (orientation:portrait){
+    /* the title takes the room the film gave back. this is portrait only
+       — a phone turned SIDEWAYS still stacks the film under the copy in
+       normal flow (the ≤767 rung above), and 38px of headline there
+       would push it clean off a 375px-tall frame. measured upright on a
+       390: the second line wraps, so the head is three lines ≈ 95px
+       inside a copy box worth ~560. flat 30, not a clamp — it is the
+       size that was picked by eye on the phone, and it still fits the
+       shortest portrait frame there is (a 320x568 leaves ~312 for a
+       stack that measures ~298). */
+    h1{font-size:30px;letter-spacing:-.02em}
+    .sub{font-size:16px}   /* the stack rung's 14.5 is sized for a screen that still had the film in it */
+    .hero-over{
+      height:100vh;height:100svh;
+      justify-content:center;      /* the copy centres in what is left between the bar and the link */
+      padding:72px 0 96px 20px;    /* the bottom is the link's room, so centring never lands on it */
+      overflow:visible;            /* the clip was for the desktop's negative pull; nothing overhangs here */
+    }
+    .demo-open{
+      display:inline-flex;align-items:center;
+      position:absolute;left:20px;bottom:calc(14px + env(safe-area-inset-bottom,0px));
+      pointer-events:auto;         /* the hero wrapper itself is transparent to touch (the city grab) */
+      background:none;border:0;margin:0;cursor:pointer;
+      padding:12px 12px 12px 2px;  /* a thumb-sized target around an 11.5px line */
+      font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:lowercase;
+      color:var(--muted);          /* a step brighter than the rail's --dim: this one is meant to be pressed */
+      text-decoration:underline;text-decoration-color:rgba(255,255,255,.22);text-underline-offset:5px;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .demo-open:active{color:var(--text);text-decoration-color:rgba(255,255,255,.55)}
+    /* the film is out of the page — see the block above */
+    .hero-demo-wrap{display:none}
+    /* two classes, not one: `sheet` gives the film a box, `open` fades it
+       in. the resting state has to be display:none and nothing else —
+       an opacity:0 sheet is still a BOX, and a box is exactly what the
+       commercial's own observers read as "visible": it would refit and
+       play behind a transparent overlay on every phone that never opens
+       it. so js adds `sheet`, lets the browser see opacity 0, and only
+       then adds `open` (and unwinds the pair in the same order). the
+       fade is the mobile menu's own — .3s ease-in-out. */
+    .hero-demo-wrap.sheet{
+      display:flex;flex-direction:column;justify-content:center;
+      position:fixed;inset:0;z-index:200;margin:0;height:auto;
+      background:#141313;   /* solid: at 96% the nav's own burger ghosted through behind this one */
+      padding:0 0 env(safe-area-inset-bottom,0px);
+      /* the sheet eats the gesture itself: the page under it must not
+         scroll the ride while it is up. no html/body overflow lock —
+         that one can bump the very scroll position every leg is
+         measured against, on exactly the browser this is for. */
+      touch-action:none;overscroll-behavior:contain;
+      opacity:0;transition:opacity .3s ease-in-out;
+    }
+    .hero-demo-wrap.sheet.open{opacity:1}
+    /* inside the sheet the rail is the film's caption, and the film
+       keeps its true 16:9 at the sheet's full width — no crop, no bands */
+    .hero-demo-wrap.sheet .rail.demo-rail{width:calc(100% - 40px);margin:0 auto 10px;flex:none}
+    .hero-demo-wrap.sheet .hero-demo{flex:none}
+    .hero-demo-wrap.sheet .demo-close{display:flex}
+    /* the split comes up sooner after the link. the stack rung above is
+       written for a phone whose first screen ENDS with the film, and it
+       holds the product 120px clear of it; upright there is no film
+       there any more — just the link on the hero's own bottom edge —
+       and that clearance read as a dead screen-end. the opening drop
+       pays for it in scroll length and can afford it: leg 1 runs from 0
+       to #split's top crossing 0.55 of a viewport, which is ~0.61vh
+       before this and ~0.53 after, either way far above the 0.18vh
+       floor floorLegs() would otherwise inject margin to defend. */
+    .after{padding-top:56px}
+  }
+
+  /* a SHORT portrait phone — an se, a mini, most 16:9 androids. the
+     hero's own box is svh, so it shrinks with the frame while the type
+     does not: on a 320x568 the stack wants ~305 against a box worth
+     ~292. the type gives the difference back. (media-query height is
+     the TALL viewport — the url bar is not in it — so the cut is keyed
+     well above the svh it is protecting.) */
+  @media (max-width:767px) and (orientation:portrait) and (max-height:740px){
+    .sub{font-size:15px;line-height:1.5;margin:6px 0 14px 0}
+    .btn{font-size:12px;padding:7px 12px}
+    .ctas{gap:8px 10px}
+    .note{font-size:11px}
+    .hero-over{padding:62px 0 86px 20px}
+    .hero-over .note{margin-top:10px}
   }
 </style>
 </head>
@@ -932,7 +1276,7 @@
         </a>
       </div>
       <button class="mobile-menu-btn" aria-label="Toggle mobile menu" aria-expanded="false"
-        onclick="var m=document.getElementById('mobile-menu');var n=document.getElementById('nav');m.classList.toggle('active');n.classList.toggle('active');this.classList.toggle('active');this.setAttribute('aria-expanded',m.classList.contains('active'))">
+        onclick="var m=document.getElementById('mobile-menu');var n=document.getElementById('nav');m.classList.toggle('active');n.classList.toggle('active');this.classList.toggle('active');var o=m.classList.contains('active');this.setAttribute('aria-expanded',o);window.__holdPage(o)">
         <div class="hamburger">
           <div class="hamburger-container">
             <div class="hamburger-line"></div>
@@ -966,6 +1310,41 @@
     window.__vpH = function(){
       if (!st) st = document.getElementById('stage');
       return (st && st.clientHeight) || window.innerHeight;
+    };
+  })();
+  // ── NOTHING MOVES THE PAGE WHILE SOMETHING IS OVER IT ────────────
+  // used by the nav's menu and by the film's sheet on a phone. the
+  // scroll is not LOCKED, it is REFUSED: every gesture that would move
+  // the page is cancelled at the document, and window.pageYOffset never
+  // changes by a pixel. the usual lock (html/body overflow, or the ios
+  // position:fixed trick) moves or zeroes the scroll position — and that
+  // position is the film reel of this whole page: every leg, every show
+  // window, the camera itself is measured off it. a lock that "restores"
+  // the number afterwards still hands the ride a jump cut through twelve
+  // legs on the way in and another on the way out.
+  // touch-action/overscroll-behavior on an overlay only stop a gesture
+  // that STARTS on it; this stops the rest — a wheel, a trackpad, a
+  // space bar, an arrow key, a fling that began somewhere else.
+  (function(){
+    var KEYS = {' ': 1, 'Spacebar': 1, 'ArrowUp': 1, 'ArrowDown': 1, 'ArrowLeft': 1,
+                'ArrowRight': 1, 'PageUp': 1, 'PageDown': 1, 'Home': 1, 'End': 1};
+    var held = 0;
+    function eatMove(e){ e.preventDefault(); }
+    function eatKeys(e){
+      if (KEYS[e.key] && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target || {}).tagName || '')) e.preventDefault();
+    }
+    // counted, not flagged: the menu and the sheet can both be up (open
+    // the menu, tap through to the film) and whichever closes second is
+    // the one that gives the page back
+    window.__holdPage = function(on){
+      held = Math.max(0, held + (on ? 1 : -1));
+      if (on && held !== 1) return;
+      if (!on && held !== 0) return;
+      var fn = on ? 'addEventListener' : 'removeEventListener';
+      // passive:false, or preventDefault is ignored on both of these
+      document[fn]('touchmove', eatMove, {passive: false});
+      document[fn]('wheel', eatMove, {passive: false});
+      document[fn]('keydown', eatKeys);
     };
   })();
   // the nav's black gradient: on whenever the page is scrolled off the top
@@ -1002,8 +1381,40 @@
       cards.forEach(function(x, j){ x.classList.toggle('on', j === i); });
     };
     cards.forEach(function(c, i){
-      c.addEventListener('click', function(){ window.__machPick(i); });
+      // a tap picks — except where the scroll is the picker (below), and
+      // there it would only fight the next card to cross the line
+      c.addEventListener('click', function(){ if (!window.__machScrollDriven) window.__machPick(i); });
     });
+    // ── PHONES: THE CARDS ARE NOT A SLIDER, THEY ARE THE SCROLL ───────
+    // the four cards are docked alternately left and right down a whole
+    // screen each, so on a phone the page already says which one you are
+    // reading — whichever is crossing the line just under mid-screen. it
+    // picks the slide, and the rack changes under you as you read.
+    // the observer's root margin IS that line: the band from 50% to 55%
+    // of the frame. it costs nothing per scroll frame — no listener, no
+    // layout read — the browser tells us only when a card enters or
+    // leaves it. the first card whose box is on the line wins, so a
+    // boundary crossing resolves to the upper of the two.
+    // the autoplay beat stands down while this drives (the scene reads
+    // __machScrollDriven every frame): two pickers on one slide would
+    // fight, and the one the thumb is steering has to win.
+    var phone = window.matchMedia('(max-width:767px)');
+    var live = [], mcIO = null;
+    function machDriver(on){
+      window.__machScrollDriven = on;
+      if (on){
+        if (mcIO || !('IntersectionObserver' in window)) return;
+        mcIO = new IntersectionObserver(function(ents){
+          for (var k = 0; k < ents.length; k++) live[cards.indexOf(ents[k].target)] = ents[k].isIntersecting;
+          for (var i = 0; i < cards.length; i++) if (live[i]){ window.__machPick(i); return; }
+        }, {rootMargin: '-50% 0px -45% 0px', threshold: 0});
+        cards.forEach(function(c){ mcIO.observe(c); });
+      } else if (mcIO){ mcIO.disconnect(); mcIO = null; live = []; }
+    }
+    machDriver(phone.matches);
+    var machMQ = function(){ machDriver(phone.matches); };
+    if (phone.addEventListener) phone.addEventListener('change', machMQ);
+    else if (phone.addListener) phone.addListener(machMQ);
     // ...and while the pointer is parked ON the stack the autoplay beat
     // holds where it is (the scene reads this flag every frame): you are
     // reading the card, the rack must not slide out from under you.
@@ -1079,15 +1490,111 @@
       <a class="btn primary" href="https://manager.usectl.com"><span>Create a machine</span><div class="glitch" aria-hidden="true"><span class="letters"><span>C</span><span>r</span><span>e</span><span>a</span><span>t</span><span>e</span><span>&nbsp;</span><span>a</span><span>&nbsp;</span><span>m</span><span>a</span><span>c</span><span>h</span><span>i</span><span>n</span><span>e</span></span></div></a>
       <a class="btn ghost" href="https://docs.usectl.com"><span>Read the docs</span><div class="glitch" aria-hidden="true"><span class="letters"><span>R</span><span>e</span><span>a</span><span>d</span><span>&nbsp;</span><span>t</span><span>h</span><span>e</span><span>&nbsp;</span><span>d</span><span>o</span><span>c</span><span>s</span></span></div></a>
     </div>
-    <p class="note" style="margin-top:20px">30 days free. No card.</p>
+    <p class="note">30 days free. No card.</p>
   </div>
+  <!-- phones only (see .demo-open): the commercial is not in the page
+       there — this opens it as a sheet -->
+  <button type="button" class="demo-open" id="demoOpen" aria-haspopup="dialog" aria-expanded="false">
+    <span class="led" aria-hidden="true"></span>How it ships
+  </button>
 </div>
 
-<!-- the commercial: pure GSAP build (see /commercial/gsap/commercial.js) -->
-<div class="rail demo-rail"><span><span class="led"></span>How it ships</span><span>GitHub app · Kaniko · TLS</span></div>
-<div class="hero-demo">
-  <div id="commercial-mount" style="position:absolute;inset:0;background:#141414;"></div>
+<!-- the commercial: pure GSAP build (see /commercial/gsap/commercial.js).
+     the wrapper is display:contents at every width but a portrait phone,
+     where it becomes the film's own half of the first screen — on every
+     other frame these two are laid out exactly as the bare siblings they
+     have always been. -->
+<div class="hero-demo-wrap" id="demoWrap">
+  <div class="rail demo-rail"><span><span class="led"></span>How it ships</span><span>GitHub app · Kaniko · TLS</span></div>
+  <div class="hero-demo">
+    <div id="commercial-mount" style="position:absolute;inset:0;background:#141414;"></div>
+  </div>
+  <button type="button" class="demo-close" id="demoClose" aria-label="Close">
+    <div class="hamburger">
+      <div class="hamburger-container">
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+      </div>
+    </div>
+  </button>
 </div>
+<script>
+  // the film's sheet — portrait phones only, where the commercial is not
+  // in the page at all. opening gives it a box back: no unmount, no
+  // re-mount, no second copy of a 1920x1080 stage. what runs is switched
+  // by hand at both ends of the tap, not left to the observers to notice:
+  // closed, the film's timeline is paused outright (and parked at load,
+  // down where it is mounted); open, the CITY is held instead — the whole
+  // webgl frame is skipped while the sheet covers it.
+  (function(){
+    var btn = document.getElementById('demoOpen'),
+        wrap = document.getElementById('demoWrap'),
+        shut = document.getElementById('demoClose');
+    if (!btn || !wrap) return;
+    var phone = window.matchMedia('(max-width:767px) and (orientation:portrait)');
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // mounted at the foot of the page, after this script — read it when
+    // the tap happens, not now
+    function film(){ return window.__commercial || null; }
+    var FADE = 300;        // the sheet's own transition, in ms — keep the two in step
+    var fadeTimer = null;
+    var holdPage = window.__holdPage;   // shared with the nav's menu, defined up in the header
+    function open(){
+      clearTimeout(fadeTimer);
+      wrap.classList.add('sheet');
+      void wrap.offsetWidth;            // the browser has to SEE opacity 0 before it is told 1
+      wrap.classList.add('open');
+      holdPage(true);
+      // the close is the nav's burger and it draws itself into the x the
+      // same way the nav's does — same class, same 900ms curve
+      if (shut) shut.classList.add('active');
+      wrap.setAttribute('role', 'dialog');
+      wrap.setAttribute('aria-modal', 'true');
+      btn.setAttribute('aria-expanded', 'true');
+      var f = film();
+      if (f && !reduced) f.play(0);     // a demo opened by hand starts at its start
+      // the sheet is opaque and covers the whole frame: hold the city
+      // entirely — no render, no lap — so the phone's gpu is the film's
+      // alone. held only ONCE THE FADE IS OVER: until then the city is
+      // still on screen underneath, and a frozen one would show.
+      fadeTimer = setTimeout(function(){ window.__sceneHold = true; }, FADE);
+      if (shut) shut.focus();
+    }
+    function close(){
+      if (!wrap.classList.contains('open')) return;
+      clearTimeout(fadeTimer);
+      wrap.classList.remove('open');
+      holdPage(false);
+      if (shut) shut.classList.remove('active');
+      wrap.removeAttribute('role');
+      wrap.removeAttribute('aria-modal');
+      btn.setAttribute('aria-expanded', 'false');
+      // the city takes its frame back AT ONCE — it has to be rendering
+      // again to be there when the sheet thins over it
+      window.__sceneHold = false;
+      btn.focus();
+      // ...and the box goes away only when the fade has finished, or the
+      // sheet would vanish instead of leaving. the film stops with it —
+      // unless this close is a ROTATION out of portrait, where the film
+      // rejoins the page and its own IntersectionObserver owns it again
+      fadeTimer = setTimeout(function(){
+        wrap.classList.remove('sheet');
+        var f = film();
+        if (f && phone.matches) f.pause();
+      }, FADE);
+    }
+    btn.addEventListener('click', open);
+    if (shut) shut.addEventListener('click', close);
+    // the backdrop closes it; a tap on the film itself does not
+    wrap.addEventListener('click', function(e){ if (e.target === wrap) close(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+    // turned sideways the film goes back into the page on its own — the
+    // sheet's rules are portrait-only, so close it before it half-applies
+    var onChange = function(){ if (!phone.matches) close(); };
+    if (phone.addEventListener) phone.addEventListener('change', onChange);
+    else if (phone.addListener) phone.addListener(onChange);
+  })();
+</script>
 
 <!-- ── the product ────────────────────────────────── -->
 <main class="after">
@@ -1106,30 +1613,30 @@
     <div class="grid3 big" id="machCards">
       <div class="card on"><b>Isolated by default</b><span>Bare-metal speed behind ironclad kernel and network walls — no leaky multi-tenant hosts.</span>
         <ul>
-          <li><b>Hardened network perimeter</b> — every machine sealed in its own namespace, ingress and egress policy enforced. Neighbours cannot sniff your traffic or reach your pods.</li>
-          <li><b>Kernel sandboxing</b> — heavy workloads and AI agents run inside gVisor sandboxes, fully isolated from the host kernel.</li>
-          <li><b>Envelope-vault secrets</b> — keys and env vars under AES-256-GCM envelope encryption with tamper-evident audit logs. Protected secrets never return plaintext.</li>
+          <li><b>Hardened network perimeter</b><span class="dash"> — </span>every machine sealed in its own namespace, ingress and egress policy enforced. Neighbours cannot sniff your traffic or reach your pods.</li>
+          <li><b>Kernel sandboxing</b><span class="dash"> — </span>heavy workloads and AI agents run inside gVisor sandboxes, fully isolated from the host kernel.</li>
+          <li><b>Envelope-vault secrets</b><span class="dash"> — </span>keys and env vars under AES-256-GCM envelope encryption with tamper-evident audit logs. Protected secrets never return plaintext.</li>
         </ul>
       </div>
       <div class="card"><b>Everything inside</b><span>Kill five SaaS subscriptions — the whole production stack lives in one machine.</span>
         <ul>
-          <li><b>Auto-healing data</b> — two-instance PostgreSQL clusters with streaming failover, three-node NATS JetStream RAFT.</li>
-          <li><b>Storage, cron and edge TLS</b> — Redis, MongoDB, S3 object storage, CronJobs and custom domains with automated TLS. No external addons.</li>
-          <li><b>Full-stack telemetry</b> — Grafana dashboards for metrics, logs and traces, plus Sentry-compatible error tracking, all in one CLI.</li>
+          <li><b>Auto-healing data</b><span class="dash"> — </span>two-instance PostgreSQL clusters with streaming failover, three-node NATS JetStream RAFT.</li>
+          <li><b>Storage, cron and edge TLS</b><span class="dash"> — </span>Redis, MongoDB, S3 object storage, CronJobs and custom domains with automated TLS. No external addons.</li>
+          <li><b>Full-stack telemetry</b><span class="dash"> — </span>Grafana dashboards for metrics, logs and traces, plus Sentry-compatible error tracking, all in one CLI.</li>
         </ul>
       </div>
       <div class="card"><b>One bill</b><span>One budget, unlimited pods — no per-pod tax.</span>
         <ul>
-          <li><b>Unified resource wallet</b> — a machine is a fixed budget of vCPU, RAM and storage on one predictable subscription.</li>
-          <li><b>Pods without bills</b> — every extra web, worker or release pod shares the machine's budget. No new fees.</li>
-          <li><b>Stage and prod groups</b> — sibling machines with isolated networks, each its own namespace and database, on the same budget.</li>
+          <li><b>Unified resource wallet</b><span class="dash"> — </span>a machine is a fixed budget of vCPU, RAM and storage on one predictable subscription.</li>
+          <li><b>Pods without bills</b><span class="dash"> — </span>every extra web, worker or release pod shares the machine's budget. No new fees.</li>
+          <li><b>Stage and prod groups</b><span class="dash"> — </span>sibling machines with isolated networks, each its own namespace and database, on the same budget.</li>
         </ul>
       </div>
       <div class="card"><b>Workloads and previews</b><span>Zero-downtime rollouts and an instant preview for every pull request.</span>
         <ul>
-          <li><b>Targeted pods</b> — run workloads as web, worker or release, each owning its repo, branch, domain and ports.</li>
-          <li><b>Zero-downtime rollouts</b> — rolling or recreate strategies with 5xx watchers and instant auto-rollback.</li>
-          <li><b>PR preview URLs</b> — every pull request spins up an isolated preview with its own namespace and URL.</li>
+          <li><b>Targeted pods</b><span class="dash"> — </span>run workloads as web, worker or release, each owning its repo, branch, domain and ports.</li>
+          <li><b>Zero-downtime rollouts</b><span class="dash"> — </span>rolling or recreate strategies with 5xx watchers and instant auto-rollback.</li>
+          <li><b>PR preview URLs</b><span class="dash"> — </span>every pull request spins up an isolated preview with its own namespace and URL.</li>
         </ul>
       </div>
     </div>
@@ -1146,6 +1653,15 @@
   </div>
 <pre class="term"><span class="ln"><span class="p">$</span> usectl login</span><span class="ln"><span class="p">$</span> usectl machines create my-project --repo github.com/you/shop --postgres --redis --s3</span><span class="ln"><span class="ok">✓</span> postgres ready. DATABASE_URL injected</span><span class="ln"><span class="ok">✓</span> redis ready. REDIS_URL injected</span><span class="ln"><span class="ok">✓</span> s3 ready. S3_BUCKET injected</span><span class="ln"><span class="p">$</span> usectl deploy my-project</span><span class="ln"><span class="ok">✓</span> build 28s · tls issued · live at <span class="u">https://my-project.usectl.com</span></span></pre>
 </div>
+    <!-- ── the phone's room for the board shot ──────────────────────
+         above 768 the copy is docked to one half and the pcb + pod
+         column stand in the other; a phone runs the copy full width and
+         they had nowhere to go but ON TOP of the session they are
+         illustrating. this empty block is the room, and the shot is
+         MEASURED into it (measureBoardShot) rather than nudged by hand,
+         so the reading order is rail, headline, session, machine at any
+         phone size. display:none from 768 up — see the sheet. -->
+    <div class="board-slot" id="boardSlot" aria-hidden="true"></div>
   </section>
 
   <section class="panel" id="addons">
@@ -1262,7 +1778,7 @@
         <div class="f-copy">© 2026 <a class="co" href="https://systemctl.sh/" target="_blank" rel="noopener">systemctl</a>. All rights reserved.</div>
       </div>
       <nav class="f-links" aria-label="Footer">
-        <a href="https://docs.usectl.com">Documentation</a>
+        <a href="https://docs.usectl.com">Docs</a>
         <a href="https://github.com/syst3mctl">GitHub</a>
         <a href="https://status.usectl.com">Status</a>
         <a href="#">Privacy policy</a>
@@ -1280,7 +1796,16 @@
 <script src="/commercial/gsap/gsap.min.js"></script>
 <script src="/commercial/gsap/commercial.js"></script>
 <script>
-  UsectlCommercialGSAP.mount(document.getElementById('commercial-mount'));
+  // the master timeline is kept on window: on a portrait phone the sheet
+  // is the only thing that can show the film, so it is the only thing
+  // that should be running it (see the #demoOpen script up the page).
+  window.__commercial = UsectlCommercialGSAP.mount(document.getElementById('commercial-mount'));
+  // there the film has no box at load, so park it AT ONCE — its own
+  // IntersectionObserver would get there too, but a frame or two later,
+  // and those are frames a phone spends animating something nobody can see
+  if (window.__commercial && window.matchMedia('(max-width:767px) and (orientation:portrait)').matches){
+    window.__commercial.pause(0);
+  }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -1364,8 +1889,19 @@
   var MOBILE = window.innerWidth <= 767;
   var MQ = (function(){
     var Q = [
-      // 0 — the bad phone: everything that can be off, is
-      {dpr: 1,   chain: 0.75, dof: false, bloom: false, fxaa: false, grain: 0,     wires: false, overlay: false, calm: true},
+      // 0 — the bad phone: everything that can be off, is — EXCEPT the
+      // two that ARE the city. bloom is the lit windows and the street
+      // runs; the overlay is the white line work over the blocks. with
+      // both off this rung does not read as a cheaper city, it reads as
+      // a broken one: a flat grey model with the lights switched off
+      // (seen on a real demotion mid-scroll, "city lights was turn off
+      // wtf ... lines too"). they stay, and the rung still pays for
+      // itself where the money actually is — dpr 1 (a third of rung 1's
+      // pixels), the chain at 0.75, the bokeh pass off entirely, no
+      // grain, no fxaa. bloom at dpr 1 / chain 0.75 costs a fraction of
+      // what it costs at rung 1's dpr 1.5, so this rung is still the
+      // cheapest frame in the ladder by a wide margin.
+      {dpr: 1,   chain: 0.75, dof: false, bloom: true,  fxaa: false, grain: 0,     wires: false, overlay: true,  calm: true},
       // 1 — every phone starts here
       {dpr: 1.5, chain: 0.9,  dof: true,  bloom: true,  fxaa: true,  grain: 0.055, wires: false, overlay: true,  calm: false},
       // 2 — the page as written (desktop always; a phone only by promotion)
@@ -1888,6 +2424,16 @@
   // so everything resumes instantly. the clock keeps running, so the glitch
   // and flicker timelines stay honest across the gap.
   var stageVisible = true;
+  // ...and the film's sheet on a portrait phone covers the scene outright.
+  // while it is up the city is not merely still, it is not rendered at
+  // all — the same whole-frame skip as the scroll-away above, so the
+  // phone spends its gpu on the one thing actually being watched. the
+  // sheet raises and lowers this (see the #demoOpen script). the lap
+  // itself stops with it: OrbitControls only auto-rotates inside
+  // controls.update(), which this skip never reaches, and its step is a
+  // per-call constant rather than a time delta — so the city picks the
+  // lap back up exactly where it left off, with no catch-up swing.
+  window.__sceneHold = false;
   if ('IntersectionObserver' in window){
     new IntersectionObserver(function(entries){
       stageVisible = entries[entries.length - 1].isIntersecting;
@@ -2042,6 +2588,12 @@
   var rackRoot2 = null, rack2Mats = [], rack2Op = 0, rackLamp2 = null, rackSpot2 = null;
   var rack2BaseX = 0, rack2DxW = 0;   // the clone's birth x (inside the original) and its travel
   var rackLbl1 = null, rackLbl2 = null;   // the typed name plates over the two racks
+  // the phone drops the RACKS THEMSELVES through the two-rack show —
+  // not any camera ("not container! racks!"): a world-space sink, in
+  // meters, riding the metal window and released as the math approaches
+  // (the faq re-frames the rack and must find it back on the ground).
+  var RACK_SINK_M = 2.0;
+  var rackSinkQ = 0, rackBaseY0 = null, rack2BaseY0 = null, lbl1BaseY0 = null, lbl2BaseY0 = null;
   // the version-10 machine grid living inside the rack: cubes that rise
   // in the leg-3 tail while the shell dims to glass. styled like the
   // page's annotation swatches: bright border in the exact accent hex,
@@ -2394,6 +2946,14 @@
   // RIGHT-hand wall (+x — the face this slide's camera turns to the
   // lens). not a prop standing beside the machine: part of it.
   var panelRoot = null, panelMats = [], panelLamp = null, panelQ = -1;
+  // ...and on a phone slide 4's shot is MIRRORED (see machPose), so the
+  // lens looks at the -x wall and this console would be hidden behind
+  // the machine. these are the two wall seats — the logged +x one and
+  // its opposite — measured off the rack's box when the panel loads and
+  // picked per viewport in the fade block, with the key light following
+  // it across. panelFlipQ -1 forces the first pass, so the load lands on
+  // the right wall without a special case up here.
+  var panelXOut = 0, panelXIn = 0, panelLampXOut = 0, panelLampXIn = 0, panelFlipQ = -1;
   // the panel's dashboards, recolored to OUR blue and kept alive: the
   // authored screen art is amber and rides the EMISSIVE map whole, so
   // the recolor is one pass over that map (every pixel keeps its own
@@ -2489,21 +3049,112 @@
     // 3% back right with every other slide, then 5% more right ("one
     // bill slide more to right + 5%") — which lands it exactly back on
     // the value it was logged at. plus a 4px nudge in real pixels.
-    else if (i === 2){ TGT = S3_TGT; EYE = S3_EYE; panR = 0.14; panU = 0.24; pxR = 4; }
+    // ...and its walk alone is held to the DESIGN frame's width on a tall
+    // frame ('its onebill slide, its moved in right' on an ipad, where
+    // 0.14 of a 2.4x narrower half-width never carried the rack off the
+    // copy). this slide walks LEFT, away from the text, so reaching
+    // further is the composition holding; slides 2 and 4 are left alone
+    // because their own walks do not want it. desktop never enters the
+    // branch: every frame at or above 3:2 keeps panR at a flat 0.14.
+    else if (i === 2){ TGT = S3_TGT; EYE = S3_EYE; panR = 0.14; panU = 0.24; pxR = 4;
+      // ...and then 5% of the frame's WIDTH back to the RIGHT on that same
+      // tall frame ('3rd slide move to right + 5%'): panR is a share of
+      // the HALF width, so 5% of the frame is 0.10 of it, and positive
+      // panR carries the content LEFT — hence the subtraction. it is
+      // taken AFTER the widening, because 5% of the frame is 5% of the
+      // frame whatever the reach before it was. ipad portrait: 0.14 ->
+      // 0.28 -> 0.18.
+      var aNow = camera.aspect || DESIGN_ASPECT;
+      if (aNow < DESIGN_ASPECT) panR = panR * (DESIGN_ASPECT / aNow) - 0.10;
+      // ...and further LEFT again on a phone. same arithmetic as the step
+      // above and the opposite sign: panR is a share of the HALF width,
+      // so 1% of the frame is 0.02 of it, and positive carries the
+      // content left. taken last, after the tall-frame widening this
+      // same branch does, so it is a share of the FRAME whatever the
+      // reach before it was. walked 0.10 -> 0.30, then 0.04 back right
+      // ("move to right + 2%") = 0.26, a net 13% of the frame left.
+      if (window.innerWidth <= 767) panR += 0.26;
+    }
     // slide 4: the sealed rack right of center, a fifth low — and its
     // walk left goes 0.1 → 0.26, the same 8% of the full frame width
     // slides 1 and 3 took, then back 0.04 ("move to right +2%") and
     // 0.06 more ("move all to right +3%") = 0.16, a net 3% left
     else { TGT = S4_TGT; EYE = S4_EYE; panR = 0.16; panU = 0.2; pxR = 0; }
+    // ── PHONES, THE RIGHT-DOCKED CARDS: the shot crosses the frame ────
+    // BELOW the chain above, never inside it: declared between two of
+    // its arms, `if (s2Flip) panR = -panR;` becomes the head of the rest
+    // of the chain and slide 2 falls through to slide 4's pose on every
+    // frame where the flip is off — i.e. every laptop.
+    // the cards dock alternately on a phone — left, RIGHT, left, RIGHT
+    // (`.card:nth-child(even){justify-self:end}`) — so cards 2 AND 4 both
+    // leave the LEFT of the frame to the scene they are talking about.
+    // two mirrored things, and they are the same mirror: the WALK flips
+    // (panR is a share of the half width and positive walks the content
+    // left), and the ORBIT goes round to the far side of the subject —
+    // the eye's x offset from the look point is negated below, elevation
+    // and distance untouched, so the same faces read from the opposite
+    // corner. laptops never enter any of it: this is the phone rung.
+    var s2Flip = ((i === 1 || i === 3) && window.innerWidth <= 767);
+    if (s2Flip) panR = -panR;
+    // ...and slide 4 needs one thing slide 2 does not. slide 2's look
+    // point sits ON the machine (S2_TGT is re-aimed at the opened row
+    // when the rack loads), so the mirror leaves the rack dead centre and
+    // its own walk — -0.56, now +0.56 — is the whole trip left. slide 4's
+    // look point is a free-cam spot ~2.3m off the rack, and the mirror
+    // spends exactly that offset carrying the rack TO the centre, so its
+    // flipped -0.16 would park it a touch RIGHT of middle. the walk has
+    // to make the trip alone: 0.56 (slide 2's, so the two cards put the
+    // rack on the same spot of the screen) times the 1.05 depth ratio
+    // between the rack and this slide's further look point, since panR is
+    // a share of the half width AT THE LOOK POINT.
+    // ...and it rides LOWER on a phone than the laptop shot puts it:
+    // 0.2 -> 0.5 of the half height, so the machine clears the card's
+    // own block of type instead of standing level with it. desktop keeps
+    // the logged 0.2 — only this rung moves.
+    if (s2Flip && i === 3){ panR = 0.59; panU = 0.5; }
     tgtOut.copy(TGT); tgtOut.y += prlxDy * 0.3; tgtOut.add(scrubOff);
     eyeOut.copy(EYE); eyeOut.y += prlxDy * 0.3; eyeOut.add(scrubOff);
+    if (s2Flip) eyeOut.x = 2 * tgtOut.x - eyeOut.x;   // round to the other side
     // the responsive frame reaches the slide poses too. these are absolute
     // eye/target pairs (not a pose.w like the legs), so the widening is a
     // plain scale of the eye's offset from the look point — same orbit,
     // same fov, just further out. the pans below ride the widened frame,
     // so the composition walks with it instead of off the edge.
-    if (frameFitK !== 1) eyeOut.sub(tgtOut).multiplyScalar(frameFitK).add(tgtOut);
+    // ...and on a tall frame the SLIDES pull back further than the legs.
+    // the FIT_MAX ceiling is there so the rack keeps its size in the
+    // legs' shots; these three are horizontal compositions (the floor of
+    // machines, the crowd, the sealed box) and a narrow frame simply has
+    // to see more of them ('make slides smaller. zoomout man'). so here
+    // the width fit is taken UNCAPPED, to 2.0 at most: an ipad portrait
+    // goes 1.5 -> 2.0, a third further out, and a landscape ipad keeps
+    // the 1.125 it already had. the phone rung is left out — below 768
+    // the cards stack and that ladder is tuned on its own.
+    // desktop never enters it: at 3:2 and wider DESIGN_ASPECT/aspect is
+    // <= 1, so the max returns frameFitK and the laptop does not budge.
+    var fitS = frameFitK, aFit = camera.aspect || DESIGN_ASPECT;
+    if (window.innerWidth > 767 && aFit < DESIGN_ASPECT)
+      fitS = Math.max(fitS, Math.min(2, DESIGN_ASPECT / aFit));
+    // ...and two of the four pull back further still on a phone — the one
+    // rung the branch above leaves alone. slide 4 is the sealed box and
+    // slide 3 the wide crowd shot: the two widest subjects, both asked to
+    // stand in the narrowest frame the page has. the pans below are
+    // shares of the frame's OWN half width and height, so they grow with
+    // it — each shot keeps the spot on screen it was walked to and simply
+    // reads smaller, orbit and fov untouched. (slide 4 was 1.25, then
+    // 1.6 — "more zoomout plz".)
+    if (window.innerWidth <= 767){
+      if (i === 3) fitS *= 1.6;        // 1.5 -> 2.4
+      else if (i === 2) fitS *= 1.25;  // 1.5 -> 1.875 (1.5 overshot — "it was to much")
+    }
+    if (fitS !== 1) eyeOut.sub(tgtOut).multiplyScalar(fitS).add(tgtOut);
     var hh = eyeOut.distanceTo(tgtOut) * Math.tan(camera.fov * Math.PI / 360);
+    // the pans stay fractions of the frame's OWN half-width. flooring
+    // this at the design aspect was tried and it is wrong as a rule: a
+    // walk is a share of the frame it sits in, and slide 2's walk is
+    // NEGATIVE — it pushes the display right on purpose — so handing it
+    // the design frame's width on a narrow frame threw it off the right
+    // edge. where a slide genuinely needs to reach further on a tall
+    // frame, its own panR says so in the chain above.
     var hw = hh * camera.aspect;
     s2Dir.copy(tgtOut).sub(eyeOut).normalize();
     s2Right.crossVectors(s2Dir, S2_UP).normalize();
@@ -2839,7 +3490,21 @@
   // an ipad landscape moves 1.125 -> 1 and an ipad portrait 2.0 -> 1.
   // FIT_MAX is the single knob: raise it toward 2 to go back to pure
   // width-fitting, lower it to crop tall frames in harder.
-  var DESIGN_ASPECT = 1.5, FIT_POW = 1, FIT_MAX = 1, frameFitK = 1;
+  // ...and the ceiling was landing ON the ipads, which is the one place
+  // it had no business being tight: at 1 an ipad portrait (aspect 0.75)
+  // wants 2.0 and gets 1.0 — the frame stands 7.01 m tall by 5.26 m
+  // wide and the 3.6 m rack fills three quarters of its WIDTH, so the
+  // gate, the rack and the laptop all run off the edges ('animations
+  // are not in good proportions', 'u need make more zoomouts on ipads').
+  // 1.5 is the halfway house between the two complaints: the portrait
+  // frame opens to 10.52 x 7.89 m (the rack back to about half the
+  // width, a third of the height) without returning to the pure
+  // width-fit that made it read too SMALL before ('when my scroll is
+  // center then rack must be full size of animation' — that was 2.0).
+  // an ipad landscape (1.33) asks 1.125 and now gets all of it.
+  // DESKTOPS ARE UNTOUCHED, bit for bit: 16:9 solves 0.843 and 3:2
+  // 0.974, both far under the ceiling, so it never binds there.
+  var DESIGN_ASPECT = 1.5, FIT_POW = 1, FIT_MAX = 1.5, frameFitK = 1;
   function frameFit(){
     var a = camera.aspect || DESIGN_ASPECT;
     return Math.min(FIT_MAX, Math.max(0.8, Math.pow(DESIGN_ASPECT / a, FIT_POW)));
@@ -2876,45 +3541,339 @@
   // ipad pro included ("in ipad pro i need see oopened rack animation by
   // leftside center"). only the phone rung, where the cards stack full
   // width and there is no right half to dock to, centres it.
-  function splitAnchor(x){
-    return function(){
-      if (window.innerWidth <= 767) return 0.5;
-      // ...and a tablet frame steps it left by 9% of the frame — 5%
-      // ("move more left rack plz in both ipads, - 5%") then 4% more.
-      // same under-3:2 test the vertical lift uses, so it catches an
-      // ipad either way up and an ipad pro either way up, and leaves a
-      // 16:9 desktop alone
-      return (camera.aspect || DESIGN_ASPECT) < DESIGN_ASPECT ? x - 0.09 : x;
-    };
+  // ── ONE FRAMING RULE, EVERY SHOT, EVERY RESOLUTION ───────────────
+  // the anchors used to carry ten different hand-logged screen spots and
+  // a pile of per-tablet nudges on top (splitAnchor -0.09, splitAnchorY
+  // -0.16, both now gone). they are replaced by a single rule: THE
+  // SUBJECT SITS DEAD CENTRE OF THE HALF THE COPY IS NOT USING — 0.25
+  // across, 0.50 down. no ramp, no aspect test, no device special case;
+  // an ipad and an ipad pro get the same framing as a desktop, either
+  // way up.
+  // TWO EXCEPTIONS, and they are not taste. the sheet docks the copy of
+  // #machine, #math and #for on the LEFT ("ride the LEFT half, naked like
+  // the split") while #split, #deploy, #modes, #agents and #faq dock it
+  // RIGHT. on a left-docked section the free half is the RIGHT one, so
+  // 0.25 there would park the rack underneath the body copy. #machine and
+  // #for mirror to 0.75. (#math stays at 0.25: the rack is FADING OUT
+  // across that section on rackOutWin and the calculator takes the right
+  // side, so the left is genuinely free by the time it matters.)
+  // FRAME_X / FRAME_Y are the knob — change them once, every shot moves.
+  var FRAME_X = 0.25, FRAME_Y = 0.50, FRAME_X_MIRROR = 1 - FRAME_X;
+  // 'built for agents' sits off the rule on BOTH axes. 0.25 / 0.50 put the
+  // rack dead centre of the left half and it read as too far over and too
+  // high there ("more left. its to much", "and more bottom") — this shot
+  // carries the LAPTOP out to 0.48 as well, so the pair together sit
+  // heavier and higher than a lone rack does at the same anchor. both
+  // agents legs share these, so the blend between them never drifts.
+  // one more nudge in either direction = one more 0.06.
+  // ...and then a real walk of the pair, asked in frame percentages and
+  // applied here because the anchor is the only thing framing this shot:
+  // DOWN 10% then 5% more ('move our camera to bottom +10%', 'more down
+  // + 5%') and LEFT 5% twice ('more left 5%', 'more left man !'). the
+  // rack's screen spot goes 0.19 / 0.56 -> 0.09 / 0.71 and the laptop
+  // rides with it, since the pose — orbit, fov, target — is untouched.
+  var AGENTS_DX = -0.16, AGENTS_DY = 0.21;
+  // 'who it is for' drops the LAPTOP well below mid-frame. it had been hand
+  // set to +0.15 and that was right ("bottom was good"); it lost that when
+  // the anchors were rewritten to the bare rule, which is what put it back
+  // up at 0.50. +0.19 is past the value that was good, since the ask was to
+  // move it down from where it had drifted to.
+  // the laptop stands 1.523 m in that shot's 2.53 m frame — 60% of the
+  // height — so at 0.69 it spans y 0.39 to 0.99 and still lands whole.
+  // FOR_DY is the only number here: past ~0.20 its base leaves the frame.
+  var FOR_DY = 0.19;
+  // ...and on a SHORT phone — the SE class, ~667 frame — a hair lower
+  // still: at 0.69 the laptop's screen crowded the card row above it
+  // ("on little se u need to move it down little bit"); taller phones
+  // read fine and keep the bare number. measured off the stage's own
+  // svh height, so a url bar sliding cannot flip the step mid-scroll.
+  function forAnchorY(){
+    var short_ = window.innerWidth <= 767 && (window.__vpH ? window.__vpH() : window.innerHeight) <= 700;
+    return FRAME_Y + FOR_DY + (short_ ? 0.07 : 0);
   }
-  // ...and vertically: a frame under 3:2 is tall, the text block at the
-  // top of it is long, and the rack at its logged 0.58/0.62 sat under
-  // all of it — on an ipad pro the whole opened-rack reveal played below
-  // the fold of the shot. it lifts 16% of the frame there ("u need to
-  // move it up, in split"). same threshold the sheet's tall-frame rule
-  // uses, so the layout and the camera agree on what "tall" means
-  function splitAnchorY(y){
-    return function(){
-      return (camera.aspect || DESIGN_ASPECT) < DESIGN_ASPECT ? y - 0.16 : y;
-    };
+  // the machine leg — the shot the FIRST slide ('isolated by default') sits
+  // on, since that card takes no slide pose of its own and rides the leg's
+  // own framing. the rack wanted to come down from mid-frame here.
+  // it stands ~3.6 m in this shot's 6.36 m frame (57% of the height), so at
+  // 0.60 it spans y 0.32 to 0.88. MACHINE_DY is the only number: past ~0.22
+  // its feet go under the bottom edge.
+  // NOTE this moves the DEFAULT framing only. slides 2-4 fly to their own
+  // logged poses (S2/S3/S4 in machPose) and are not touched by it.
+  var MACHINE_DY = 0.18;
+  // the laptop's visual centre. lapRoot is a wrap whose origin is the
+  // model's BASE centre and whose scale puts it 2.2 m across; measured off
+  // the glb, the body+open lid stand 1.523 m over that base, so mid-height
+  // is +0.761. resolved live because groundY is read from the city at load
+  // and the laptop is the last model in the chain.
+  var lapMid = new THREE.Vector3();
+  function lapAt(){
+    if (!lapRoot) return null;
+    return lapMid.set(lapRoot.position.x, lapRoot.position.y + 0.761, lapRoot.position.z);
+  }
+  var LAP_FALLBACK = [0.78, 0.611, 0.8];   // 0.78, groundY(-0.15)+0.761, 0.8
+  // the pcb's spot on a narrow frame: THE CENTRE OF THE LEFT CONTAINER —
+  // the room the docked copy leaves free — not the centre of the frame.
+  // 0.25 is the desktop number, and it is the centre of a 50%-wide left
+  // half; from 1250 down the copy takes 54-58% with a smaller gutter, so
+  // that free column is neither 50% wide nor centred on 0.25 and the
+  // board sat off to one side of its own room. measured off #deploy's own
+  // left edge, so it tracks the dock and the gutter at every rung instead
+  // of adding a second hardcoded number. cached: re-read in measureScrub
+  // (load / resize / relayout), never per frame — the ride's pin calls
+  // pcbX() on every frame and must not touch layout.
+  // ── THE BOARD SHOT — ONE RULE, EVERY RESOLUTION ──────────────────
+  // the pcb FILLS THE LEFT CONTAINER and the pod column centres on the
+  // same point, on a laptop exactly as on an ipad ("make psb full size +
+  // pods in middle of left side of container. in center! of left side
+  // container! in all resolutions, in ipads too, laptop too").
+  // the container is the room the docked copy leaves free — read off
+  // #deploy's own left edge, so it follows the 50/54/58% dock and its
+  // gutter at every rung instead of a pile of hardcoded numbers. below
+  // 768 the copy runs the full width and the frame IS the container.
+  var BOARD_FILL = 0.78;   // the board spans this much of the container
+  var BOARD_MAXH = 0.48;   // ...but never more of the frame's height
+  // both are what LANDS ON SCREEN, not what the flat solve returns. the
+  // solve treats the board as a rectangle standing at the anchor point's
+  // distance; it is a 3d prop with components and a slight turn, and the
+  // camera is 0.3 m from it, so its near corners project past that plane.
+  // 1.1 came from a WIDTH measurement taken while the width term was the
+  // binding one (1498x735: 622px actual against a 568px solve). it is the
+  // HEIGHT term that binds on a laptop, and re-measured there the same
+  // blowup is far bigger: at 1512x730 the board landed 506px tall against
+  // the 318px the solve had in mind — 1.59, not 1.10. under-correcting by
+  // that much put the board at 69% of the frame's height when its own cap
+  // says 48%, so it ran off the top and the bottom of its room and dwarfed
+  // the pod column sitting on it ("dont make psb so big ... when i see
+  // pods it looks good"). with the factor honest the rule finally means
+  // what it says at every size: BOARD_FILL of the container, never past
+  // BOARD_MAXH of the frame — on a laptop the height cap is what lands,
+  // ~63% of the container, with the pods reading as cards ON a board
+  // instead of stamps on a wall.
+  var BOARD_PERSP = 1.6;
+  // leg 5 dives from 22 m out to a hair off the board, blended as one
+  // smoothstep across the leg, so the payoff normally happens in its last
+  // few percent — the board is a grey chip for the whole ride and then
+  // full size for an instant before leg 6 reverts it. ARRIVE lands the
+  // pose at 55% of the leg and HOLDS it: the board is full size, the pods
+  // are up and the session is printed while the section is in the middle
+  // of the frame, and it stays that way until the revert takes it.
+  var ARRIVE = 0.55;
+  var pcbSpot = -1;   // <0 = not measured yet, fall back to the old rule
+  // the same pair for the vertical: the anchored screen row, and the
+  // height ceiling that row can afford (BOARD_MAXH unless a phone slot
+  // says less — see measureBoardShot)
+  var pcbSpotY = 0.5, pcbMaxH = BOARD_MAXH;
+  // the pod column's phone width: the TERMINAL's own, measured off the
+  // card so it tracks the section's gutters at any phone size. <0 on
+  // every rung above 768, where the column is a share of the free half
+  var podWPhone = -1;
+  function measureBoardShot(){
+    var w = stageW || window.innerWidth, h = stageH || window.innerHeight;
+    if (LEGS[4]) LEGS[4].arrive = ARRIVE;
+    var dn = w >= 768 ? document.getElementById('deploy') : null;
+    var lead = dn ? dn.getBoundingClientRect().left : 0;
+    if (!(lead > 120)) lead = w;   // full-width copy, or a layout not laid out yet
+    // WHERE: dead centre of the container, floored only so the pod column
+    // (pinned to the same point) keeps its own left edge on the frame
+    var colW = w * (w < 1200 ? 0.28 : 0.22);
+    if (w < 900) colW = Math.max(colW, Math.min(260, w - 40));
+    pcbSpot = Math.max((colW / 2 + 10) / w, (lead / 2) / w);
+    // WHERE, VERTICALLY: the middle of the frame on every rung that has a
+    // free half — the board owns it top to bottom. a phone has no free
+    // half, so #deploy carries an empty block under its terminal and the
+    // shot is measured INTO it. the slot's offset from the section's own
+    // top is a layout fact; its place on SCREEN is the ride's own
+    // arithmetic — leg 5 walks the deploy top from 0.55 of the frame down
+    // to its endAt 0.2 and the payoff holds across the back half of that,
+    // so 0.25 is where the top stands while the board is full size and
+    // the pods are up. read here, with the rest of the layout, and never
+    // per frame: pcbY() is called by the pin on every ride frame.
+    pcbSpotY = 0.5; pcbMaxH = BOARD_MAXH; pcbSlotPage = -1; podWPhone = -1;
+    var slotN = w < 768 ? document.getElementById('boardSlot') : null;
+    var dpN = slotN ? document.getElementById('deploy') : null;
+    if (slotN && dpN){
+      var sR = slotN.getBoundingClientRect(), dR = dpN.getBoundingClientRect();
+      if (sR.height > 40 && h > 0){
+        pcbSpotY = Math.min(0.9, Math.max(0.5,
+          (0.25 * h + (sR.top - dR.top) + sR.height / 2) / h));
+        // ...and the board is capped by THE SLOT, not by the frame. at the
+        // blanket 0.48 it stands half a screen tall and reaches up THROUGH
+        // the terminal it is supposed to sit under; the room it was given
+        // is the honest ceiling.
+        pcbMaxH = Math.min(BOARD_MAXH, sR.height / h);
+        // ...and the same slot in PAGE space, for the travelling row the
+        // pin reads every frame (pcbYLive)
+        pcbSlotPage = sR.top + window.pageYOffset + sR.height / 2;
+      }
+      // ...and the cards take the session's width. they ARE its output —
+      // a narrower column standing under it read as a different
+      // component bolted on ("make pods 100% in mobile, same width like
+      // terminal"). measured off .term-chat rather than restated as
+      // another gutter sum, so it follows the sheet.
+      var tcN = document.querySelector('#deploy .term-chat');
+      if (tcN){
+        var tW = tcN.getBoundingClientRect().width;
+        if (tW > 40) podWPhone = tW;
+      }
+    }
+    // HOW BIG: solve the leg's distance instead of standing it at a fixed
+    // one. pose.w is the frame's half-height in world units, so the
+    // board's projected width is pcbW * h / (2 * pose.w) px — set that to
+    // BOARD_FILL of the container and the board reads the same at every
+    // size. this is also why the leg opts OUT of frameFit: the fit widens
+    // a logged composition to survive a narrow viewport, and there is no
+    // logged composition left here to protect.
+    if (LEGS[4] && LEGS[4].pose && pcbW > 0 && h > 0){
+      var pw = pcbW * h * BOARD_PERSP / (2 * BOARD_FILL * lead);
+      var bh = pcbTopY - pcbBotY;
+      if (bh > 0) pw = Math.max(pw, bh * BOARD_PERSP / (2 * pcbMaxH));
+      LEGS[4].pose.w0 = pw;
+      LEGS[4].pose.w = pw;
+      LEGS[4].fitFixed = true;
+    }
   }
   function pcbX(){
+    if (pcbSpot > 0) return pcbSpot;
     var w = stageW || window.innerWidth;
     var col = w < 900 ? Math.min(260, w - 40) : 0;
     return Math.max(0.25, (col / 2 + 12) / w);
+  }
+  // ── THE REVERT'S PROP CLOCK ──────────────────────────────────────
+  // leg 6 does two jobs at once: it pulls the CAMERA back out of the
+  // machine, and it takes the show APART — pods, board, crowd, shell, in
+  // five ordered windows. the camera keeps the leg's own timing. every
+  // prop rides this instead, and on a phone it is held back for the
+  // first third of the leg.
+  // the reason is the phone's travelling row: the board rides UP the
+  // page with the copy (pcbYLive) and only reaches a readable spot in
+  // the last third of the push, so a revert that starts clearing pods on
+  // the leg's first frame takes them away almost as soon as they arrive
+  // ("u startin to hide pods to fast in mobile"). the five windows keep
+  // their order and their shape — they are squeezed into the back 65% of
+  // the leg, which still lands them all inside it, so the addons cover
+  // never catches the revert mid-way.
+  var REV_HOLD_PHONE = 0.35;
+  function revProp(){
+    var p = LEGS[5] ? Math.min(1, Math.max(0, LEGS[5].p)) : 0;
+    if ((stageW || window.innerWidth) > 767) return p;
+    return Math.max(0, (p - REV_HOLD_PHONE) / (1 - REV_HOLD_PHONE));
+  }
+  // the board's screen ROW — 0.5 everywhere the copy leaves a free half,
+  // the phone slot's own middle where it does not. this one is the
+  // SETTLE row: a single number, which is what a leg's anchor solve
+  // wants (it bakes one pose per endpoint and knows nothing about scroll)
+  function pcbY(){ return pcbSpotY > 0 ? pcbSpotY : 0.5; }
+  // ...but what you WATCH is the per-frame pin, and on a phone that row
+  // TRAVELS. the slot is a block of the page, so the board and the pod
+  // column standing on it ride up the screen with the terminal above
+  // them instead of hanging at one height while the copy slides past
+  // ("i need you scroll with content our pods"). the slot's page-space
+  // centre is measured with the rest of the layout; the live row is that
+  // minus the scroll — arithmetic, no layout read, safe every frame.
+  var pcbSlotPage = -1;   // <0 = no slot (every rung with a free half)
+  function pcbYLive(scroll){
+    if (pcbSlotPage < 0) return pcbY();
+    var h = stageH || window.innerHeight;
+    // floored just inside the bottom edge, because the DIVE has to have
+    // something to aim at: leg 4 is a zoom onto the free cube and the
+    // slot is still a screen and a half below the fold while it plays.
+    // the board waits there until the page catches up with it — which
+    // happens just after the arrival — and rides the content from then
+    // on. the ceiling lets it keep climbing into the revert, where the
+    // pin hands the framing back anyway.
+    return Math.min(0.86, Math.max(0.36, (pcbSlotPage - scroll) / h));
+  }
+  // a TABLET-SHAPED frame: narrower than the design aspect, and not the
+  // phone rung (which runs full-width copy and has anchorX's own ramp).
+  // the faq shot uses it to take its tablet nudge.
+  function tabletShot(){
+    return (camera.aspect || DESIGN_ASPECT) < DESIGN_ASPECT && window.innerWidth >= 768;
   }
   function anchorX(x){
     if (window.innerWidth > 768) return x;
     var k = Math.max(0.28, Math.min(1, (window.innerWidth - 320) / (768 - 320)));
     return 0.5 + (x - 0.5) * k;
   }
+  // ...and the SPLIT opts out of that ramp. the ramp exists because on a
+  // phone every section's copy runs the full width, so there is no free
+  // half to sit the subject in and the honest answer is the middle. the
+  // split is now the one exception: the sheet docks its copy right at
+  // 65% (.after #split in the ≤767 rung), which hands the left third of
+  // the frame back to the city. so the rack goes where the desktop rule
+  // would put it — centre of the column the copy is not using — and the
+  // radial's own swing was widened to meet it there (1.56/2 in that same
+  // rung, landing the circle at 28% instead of the 38% the old third-
+  // travel gave). 0.20, not 0.175: the rack is wide, and dead-centring
+  // the free column pushed its left edge off the frame.
+  var SPLIT_X_PHONE = 0.07;
+  // ...and 5% of the frame DOWN from the centre line. y is measured
+  // top-down in the solver (ndcY = 1 - y*2), so bigger is lower. phone
+  // only, and the rack flight only — the map that flies in ahead of it
+  // keeps the centre line.
+  var SPLIT_Y_PHONE = 0.55;
+  function splitAnchorY(){ return window.innerWidth <= 767 ? SPLIT_Y_PHONE : FRAME_Y; }
+  // 'what you get' slide 1 takes no pose of its own — the machine leg's
+  // framing IS that slide (the blend weights the default pose for it) —
+  // so this is where it is aimed on a phone. the cards there dock
+  // alternately left and right, and the FIRST one docks left, so the
+  // shot takes the right of the frame instead of the middle the ramp
+  // would give it. mirror-side twin of SPLIT_X_PHONE.
+  var MACHINE_X_PHONE = 0.90;
+  function machineAnchorX(){
+    if (window.innerWidth <= 767) return MACHINE_X_PHONE;
+    var x = FRAME_X_MIRROR;
+    if ((camera.aspect || DESIGN_ASPECT) < DESIGN_ASPECT) x += 0.05;   // the ipad step
+    return anchorX(x);
+  }
+  function splitAnchorX(){
+    if (window.innerWidth <= 767) return SPLIT_X_PHONE;
+    // the ipad step: the docked copy takes 54-58% there instead of 50%,
+    // so the free column the rule centres on has drifted right
+    var x = FRAME_X;
+    if ((camera.aspect || DESIGN_ASPECT) < DESIGN_ASPECT) x -= 0.03;
+    return anchorX(x);
+  }
+  // 'built for agents' opts out of the ramp for the SPLIT'S OWN REASON,
+  // now that it has the split's own shape: its points dock RIGHT at 65%
+  // on a phone (.after #agents .points in the ≤767 rung), so the left of
+  // the frame is the scene's again and the honest-middle argument the
+  // ramp is built on does not apply. the ramp was walking the rack in
+  // to 0.385 on a 390 frame — dead under the copy — so the phone simply
+  // keeps the spot the desktop rule already frames this shot at, and
+  // the laptop rides in from the right with it. one constant: walk it.
+  // ...then walked further left on the phone alone, off the desktop
+  // rule's own 0.09, 5% of the frame at a time ("more left - 5%",
+  // "more left man", "more left"). at -0.15 the anchor point is 6% of
+  // the frame past the left edge, so the rack rides the edge itself and
+  // the copy's column is clear of it end to end.
+  var AGENTS_X_PHONE = FRAME_X + AGENTS_DX - 0.15;
+  function agentsAnchorX(){
+    return window.innerWidth <= 767 ? AGENTS_X_PHONE : anchorX(FRAME_X + AGENTS_DX);
+  }
+  // a leg may tighten the frame's own fit on top of it. frameFit pulls
+  // EVERY shot back on a narrow viewport (1.5x at the clamp) so nothing
+  // logged on a desktop crops on a phone — honest, but it is a blanket,
+  // and a shot that owns its screen can afford to come back in. pose.w
+  // is the frame's half-height in world units and r = w / tan(fov/2), so
+  // a factor under 1 is a straight dolly in. fitK is a function, not a
+  // number, because the answer changes with the frame.
+  function legFitK(L){ return L.fitK ? L.fitK() : 1; }
   // re-applied on every resize, ahead of the leg measuring + anchor solve
+  var fitPhone = null;
   function applyFrameFit(){
-    var f = frameFit();
-    if (Math.abs(f - frameFitK) < 1e-4) return;
+    var f = frameFit(), ph = window.innerWidth <= 767;
+    // the phone flag is part of the test: two frames can share a fit (it
+    // clamps at 1.5) and still disagree about fitK, and that resize has
+    // to re-lay the legs too
+    if (Math.abs(f - frameFitK) < 1e-4 && ph === fitPhone) return;
     var ratio = f / frameFitK;
-    frameFitK = f;
-    for (var fi = 0; fi < LEGS.length; fi++) LEGS[fi].pose.w = LEGS[fi].pose.w0 * f;
+    frameFitK = f; fitPhone = ph;
+    for (var fi = 0; fi < LEGS.length; fi++){
+      // a leg whose frame is SOLVED from the layout (the board shot) opts
+      // out: it is re-solved for this exact viewport a few lines later
+      if (LEGS[fi].fitFixed) continue;
+      LEGS[fi].pose.w = LEGS[fi].pose.w0 * f * legFitK(LEGS[fi]);
+    }
     // the LIVE rig rides with it, so a resize mid-hero (or mid-ride) pulls
     // back on the spot instead of waiting for the next leg to blend in
     camera.position.sub(controls.target).multiplyScalar(ratio).add(controls.target);
@@ -2929,18 +3888,46 @@
                       // the arrival, more still-map time for the reading
       eye: [8.3293, 16.6845, -2.1475], target: [8.3293, 1.1489, -2.1475],
       // the 8 button holds this screen spot at every resolution
-      anchor: {x: 0.22, y: 0.58, fn: splitAnchor(0.22), fnY: splitAnchorY(0.58), point: [0.0165, 0.8547, -0.8369]} },
+      // ...and on a phone it lands where the rack flight that follows it
+      // lands — the split's left column — instead of ramping to the
+      // middle. no ipad step here: that one is the rack's, not the map's.
+      anchor: {x: FRAME_X, y: FRAME_Y, point: [0.0165, 0.8547, -0.8369],
+               fn: function(){ return window.innerWidth <= 767 ? SPLIT_X_PHONE : anchorX(FRAME_X); }} },
     { el: 'split',    // the rack building flight — THE SPLIT'S OWN SHOW:
       loggedFov: 8,   // the carve + the green/blue cube grid (the legend's
                       // colors) ride the split's ENTRANCE and the camera
                       // is LANDED by the time the split text reads
                       // (user screenshot: "end of animation on this
                       // position" — split top ~15% vh)
-      endAt: 0.15,
+      // ON A PHONE THE WHOLE SHOW LANDS HALF A SCREEN EARLIER. 0.15 means
+      // the flight finishes only once the section's top has climbed to
+      // 15% of the frame — on a desktop that is the moment the copy sits
+      // down beside a rack that is already open, but on a phone the copy
+      // is UNDER the shot rather than beside it, so the reader had to
+      // scroll their own text up and off to find out the rack had opened
+      // at all. 0.5 finishes it as the section top passes mid-frame: the
+      // rack is open, the cubes are in, and only then does the copy
+      // arrive. the leg still gets half a viewport of scroll to do it in
+      // (it starts when the split's top crosses 1.0), well clear of the
+      // 0.18 the floors call a snap.
+      endAt: function(){ return window.innerWidth <= 767 ? 0.5 : 0.15; },
       eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
       // the rack's center holds the middle of the left half at every
       // aspect — and the middle of the WHOLE frame from a tablet down
-      anchor: {x: 0.25, y: 0.62, fn: splitAnchor(0.25), fnY: splitAnchorY(0.62), point: [-0.35, 1.6, -1.72]} },
+      // ...and on an IPAD ONLY it steps 3% of the frame's width to the
+      // LEFT ('in ipad move this rack to left -3%'): the docked copy
+      // takes 54-58% there instead of 50%, so the free column the rule
+      // centres on has drifted right of where the shot wants the rack.
+      // the test is the one the machine and faq legs already use — a
+      // frame under 3:2, phone rung left out, since below 768 anchorX is
+      // already walking the subject to the middle. fn replaces anchorX
+      // when present, so it calls it on the way out and the phone ramp
+      // survives; wide frames never enter the branch, laptop untouched.
+      // and on a phone it comes back IN: the blanket pull-back is sized so
+      // a logged desktop composition never crops, but this shot has the
+      // whole left of the frame to itself there and read small in it
+      fitK: function(){ return window.innerWidth <= 767 ? 0.72 : 1; },
+      anchor: {x: FRAME_X, y: FRAME_Y, point: [-0.35, 1.6, -1.72], fn: splitAnchorX, fnY: splitAnchorY} },
     { el: 'machine',
       // the gate + rack right of centre — held at this screen spot at EVERY aspect. the pair
       // below frames it exactly here on a 3:2 window; without the
@@ -2950,8 +3937,21 @@
       // DISTANCE per aspect and the rack sits off the look-at centre.
       // solving at 3:2 returns the logged pose exactly, so this costs
       // the design frame nothing.
-      anchor: {x: 0.8171, y: 0.7498, point: [-0.35, 1.6, -1.72]},
-     
+      // ...and on an IPAD ONLY the rack steps 5% of the frame's width to
+      // the RIGHT ('in ipads first slide Isolated by default rack move to
+      // right + 5%'). slide 1 takes no pose of its own, so this leg's
+      // framing IS that slide. the test is the one the sheet and the
+      // faq leg already use — a frame under 3:2 — with the phone rung
+      // left out, since below 768 the cards stack and anchorX is already
+      // walking the subject to the middle. fn replaces anchorX when it
+      // is present, so it calls it on the way out and the phone ramp
+      // survives. wide frames never enter the branch: laptop untouched.
+      anchor: {x: FRAME_X_MIRROR, y: FRAME_Y + MACHINE_DY, point: [-0.35, 1.6, -1.72],
+               fn: machineAnchorX},
+      // ...and it comes in on a phone, like the split's does: the blanket
+      // pull-back is sized so nothing logged wide ever crops, and this
+      // shot owns the right of the frame there
+      fitK: function(){ return window.innerWidth <= 767 ? 0.80 : 1; },
       minVH: 0.18,   // net only — the combined turn+push
       // 'what you get' — the section's OWN shot, re-logged
       loggedFov: 8,   // WIDER for the isolation door (user free-cam framing,
@@ -2990,6 +3990,7 @@
       eye: [24.5310, 15.6441, 42.5243], target: [-5.8156, 2.3733, -3.6785] },
     { el: 'deploy',
       minVH: 0.18,   // net only
+      vhGate: true,  // gates on the real viewport (see measureScrub)
       // leg 4: "the lights come on" — dive toward the free cube
       loggedFov: 8,   // framed in free-cam at the narrow ride fov
       startAt: 0.8,   // was 1 — the CAMERA waits +20% longer on the zoomed
@@ -2998,6 +3999,7 @@
       eye: [0.2100, 2.5681, 17.3978], target: [1.4803, 1.8870, -4.6190] },
       // ends at the default 0.55 — the same panel, scrolled to its middle
     { el: 'deploy',   // leg 5: push INSIDE the free cube — the pcb look.
+      vhGate: true,  // gates on the real viewport (see measureScrub)
       // walked 0.1 → -0.25 → -0.05: stretched past the panel top, but
       // -0.25 finished too late ("outer animation… now its to late").
       // now 0.2, and the reason is arithmetic, not taste: this section
@@ -3029,7 +4031,7 @@
       // under this section is the same one above it
       endAt: 0.5,
       eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
-      anchor: {x: 0.25, y: 0.62, point: [-0.35, 1.6, -1.72]} },
+      anchor: {x: FRAME_X, y: FRAME_Y, point: [-0.35, 1.6, -1.72]} },
     { el: 'agents',
       // the street-level setup (under the cover) — held at this screen spot at EVERY aspect. the pair
       // below frames it exactly here on a 3:2 window; without the
@@ -3039,8 +4041,25 @@
       // DISTANCE per aspect and the rack sits off the look-at centre.
       // solving at 3:2 returns the logged pose exactly, so this costs
       // the design frame nothing.
-      anchor: {x: 0.1099, y: 0.2897, point: [-0.35, 1.6, -1.72]},
-     
+            // ...and this section frames on the RACK, not the laptop. both agents
+      // legs were briefly moved onto the laptop along with 'who it is for'
+      // and that was wrong for THIS section: measured on a 1512x770 frame it
+      // put the rack at screen 0.03 / 0.26 — jammed into the top-left corner
+      // ("move rack more bottom and in right"). back on the rack it sits at
+      // the rule's 0.25 / 0.50, which is +22% of the frame right and +24%
+      // down, and the laptop still lands fully in frame at 0.48 / 0.75,
+      // below and right of it. 'who it is for' keeps the laptop anchor —
+      // there the laptop's SCREEN is the content, so it has to be the subject.
+      anchor: {x: FRAME_X + AGENTS_DX, y: FRAME_Y + AGENTS_DY, point: [-0.35, 1.6, -1.72],
+               fn: agentsAnchorX},
+      // ...and on a phone it goes the OTHER way to the split's and the
+      // machine's: OUT, not in. those two own a half of the frame there;
+      // this shot carries the rack AND the laptop across a frame the
+      // copy now takes the right 65% of, so the pair read cropped. the
+      // blanket pull-back gets another 25% on top. both agents legs
+      // carry the same number, like the anchor, so the blend between
+      // them never drifts.
+      fitK: function(){ return window.innerWidth <= 767 ? 1.25 : 1; },
       minVH: 0.18,   // net only — the under-cover setup for leg 8
       // leg 10: 'built for agents', the SETUP — the camera
       loggedFov: 8,   // switches to a low street-level frame on the LEFT
@@ -3077,7 +4096,25 @@
       // DISTANCE per aspect and the rack sits off the look-at centre.
       // solving at 3:2 returns the logged pose exactly, so this costs
       // the design frame nothing.
-      anchor: {x: 0.0728, y: 0.5940, point: [-0.35, 1.6, -1.72]},
+            // ...and this section frames on the RACK, not the laptop. both agents
+      // legs were briefly moved onto the laptop along with 'who it is for'
+      // and that was wrong for THIS section: measured on a 1512x770 frame it
+      // put the rack at screen 0.03 / 0.26 — jammed into the top-left corner
+      // ("move rack more bottom and in right"). back on the rack it sits at
+      // the rule's 0.25 / 0.50, which is +22% of the frame right and +24%
+      // down, and the laptop still lands fully in frame at 0.48 / 0.75,
+      // below and right of it. 'who it is for' keeps the laptop anchor —
+      // there the laptop's SCREEN is the content, so it has to be the subject.
+      anchor: {x: FRAME_X + AGENTS_DX, y: FRAME_Y + AGENTS_DY, point: [-0.35, 1.6, -1.72],
+               fn: agentsAnchorX},
+      // ...and on a phone it goes the OTHER way to the split's and the
+      // machine's: OUT, not in. those two own a half of the frame there;
+      // this shot carries the rack AND the laptop across a frame the
+      // copy now takes the right 65% of, so the pair read cropped. the
+      // blanket pull-back gets another 25% on top. both agents legs
+      // carry the same number, like the anchor, so the blend between
+      // them never drifts.
+      fitK: function(){ return window.innerWidth <= 767 ? 1.25 : 1; },
         // leg 11: the VISIBLE ride — from the street-level
       loggedFov: 8,   // start it climbs and orbits right (az -54 → -35)
                       // to the settled laptop shot while the reveal plays
@@ -3103,7 +4140,7 @@
       // DISTANCE per aspect and the rack sits off the look-at centre.
       // solving at 3:2 returns the logged pose exactly, so this costs
       // the design frame nothing.
-      anchor: {x: 0.4566, y: 0.3386, point: [-0.35, 1.6, -1.72]},
+      anchor: {x: FRAME_X_MIRROR, y: FRAME_Y + FOR_DY, at: lapAt, point: LAP_FALLBACK, fnY: forAnchorY},
      
       minVH: 0.18,   // net only
       // leg 12: 'who it is for' — a near-frontal shot at
@@ -3146,6 +4183,19 @@
                       // off the tail of 'who it is for')
       startAt: 0.72,
       endAt: 0.45,
+      // the two-rack shot joins the rule too. it was the ONE leg left
+      // framing itself off the raw pose, and measured, that pose put the
+      // original rack at screen x -0.07 — OFF THE LEFT EDGE, with only
+      // the clone actually in the copy's free half. anchored on the same
+      // rack centre as every other shot, the original lands at 0.25 and
+      // the clone sits to its right, which is what 'on our metal, or on
+      // yours' has to show.
+      // ...and on a phone the pair drops 12% of the frame: the copy
+      // runs full width above them there, and the racks read against
+      // the 34svh room the sheet opens under it ("move scene of this
+      // container more bottom in mobile")
+      anchor: {x: FRAME_X, y: FRAME_Y, point: [-0.35, 1.6, -1.72],
+               fnY: function(){ return FRAME_Y + (window.innerWidth <= 767 ? 0.35 : 0); }},   /* 0.60 chased the WRONG lever: the math blend was lifting the shot */
       eye: [0.7027, 5.0724, 63.4526], target: [7.7103, 2.6830, -4.3409] },
     { el: 'math',
       minVH: 0.18,   // net only
@@ -3156,7 +4206,7 @@
       startAt: 0.9,
       endAt: 0.6,
       eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
-      anchor: {x: 0.25, y: 0.62, point: [-0.35, 1.6, -1.72]} },
+      anchor: {x: FRAME_X, y: FRAME_Y, point: [-0.35, 1.6, -1.72]} },
     { el: 'faq',
       // the wide shot from the left — held at this screen spot at EVERY aspect. the pair
       // below frames it exactly here on a 3:2 window; without the
@@ -3166,8 +4216,31 @@
       // DISTANCE per aspect and the rack sits off the look-at centre.
       // solving at 3:2 returns the logged pose exactly, so this costs
       // the design frame nothing.
-      anchor: {x: 0.2057, y: 0.7501, point: [-0.35, 1.6, -1.72]},
-     
+      // ...and the rack sits 21% of the frame LOWER on a desktop or a
+      // laptop — 6% ("move faq rack more to buttom. in desktop laptop"),
+      // 10% ("no man! move to bottom ! + 10 %") and 5% ("nice but move
+      // it to bottom + 5%"). the
+      // anchor IS the framing here, so its vertical resolver is the whole
+      // move — nothing panned into the pose for the solve to undo. read
+      // on every measure, and only at or above the design aspect, so the
+      // tablet frames (which already lift and step this shot) stay put
+      // ...and on a TABLET the same shot takes its own nudge: 8% of the
+      // frame down and 8% left — 5 ("in ipads faq rack move more to
+      // bottom and left - 5%") then 3 more ("more bottom more left -3%").
+      // the desktop's +21% drop and the phone rung are both untouched —
+      // anchorX is still the x resolver underneath, so the sub-768 ramp
+      // toward centre survives.
+      // ...and the PHONE takes its own three ("zoom in rack in faq, and
+      // move more bottom and left"): the ramp toward centre is skipped —
+      // the faq copy docks right at 65% now, so the left is the rack's —
+      // the anchor drops 16% and the fitK below dollies the blanket
+      // pull-back most of the way back in
+      anchor: {x: FRAME_X, y: FRAME_Y, point: [-0.35, 1.6, -1.72],
+               fn: function(){ return window.innerWidth <= 767 ? 0.0 : anchorX(FRAME_X) - (tabletShot() ? 0.08 : 0); },   /* walked 0.08->0.06->0.04->0.0 */
+               fnY: function(){ return window.innerWidth <= 767 ? FRAME_Y + 0.26
+                                     : (camera.aspect || DESIGN_ASPECT) >= DESIGN_ASPECT ? FRAME_Y + 0.21
+                                     : (tabletShot() ? FRAME_Y + 0.08 : FRAME_Y); }},
+      fitK: function(){ return window.innerWidth <= 767 ? 0.75 : 1; },
       minVH: 0.18,   // net only
       // leg 13: faq — user-logged wide shot from the left
       loggedFov: 8,   // (az -40.5, pol 80.9, r 35.01; re-logged wider from
@@ -3204,7 +4277,33 @@
       // was: eye: [-19.4320, 7.8455, 23.6825]
       eye: [-27.4971, 7.8455, 13.6314], target: [3.0212, 2.2849, -2.5954] },
     { el: 'cta',
+      // THE LAST LEG GATES ON THE REAL VIEWPORT, and it is not a taste
+      // call: this is the final section, so the only scroll left below it
+      // is the footer. the gate asks for the cta's top to reach 0.6 of a
+      // unit — 464px of rideH on an ipad — and the document ends with
+      // that top still at ~630px, so the leg could never finish and the
+      // camera sat frozen mid-blend between the faq shot and this one
+      // ("in ipads last leg not works"). against the real viewport the
+      // gate is 826px, which the page reaches with room to spare. ctaWin
+      // is this leg's twin (0.9 -> 0.6) and rides with it to VH.
+      vhGate: true,
       minVH: 0.18,   // net only
+      // ── THE RACK ONLY TURNS A THIRD HERE ─────────────────────────
+      // as logged, this leg swings the orbit from the faq's -62.0 deg to
+      // the hero's +73.7 — 136 degrees of rack inside one leg. that
+      // doesn't read as a camera move, it reads as the rack being spun,
+      // and it lands right where the film should be settling ("dont make
+      // so big rotation of rack"). a third of it — 45.2 deg, landing the
+      // face at -16.8 — is a look-around, not a spin ("rotate littlebit
+      // ... i mean 1/3"), and the footer's endless lap (footSpin,
+      // 120s/lap) carries on from there instead of arriving at a fresh
+      // angle and starting over.
+      // azK scales the azimuth STEP and only that: the radius, polar, fov
+      // and target below are still the hero's start camera verbatim, so
+      // the dolly in and the re-aim are untouched ("camera is good, i
+      // mean xzy opsitions").
+      // TO REVERT: drop this one line (or set it to 1).
+      azK: 1 / 3,
       // leg 15: the cta — the HERO's start camera, VERBATIM
                       // (the page-load view, fov 50): same eye, same
                       // target, no anchor, no re-aim. the radial circle
@@ -3239,6 +4338,12 @@
     // azimuth step from the previous leg, shortest way round ([0] is
     // rewired to the live lap azimuth when a ride starts)
     L.azD = i ? wrapPi(L.pose.az - LEGS[i - 1].pose.az) : 0;
+    // ...and a leg may TRIM THE FACING it travels: azK scales the compass
+    // step and nothing else (0 holds the inherited angle, 1 is the logged
+    // swing). the pose's radius, polar, fov and target still land exactly
+    // as logged, so the rig keeps dollying and re-aiming — it just turns
+    // the subject less on the way. see the cta leg.
+    if (L.azK != null) L.azD *= L.azK;
     L.node = document.getElementById(L.el);
     L.start = 0; L.end = 1; L.p = 0; L.raw = 0;
   }
@@ -3257,7 +4362,17 @@
     anchorCam.fov = P.fov;
     anchorCam.aspect = camera.aspect;
     anchorCam.updateProjectionMatrix();
-    anchorPt.fromArray(L.anchor.point);
+    // an anchor may name a LIVE subject instead of a fixed world point.
+    // it matters because the anchor decides what the shot is ABOUT: the
+    // laptop stands 1.13 m right, 2.52 m forward and 1 m below the rack
+    // centre, so framing those legs on the rack throws the laptop off the
+    // edge — which is exactly what happened to 'who it is for'.
+    // the fallback literal is used until the model lands (it loads last in
+    // the chain, after this first runs); the loader re-measures on arrival.
+    if (L.anchor.at){
+      var liveAt = L.anchor.at();
+      if (liveAt) anchorPt.copy(liveAt); else anchorPt.fromArray(L.anchor.point);
+    } else anchorPt.fromArray(L.anchor.point);
     var t = new THREE.Vector3(P.tx, P.ty, P.tz);
     var ndcX = (L.anchor.fn ? L.anchor.fn() : anchorX(L.anchor.x)) * 2 - 1;
     var ndcY = 1 - (L.anchor.fnY ? L.anchor.fnY() : L.anchor.y) * 2;
@@ -3319,16 +4434,33 @@
       if (n) n.style.marginTop = legPad[id] > 0.5 ? legPad[id].toFixed(1) + 'px' : '';
     }
   }
+  // the floor's pre-pass has to lay the legs out THE WAY THE RIDE DOES —
+  // same unit, same gates — or it measures a leg that does not exist.
+  // it used to lay them out with vpH() while measureScrub measures with
+  // rideH(): identical on anything 4:3 or wider (every laptop), but on a
+  // tall frame rideH collapses (an ipad's 1376 -> 774) and every leg came
+  // out SHORTER than it really is. the net then paid for a deficit that
+  // was never there — ~200px of margin injected above sections that had
+  // plenty of scroll, which is the empty half-screen that opened up over
+  // the agents title on an ipad. same unit here, and the net only fires
+  // on a leg that is genuinely short.
+  function legUnit(L){ return L.vhGate ? vpH() : rideH(); }
+  // a leg's endAt may be a NUMBER or a function of the frame. both places
+  // that lay legs out (this one and the floor's pre-pass) read it through
+  // here, or the net would measure a leg the ride does not have.
+  function legEndAt(L){
+    return (typeof L.endAt === 'function' ? L.endAt() : L.endAt) || 0.55;
+  }
   function layLegs(){
     var prev = 0;
     for (var mi = 0; mi < LEGS.length; mi++){
-      var L = LEGS[mi];
-      L.start = Math.max(0, prev - (L.early || 0) * vpH());
+      var L = LEGS[mi], u = legUnit(L);
+      L.start = Math.max(0, prev - (L.early || 0) * u);
       var sN = L.startEl ? document.getElementById(L.startEl) : L.node;
       if (L.startAt && sN) L.start = Math.max(L.start,
-        sN.getBoundingClientRect().top + window.pageYOffset - vpH() * L.startAt);
+        sN.getBoundingClientRect().top + window.pageYOffset - u * L.startAt);
       L.end = Math.max(L.start + 1, L.node ?
-        L.node.getBoundingClientRect().top + window.pageYOffset - vpH() * (L.endAt || 0.55) : L.start + 1);
+        L.node.getBoundingClientRect().top + window.pageYOffset - u * legEndAt(L) : L.start + 1);
       prev = L.end;
     }
   }
@@ -3348,7 +4480,7 @@
       for (var li = 0; li < LEGS.length; li++){
         var L = LEGS[li];
         if (!L.minVH || !L.el) continue;
-        var miss = L.minVH * vpH() - (L.end - L.start);
+        var miss = L.minVH * legUnit(L) - (L.end - L.start);
         if (miss > 1){ need = need || {}; need[L.el] = Math.max(need[L.el] || 0, miss); }
       }
       if (!need) break;
@@ -3360,6 +4492,10 @@
     // the frame first: the legs' poses and every anchor solve below read
     // pose.w, so the viewport's fit has to be in before either runs
     applyFrameFit();
+    // ...and the board shot — its left-container centre (legs 4 and 5
+    // anchor on it through pcbX() in the solve below), its solved size
+    // and the push's early arrival
+    measureBoardShot();
     // lay the legs out and top up any that came in under their floor;
     // returns with every L.start / L.end final
     floorLegs();
@@ -3372,30 +4508,70 @@
       // `endAt` is the viewport fraction the section top must reach for the
       // leg to be done (default 0.55 = lower middle; 1 = the moment the
       // section enters from the bottom).
-      L.start = Math.max(0, prev - (L.early || 0) * rideH());
+      // `vhGate` measures a leg's gates against the REAL viewport instead
+      // of rideH(). rideH is min(h, max(w*0.75, h*0.55)): on anything
+      // 4:3 or wider it IS the viewport — every laptop and desktop —
+      // but on a tall frame it collapses (827x1092 -> 620, an ipad's
+      // 1032x1376 -> 774) and every gate keyed to it fires when the
+      // section has already climbed to the top of the screen. that is
+      // why the board, the pods and the session all arrived late and
+      // high on a portrait frame while the copy sat in the middle of it
+      // ("i need see pods when my content is in middle of scroll").
+      // the deploy pair reads the frame it is actually composed in.
+      var unit = legUnit(L);
+      L.start = Math.max(0, prev - (L.early || 0) * unit);
       // `startAt` (viewport fraction) delays a leg past the previous end:
       // it begins only once its section's top reaches that line —
       // `startEl` points that measurement at ANOTHER section (leg 10
       // starts off the addons top, so it rides under the gray cover)
       var sN = L.startEl ? document.getElementById(L.startEl) : L.node;
       if (L.startAt && sN) L.start = Math.max(L.start,
-        sN.getBoundingClientRect().top + window.pageYOffset - rideH() * L.startAt);
+        sN.getBoundingClientRect().top + window.pageYOffset - unit * L.startAt);
       L.end = Math.max(L.start + 1, L.node ?
-        L.node.getBoundingClientRect().top + window.pageYOffset - rideH() * (L.endAt || 0.55) : L.start + 1);
+        L.node.getBoundingClientRect().top + window.pageYOffset - unit * legEndAt(L) : L.start + 1);
       prev = L.end;
       if (L.anchor) solveAnchor(L);
     }
+    // ── TWO UNITS DOWN HERE, AND THE LINE BETWEEN THEM MATTERS ──────
+    // LU (the ride's own unit) for every window that RIDES WITH A LEG.
+    // most of these were written as the twin of a leg's gates — metalWin
+    // is 0.72->0.45 and so is the modes leg, macWin/doorWin/macCloseWin
+    // track the machine shot, forWin/faqWin/ctaWin track their own legs.
+    // they stage 3d: the second rack sliding out of the first, the door,
+    // the laptop retiring, the rack leaving. move one of them off the
+    // leg's unit and on a tall frame the prop fires while the CAMERA is
+    // still in the previous shot — which is what put both racks and the
+    // copy on top of each other on an ipad ("Our metal is broken").
+    // VH (the real viewport) for the few that answer a question about the
+    // FRAME, not about the ride: the footer's end is the document's own
+    // max scroll, addonsMidY is a true centre, the agents session prints
+    // against its card's place on screen, the deploy pair is vhGate so
+    // depWin rides with it — and the calculator, which is pinned to a
+    // screen spot every frame and owes the camera nothing.
+    // identical on any frame 4:3 or wider: rideH() IS vpH() there.
+    var VH = vpH(), LU = rideH();
     // the calculator's window: math title top from 60% vh down to 25% vh
     var calcNode = document.getElementById('math');
     if (calcNode){
       var calcRect = calcNode.getBoundingClientRect();
       var calcTop = calcRect.top + window.pageYOffset;
-      calcWin.start = calcTop - rideH() * 0.55;
-      calcWin.end = Math.max(calcWin.start + 1, calcTop - rideH() * 0.25);
+      // THE WHOLE MATH TRAIN RUNS 15% OF A FRAME EARLIER, because the
+      // entrance and the exit used to overlap: calcOut starts pulling the
+      // master clock back down when the math panel's BOTTOM crosses 85%
+      // vh, and with a panel about three quarters of a frame tall that
+      // lands while the top is still at ~27% — inside the old 55%->25%
+      // entrance. calcT is calcWin.p * (1 - calcOut.p), so the two ends
+      // of the train cancelled and the calculator never reached full
+      // opacity anywhere ("its no full opacity when i am in middle").
+      // at 70%->40% the entrance is finished while the section is still
+      // coming up the middle of the frame, and the hold before the exit
+      // is a seventh of a viewport on any shape.
+      calcWin.start = calcTop - VH * 0.70;
+      calcWin.end = Math.max(calcWin.start + 1, calcTop - VH * 0.40);
       // the rack leaves over math top 75% → 50% vh ("delay is so big" —
       // the whole math train moved 10% vh earlier)
-      rackOutWin.start = calcTop - rideH() * 0.75;
-      rackOutWin.end = Math.max(rackOutWin.start + 1, calcTop - rideH() * 0.5);
+      rackOutWin.start = calcTop - LU * 0.75;
+      rackOutWin.end = Math.max(rackOutWin.start + 1, calcTop - LU * 0.5);
       // the release point: once the math panel's bottom passes the
       // calculator's bottom, the whole composition scrolls out with it
       calcMathBot = calcTop + calcRect.height;
@@ -3406,21 +4582,21 @@
       var metalTop = metalNode.getBoundingClientRect().top + window.pageYOffset;
       // order rewire: shifted LATER (was 0.9→0.6) — 'for' now precedes
       // modes, and the early window played the clone show over its tail
-      metalWin.start = metalTop - rideH() * 0.72;
-      metalWin.end = Math.max(metalWin.start + 1, metalTop - rideH() * 0.45);
+      metalWin.start = metalTop - LU * 0.72;
+      metalWin.end = Math.max(metalWin.start + 1, metalTop - LU * 0.45);
       // the plates start typing the moment the CLONING starts (metalWin
       // p 0.4 ≈ top 78% vh): '[ our metal ]' writes while the clone
       // slides, '[ your metal ]' picks up right as it lands
-      rackLblWin.start = metalTop - rideH() * 0.6;
-      rackLblWin.end = Math.max(rackLblWin.start + 1, metalTop - rideH() * 0.35);
+      rackLblWin.start = metalTop - LU * 0.6;
+      rackLblWin.end = Math.max(rackLblWin.start + 1, metalTop - LU * 0.35);
     }
     // the deploy show window: deploy top 100% → 55% vh (the dive leg's
     // ORIGINAL span, frozen — "only camera" gets delayed, not the shows)
     var depNode = document.getElementById('deploy');
     if (depNode){
       var depTop = depNode.getBoundingClientRect().top + window.pageYOffset;
-      depWin.start = depTop - rideH() * 1.0;
-      depWin.end = Math.max(depWin.start + 1, depTop - rideH() * 0.55);
+      depWin.start = depTop - VH * 1.0;
+      depWin.end = Math.max(depWin.start + 1, depTop - VH * 0.55);
     }
     // the machine show window: machine top 90% → 60% vh (the zoom leg's
     // original span, frozen — the box-close stays put while the camera
@@ -3428,8 +4604,8 @@
     var macNode = document.getElementById('machine');
     if (macNode){
       var macTop = macNode.getBoundingClientRect().top + window.pageYOffset;
-      macWin.start = macTop - rideH() * 0.9;
-      macWin.end = Math.max(macWin.start + 1, macTop - rideH() * 0.6);
+      macWin.start = macTop - LU * 0.9;
+      macWin.end = Math.max(macWin.start + 1, macTop - LU * 0.6);
       // the split's rack seal: earlier than the machine show but NOT
       // rushed — starts as the split leaves (105vh), lands at 70vh
       // (115→80 closed too early/fast — "ending end so fast")
@@ -3457,14 +4633,14 @@
       // open fucken rack when i am in this position"). the split's own
       // show now finishes whole, the box stands OPEN for the reading,
       // and the close is what the machine's approach does afterwards
-      macCloseWin.start = Math.max(macTop - rideH() * 1.05, l1End);
-      var macCloseEnd = Math.max(macTop - rideH() * 0.70, l1End + rideH() * 0.04);
+      macCloseWin.start = Math.max(macTop - LU * 1.05, l1End);
+      var macCloseEnd = Math.max(macTop - LU * 0.70, l1End + LU * 0.04);
       if (LEGS[2]) macCloseEnd = Math.min(macCloseEnd, LEGS[2].end);
       macCloseWin.end = Math.max(macCloseWin.start + 1, macCloseEnd);
       // the door show starts the moment the leg-9 camera lands (60vh)
       // and seals by 30vh — the earlier/tighter ride ("its to late")
-      doorWin.start = macTop - rideH() * 0.60;
-      doorWin.end = Math.max(doorWin.start + 1, macTop - rideH() * 0.30);
+      doorWin.start = macTop - LU * 0.60;
+      doorWin.end = Math.max(doorWin.start + 1, macTop - LU * 0.30);
       // the exit rides the DEPLOY leg's departure ("make it when rack
       // is start goin to next leg"): it begins the moment the camera
       // starts pulling away and completes just past mid-flight —
@@ -3488,8 +4664,8 @@
     var machNode = document.getElementById('math');
     if (machNode){
       var machTop = machNode.getBoundingClientRect().top + window.pageYOffset;
-      machineWin.start = machTop - rideH() * 0.9;
-      machineWin.end = Math.max(machineWin.start + 1, machTop - rideH() * 0.6);
+      machineWin.start = machTop - LU * 0.9;
+      machineWin.end = Math.max(machineWin.start + 1, machTop - LU * 0.6);
     }
     // the agents window rides EXACTLY leg 10's span (measured above):
     // the radial's crossing to the left happens with the camera switch,
@@ -3502,8 +4678,8 @@
     var agTermNode = document.querySelector('#agents .term-chat');
     if (agTermNode){
       var agTermTop = agTermNode.getBoundingClientRect().top + window.pageYOffset;
-      agTermWin.start = agTermTop - rideH() * 0.95;
-      agTermWin.end = Math.max(agTermWin.start + 1, agTermTop - rideH() * 0.7);
+      agTermWin.start = agTermTop - VH * 0.95;
+      agTermWin.end = Math.max(agTermWin.start + 1, agTermTop - VH * 0.7);
     }
     // the 'who it is for' window: top 90% → 45% vh, in step with its leg
     // (was → 60%: stretched with the leg's endAt so the un-type, the lid
@@ -3512,28 +4688,30 @@
     var forNode = document.getElementById('for');
     if (forNode){
       var forTop = forNode.getBoundingClientRect().top + window.pageYOffset;
-      forWin.start = forTop - rideH() * 0.9;
-      forWin.end = Math.max(forWin.start + 1, forTop - rideH() * 0.45);
+      forWin.start = forTop - LU * 0.9;
+      forWin.end = Math.max(forWin.start + 1, forTop - LU * 0.45);
     }
     // the faq window: top 90% → 45% vh, in step with its leg — radial
     // back left, lid shut, laptop opacity 0, all on the same beat
     var faqNode = document.getElementById('faq');
     if (faqNode){
       var faqTop = faqNode.getBoundingClientRect().top + window.pageYOffset;
-      faqWin.start = faqTop - rideH() * 0.9;
-      faqWin.end = Math.max(faqWin.start + 1, faqTop - rideH() * 0.45);
+      faqWin.start = faqTop - LU * 0.9;
+      faqWin.end = Math.max(faqWin.start + 1, faqTop - LU * 0.45);
     }
     // the cta window: top 90% → 60% vh (the section is last — 60 stays
     // reachable with just the footer and the band's padding below it)
     var ctaNode = document.getElementById('cta');
     if (ctaNode){
       var ctaTop = ctaNode.getBoundingClientRect().top + window.pageYOffset;
-      ctaWin.start = ctaTop - rideH() * 0.9;
-      ctaWin.end = Math.max(ctaWin.start + 1, ctaTop - rideH() * 0.6);
+      // VH, not LU: the cta leg is vhGate (it is the last one — see its
+      // note in LEGS) and this window is its twin
+      ctaWin.start = ctaTop - VH * 0.9;
+      ctaWin.end = Math.max(ctaWin.start + 1, ctaTop - VH * 0.6);
       // the footer window: whatever scroll remains AFTER the cta leg
       // lands (the footer + the band's padding — ~0.3vh) — pinned to the
       // document's true end so "at the very bottom" is always p = 1
-      var footMaxS = Math.max(1, document.documentElement.scrollHeight - rideH());
+      var footMaxS = Math.max(1, document.documentElement.scrollHeight - VH);
       footWin.start = ctaWin.end;
       footWin.end = Math.max(footWin.start + 1, footMaxS);
     }
@@ -3544,7 +4722,7 @@
     var adNode = document.getElementById('addons');
     if (adNode){
       var adTop = adNode.getBoundingClientRect().top + window.pageYOffset;
-      addonsMidY = adTop + adNode.offsetHeight * 0.5 - rideH() * 0.5;
+      addonsMidY = adTop + adNode.offsetHeight * 0.5 - VH * 0.5;
       setChainRes((window.pageYOffset || 0) > addonsMidY ? CHAIN_LAP : CHAIN_HI);
     }
   }
@@ -4302,8 +5480,8 @@
         // legs 4 AND 5 both pin the pcb cube to the center of the frame's
         // left half: the dive zooms straight at it (no swimming in from
         // the side) and the push stops on the same spot
-        LEGS[3].anchor = {x: 0.25, y: 0.5, fn: pcbX, point: [freeC.x, freeC.y, freeC.z]};
-        LEGS[4].anchor = {x: 0.25, y: 0.5, fn: pcbX, point: [freeC.x, freeC.y, freeC.z]};
+        LEGS[3].anchor = {x: 0.25, y: 0.5, fn: pcbX, fnY: pcbY, point: [freeC.x, freeC.y, freeC.z]};
+        LEGS[4].anchor = {x: 0.25, y: 0.5, fn: pcbX, fnY: pcbY, point: [freeC.x, freeC.y, freeC.z]};
         initLeg(LEGS[4], 4);
         // leg 6's azimuth chain hangs off leg 5's re-aimed pose
         initLeg(LEGS[5], 5);
@@ -4867,6 +6045,15 @@
           rackBox.max.x - 0.01,                        // back BITTEN into the wall: no coplanar seam
           rackBotY,                                    // standing on the machine's own floor
           (rackBox.min.z + rackBox.max.z) * 0.5);      // centered: wall edge to wall edge
+        // the same bite on the OPPOSITE wall, for the phone's mirrored
+        // shot. the wrap's origin is the panel's BACK plane, so a half
+        // turn about y puts that plane against the -x wall and the
+        // gauges facing out of it — and the z centering is unchanged by
+        // the turn, so the console stays wall-edge to wall-edge.
+        panelXOut = rackBox.max.x - 0.01;
+        panelXIn  = rackBox.min.x + 0.01;
+        panelLampXOut = rackBox.max.x + 2.2;
+        panelLampXIn  = rackBox.min.x - 2.2;
         cwrap.visible = false;
         cwrap.traverse(function(o){
           if (!o.isMesh) return;
@@ -5050,8 +6237,21 @@
           pdMark.getContext('2d').drawImage(panelBaseCv, 311, 493, 5, 6, 0, 0, 5, 6);
           // the art's own two tones, read off the plate (the recolor
           // already ran): a hand-picked blue would drift from it
-          var pdLitD = panelCx.getImageData(120, 232, 1, 1).data;
-          var pdDimD = panelCx.getImageData(176, 252, 1, 1).data;
+          // ...sipped through a 1x1 scratch plate, NOT off panelCx itself:
+          // the dashboard canvas is redrawn every frame and reading it
+          // even twice flips it to a cpu-backed surface for the whole
+          // ride (chrome's willReadFrequently heuristic). the plate is
+          // the thing that wants the hint; the live texture never does.
+          var pdSip = document.createElement('canvas');
+          pdSip.width = 1; pdSip.height = 1;
+          var pdSipX = pdSip.getContext('2d', {willReadFrequently: true});
+          function pdSample(sx, sy){
+            pdSipX.clearRect(0, 0, 1, 1);   // so a second sip never blends over the first
+            pdSipX.drawImage(panelCv, sx, sy, 1, 1, 0, 0, 1, 1);
+            return pdSipX.getImageData(0, 0, 1, 1).data;
+          }
+          var pdLitD = pdSample(120, 232);
+          var pdDimD = pdSample(176, 252);
           var PD_LIT = 'rgb(' + pdLitD[0] + ',' + pdLitD[1] + ',' + pdLitD[2] + ')';
           var PD_DIM = 'rgb(' + pdDimD[0] + ',' + pdDimD[1] + ',' + pdDimD[2] + ')';
           // ── and the loop itself: every value is two incommensurate
@@ -5214,6 +6414,10 @@
         frameCacheValid = false;   // the warm-up scribbled on the cache
         frameDirtyFlag = true;
         pcbRoot = pr;
+        // leg 5's frame is SOLVED from the board's own width (see
+        // measureBoardShot) and pcbW only exists from this moment —
+        // re-measure now, exactly as the laptop's loader does
+        measureScrub();
         // ── the SCHEME in the removed slab (slide 3): a clone of the
         // board STANDS in the hidden column's volume, stretched to
         // 100% x 100% of the hole, facing the lens side ──
@@ -6501,7 +7705,11 @@
         function lapClone(tex){
           var c = document.createElement('canvas');
           c.width = tex.image.width; c.height = tex.image.height;
-          c.getContext('2d').drawImage(tex.image, 0, 0);
+          // willReadFrequently: these scrub plates exist to be READ — the
+          // rect passes below pull them back pixel by pixel. without the
+          // hint chrome keeps them gpu-backed and every getImageData is a
+          // stall (and it says so in the console).
+          c.getContext('2d', {willReadFrequently: true}).drawImage(tex.image, 0, 0);
           return c;
         }
         function lapSwap(tex, cv, srgb){
@@ -6514,7 +7722,7 @@
           return t;
         }
         if (lapAlb && lapAlb.image && lapAlb.image.width){
-          var ac = lapClone(lapAlb), actx = ac.getContext('2d');
+          var ac = lapClone(lapAlb), actx = ac.getContext('2d', {willReadFrequently: true});
           var aS = ac.width / 2048;   // rects measured on the 2k bake
           [[1494,300,46,160],[1588,295,52,170],[548,288,54,155]].forEach(function(R){
             var rx = Math.round(R[0]*aS), ry = Math.round(R[1]*aS),
@@ -6532,7 +7740,7 @@
           lapMats.forEach(function(m){ if (m.map){ m.map = aNew; m.needsUpdate = true; } });
         }
         if (lapOrm && lapOrm.image && lapOrm.image.width){
-          var oc = lapClone(lapOrm), octx = oc.getContext('2d');
+          var oc = lapClone(lapOrm), octx = oc.getContext('2d', {willReadFrequently: true});
           var oS = oc.width / 2048;
           var orx = Math.round(412*oS), ory = Math.round(1194*oS),
               orw = Math.round(792*oS), orh = Math.round(52*oS);
@@ -6702,6 +7910,12 @@
         for (var lwt = 0; lwt < lapHoloFade.length; lwt++) lapWarmAdd(lapHoloFade[lwt][0].map);
         for (lwt = 0; lwt < lapWarm.length; lwt++) renderer.initTexture(lapWarm[lwt]);
         lapRoot = lwrap;
+        // three legs frame themselves on the LAPTOP, not the rack, and it
+        // is the last model in the chain — until this moment lapAt() has
+        // been returning null and those anchors have been solving against
+        // the fallback literal. re-measure now so they land on the real
+        // prop, at its real ground height.
+        measureScrub();
         frameDirtyFlag = true;
         if (--dracoPending === 0) draco.dispose();
       });
@@ -6990,6 +8204,11 @@
   var forCards = Array.prototype.slice.call(document.querySelectorAll('#for .grid3 .card'));
   function lapForBtns(n){
     for (var fb = 0; fb < forCards.length; fb++) forCards[fb].classList.toggle('on', fb === n);
+    // ...and on a phone the cards are a LOOPING SWIPER (the #for slider
+    // script at the bottom of the page). every change lands here — a
+    // tap, a swipe, the 5s beat — so the row is pushed from the one
+    // state the glass reads, never from a second idea of 'active'
+    if (window.__forSliderTo) window.__forSliderTo(n);
   }
   function lapSlideStep(n){
     lapSlideIdx = n % 3;
@@ -7015,6 +8234,14 @@
       else lapSlideIdx = fci % 3;   // remembered for the next show
     });
   });
+  // the phone slider's two doors into this state: the same select a card
+  // click does, and the same beat-hold the pointer does — a finger on
+  // the row IS 'you are reading', so the glass must not flip under it
+  window.__forSelect = function(n){
+    if (lapSlideOn) lapSlideStep(n);
+    else lapSlideIdx = n % 3;
+  };
+  window.__forHold = function(on){ forHover = !!on; };
   var clock = new THREE.Clock();
   // set while the addons flat blanks the frame — and STARTS true: the
   // very first frame after a reload snaps every damped ride straight to
@@ -7084,7 +8311,7 @@
   function loop(){
     requestAnimationFrame(loop);
     var dt = Math.min(clock.getDelta(), 0.05);
-    if (!stageVisible) return;   // scrolled away: skip the whole frame
+    if (!stageVisible || window.__sceneHold) return;   // scrolled away, or under the film's sheet: skip the whole frame
     // the addons flat is fully opaque: nothing of the scene can show —
     // skip the whole chain; the ride resumes as soon as the cover thins.
     // the flag makes the resume a JUMP CUT: everything the scroll did
@@ -7152,7 +8379,7 @@
     // per card, restarted by any pick (yours or its own), held while the
     // page is actually scrolling, and asleep unless the rack is really on
     // stage — an unseen advance would still wake the static frame cache.
-    if (window.__machPick && !reducedMotion && machGate && machScroll > 0.9){
+    if (window.__machPick && !reducedMotion && !window.__machScrollDriven && machGate && machScroll > 0.9){
       var machNow = window.__machSlide || 0;
       if (machNow !== machSeen){ machSeen = machNow; machBeatAt = clock.elapsedTime + MACH_BEAT; }
       if (machBeatAt < 0) machBeatAt = clock.elapsedTime + MACH_BEAT;
@@ -7421,7 +8648,16 @@
       var saz = scrubAz;
       for (var bi = 0; bi < LEGS.length; bi++){
         var BL = LEGS[bi], BP = BL.pose;
-        var be = BL.p * BL.p * (3 - 2 * BL.p);   // smoothstep
+        // `arrive` (a leg may set it) lands the pose EARLY and HOLDS it
+        // there for the rest of the leg. the ride is one long blend, so a
+        // leg's payoff normally happens in its last few percent — which
+        // is fine on a 3:2 desktop frame, where the leg is short in
+        // scroll and the next one takes over straight away, and wrong on
+        // a tall one, where the same leg is half a screen of scroll and
+        // the subject stays tiny until the section has already climbed
+        // out of the middle of the frame.
+        var bpr = BL.arrive ? Math.min(1, BL.p / BL.arrive) : BL.p;
+        var be = bpr * bpr * (3 - 2 * bpr);   // smoothstep
         var BT = BL.solved || {x: BP.tx, y: BP.ty, z: BP.tz};
         stx = sl(stx, BT.x, be); sty = sl(sty, BT.y, be); stz = sl(stz, BT.z, be);
         sw = sl(sw, BP.w, be); sfov = sl(sfov, BP.fov, be); spp = sl(spp, BP.pol, be);
@@ -7447,9 +8683,24 @@
           // approach), and the faq (text right) slides it back LEFT
           // ...and the cta rides it to the MIDPOINT (holeX 50%) while
           // holeY (below) lifts the circle to the top — top center
+          // ...and on a phone slides 2 AND 4 take the circle back with
+          // them: those are the two cards that dock RIGHT, so the scene
+          // crosses to the left under both (see the mirror in machPose).
+          // the machine leg's own drive is faded out on the SLIDE's
+          // camera weight, so the radial rides home to its 22% while
+          // either card is up and returns when a left-docked one takes
+          // over. one term only: the math window below is its own
+          // section's drive, untouched.
+          var s2Rad = (window.innerWidth <= 767)
+            ? revealEase(Math.min(1, Math.max(0, Math.max(s2Cam, s4Cam)))) : 0;
+          // ...and on a phone the LAPTOP scene parks the circle at the
+          // MIDDLE, not the right: the cards are a full-bleed slider
+          // there, so no side is the text's ("move radial to center").
+          // 0.5 of the 22→78 ride is exactly 50%.
           radialT = Math.max(
-            Math.min(1, Math.max(0, LEGS[2].p)) * (1 - Math.min(1, LEGS[3].p / 0.5)),
-            forWin.p * (1 - metalWin.p),
+            Math.min(1, Math.max(0, LEGS[2].p)) * (1 - Math.min(1, LEGS[3].p / 0.5)) * (1 - s2Rad),
+            forWin.p * (1 - metalWin.p) * (window.innerWidth <= 767 ? 0.5 : 1),
+            (window.innerWidth <= 767 ? metalWin.p * (1 - machineWin.p) * 0.5 : 0),
             machineWin.p * (1 - faqWin.p),
             ctaWin.p * 0.5);
           if (radialT > 0.001 || gradQ2 > 0){
@@ -7571,7 +8822,15 @@
         pinW = pinW * pinW * (3 - 2 * pinW);
         // and it lets go across leg 6 — the revert hands the framing
         // back to leg 3's own rack anchor
-        var pinRel = LEGS[5] ? Math.min(1, Math.max(0, LEGS[5].p)) : 0;
+        // ...on the PROP clock, not the leg's own. leg 6 starts pulling the
+        // camera out on its first frame, and on a phone the pods now stand
+        // through the first third of it (REV_HOLD_PHONE) — releasing the
+        // pin on the raw leg walked the board, and the cards sitting on
+        // it, across the frame while they were still being read ("dont
+        // animate pods in right side in mobile"). tied to revProp() the
+        // framing holds for exactly as long as there is something up to
+        // hold. desktop is unchanged: revProp() is the raw leg there.
+        var pinRel = LEGS[5] ? revProp() : 0;
         pinW *= 1 - pinRel * pinRel * (3 - 2 * pinRel);
         camera.updateMatrixWorld(true);
         camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
@@ -7582,7 +8841,7 @@
           var pinHalfH = pinD * Math.tan(camera.fov * Math.PI / 360);
           var pinHalfW = pinHalfH * camera.aspect;
           var pinDx = (pinP.x - (pcbX() * 2 - 1)) * pinHalfW * pinW;
-          var pinDy = (pinP.y - (1 - 0.5 * 2)) * pinHalfH * pinW;
+          var pinDy = (pinP.y - (1 - pcbYLive(scrollNow) * 2)) * pinHalfH * pinW;
           pinAx.setFromMatrixColumn(camera.matrixWorld, 0);
           camera.position.addScaledVector(pinAx, pinDx);
           controls.target.addScaledVector(pinAx, pinDx);
@@ -7605,16 +8864,34 @@
           // at 22% came out ~220px and read as a toy ("pod is so little
           // in ipad"). the left half has the room — the docked text only
           // takes 58% from here down
-          var podWpx = stageW * (stageW < 1200 ? 0.28 : 0.22);
-          // a narrow frame projects the board small enough that the pcc
-          // type inside stops reading — floor it, and clamp to the frame
-          if (stageW < 900) podWpx = Math.max(podWpx, Math.min(260, stageW - 40));
-          podWpx = Math.min(podWpx, stageW - 24);
+          var podWpx;
+          if (podWPhone > 0){
+            // the phone rung: the terminal's own width, solved with the
+            // layout (see measureBoardShot) — the cards run the session's
+            // full span in the section's own gutters
+            podWpx = podWPhone;
+          } else {
+            podWpx = stageW * (stageW < 1200 ? 0.28 : 0.22);
+            // a narrow frame projects the board small enough that the pcc
+            // type inside stops reading — floor it, and clamp to the frame
+            if (stageW < 900) podWpx = Math.max(podWpx, Math.min(260, stageW - 40));
+            podWpx = Math.min(podWpx, stageW - 24);
+          }
           var podW = podWpx.toFixed(1) + 'px';
           if (podsEl.style.width !== podW) podsEl.style.width = podW;
           camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
           pinP.set(freeC.x, freeC.y, freeC.z).project(camera);
-          var podT = 'translate(' + ((pinP.x * 0.5 + 0.5) * stageW).toFixed(1) + 'px,' +
+          // ── PHONES: THE COLUMN DOES NOT TRAVEL SIDEWAYS ─────────────
+          // vertically it rides the projection, which is the whole point
+          // of the phone rung — the cards scroll with the copy above
+          // them. HORIZONTALLY it is nailed to the same solved column
+          // the board is framed in, instead of chasing the cube across
+          // the frame: any lateral camera move — the revert's release,
+          // the dive's own settle — used to drag the cards with it while
+          // they were being read. a laptop keeps the pure projection:
+          // the board owns its own half there and nothing drags it.
+          var podPx = (stageW < 768 ? pcbX() : (pinP.x * 0.5 + 0.5)) * stageW;
+          var podT = 'translate(' + podPx.toFixed(1) + 'px,' +
             ((-pinP.y * 0.5 + 0.5) * stageH).toFixed(1) + 'px) translate(-50%,-50%)';
           // a settled frame writes zero style: no recalc while resting
           if (podT !== podsLastT){ podsLastT = podT; podsEl.style.transform = podT; }
@@ -7628,7 +8905,11 @@
       if (calcRoot){
         // its own late window (calcWin): the radial finishes crossing at
         // math-top 70% vh, the calculator rises over 60% → 25%
-        var calcT = calcWin.p;
+        // ...and on a phone it does not come at all ("in mobile remove
+        // calculator scene"): the ledger runs full width there and the
+        // prop has no half of the frame to stand in. zeroing the drive
+        // runs the normal teardown (visible false, digits parked)
+        var calcT = window.innerWidth <= 767 ? 0 : calcWin.p;
         var calcOn = calcT > 0.001;
         if (calcRoot.visible !== calcOn){
           calcRoot.visible = calcOn;
@@ -7965,8 +9246,7 @@
       //   0.85→1  the radial crosses right (in the blend loop); the
       //            sealed rack then fades out LATER, on the calculator's
       //            window — and 'our metal' brings rack + radial back
-      var revScrub = (LEGS[5] && !scrubFree && sceneMode === 2)
-        ? Math.min(1, Math.max(0, LEGS[5].p)) : 0;
+      var revScrub = (LEGS[5] && !scrubFree && sceneMode === 2) ? revProp() : 0;
       var revNext = Math.round(revealEase(Math.min(1, Math.max(0, (revScrub - 0.45) / 0.25))) * 200) / 200;
       var pcbRawNext = pcbNext;   // pre-revert: the pods' own fade driver
       var revPcb = Math.round(revealEase(Math.min(1, Math.max(0, (revScrub - 0.2) / 0.25))) * 200) / 200;
@@ -8431,6 +9711,48 @@
         frameDirtyFlag = true;
       }
     }
+    // ── the phone's rack sink: both racks AND their name plates ride
+    // 2m of world y down while the metal show stands, released over the
+    // math approach. the cube lattice never shows sealed, the door and
+    // the slide-2 props live on machineWin's side of the release, and
+    // the faq's own leg only ever sees sink 0 — the ground truth holds
+    // everywhere else. quantized like every scrub write; autoUpdate is
+    // off, so every step bakes its matrix.
+    if (rackRoot){
+      var rsNext = (window.innerWidth <= 767 && sceneMode === 2)
+        ? Math.round(revealEase(metalWin.p) * (1 - revealEase(Math.min(1, machineWin.p / 0.5))) * 200) / 200 : 0;
+      if (rsNext !== rackSinkQ){
+        rackSinkQ = rsNext;
+        var rsY = RACK_SINK_M * rsNext;
+        if (rackBaseY0 === null) rackBaseY0 = rackRoot.position.y;
+        rackRoot.position.y = rackBaseY0 - rsY;
+        rackRoot.updateMatrixWorld(true);
+        if (rackRoot2){
+          if (rack2BaseY0 === null) rack2BaseY0 = rackRoot2.position.y;
+          rackRoot2.position.y = rack2BaseY0 - rsY;
+          rackRoot2.updateMatrixWorld(true);
+        }
+        // ...and here the phone's plates step up: 1.35x, sized so the
+        // two texts still clear each other across the clone's travel
+        // (the plates only ever show in this scene, so the scale rides
+        // the same driver as the sink)
+        var lblS = window.innerWidth <= 767 ? 1.35 : 1;
+        if (rackLbl1){
+          if (lbl1BaseY0 === null) lbl1BaseY0 = rackLbl1.position.y;
+          rackLbl1.position.y = lbl1BaseY0 - rsY;
+          rackLbl1.scale.set(lblS, lblS, 1);
+          rackLbl1.updateMatrixWorld(true);
+        }
+        if (rackLbl2){
+          if (lbl2BaseY0 === null) lbl2BaseY0 = rackLbl2.position.y;
+          rackLbl2.position.y = lbl2BaseY0 - rsY;
+          rackLbl2.scale.set(lblS, lblS, 1);
+          rackLbl2.updateMatrixWorld(true);
+        }
+        if (rsNext === 0 || rsNext === 1) renderer.shadowMap.needsUpdate = true;
+        frameDirtyFlag = true;
+      }
+    }
     // the name plates, typed on their own window (it opens as the
     // clone's slide BEGINS): '[ our metal ]' writes over the original
     // while the clone travels (0→0.45), a beat, then '[ your metal ]'
@@ -8521,6 +9843,23 @@
     // (doorWin), so it materializes under the eye instead of inside the
     // flight, and rewinds the way it came.
     if (panelRoot){
+      // ── WHICH WALL ── the phone mirrors slide 4's orbit, so the console
+      // changes walls with it: bolted to -x and turned to face out, it
+      // stays the face the lens is looking at instead of the back of the
+      // machine. re-asked every frame and free unless the answer changed,
+      // so a rotate across the 767 line corrects itself.
+      var cpFlip = (window.innerWidth <= 767) ? 1 : 0;
+      if (cpFlip !== panelFlipQ){
+        panelFlipQ = cpFlip;
+        panelRoot.position.x = cpFlip ? panelXIn : panelXOut;
+        panelRoot.rotation.y = cpFlip ? Math.PI : 0;
+        panelRoot.updateMatrixWorld(true);   // autoUpdate is off — bake the move
+        if (panelLamp){
+          panelLamp.position.x = cpFlip ? panelLampXIn : panelLampXOut;
+          panelLamp.updateMatrixWorld(true);
+        }
+        frameDirtyFlag = true;
+      }
       var s4Seq = Math.min(s4Show, Math.max(0, doorWin.p));
       // ...but it LEAVES early, on its own window: the slide's release
       // runs to 45% of the deploy dive, and the panel is bolted to the
@@ -8729,13 +10068,35 @@
     // and only then — 45%→100% of leg 5 — does the session print
     if (termLines.length && LEGS[3]){
       var termP5 = Math.min(1, Math.max(0, LEGS[4] ? LEGS[4].p : 0));
-      var termTarget = Math.round(Math.min(1, Math.max(0, (termP5 - 0.15) / 0.4)) * termLines.length);
+      // a narrow frame prints ON THE SCROLL, not on a clock. an ipad
+      // arrives at this section with a flick: the target is reached in a
+      // third of a second and the 2.5 line/s typewriter then dribbled the
+      // session in long after the thumb had stopped, so the card sat
+      // empty exactly when the section was in the middle of the frame
+      // ("terminal writin to late in ipads"). here the scroll IS the
+      // typing — a line per ~25px — and the window closes at 48% of the
+      // leg, just before the push lands the board (ARRIVE_NAR). above
+      // 1250 nothing moves: the laptop keeps its clock and its window.
+      var termW = stageW || window.innerWidth;
+      var termNar = termW <= 1250;
+      // ...and a PHONE prints later still. the board is up by 40% of the
+      // leg on every rung, but on a phone it is still parked at the
+      // bottom of pcbYLive's clamp then, waiting for the page to catch
+      // up with it — so a session printing from 12% put the pods on
+      // screen before there was a board under them to stand on ("showing
+      // of pods u start to fast in mobile"). 45%→90% instead: the board
+      // has started its climb, and the last ✓ lands just before the
+      // revert's own hold lets go (REV_HOLD_PHONE).
+      var termPhone = termW <= 767;
+      var termS = termPhone ? 0.45 : (termNar ? 0.12 : 0.15);
+      var termSpan = termPhone ? 0.45 : (termNar ? 0.36 : 0.4);
+      var termTarget = Math.round(Math.min(1, Math.max(0, (termP5 - termS) / termSpan)) * termLines.length);
       // leg 6's FIRST window (0→0.2) claws the POD count back down —
       // last in, first out, each at its own scroll position — while the
       // printed text itself stands untouched
-      var termPodClamp = Math.round((1 - revealEase(Math.min(1, Math.max(0, (LEGS[5] ? LEGS[5].p : 0) / 0.2)))) * termLines.length);
+      var termPodClamp = Math.round((1 - revealEase(Math.min(1, revProp() / 0.2))) * termLines.length);
       if (termShown !== termTarget){
-        if (reducedMotion) termShown = termTarget;
+        if (reducedMotion || termNar) termShown = termTarget;
         else termShown = termShown < termTarget
           ? Math.min(termTarget, termShown + dt * 2.5)
           : termTarget;   // scroll-up untyping rides the scroll directly
@@ -8754,8 +10115,9 @@
       var agTarget = Math.round(agP * agLines.length);
       if (agShown !== agTarget){
         if (reducedMotion) agShown = agTarget;
+        // the same flick rate as deploy's on a narrow frame
         else agShown = agShown < agTarget
-          ? Math.min(agTarget, agShown + dt * 2.5)
+          ? Math.min(agTarget, agShown + dt * (((stageW || window.innerWidth) <= 1250) ? 5 : 2.5))
           : agTarget;   // scroll-up untyping rides the scroll directly
       }
       var agCount = Math.floor(agShown);
@@ -9035,6 +10397,29 @@
 </script>
 
 <script>
+/* ── swiper, fetched once and shared by the phone's two sliders ─────
+   the addon board's free-slide row and 'who it is for'. it is only ever
+   requested at the ≤767 rung, by whichever row mounts first; the second
+   one gets the same load. cb(null) = it never arrived, and the caller
+   falls back to a native scroller (.no-swiper in the sheet). */
+(function(){
+  var URL = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+  var queue = null;
+  window.__loadSwiper = function(cb){
+    if (window.Swiper){ cb(window.Swiper); return; }
+    if (queue){ queue.push(cb); return; }
+    queue = [cb];
+    var done = function(){
+      var q = queue; queue = null;
+      for (var i = 0; i < q.length; i++) q[i](window.Swiper || null);
+    };
+    var sc = document.createElement('script');
+    sc.src = URL; sc.async = true;
+    sc.onload = done; sc.onerror = done;
+    document.head.appendChild(sc);
+  };
+})();
+
 /* ── the addon board: the manager machine page's pod canvas, ported ──
    the dotted grid, draggable pcc pods, and the water: a colored-dot halo
    under the grabbed pod, calm waves rippling through it at rest, a radial
@@ -9069,6 +10454,7 @@
     return W < 700 ? 230 : 310;
   }
   function layout(){
+    if (sliderOn) return;   // the phone slider owns the cards; nothing to place
     CARD_W = cardW();
     PAD_Y = padY();
     for (var i = 0; i < cards.length; i++) cards[i].style.width = CARD_W + 'px';
@@ -9351,6 +10737,7 @@
   // ── drag: pointer capture, board-clamped ──
   cards.forEach(function(card, i){
     card.addEventListener('pointerdown', function(e){
+      if (sliderOn) return;   // swiper reads the touch on a phone
       if (e.button !== undefined && e.button !== 0 && e.pointerType === 'mouse') return;
       e.preventDefault();
       card.setPointerCapture(e.pointerId);
@@ -9362,7 +10749,7 @@
       setDragging(true);
     });
     card.addEventListener('pointermove', function(e){
-      if (dragIdx !== i) return;
+      if (sliderOn || dragIdx !== i) return;
       var x = card._px + (e.clientX - card._sx);
       var y = card._py + (e.clientY - card._sy);
       pos[i].x = Math.max(0, Math.min(board.clientWidth - CARD_W, x));
@@ -9379,7 +10766,7 @@
     card.addEventListener('pointercancel', release);
     // hover halo on the not-yet-grabbed pods, 60% size
     card.addEventListener('pointerenter', function(e){
-      if (e.pointerType !== 'mouse' || i === activeIdx || dragIdx >= 0) return;
+      if (sliderOn || e.pointerType !== 'mouse' || i === activeIdx || dragIdx >= 0) return;
       hoverIdx = i;
       var c = centerOf(i);
       hover.cx = c.x; hover.cy = c.y;
@@ -9387,13 +10774,14 @@
       hoverTween = gsap.to(hover, { opacity: 1, duration: 0.25, ease: 'power2.out', onUpdate: paintHover });
     });
     card.addEventListener('pointerleave', function(e){
-      if (e.pointerType !== 'mouse' || hoverIdx !== i) return;
+      if (sliderOn || e.pointerType !== 'mouse' || hoverIdx !== i) return;
       hoverIdx = -1;
       hideHover();
     });
   });
 
   var relayout = function(){
+    if (sliderOn) return;
     layout();
     if (activeIdx >= 0){ var c = centerOf(activeIdx); halo.cx = c.x; halo.cy = c.y; }
     if (hoverIdx >= 0){ var h = centerOf(hoverIdx); hover.cx = h.x; hover.cy = h.y; }
@@ -9401,7 +10789,84 @@
   };
   window.addEventListener('resize', relayout);
   window.addEventListener('load', relayout);   // heights settle with the fonts
+
+  // ── the phone rung: the cards leave the grid and ride a swiper ──
+  // the BOARD does not change — same full-bleed dotted water, same
+  // hairlines, same cover choreography hanging off the section. only
+  // its contents do: each pod is wrapped in a slide, 1.2 stand in the
+  // frame and the row free-slides with momentum. swiper is fetched on
+  // demand, here only, so the desktop page never carries it; if the
+  // cdn is unreachable the row falls back to a native scroller (the
+  // .no-swiper rules in the sheet). the move is reversible, because a
+  // phone turned landscape crosses back over 767 mid-session.
+  var PHONE = window.matchMedia('(max-width:767px)');
+  var SWIPER_OPTS = {
+    slidesPerView: 1.2, spaceBetween: 12,   // the inset is the box's padding, which swiper measures out of the size it divides
+    grabCursor: true, watchOverflow: true, resistanceRatio: 0.6,
+    freeMode: { enabled: true, sticky: false, momentumRatio: 0.85, momentumVelocityRatio: 0.85 }
+  };
+  var sliderOn = false, swiperEl = null, swiper = null, swiperLoading = false;
+
+  function mountSwiper(){
+    if (!sliderOn || !swiperEl || swiper || swiperLoading) return;
+    swiperLoading = true;
+    window.__loadSwiper(function(S){
+      swiperLoading = false;
+      if (!sliderOn || !swiperEl || swiper) return;
+      if (S) swiper = new S(swiperEl, SWIPER_OPTS);
+      else swiperEl.classList.add('no-swiper');
+    });
+  }
+
+  function enterSlider(){
+    if (sliderOn) return;
+    sliderOn = true;
+    // whatever the grid left behind: inline size, place, stacking, the
+    // lit card and its halo — all of it is the desktop's, not the row's
+    if (haloTween) haloTween.kill();
+    if (hoverTween) hoverTween.kill();
+    activeIdx = -1; hoverIdx = -1; dragIdx = -1;
+    halo.opacity = 0; hover.opacity = 0; paintAll();
+    if (waveTween) waveTween.pause();   // no drag here, so no water to paint
+    board.classList.add('board-slider');
+    board.style.height = '';
+    swiperEl = document.createElement('div');
+    swiperEl.className = 'pswiper bpod-swiper';
+    var wrap = document.createElement('div');
+    wrap.className = 'swiper-wrapper';
+    for (var i = 0; i < cards.length; i++){
+      var card = cards[i];
+      card.style.width = ''; card.style.transform = ''; card.style.zIndex = '';
+      card.classList.remove('on');
+      var slide = document.createElement('div');
+      slide.className = 'swiper-slide';
+      slide.appendChild(card);
+      wrap.appendChild(slide);
+    }
+    swiperEl.appendChild(wrap);
+    board.appendChild(swiperEl);
+    mountSwiper();
+  }
+
+  function exitSlider(){
+    if (!sliderOn) return;
+    sliderOn = false;
+    if (swiper){ swiper.destroy(true, true); swiper = null; }
+    for (var i = 0; i < cards.length; i++) board.appendChild(cards[i]);
+    if (swiperEl && swiperEl.parentNode) swiperEl.parentNode.removeChild(swiperEl);
+    swiperEl = null;
+    board.classList.remove('board-slider');
+    if (waveTween && boardLive && !dragging) waveTween.play();
+    layout();
+    paintAll();
+  }
+
+  function syncMode(){ if (PHONE.matches) enterSlider(); else exitSlider(); }
+  if (PHONE.addEventListener) PHONE.addEventListener('change', syncMode);
+  else if (PHONE.addListener) PHONE.addListener(syncMode);
+
   layout();
+  syncMode();
 
   // ── the flat, in two beats: as the addons section rides in, the RACK
   // leaves first (the ride reads __addonsRackHide into its radialHide →
@@ -9437,6 +10902,114 @@
   window.addEventListener('scroll', coverTick, { passive: true });
   window.addEventListener('resize', coverTick);
   coverTick();
+})();
+
+/* ── 'who it is for' on a phone: the cards become a LOOPING slider ───
+   above 767 the three cards are what they always were — the laptop
+   slider's buttons, clicked. below it they stack into a wall of text
+   nobody reads, so they ride a swiper instead: 1.2 in frame, looping,
+   and THE SLIDE YOU ARE ON IS THE SLIDE ON THE GLASS.
+   the scene keeps owning that index. every change goes through its
+   lapSlideStep — a swipe calls __forSelect, the render loop's 5s beat
+   calls it directly — and lapForBtns pushes the result back out here
+   through __forSliderTo. so the autoplay DRIVES this row (it is not
+   swiper's own autoplay; the beat still pauses for scrolling, reduced
+   motion and a faded-out slide, and it still restarts on every change)
+   and the row can never hold a second, drifting idea of 'active'.
+   a finger on the row holds the beat, the way a pointer on the cards
+   does on a desktop. reversible at the breakpoint, like the board. */
+(function(){
+  var grid = document.querySelector('#for .grid3');
+  if (!grid) return;
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.card'));
+  if (!cards.length) return;
+  var PHONE = window.matchMedia('(max-width:767px)');
+  var OPTS = {
+    slidesPerView: 1.2, spaceBetween: 12, speed: 420,
+    loop: true,             // the beat runs 0→1→2→0 forever; the row must too
+    grabCursor: true, watchOverflow: true
+  };
+  var on = false, el = null, sw = null, loading = false, pushing = false;
+
+  // the scene → the row. n < 0 is the show standing down (lapForBtns(-1)),
+  // which this row has nothing to do. a step of exactly +1 is the beat,
+  // and it slides FORWARD through the loop seam rather than rewinding.
+  function pushTo(n){
+    if (!sw || n < 0 || sw.realIndex === n) return;
+    pushing = true;
+    if (n === (sw.realIndex + 1) % cards.length) sw.slideNext();
+    else sw.slideToLoop(n);
+    pushing = false;
+  }
+
+  function mount(){
+    if (!on || !el || sw || loading) return;
+    loading = true;
+    window.__loadSwiper(function(S){
+      loading = false;
+      if (!on || !el || sw) return;
+      if (!S){ el.classList.add('no-swiper'); return; }
+      sw = new S(el, OPTS);
+      // the row → the scene. programmatic moves (pushTo) are skipped:
+      // they came FROM the scene and re-selecting would restart the beat
+      sw.on('slideChange', function(){
+        if (pushing) return;
+        var n = sw.realIndex;
+        // the lit card IS the scene's index while the show runs, so a
+        // change that merely AGREES with it (the mount's own slideToLoop,
+        // a loop seam settling) never re-selects: lapSlideStep restarts
+        // the 5s beat and rips the glass, and neither belongs here
+        if (cards[n] && cards[n].classList.contains('on')) return;
+        if (window.__forSelect) window.__forSelect(n);
+      });
+      sw.on('touchStart', function(){ if (window.__forHold) window.__forHold(true); });
+      sw.on('touchEnd', function(){ if (window.__forHold) window.__forHold(false); });
+      // land on whatever the glass is already showing
+      var lit = -1;
+      for (var i = 0; i < cards.length; i++) if (cards[i].classList.contains('on')) lit = i;
+      if (lit > 0) sw.slideToLoop(lit, 0);
+      window.__forSliderTo = pushTo;
+    });
+  }
+
+  function enter(){
+    if (on) return;
+    on = true;
+    grid.classList.add('for-slider');
+    el = document.createElement('div');
+    el.className = 'pswiper for-swiper';
+    var wrap = document.createElement('div');
+    wrap.className = 'swiper-wrapper';
+    for (var i = 0; i < cards.length; i++){
+      var slide = document.createElement('div');
+      slide.className = 'swiper-slide';
+      slide.appendChild(cards[i]);
+      wrap.appendChild(slide);
+    }
+    el.appendChild(wrap);
+    grid.appendChild(el);
+    mount();
+  }
+
+  function exit(){
+    if (!on) return;
+    on = false;
+    window.__forSliderTo = null;
+    if (window.__forHold) window.__forHold(false);
+    if (sw){ sw.destroy(true, true); sw = null; }
+    // the cards go back to being grid items, in their own order — loop
+    // mode re-orders the real slide elements, so read the order back off
+    // the cards array, never off the dom
+    for (var i = 0; i < cards.length; i++) grid.appendChild(cards[i]);
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+    el = null;
+    grid.classList.remove('for-slider');
+  }
+
+  function sync(){ if (PHONE.matches) enter(); else exit(); }
+  if (PHONE.addEventListener) PHONE.addEventListener('change', sync);
+  else if (PHONE.addListener) PHONE.addListener(sync);
+  sync();
 })();
 </script>
 
