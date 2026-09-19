@@ -442,6 +442,22 @@ const Scenes = {
 
     },
 
+    // Pages without the hero scene (privacy, terms) get the same nav reveal, minus the glitch
+    initNav() {
+        const tl = gsap.timeline();
+
+        tl.to(".nav", { "--nav-scale": 1, duration: 1, ease: "none" }, 0)
+            .to(".nav-logo", { opacity: 1, duration: 0.6, ease: "power2.inOut" }, 0)
+            .to(".nav-badge", { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }, 0.1)
+            .to(".nav-links", { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.2)
+            .to(".nav-cta-btn", { opacity: 1, scale: 1, duration: 0.3, ease: "power2.out" }, 0.3);
+
+        // Legal pages: draw the column divider after the nav line, like the hero divider
+        if (document.querySelector(".legal")) {
+            tl.to(".legal", { "--legal-line-scale": 1, duration: 1, ease: "none" }, 1.0);
+        }
+    },
+
     initLottie() {
         const firstContainer = document.getElementById('lottie-blocks');
         if (!firstContainer) return;
@@ -518,7 +534,8 @@ const Scenes = {
 
     init() {
         // Hero scene is above-the-fold critical — init immediately
-        this.initHero();
+        if (document.querySelector(".hero")) this.initHero();
+        else this.initNav();
         // Lottie is below-the-fold — load lazily
         this.initLottie();
         // Nav color transition for AI section (uses IntersectionObserver, not scroll animation)

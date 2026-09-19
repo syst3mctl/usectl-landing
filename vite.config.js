@@ -68,7 +68,8 @@ function siteHeadPlugin() {
         const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
         const title = html.match(/<title>([^<]*)<\/title>/)?.[1] ?? '';
         const description = html.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1] ?? '';
-        const pagePath = '/' + ctx.path.replace(/^\/+/, '').replace(/(^|\/)index\.html$/, '$1');
+        // Cloudflare Pages serves foo.html at /foo (and redirects the .html form), so drop the extension
+        const pagePath = '/' + ctx.path.replace(/^\/+/, '').replace(/(^|\/)index\.html$/, '$1').replace(/\.html$/, '');
         const url = SITE + pagePath;
 
         const ogTag = (p, v) => `<meta property="${p}" content="${esc(v)}">`;
@@ -141,6 +142,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
+        privacy: './privacy.html',
+        terms: './terms.html',
         ...variantPages,
       },
     },
