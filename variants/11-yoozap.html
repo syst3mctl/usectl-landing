@@ -175,7 +175,13 @@
 
   /* ── the stage: the city, full size ─────────────── */
   /* the scene is fixed; the content scrolls up over it */
-  .stage{position:fixed;top:0;left:0;right:0;height:100vh;height:100svh;background:#1e1d1d;overflow:hidden;z-index:1;
+  /* PAINT tall, MEASURE small: the box is lvh — the toolbar-hidden
+     height, constant like svh — so the canvas covers the frame when ios
+     slides its bar away (svh here left a black band under the scene,
+     "three js have black bg in bottom"). with the bar up the extra rows
+     hang under the fold, unseen. THE RIDE'S RULER DID NOT MOVE: __vpH
+     measures a dedicated svh probe, not this box. */
+  .stage{position:fixed;top:0;left:0;right:0;height:100vh;height:100lvh;background:#1e1d1d;overflow:hidden;z-index:1;
     /* gsap slides these with the scroll ride: the see-through circle goes
        to the left side (the scene lands there), the hero text veil lifts */
     --holeX:78%;--holeY:50%;--veil:1;
@@ -938,7 +944,12 @@
        edge; the 16px inset is the swiper's own padding, which it
        measures out of the size it divides — the active card rides the
        edge instead of sitting boxed inside the body's gutter */
-    .after #for .for-swiper{width:100vw;margin-left:calc(50% - 50vw);padding:0 16px}
+    /* max-width:100vw OUTRANKS .pswiper's max-width:100% — that cap
+       (part of the intrinsic-width fix) was clamping this full-bleed
+       row to the SECTION's width: shifted to the left screen edge but
+       343px wide, it left exactly 32px of dead space on the right
+       ("remove fucken space from right!") */
+    .after #for .for-swiper{width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);padding:0 16px}
     /* the room under the row is the LAPTOP'S ("i need our laptop be in
        this place"): the scene parks it at ~57% across / 69% down of the
        frame through this section, and the cards used to stand on top of
@@ -1176,6 +1187,17 @@
        stack that measures ~298). */
     h1{font-size:30px;letter-spacing:-.02em}
     .sub{font-size:16px}   /* the stack rung's 14.5 is sized for a screen that still had the film in it */
+    /* the hero's radial parks in the BOTTOM-RIGHT CORNER ("radial move
+       to bottom right corner"): the copy owns the top of this one-screen
+       hero, so the see-through circle takes the corner under it. X runs
+       through the phone divisor (/2 over a 156%-wide layer = 0.78x), so
+       85 lands the centre at ~77% across — ~86 is the coverage ceiling,
+       past which the layer's own left edge walks on screen. Y maps 1:1:
+       76 = 76% down. the ride owns both the moment leg 1 starts (the
+       hero-seat blend in the scene script carries Y back to the ride's
+       50; gsap locks X's start from this value) and hands them back
+       when the scroll parks at the top again. */
+    .stage{--holeX:85%;--holeY:76%}
     .hero-over{
       height:100vh;height:100svh;
       justify-content:center;      /* the copy centres in what is left between the bar and the link */
@@ -1306,10 +1328,15 @@
   // would shift mid-ride (every leg start/end, every show window). anything
   // that measures in "viewport heights" asks here instead.
   (function(){
-    var st = null;
+    // the stage now PAINTS at lvh (so the canvas covers a toolbar-hidden
+    // frame); the ruler keeps its own svh box — this 1px probe — so no
+    // scroll window moved when the stage grew
+    var pr = document.createElement('div');
+    pr.style.cssText = 'position:fixed;left:-2px;top:0;width:1px;height:100vh;visibility:hidden;pointer-events:none';
+    if (window.CSS && CSS.supports && CSS.supports('height', '100svh')) pr.style.height = '100svh';
+    document.documentElement.appendChild(pr);
     window.__vpH = function(){
-      if (!st) st = document.getElementById('stage');
-      return (st && st.clientHeight) || window.innerHeight;
+      return pr.clientHeight || window.innerHeight;
     };
   })();
   // ── NOTHING MOVES THE PAGE WHILE SOMETHING IS OVER IT ────────────
@@ -1979,12 +2006,15 @@
     function memRead(){
       try {
         var v = JSON.parse(localStorage.getItem(MEM_KEY) || 'null');
-        if (v && v.sig === memSig() && (Date.now() - v.at) < 6048e5) return v.t;
+        if (v && v.sig === memSig() && (Date.now() - v.at) < 6048e5) return {t: v.t, hard: !!v.hard};
       } catch(e){}
-      return -1;
+      return null;
     }
-    function memWrite(t){
-      try { localStorage.setItem(MEM_KEY, JSON.stringify({t: t, sig: memSig(), at: Date.now()})); } catch(e){}
+    // `hard` marks a memory the probe must not second-guess: a context
+    // loss. everything else (watchdog steps, past benches) is soft —
+    // history, which the boot bench below now outranks.
+    function memWrite(t, hard){
+      try { localStorage.setItem(MEM_KEY, JSON.stringify({t: t, sig: memSig(), at: Date.now(), hard: !!hard})); } catch(e){}
     }
     function probe(){
       if (!MOBILE) return 2;
@@ -2013,9 +2043,21 @@
       // core/ram tells entirely and the watchdog alone catches a tired
       // iphone, from real frame numbers instead of a guess. the string
       // and panel tells only ever demote an ANDROID.
-      // the device already taught us its rung on a previous visit
+      // the device taught us a rung on a previous visit — but memory is
+      // a HINT now, not a verdict. it used to return here outright, and
+      // one bad day (a throttled devtools ride, a heavy background
+      // build, a lost context) parked THIS device shape on a dead rung
+      // for a WEEK of plain-url loads: dpr down, hero lap off, and on a
+      // fast machine nothing to climb it back (the ceiling pins one
+      // over the remembered rung). the bench below is a real
+      // measurement on this gpu taken right now, and it outranks
+      // history ("i need you show me without it this version" — the
+      // localhost mobile hero stood still on a remembered 0 while ?q=2
+      // span fine). the ONE memory that stays absolute is a CONTEXT
+      // LOSS: the os killed webgl, and re-opening high risks killing it
+      // again into a black canvas — that rung is honored untested.
       var remembered = memRead();
-      if (remembered >= 0){ M.why = 'remembered rung ' + remembered; return remembered; }
+      if (remembered && remembered.hard){ M.why = 'remembered rung ' + remembered.t + ' (context loss)'; return remembered.t; }
       t = 2;
       var apple = /apple/.test(g) || /iphone|ipad|ipod/i.test(navigator.userAgent || '');
       if (!apple && cores && cores <= 4){ t--; why.push('cores ' + cores); }
@@ -2036,6 +2078,7 @@
         why.push('bench ' + Math.round(bm) + 'ms→' + bt);
       }
       t = Math.max(0, Math.min(2, t));
+      if (remembered && remembered.t !== t) why.push('over remembered ' + remembered.t);
       M.why = why.length ? ('probe: ' + why.join(', ')) : 'probe: phone full';
       memWrite(t);
       return t;
@@ -2136,7 +2179,7 @@
   canvas.addEventListener('webglcontextlost', function(ev){
     ev.preventDefault();
     try {
-      MQ.remember(Math.max(0, MQ.tier - 1));
+      MQ.remember(Math.max(0, MQ.tier - 1), true);   // hard: the probe honors this one untested
       if (!sessionStorage.getItem('yz_ctxr')){
         sessionStorage.setItem('yz_ctxr', '1');
         location.reload();
@@ -2557,7 +2600,7 @@
   // with the url bar on every single scroll, which would slide all of them
   // underneath the ride. the stage is sized in svh (the SMALL, stable
   // viewport), so its own box is the honest height to measure against.
-  function vpH(){ return stageH || window.innerHeight; }
+  function vpH(){ return (window.__vpH ? window.__vpH() : 0) || stageH || window.innerHeight; }
   // ...and the RIDE's own ruler, which is not the same thing. every leg
   // line and every show window is stated in "viewport heights", and that
   // unit stops working when the viewport is tall: on a 1024x1366 ipad
@@ -2713,7 +2756,7 @@
   // not any camera ("not container! racks!"): a world-space sink, in
   // meters, riding the metal window and released as the math approaches
   // (the faq re-frames the rack and must find it back on the ground).
-  var RACK_SINK_M = 2.0;
+  var RACK_SINK_M = 0;   // the 2m sink buried the racks under the ghost city — the CAMERA moves the scene now; the driver survives as the plates' phone-scale applier
   var rackSinkQ = 0, rackBaseY0 = null, rack2BaseY0 = null, lbl1BaseY0 = null, lbl2BaseY0 = null;
   // the version-10 machine grid living inside the rack: cubes that rise
   // in the leg-3 tail while the shell dims to glass. styled like the
@@ -4000,6 +4043,28 @@
     camera.position.sub(controls.target).multiplyScalar(ratio).add(controls.target);
     if (scrubHome){ scrubHome.w *= ratio; scrubHome.r *= ratio; }
   }
+  // ── the phone hero pan ("move city more bottom") ─────────────────
+  // the portrait hero centres its copy over the top of the frame and
+  // the lap framed the city dead middle under it. a straight vertical
+  // pan — eye and target together, so the orbit's shape and every leg
+  // blend are untouched — seats the city in the LOWER part of the
+  // frame. world metres: 1.0 ≈ 15% of the fitted phone orbit's ~6.6 m
+  // frame height. the pan is IN the pose scrubHome captures, so leg 1
+  // blends it out like any other part of the hero framing, and the
+  // delta re-applies on rotation (measureScrub runs this on resize).
+  var phoneHeroMq = window.matchMedia('(max-width:767px) and (orientation:portrait)');
+  var HERO_PAN = 1.0, heroPanNow = 0;
+  function applyHeroPan(){
+    var want = phoneHeroMq.matches ? HERO_PAN : 0;
+    if (want === heroPanNow) return;
+    var d = want - heroPanNow;
+    heroPanNow = want;
+    camera.position.y += d;
+    controls.target.y += d;
+    // mid-ride the rig is rewritten per frame from the blend — the hero
+    // end of it is what carries the pan there
+    if (scrubHome) scrubHome.ty += d;
+  }
   var LEGS = [
     { el: 'split',
       minVH: 0.18,   // net only — the opening drop
@@ -4316,7 +4381,7 @@
       // the 34svh room the sheet opens under it ("move scene of this
       // container more bottom in mobile")
       anchor: {x: FRAME_X, y: FRAME_Y, point: [-0.35, 1.6, -1.72],
-               fnY: function(){ return FRAME_Y + (window.innerWidth <= 767 ? 0.35 : 0); }},   /* 0.60 chased the WRONG lever: the math blend was lifting the shot */
+               fnY: function(){ return window.innerWidth <= 767 ? 0.81 : FRAME_Y; }},   /* pre-glb only — the rack callback's re-anchor is the live copy; keep the two in step */
       eye: [0.7027, 5.0724, 63.4526], target: [7.7103, 2.6830, -4.3409] },
     { el: 'math',
       minVH: 0.18,   // net only
@@ -4327,7 +4392,12 @@
       startAt: 0.9,
       endAt: 0.6,
       eye: [-18.3317, 7.9493, 39.1629], target: [6.1581, 1.7438, -4.1365],
-      anchor: {x: FRAME_X, y: FRAME_Y, point: [-0.35, 1.6, -1.72]} },
+      // the math leg carries the modes leg's phone drop so the blend
+      // between them never rides the racks back up into the copy — safe
+      // now: the calculator stands down on phones, so this framing has
+      // no second subject to guard
+      anchor: {x: FRAME_X, y: FRAME_Y, point: [-0.35, 1.6, -1.72],
+               fnY: function(){ return window.innerWidth <= 767 ? 0.81 : FRAME_Y; }} },
     { el: 'faq',
       // the wide shot from the left — held at this screen spot at EVERY aspect. the pair
       // below frames it exactly here on a 3:2 window; without the
@@ -4613,6 +4683,7 @@
     // the frame first: the legs' poses and every anchor solve below read
     // pose.w, so the viewport's fit has to be in before either runs
     applyFrameFit();
+    applyHeroPan();   // the portrait hero's vertical seat rides the same resize
     // ...and the board shot — its left-container centre (legs 4 and 5
     // anchor on it through pcbX() in the solve below), its solved size
     // and the push's early arrival
@@ -5610,7 +5681,12 @@
         // the midpoint between the original and the clone pins to the
         // hole's center (screen 0.22), at the height the shot was
         // framed at (mid-rack 1.6 sat at ~0.61 in the logged frame)
-        LEGS[9].anchor = {x: 0.22, y: 0.61, point: [-0.35 + rack2Dx / 2, 1.6, -1.72]};
+        // ...and the PHONE drops the pair 20% of the frame from the
+        // logged line — THIS object is the anchor the shot really uses,
+        // and its earlier form replaced the leg literal's fnY wholesale,
+        // which is why five walks of that knob moved nothing
+        LEGS[9].anchor = {x: 0.22, y: 0.61, point: [-0.35 + rack2Dx / 2, 1.6, -1.72],
+                          fnY: function(){ return window.innerWidth <= 767 ? 0.81 : 0.61; }};
         initLeg(LEGS[9], 9);
         measureScrub();
         // the deployed cube's green: per-instance TINTS that turn the
@@ -8767,6 +8843,7 @@
       var stx = scrubHome.tx, sty = scrubHome.ty, stz = scrubHome.tz;
       var sw = scrubHome.w, sfov = scrubHome.fov, spp = scrubHome.pol;
       var saz = scrubAz;
+      var leg0E = 0;   // leg 1's eased blend, reused by the radial's hero seat below
       for (var bi = 0; bi < LEGS.length; bi++){
         var BL = LEGS[bi], BP = BL.pose;
         // `arrive` (a leg may set it) lands the pose EARLY and HOLDS it
@@ -8786,9 +8863,12 @@
         // the gradient tween repaints two full-viewport css layers on every
         // value change — quantized to 1% steps (invisible), it repaints a
         // hundred times per ride instead of every frame
-        if (bi === 0 && gradRide){
-          var gq = Math.round(be * 100) / 100;
-          if (gq !== gradQ){ gradQ = gq; gradRide.progress(gq); }
+        if (bi === 0){
+          leg0E = be;
+          if (gradRide){
+            var gq = Math.round(be * 100) / 100;
+            if (gq !== gradQ){ gradQ = gq; gradRide.progress(gq); }
+          }
         }
         // the leg-6 radial ride waits for EVERYTHING: revert done, blink
         // played, shell fully sealed — only then does it cross, on its
@@ -8839,7 +8919,12 @@
           // so the transform mirrors the holeX math; a pure compositor
           // slide, no repaint
           // ...and the footer ride nudges it 5 higher (4 → -1)
-          var hyQ = Math.round((50 - 46 * ctaWin.p - 5 * revealEase(footWin.p)) * 100) / 100;
+          // ...and the PHONE HERO seats it LOW: the parked circle waits
+          // in the bottom-right corner (--holeY:76% on the portrait css
+          // rung) and leg 1 carries it up to the ride's 50 on the same
+          // eased blend the veil and holeX already ride
+          var heroHy = phoneHeroMq.matches ? 76 : 50;
+          var hyQ = Math.round((heroHy + (50 - heroHy) * leg0E - 46 * ctaWin.p - 5 * revealEase(footWin.p)) * 100) / 100;
           if (hyQ !== holeYQ){
             holeYQ = hyQ;
             stage.style.setProperty('--holeY', hyQ + '%');
@@ -9230,8 +9315,11 @@
         if (gradRide2) gradQ2 = -1;   // no render: leg 6 re-locks on next entry
         // the circle's vertical seat resets with it — a fast scroll home
         // from the footer used to strand --holeY near the top and the
-        // hero radial sat visibly wrong after a refresh at the bottom
-        if (holeYQ !== 50){ holeYQ = 50; stage.style.setProperty('--holeY', '50%'); }
+        // hero radial sat visibly wrong after a refresh at the bottom.
+        // the inline value comes OFF instead of being pinned: the css
+        // owns the parked seat (50 on a desktop, 76 in the phone hero's
+        // corner) and stays responsive to a rotation at the top
+        if (holeYQ !== -999){ holeYQ = -999; stage.style.removeProperty('--holeY'); }
         if (calcRoot && calcRoot.visible){ calcRoot.visible = false; calcQ = -1; calcCQ = -1; bokehStamp++; frameDirtyFlag = true; }
         if (calcCubes) calcCubes.visible = false;
         if (calcLabel) calcLabel.visible = false;
