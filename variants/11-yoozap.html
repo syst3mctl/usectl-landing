@@ -1858,12 +1858,18 @@
   // ── THE PHONE LADDER ────────────────────────────────────────────
   // under 767 the page runs on a gpu a tenth of a laptop's behind a
   // panel that asks for three device pixels per css one. nothing here
-  // guesses WHICH phone it is:
-  //   · every phone opens on the MIDDLE rung. not a heuristic — an
-  //     iphone 12 (A14, no slouch) lagged at the desktop settings, so
-  //     "is a phone" is reason enough to step down;
+  // guesses WHICH phone it is — it MEASURES:
+  //   · every phone opens on the TOP rung ("i need see good quality"),
+  //     and the fill BENCH — a real timed render on the device's own
+  //     gpu at boot — pulls the weak ones straight down before the
+  //     first frame of the city ever renders;
   //   · the static probe (cores, ram, panel, gpu string) can push a
-  //     weak device down from there, never up;
+  //     weak ANDROID down as well, never up; apple's strings are
+  //     masked, so for iphones the bench and the watchdog are the
+  //     whole truth;
+  //   · what a visit learns is REMEMBERED (a week, per device shape):
+  //     the next load opens on the settled rung, no re-jank;
+  //   · a lost webgl context reloads once into a lower remembered rung;
   //   · a live watchdog on the MEASURED frame cost has the last word,
   //     and it can only walk down — a climb back up needs the frames to
   //     have been clean for six seconds AND the ride to be settled, and
@@ -1922,6 +1928,64 @@
       return copyMat;
     }
     var fxaaMat = null, fxaaUni = null;
+    // ── the fill bench: MEASURE the gpu instead of guessing from masked
+    // strings. its own tiny context (nothing of the page's state), a
+    // fragment-heavy quad drawn 16 times over 768² with blending — the
+    // exact shape of this page's cost (transparent overdraw × ALU) — and
+    // a 1×1 readPixels to force the tile gpu to actually finish. ~5ms on
+    // a desktop, tens on a phone soc, hundreds on the ones rung 0 exists
+    // for. the context is explicitly lost afterwards.
+    var benchMs = null;
+    function bench(){
+      if (benchMs !== null) return benchMs;
+      benchMs = -1;
+      try {
+        var cv = document.createElement('canvas');
+        cv.width = 768; cv.height = 768;
+        var gl = cv.getContext('webgl', {antialias: false, depth: false, alpha: false, powerPreference: 'high-performance'});
+        if (!gl) return benchMs;
+        function sh(t, src){ var h = gl.createShader(t); gl.shaderSource(h, src); gl.compileShader(h); return h; }
+        var pr = gl.createProgram();
+        gl.attachShader(pr, sh(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));
+        gl.attachShader(pr, sh(gl.FRAGMENT_SHADER,
+          'precision highp float;uniform float u;void main(){float a=0.;vec2 q=gl_FragCoord.xy*0.013;' +
+          'for(int i=0;i<40;i++){a+=sin(q.x*float(i)+u)*cos(q.y+a);}gl_FragColor=vec4(vec3(a*0.01+0.5),0.5);}'));
+        gl.linkProgram(pr); gl.useProgram(pr);
+        var b = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, b);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+        var loc = gl.getAttribLocation(pr, 'p');
+        gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+        var un = gl.getUniformLocation(pr, 'u');
+        gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        var px = new Uint8Array(4);
+        gl.uniform1f(un, 0.5); gl.drawArrays(gl.TRIANGLES, 0, 3);   // warm: compile + first tile pass
+        gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+        var t0 = performance.now();
+        for (var f = 0; f < 16; f++){ gl.uniform1f(un, f * 0.37); gl.drawArrays(gl.TRIANGLES, 0, 3); }
+        gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+        benchMs = performance.now() - t0;
+        var lose = gl.getExtension('WEBGL_lose_context');
+        if (lose) lose.loseContext();
+      } catch(e){}
+      return benchMs;
+    }
+    // ── tier memory: what the bench + watchdog learned about THIS device
+    // survives the visit, so the next load opens on the learned rung
+    // instead of re-janking its way down. keyed on the device's own
+    // shape; a week old and it re-measures.
+    var MEM_KEY = 'yz_mq1';
+    function memSig(){ return [M.gpu, navigator.hardwareConcurrency || 0, (screen.width || 0) + 'x' + (screen.height || 0), window.devicePixelRatio || 1].join('|'); }
+    function memRead(){
+      try {
+        var v = JSON.parse(localStorage.getItem(MEM_KEY) || 'null');
+        if (v && v.sig === memSig() && (Date.now() - v.at) < 6048e5) return v.t;
+      } catch(e){}
+      return -1;
+    }
+    function memWrite(t){
+      try { localStorage.setItem(MEM_KEY, JSON.stringify({t: t, sig: memSig(), at: Date.now()})); } catch(e){}
+    }
     function probe(){
       if (!MOBILE) return 2;
       var f = /[?&]q=(0|1|2|low|mid|high)/i.exec(location.search || '');
@@ -1941,18 +2005,39 @@
       M.gpu = gpu; M.cores = cores; M.mem = mem; M.panel = panel;
       var g = gpu.toLowerCase();
       var why = [];
-      // a budget soc, by any of its tells. safari masks the gpu to
-      // "apple gpu" and every iphone answers that, so the string only
-      // ever demotes an ANDROID — the watchdog is what catches a tired
-      // iphone, and it catches it from real numbers instead of a guess
-      if (cores && cores <= 4){ t--; why.push('cores ' + cores); }
-      if (mem && mem <= 3){ t--; why.push('ram ' + mem + 'gb'); }
-      if (/adreno \(tm\) [1-5]|mali-(4|t|g3|g5|g6)|powervr|videocore|swiftshader|llvmpipe/.test(g)){ t--; why.push('gpu ' + gpu); }
+      // the default is the FULL page now ("i have iphone 12. and i need
+      // see good quality on it"): a phone opens on rung 2 and only the
+      // tells below walk it down. safari masks the gpu to "apple gpu"
+      // and every iphone answers that — and safari also under-reports
+      // cores on exactly those phones — so an APPLE device skips the
+      // core/ram tells entirely and the watchdog alone catches a tired
+      // iphone, from real frame numbers instead of a guess. the string
+      // and panel tells only ever demote an ANDROID.
+      // the device already taught us its rung on a previous visit
+      var remembered = memRead();
+      if (remembered >= 0){ M.why = 'remembered rung ' + remembered; return remembered; }
+      t = 2;
+      var apple = /apple/.test(g) || /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+      if (!apple && cores && cores <= 4){ t--; why.push('cores ' + cores); }
+      if (!apple && mem && mem <= 3){ t--; why.push('ram ' + mem + 'gb'); }
+      if (/adreno \(tm\) [1-5]|mali-(4|t|g3|g5|g6)|powervr|videocore|swiftshader|llvmpipe/.test(g)){ t -= 2; why.push('gpu ' + gpu); }
       // a 1440p-class panel over anything but a flagship: the pixels are
       // the load, and this is the device asking for the most of them
-      if (panel >= 3.4e6 && (!cores || cores <= 6)){ t--; why.push('panel ' + Math.round(panel / 1e6) + 'mp'); }
-      t = Math.max(0, Math.min(1, t));
-      M.why = why.length ? ('probe: ' + why.join(', ')) : 'probe: phone default';
+      if (!apple && panel >= 3.4e6 && (!cores || cores <= 6)){ t--; why.push('panel ' + Math.round(panel / 1e6) + 'mp'); }
+      // ...and then the MEASUREMENT outranks every guess above: the fill
+      // bench runs on every phone (apple included — its strings are
+      // masked, its numbers are not) and may pull a clean-looking device
+      // down or leave a flagged one alone. thresholds are deliberately
+      // generous at the top — the watchdog owns the fine corrections.
+      var bm = bench();
+      if (bm > 0){
+        var bt = bm < 45 ? 2 : (bm < 120 ? 1 : 0);
+        t = Math.min(t, bt);
+        why.push('bench ' + Math.round(bm) + 'ms→' + bt);
+      }
+      t = Math.max(0, Math.min(2, t));
+      M.why = why.length ? ('probe: ' + why.join(', ')) : 'probe: phone full';
+      memWrite(t);
       return t;
     }
     // the city's two geometry families. both arrays live further down
@@ -1994,7 +2079,7 @@
     // actually doing — which means this can only ever detect the MISS,
     // never the headroom. hence: stepping DOWN is measured, stepping up
     // is a cautious one-shot that locks out the moment it is wrong.
-    var hot = 0, cool = 0, cd = 0, climbed = 0;
+    var hot = 0, cool = 0, cd = 0, climbed = 0, bootAt = performance.now();
     function watch(dt, cost, riding){
       if (!M.mobile || M.forced) return;
       if (cd > 0) cd -= dt;
@@ -2006,24 +2091,34 @@
         else { hot = 0; }
       } else { hot = 0; }
       if (cd > 0) return;
-      if (hot > 1.2 && M.tier > 0){
+      // the first seconds are the hero lap — live every frame, the
+      // page's first impression, and the place a phone the bench let
+      // through shows its hand. the demotion trigger runs at a third
+      // of its cruising patience there.
+      var hotAt = (performance.now() - bootAt < 15000) ? 0.4 : 1.2;
+      if (hot > hotAt && M.tier > 0){
         // a step down that lands right after a climb means the climb was
         // wrong: nail the ceiling shut so the two can never trade places
         if (climbed > 0){ M.ceil = M.tier - 1; }
         hot = cool = 0; cd = 5;
         apply(M.tier - 1, 'watchdog: ' + Math.round(cost * 1000) + 'ms frames');
+        memWrite(M.tier);   // the next visit opens where this one settled
       } else if (cool > 6 && !riding && M.tier < M.ceil){
         cool = 0; cd = 10; climbed = 20;
         apply(M.tier + 1, 'watchdog: headroom');
+        memWrite(M.tier);
       }
     }
-    M.apply = apply; M.watch = watch; M.scene = scene;
+    M.apply = apply; M.watch = watch; M.scene = scene; M.remember = memWrite;
     // the ceiling is where the PROBE put us: the watchdog may walk down
     // from there and back up to it, never past it. a phone that opens on
     // rung 1 is never promoted into the settings that are the reason
     // this ladder exists — only a device that dipped (a hot battery, a
     // background tab) climbs back out
-    M.boot = function(){ var t = probe(); M.booted = true; M.ceil = t; M.tier = -1; apply(t); };
+    // the ceiling sits ONE rung over where the probe landed (capped at
+    // 2): a bench hiccup or a remembered bad day can be climbed out of,
+    // and the watchdog's wrong-climb lockout still nails it back down
+    M.boot = function(){ var t = probe(); M.booted = true; M.ceil = Math.min(2, t + 1); M.tier = -1; apply(t); };
     M.set = function(t){ M.forced = true; apply(t, 'manual'); return M.why; };
     M.info = function(){ return {tier: M.tier, why: M.why, gpu: M.gpu, cores: M.cores,
       mem: M.mem, panel: M.panel, dpr: renderer.getPixelRatio(), chain: CHAIN_RES, k: M.k}; };
@@ -2032,6 +2127,22 @@
     return M;
   })();
   window.__mq = MQ;
+  // ── the context-loss net: the os killing the webgl context IS the
+  // strongest "this mobile is bad" signal there is — ios does it under
+  // memory pressure with no error anywhere else. remember a rung below
+  // the one that died and reload ONCE (session-guarded, so a device
+  // that even fails rung 0 does not reload forever); the next boot
+  // opens on the remembered rung via the probe's memory.
+  canvas.addEventListener('webglcontextlost', function(ev){
+    ev.preventDefault();
+    try {
+      MQ.remember(Math.max(0, MQ.tier - 1));
+      if (!sessionStorage.getItem('yz_ctxr')){
+        sessionStorage.setItem('yz_ctxr', '1');
+        location.reload();
+      }
+    } catch(e){}
+  }, false);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, MQ.k.dpr));
   // one anisotropy budget for the whole scene. the desktop takes the
   // driver's max (16 everywhere that matters); a phone caps at 4 — the
