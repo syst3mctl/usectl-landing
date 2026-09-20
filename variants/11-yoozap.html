@@ -2630,6 +2630,66 @@
       }
     };
   })();
+  // ── motion shader lod (phones only) ───────────────
+  // the mobile-engineer read of a scrolling frame is BANDWIDTH: every
+  // fullscreen pass is a full read+write of the chain, and the two
+  // worst offenders were built for a STILL frame under a desktop eye —
+  // the dof gather reads 41 taps per pixel (~54M fetches a frame at
+  // the phone chain), the bicubic bloom composite reconstructs five
+  // mips at 4 fetches each against stock's 1. while the camera is
+  // actually MOVING that craft is invisible, so the ride wears travel
+  // kernels: a 17-tap gather (outer ring halved, the .9 ring dropped
+  // outright — its radius sits a texel inside the outer's, pure
+  // redundancy) and the stock bilinear composite. both are cut from
+  // the SHIPPED shaders at runtime — delete tap lines, patch the
+  // divisor — so they can never drift from the originals, and if the
+  // source ever changes shape the surgery refuses and the page renders
+  // exactly as today. the swap rides the scrollActive edge down in the
+  // raf loop; the first quiet frame restores the full kernels together
+  // with a forced re-render, so no settled shot can ever wear the
+  // cheap glass. adaptive RESOLUTION stays banned ("went visibly
+  // soft") — this trims taps, never pixels. both travel programs are
+  // compiled and primed behind the boot veil below, so the first real
+  // scroll never meets a shader compile.
+  var bokehMatLo = null, bloomCompLo = null, bloomCompHi = null, motionLodOn = false;
+  if (MOBILE) (function(){
+    try {
+      var src = THREE.BokehShader && THREE.BokehShader.fragmentShader;
+      if (src){
+        var nOut = 0, n9 = 0, n7 = 0, n4 = 0, nC = 0, kOut = 0, k7 = 0, k4 = 0;
+        var kept = src.split('\n').filter(function(L){
+          if (L.indexOf('col += texture2D( tColor') === -1) return true;
+          if (/dofblur9\s*\)/.test(L)){ n9++; return false; }
+          if (/dofblur7\s*\)/.test(L)){ n7++; return (k7++ % 2) === 0; }
+          if (/dofblur4\s*\)/.test(L)){ n4++; return (k4++ % 2) === 0; }
+          if (/dofblur\s*\)/.test(L)){ nOut++; return (kOut++ % 2) === 0; }
+          nC++; return true;   // the centre tap
+        }).join('\n');
+        if (nOut === 16 && n9 === 8 && n7 === 8 && n4 === 8 && nC === 1 && kept.indexOf('col / 41.0') !== -1){
+          bokehMatLo = new THREE.ShaderMaterial({
+            defines: Object.assign({}, bokeh.materialBokeh.defines),
+            uniforms: bokeh.materialBokeh.uniforms,   // SHARED: every per-frame write lands in both
+            vertexShader: THREE.BokehShader.vertexShader,
+            fragmentShader: kept.replace('col / 41.0', 'col / 17.0')
+          });
+        }
+      }
+      if (bloom.getCompositeMaterial){
+        bloomCompHi = bloom.compositeMaterial;         // the bicubic one, patched above
+        bloomCompLo = bloom.getCompositeMaterial(5);   // stock r128 bilinear
+        bloomCompLo.uniforms = bloomCompHi.uniforms;   // shared for the same reason
+      }
+      // prime: one 2px draw each behind the veil compiles the programs
+      var prt = new THREE.WebGLRenderTarget(2, 2);
+      var pfm = bokeh.fsQuad.material;
+      renderer.setRenderTarget(prt);
+      if (bokehMatLo){ bokeh.fsQuad.material = bokehMatLo; bokeh.fsQuad.render(renderer); }
+      if (bloomCompLo){ bokeh.fsQuad.material = bloomCompLo; bokeh.fsQuad.render(renderer); }
+      bokeh.fsQuad.material = pfm;
+      renderer.setRenderTarget(null);
+      prt.dispose();
+    } catch(e){ bokehMatLo = null; bloomCompLo = null; }
+  })();
   composer.addPass(bloom);
   // the rack name plates render OVER the bloomed image, not into it:
   // their own two-mesh scene, drawn after bloom and before the gamma /
@@ -8780,6 +8840,19 @@
     if (scrollNow !== scrollLastY){ scrollLastY = scrollNow; scrollQuietT = 0; }
     else scrollQuietT += dt;
     scrollActive = scrollQuietT < 0.25;
+    // motion lod: travel kernels while the ride is live, the full ones
+    // back on the FIRST quiet frame — in the same breath as a forced
+    // re-render, so the settled shot is always full craft. rung 0 has
+    // no dof pass to swap and keeps whatever bloom it runs.
+    if (MOBILE && (bokehMatLo || bloomCompLo)){
+      var lodNow = scrollActive && MQ.tier > 0;
+      if (lodNow !== motionLodOn){
+        motionLodOn = lodNow;
+        if (bokehMatLo) bokeh.fsQuad.material = lodNow ? bokehMatLo : bokeh.materialBokeh;
+        if (bloomCompLo) bloom.compositeMaterial = lodNow ? bloomCompLo : bloomCompHi;
+        if (!lodNow){ frameDirtyFlag = true; frameCacheValid = false; }
+      }
+    }
     for (var li2 = 0; li2 < LEGS.length; li2++){
       var LL = LEGS[li2];
       LL.raw = Math.min(1, Math.max(0, (scrollNow - LL.start) / (LL.end - LL.start)));
