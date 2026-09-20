@@ -173,6 +173,39 @@
     .mobile-menu{top:50px;height:calc(100vh - 50px);height:calc(100svh - 50px)}
   }
 
+  /* ── the boot veil ────────────────────────────────
+     the flat #1e1d1d ground with the mark alone at centre while the
+     city, the rack, and the sheet itself come down the wire. the
+     glitch is the MANAGER's own logo glitch (GlitchLogo.tsx), ported:
+     0.6s bursts where every 80ms the mark snaps to one of three torn
+     clip-path shapes and jitters ±3px, clean between bursts. the
+     driver rides right under the veil's markup so the mark tears from
+     the very first paint, long before the three cdn scripts answer;
+     the clock down with the scene scripts calls plVeil.hide() when
+     window load AND the gltf queue's first drain have both landed —
+     one last burst chews the mark while it fades, then the ground
+     follows, so the city is already lit underneath. z 500: over the
+     nav (100) and the film sheet (200), under nothing the visitor can
+     see. */
+  .preload{position:fixed;inset:0;z-index:500;background:#1e1d1d;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease-in-out .3s}
+  .preload.out{opacity:0;pointer-events:none}
+  .pl-defs{position:absolute;width:0;height:0}
+  .pl-mark{position:relative;transition:opacity .35s ease .25s}
+  .preload.out .pl-mark{opacity:0}
+  /* the REAL logo's size — the nav's 22px; the 1700px step down to 18
+     rides the shared nav/footer rule so the veil can never drift */
+  .pl-mark img{display:block;height:22px;width:auto}
+  /* the bar under the mark: the manager's resource slider (the one
+     that meters the cpus on a new machine), laid flat as a loader —
+     2px accent fill over the border-grey rail, and the slider's own
+     120px blurred glow sweeping the FILL (0.8s in / 3.2s across /
+     0.5s out, a 4s loop), clipped sideways by the fill exactly like
+     the MuiSlider-track ::after it copies. the fill tracks the gltf
+     queue through plVeil.progress(); hide() drives it home to 100%. */
+  .pl-bar{position:relative;margin-top:26px;height:2px;background:var(--border)}
+  .pl-bar-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent);transition:width .4s ease-out;overflow-x:clip;overflow-y:visible;--glow-left:0%;--glow-opacity:0}
+  .pl-bar-fill::after{content:'';position:absolute;top:-3px;bottom:-3px;left:var(--glow-left);width:64px;border-radius:4px;background:linear-gradient(90deg,transparent 0%,var(--accent) 50%,transparent 100%);filter:blur(4px);opacity:var(--glow-opacity);pointer-events:none}
+
   /* ── the stage: the city, full size ─────────────── */
   /* the scene is fixed; the content scrolls up over it */
   /* PAINT tall, MEASURE small: the box is lvh — the toolbar-hidden
@@ -705,7 +738,7 @@
      rungs too. declared HERE, after both 22px base rules, because a
      media query adds no specificity: in the nav's 1700 block it would
      lose to .f-logo img further down the sheet */
-  @media (max-width:1700px){.nav-logo img,.f-logo img{height:18px}}
+  @media (max-width:1700px){.nav-logo img,.f-logo img,.pl-mark img{height:18px}}
   /* the header's own type everywhere: the nav-links recipe verbatim.
      (the hairline that used to stand between the mark and the credit
      went with the stack — a vertical 1px divider only reads when the
@@ -1273,6 +1306,109 @@
 </style>
 </head>
 <body>
+
+<!-- the boot veil: bare #1e1d1d with the mark glitching at centre until
+     the whole page is real — window load and the city's gltf chain both
+     in. the glitch is the manager's GlitchLogo, ported: three torn
+     clip-path shapes over the mark's own box (objectBoundingBox, the
+     400-space paths scaled by 0.0025), swapped every 80ms in 0.6s
+     bursts with a ±3px jitter. its clock sits with the scene scripts
+     at the bottom and calls plVeil.hide(). -->
+<div class="preload" id="preload" aria-hidden="true">
+  <svg class="pl-defs" aria-hidden="true">
+    <defs>
+      <clipPath id="plClip" clipPathUnits="objectBoundingBox">
+        <path id="plClipPath" transform="scale(0.0025, 0.0025)" d=""/>
+      </clipPath>
+    </defs>
+  </svg>
+  <div class="pl-mark">
+    <img id="plLogo" src="/img/logo.svg" alt="" width="230" height="37">
+    <div class="pl-bar"><div class="pl-bar-fill" id="plBarFill"></div></div>
+  </div>
+</div>
+<script>
+  // the veil's pulse — the manager's GlitchLogo.tsx timing verbatim:
+  // a burst lasts 0.6s and swaps shape + jitter every 80ms. only the
+  // idle differs: the manager rests 40s between bursts, a loading
+  // screen lives seconds — so here one fires at 150ms and then every
+  // 2.6s. plVeil.hide() runs one last burst while the mark fades,
+  // lets the ground follow, and takes the veil out of the dom.
+  (function(){
+    var veil = document.getElementById('preload');
+    var img = document.getElementById('plLogo');
+    var clip = document.getElementById('plClipPath');
+    var fill = document.getElementById('plBarFill');
+    if (!veil || !img || !clip || !fill) return;
+    var PATHS = [
+      "M400,21.66V10.49h-116.29V0H39.36V54.56H0v36.09H101.25v9.77H.23v5.52H101.25v14.44H22.77v15.29H13.82v39.06H.23v6.79H13.82v15.29h60.63v20.81H10.25v51.17H.23v26.75H61.69v30.57h-29.35v12.1H0v30.57H22.77v31.36H400v-25.41h-31.43v-5.95h31.43v-8.28h-31.43v-15.92h-9.57v-14.65h32.56v-13.38h8.44v-10.83h-8.44v-52.23h-79.37v-21.02h69.78v-7.64h18.03v-24.7h-8.44v-52.58h-22.99v-11.89h31.43v-15.29h-31.43v-36.3h31.43V35.03h-116.29v-13.38h116.29ZM138.57,120.38h15.14v15.29h-15.14v-15.29ZM74.45,386.85v-18.08h39.56v14.01h144.19v4.06H74.45Zm89.32-42.28v-6.37h-34.45v-12.1h48.49v18.47h-14.04Zm56.73-25.48h-5.05v-2.55h5.05v2.55Zm-5.05-13.38v-10.19h5.05v10.19h-5.05Z",
+      "M398.2,238.77v-14.06h2.28v-24.74h-2.28v-37.76h-8.45v-4.24H215.93v-3.23h178.76v-61.25H254.7v-3.19h33.11v-11.59h102.55V29.58h-52.25V0H93.75V13.18H0v11.19H39.84v29.77H.48v36.15H39.84v28.22H18.22v6.81h5.04v10.06H14.3v61.25h60.63v2.12H1.05v56.57H29.76v21.71H96.62v3.81h4.79v7.66h-3.83v-6.14H.6v14.67H62.17v13.8H.48v30.62H82.37v3.83h35.94v8.77H15.17v13.3H118.31v8.77H.48v23.84H244.84v-12.97h134.3v-18.11h21.34v-8.29h-21.34v-26.19h19.02v-25.45h-42.19v-26.19h18.5v-1.93h26.01v-10.85h-26.01v-25.51h-71.49v-5.73h95.22Zm-171.06-75.27v14.95h-11.21v-14.95h11.21Zm-88.09-38.17h38.45v-5.25h15.55v15.31h-54.01v-10.06Zm76.88,189.34v-3.83h40.42v14.92h-10.22v-11.09h-30.21Zm-45.94,30.62h7.52v8.77h-7.52v-8.77Zm0,22.07h7.52v8.77h-7.52v-8.77Z",
+      "M400.21,112.61v-15.31H234.82v-9.04h52.51v-6.59h112.67V32.54h-33.6V6.06h-95.3V0H69.47V2.36H29.34V13.55h40.13v7.51H32.34v20.87h-12.38v10.18H0v36.15H19.96v49.37h18.2v23.05H13.82v11.8H.23v6.81H13.82v37.96h18.52v22.74H13.14v13.3h19.2v8.96h106.23v4.44H.23v26.8H61.69v30.62h-29.35v14.67H114.47v11.23H17.55v30.62h18.3v17.63h51.68v-17.63h26.94v11.98h143.72v5.65h141.81v-25.45h-114.47v-5.21h101.25v-.75h13.22v-8.29h-13.22v-29.24h-17.58v-10.32h30.72v-10.85h-30.72v-5.11h30.72v-31.26h-16.99v-29.1h17.08v-24.74h-60.14v-6.74h-24.11v-8.11h70.6v-61.25h-20.92v-29.24h34.78Zm-164.97,180.87v-8.94h88.66v12.37h-108.46v-3.43h19.79Zm-50.53-151.63v18.82h-30.76v-23.05h71.6v4.23h-40.84Z"
+    ];
+    var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var iv = null, to = null, loop = null, first = null, down = false;
+    function step(){
+      clip.setAttribute('d', PATHS[Math.floor(Math.random() * PATHS.length)]);
+      img.style.transform = 'translate(' + (Math.random() * 6 - 3).toFixed(1) + 'px, ' + (Math.random() * 4 - 2).toFixed(1) + 'px)';
+    }
+    function burst(ms){
+      if (still) return;
+      clearInterval(iv); clearTimeout(to);
+      img.style.transition = 'none';
+      img.style.clipPath = 'url(#plClip)';
+      step();
+      iv = setInterval(step, 80);
+      to = setTimeout(function(){
+        clearInterval(iv);
+        img.style.clipPath = 'none';
+        img.style.transition = 'transform .1s';
+        img.style.transform = 'translate(0px, 0px)';
+      }, ms || 600);
+    }
+    // the bar: real gltf progress lands through plVeil.progress(),
+    // a slow trickle keeps it breathing between reports (capped at 90
+    // — only real news and hide() go further), and the slider's glow
+    // timeline is swept by hand: gsap isn't on the wire yet up here.
+    var shown = 0, trickle = null, raf = null, g0 = Date.now();
+    function paint(){ fill.style.width = (shown * 100).toFixed(1) + '%'; }
+    trickle = setInterval(function(){
+      if (shown < 0.9){ shown = Math.min(0.9, shown + 0.004 + (0.9 - shown) * 0.012); paint(); }
+    }, 250);
+    function glowFrame(){
+      var t = ((Date.now() - g0) % 4000) / 1000, left = 0, op;
+      if (t < 0.8){ var u = t / 0.8; op = 0.3 * u * u; }   // power2.in, 0.8s
+      else {
+        left = (t - 0.8) / 3.2 * 100;                      // linear, 3.2s
+        var rem = 4 - t;                                   // power2.out over the last 0.5s
+        op = rem < 0.5 ? 0.3 * (rem / 0.5) * (rem / 0.5) : 0.3;
+      }
+      fill.style.setProperty('--glow-left', left + '%');
+      fill.style.setProperty('--glow-opacity', String(op));
+      raf = requestAnimationFrame(glowFrame);
+    }
+    if (!still) raf = requestAnimationFrame(glowFrame);
+    first = setTimeout(function(){ burst(600); }, 150);
+    loop = setInterval(function(){ burst(600); }, 2600);
+    window.plVeil = {
+      progress: function(p){
+        if (down || !(p > shown)) return;   // only ever forward
+        shown = Math.min(p, 0.99);
+        paint();
+      },
+      hide: function(){
+        if (down) return; down = true;
+        clearTimeout(first); clearInterval(loop); clearInterval(trickle);
+        if (raf) cancelAnimationFrame(raf);
+        shown = 1; paint();
+        fill.style.setProperty('--glow-opacity', '0');
+        burst(700);
+        veil.classList.add('out');
+        setTimeout(function(){ veil.remove(); window.plVeil = null; }, 1400);
+      }
+    };
+  })();
+</script>
+<noscript><style>.preload{display:none}</style></noscript>
 
 <!-- the site header, from the main landing -->
 <header>
@@ -1852,6 +1988,42 @@
 <!-- lil-gui (the 'calc light' tester panel) retired: the script is gone,
      the window.lil guard in the scene script skips the panel cleanly -->
 <script>
+  // ── the boot veil's clock ─────────────────
+  // two hands must land before the veil lifts: the window's own load
+  // (images, fonts, the gsap port) and the gltf queue's first drain —
+  // the manager's onLoad only fires once city → rack → props are all
+  // in, because every nested loader.load() starts inside its parent's
+  // callback and holds the queue open. attached HERE, before the scene
+  // script queues anything, so the drain can't slip past unheard. a
+  // 900ms floor keeps the mark from flash-frying on a warm cache; a
+  // 15s net lowers the veil even if a cdn or a model never answers.
+  (function(){
+    var veil = document.getElementById('preload');
+    if (!veil) return;
+    var t0 = Date.now(), pageIn = false, glbIn = false, down = false;
+    function lower(){
+      if (down || !pageIn || !glbIn) return;
+      down = true;
+      setTimeout(function(){
+        if (window.plVeil) window.plVeil.hide();
+        else { veil.classList.add('out'); setTimeout(function(){ veil.remove(); }, 1400); }
+      }, Math.max(0, 900 - (Date.now() - t0)));
+    }
+    if (document.readyState === 'complete') pageIn = true;
+    else window.addEventListener('load', function(){ pageIn = true; lower(); });
+    if (window.THREE && THREE.DefaultLoadingManager){
+      THREE.DefaultLoadingManager.onProgress = function(url, ld, tot){
+        // itemsTotal grows as nested loads queue, so the ratio can dip —
+        // plVeil.progress() is monotonic and shrugs those off
+        if (window.plVeil && tot) window.plVeil.progress(ld / tot);
+      };
+      THREE.DefaultLoadingManager.onLoad = function(){ glbIn = true; lower(); };
+    } else glbIn = true;   // no three at all — nothing to wait for
+    setTimeout(function(){ pageIn = glbIn = true; lower(); }, 15000);
+    lower();
+  })();
+</script>
+<script>
 (function(){
   var stage = document.getElementById('stage');
   var canvas = document.getElementById('cityCanvas');
@@ -2186,6 +2358,32 @@
       }
     } catch(e){}
   }, false);
+  // ── the crash net: jetsam — ios killing the whole TAB under memory
+  // pressure — fires NO event at all: no context loss, no error, no
+  // pagehide, nothing. it is only visible from the NEXT visit: a
+  // liveness flag raised while the scene is up and lowered on every
+  // orderly exit (pagehide, or the tab going to the background — a
+  // backgrounded tab ios reaps DID exit cleanly from the page's side).
+  // a boot that finds the flag still raised knows the last ride died
+  // mid-frame, and remembers a rung below it as HARD — exactly like a
+  // context loss, honored untested by the probe — which also drops the
+  // texture governor's cap to 512 for the whole visit. the watchdog
+  // may still climb the render rungs back out on real headroom; the
+  // sheets it crashed under stay small either way, so the climb can
+  // never re-arm the bomb.
+  if (MOBILE) (function(){
+    var K = 'yz_alive';
+    try {
+      if (localStorage.getItem(K)) MQ.remember(Math.max(0, MQ.tier - 1), true);
+      localStorage.setItem(K, '1');
+      var lower = function(){ try { localStorage.removeItem(K); } catch(e){} };
+      window.addEventListener('pagehide', lower);
+      document.addEventListener('visibilitychange', function(){
+        if (document.visibilityState === 'hidden') lower();
+        else { try { localStorage.setItem(K, '1'); } catch(e){} }
+      });
+    } catch(e){}
+  })();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, MQ.k.dpr));
   // one anisotropy budget for the whole scene. the desktop takes the
   // driver's max (16 everywhere that matters); a phone caps at 4 — the
@@ -2735,6 +2933,61 @@
   var draco = new THREE.DRACOLoader();
   draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.1/');
   loader.setDRACOLoader(draco);
+  // ── the texture governor (phones only) ────────────
+  // the models carry ~300MB of textures once decoded: the laptop and
+  // the calculator alone hold four 2048² webp sheets EACH (~90MB a
+  // piece on the gpu, rgba + mips). and three uploads a texture the
+  // first frame its mesh is actually DRAWN — which on this page is
+  // mid-scroll, right as a leg reveals its prop: a 100MB+ decode-and-
+  // upload spike landing on a tab ios already has under watch. that is
+  // the 13's "app crashed when i scrolled" — jetsam, not a slow frame,
+  // which is why the watchdog never saw it coming. two moves:
+  //   shrink — any map wider than the rung's cap is redrawn onto a
+  //   canvas at cap size BEFORE its first upload. a 390px-wide phone
+  //   cannot resolve a 2048² sheet on a prop that covers a third of
+  //   the frame: 1024 on rung 2 is transparent (the 12/13 class keeps
+  //   its "very good"), 512 on the rungs the ladder already walked
+  //   down. the original decoded image drops with its last reference.
+  //   pre-upload — initTexture pushes every (now small) map onto the
+  //   gpu right here in the load callback, behind the boot veil, so a
+  //   scroll reveal uploads NOTHING and the spike cannot exist.
+  // desktop and ipad pass through byte-identical.
+  if (MOBILE) (function(){
+    var tameSeen = {};
+    function tameTextures(root){
+      var cap = MQ.tier >= 2 ? 1024 : 512;
+      root.traverse(function(o){
+        if (!o.isMesh) return;
+        var mats = Array.isArray(o.material) ? o.material : [o.material];
+        for (var i = 0; i < mats.length; i++){
+          var m = mats[i]; if (!m) continue;
+          for (var key in m){
+            var t = m[key];
+            if (!t || !t.isTexture || !t.image || tameSeen[t.uuid]) continue;
+            tameSeen[t.uuid] = true;
+            var im = t.image, w = im.width || 0, h = im.height || 0;
+            if (w > cap || h > cap){
+              var sc = cap / Math.max(w, h);
+              var cv = document.createElement('canvas');
+              cv.width = Math.max(1, Math.round(w * sc));
+              cv.height = Math.max(1, Math.round(h * sc));
+              cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+              t.image = cv;
+              t.needsUpdate = true;
+            }
+            if (renderer.initTexture) renderer.initTexture(t);
+          }
+        }
+      });
+    }
+    var _gltfLoad = loader.load.bind(loader);
+    loader.load = function(url, onLoad, onProgress, onError){
+      return _gltfLoad(url, function(g){
+        try { tameTextures(g.scene); } catch(e){}
+        onLoad(g);
+      }, onProgress, onError);
+    };
+  })();
   // the demo's own material settings (from its 3d-settings, not in the export):
   // window emission is boosted 10× / 6.1×, streamers 1.42×
   var EMIT = {'22_-_Defaultsd': 10, '22_-_Default': 6.115, 'Streamers': 1.42};
