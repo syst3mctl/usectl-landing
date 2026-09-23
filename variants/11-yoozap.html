@@ -30,7 +30,7 @@
          (unsupported in older browsers, where it is ignored — i.e. exactly
          the behaviour this line had before.) -->
     <link rel="preload" href="/models/pcb.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/models/calculator.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/models/_orig/calculator.glb" as="fetch" crossorigin fetchpriority="low">
     <link rel="preload" href="/models/laptop.glb" as="fetch" crossorigin fetchpriority="low">
     <link rel="preload" href="/models/qblock.glb" as="fetch" crossorigin fetchpriority="low">
     <link rel="preload" href="/models/door.glb" as="fetch" crossorigin fetchpriority="low">
@@ -3135,6 +3135,11 @@
   // the lid: a hinge group around the screen mesh — born closed, open
   // exactly whenever the rack stands at opacity 1 (rides __addonsRackHide)
   var lapLid = null, lapLidClose = 0, lapLidQ = -1;
+  // the agents view tunnel's last quantized strength (uniform tunU)
+  var tunQ = -1;
+  // the damped mirror of the addons rack window — the agents entrance's
+  // one shared fade driver (rack, laptop, lid, tunnel all consume it)
+  var addonsHideP = 0;
   // slider mode stands the panel dead vertical (90° off the deck) so the
   // slides read flat, like a 2d screen — rides forWin, lands at the exact
   // scroll where the slider takes the glass (forWin.p 0.45)
@@ -3745,6 +3750,96 @@
       else if (e.hid){ e.o.visible = true; e.hid = false; }
     }
   }
+  // ── the agents view tunnel ──────────────────────────────────────────
+  // 'built for agents' looks down the street at the rack+laptop pair from
+  // a low angle, THROUGH the ghost blocks standing between the lens and
+  // the machines ("u need make tunnel for rack and laptop... buildings
+  // must hide with scroll opacity in front of items"). a world-space soft
+  // box over that corridor (measured with __tunProbe at the settled shot:
+  // hits span x -3.5..+4.9, z +1.3..+8.4, tops y <= 3.1) multiplies the
+  // city's alpha down as the laptop opens — per FRAGMENT, because each
+  // city mesh spans many buildings and hiding one whole would take
+  // neighbors ten blocks away along. every city material (the originals,
+  // the unlit ghost twins, the wire overlays) wears the same chunk and
+  // shares one uniform; the scroll drive lives with the laptop's reveal.
+  var tunU = {value: 0};
+  // the GHOST body-hide: rides the city's own ghost factor (rackFade —
+  // scroll-scrubbed, reversible), so entering ANY rack scene fades the
+  // building BODIES out with the scroll and leaves the green wireframe
+  // city + wires + neon ("u hiddin black materials of building and show
+  // only lines. u need hide materials on scroll man"). the hero and the
+  // footer (ghost 0) keep the full lit city.
+  var ghostU = {value: 0};
+  var TUN_GLSL = [
+    'uniform float uTunK;',
+    'uniform float uGhostB;',
+    'varying vec3 vTunW;',
+    // returns the FADE STRENGTH (0..1): the agents corridor carries
+    // uTunK, the body ghost-hide carries uGhostB — each term owns its
+    // own gate, so the bodies fade at EVERY ghost scene while the
+    // corridor only clears during agents
+    'float tunnelMask(vec3 w){',
+    // FULL HEIGHT on purpose — a y ceiling would slice a tall corridor
+    // building horizontally; buildings leave whole or not at all.
+    '  float mx = smoothstep(-6.0, -4.5, w.x) * (1.0 - smoothstep(5.5, 7.0, w.x));',
+    '  float mz = smoothstep(0.9, 1.6, w.z) * (1.0 - smoothstep(9.0, 10.8, w.z));',
+    '  float m = uTunK * mx * mz;',
+    // ...and the city's BODY materials (TUN_DEEP — never the wire
+    // overlays, the hanging strokes or the street neons) fade with the
+    // GHOST itself: dozens of stacked 10%-alpha walls read as
+    // green-orange mud ("i dont like quality here"), so wherever the
+    // city ghosts, the bodies go and the backdrop is the site's own
+    // annotation look — the green wireframe city, its hanging wires
+    // and the neon ribbons — scrubbed in and out by the scroll.
+    '#ifdef TUN_DEEP',
+    '  m = max(m, uGhostB);',
+    '#endif',
+    '  return m;',
+    '}'
+  ].join('\n');
+  function tunnelPatch(m, deep){
+    if (m.userData.__tun) return;
+    m.userData.__tun = true;
+    m.userData.__tunDeep = !!deep;   // the twins inherit the family
+    var prev = m.onBeforeCompile;
+    m.onBeforeCompile = function(sh, r){
+      if (prev) prev(sh, r);
+      sh.uniforms.uTunK = tunU;
+      sh.uniforms.uGhostB = ghostU;
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vTunW;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTunW = (modelMatrix * vec4(position, 1.0)).xyz;');
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', '#include <common>\n' + (deep ? '#define TUN_DEEP\n' : '') + TUN_GLSL)
+        .replace('#include <dithering_fragment>',
+          '#include <dithering_fragment>\n  gl_FragColor.a *= 1.0 - tunnelMask(vTunW);');
+    };
+    // the default program cache key is onBeforeCompile.toString() — the
+    // SAME source for every patched material even when the chained `prev`
+    // differs (the window flicker), so those flavors would collide into
+    // one compiled program. name them apart explicitly.
+    m.customProgramCacheKey = function(){ return (deep ? 'tunD' : 'tun') + (prev ? '+' + String(prev).length : ''); };
+  }
+  // ...and the bokeh depth pre-pass must not see what the tunnel faded:
+  // the corridor blocks kept writing depth after fading out, so the far
+  // city revealed behind them wore a patchwork of stale blur radii —
+  // sharp corridor-shaped patches floating in the max-blur backdrop
+  // ("i dont like quality here"). the override depth material discards
+  // the same masked fragments the beauty pass fades.
+  (function(){
+    var dm = bokeh.materialDepth;
+    dm.onBeforeCompile = function(sh){
+      sh.uniforms.uTunK = tunU;
+      sh.uniforms.uGhostB = ghostU;
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vTunW;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTunW = (modelMatrix * vec4(position, 1.0)).xyz;');
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', '#include <common>\n' + TUN_GLSL)
+        .replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n  if (tunnelMask(vTunW) > 0.5) discard;');
+    };
+    dm.customProgramCacheKey = function(){ return 'tundepth'; };
+  })();
   function cityTwinFor(m){
     if (!m || !(m.isMeshStandardMaterial || m.isMeshPhysicalMaterial)) return m;   // already unlit
     var t = cityTwins.get(m.uuid);
@@ -3758,6 +3853,7 @@
       depthTest: m.depthTest, depthWrite: m.depthWrite
     });
     t.userData.__src = m;
+    tunnelPatch(t, m.userData.__tunDeep);   // the agents view tunnel rides the ghost twins too
     cityTwins.set(m.uuid, t);
     return t;
   }
@@ -3849,6 +3945,9 @@
       m.stencilRef = 1;
       m.stencilFunc = ghost ? THREE.NotEqualStencilFunc : THREE.AlwaysStencilFunc;
     }
+    // the body ghost-hide rides the same scrubbed factor as the ghost
+    // itself: f 1 (lit hero/footer) -> 0, f 0.1 (full ghost) -> 1
+    ghostU.value = Math.max(0, Math.min(1, (1 - f) / 0.9));
     // FULL ghost only: the lights argument is already at zero there (no
     // emissive left to lose) and the reveal has finished, so the swap can
     // never land mid-crossover where the lamps still reach the buildings
@@ -3862,6 +3961,92 @@
     // lines and they stay. cityWireMeshes is kept for the cull below.
     cityCullInvisible();
   }
+  // ── city shader warm-up: every program flavor the reveal will ask for,
+  // compiled in load idle instead of mid-scroll. the reveal always built
+  // these on the hero→split stretch (applyScene's clip planes and the
+  // full-ghost twin bind are separate flavors), and any edit to the city
+  // shaders cold-starts the browser's program cache — measured 20+ fresh
+  // compiles mid-scroll after the tunnel patch: the canvas froze on each
+  // while the page kept scrolling and the green building lines visibly
+  // jumped ("like bug blink"). warmed with real hidden renders (the pcb
+  // recipe), NOT renderer.compile — compile() reads whatever clipping
+  // state the last drawn frame left, so it can bake the wrong
+  // numClippingPlanes for exactly these flavors. runs ONCE, after the
+  // model chain's five lamp-adding callbacks (terminal, door, panel,
+  // calculator, laptop) have all landed: light count is part of every
+  // lit program's identity, so an earlier warm compiles dead flavors.
+  var warmLights = 5, warmCityDone = false;
+  // testing hook: how many lamp callbacks the warm-up still waits for
+  window.__warmDbg = function(){ return {left: warmLights, done: warmCityDone}; };
+  function warmCityFlavors(){
+    if (warmCityDone || !cityMats.length) return;
+    // NEVER mid-reveal or mid-scroll: the warm is one synchronous
+    // ~100-300ms block (two renders + compiles). fired against a moving
+    // damp it ate the rack's whole fade ramp in one clamped dt step —
+    // the rack popped in solid ("rack is goin in with stick",
+    // "opacities of rack not works"). parked fades and a quiet page
+    // only; otherwise try again in a moment.
+    if (scrollActive || (rackFade > 0.001 && rackFade < 0.999)){ setTimeout(warmCityFlavors, 1000); return; }
+    warmCityDone = true;
+    var wm = sceneMode, wf = cityDimNow, wl = cityLightsNow;
+    // stage the reveal's full cast: the rack draws (alpha 0 — invisible,
+    // but a draw is what compiles its lit program with the TRUE clipping
+    // state; the rack callback's compile() bakes a stale plane count and
+    // the recompile used to land exactly as the rack faded in)
+    var wrv = rackRoot ? rackRoot.visible : false;
+    if (rackRoot) rackRoot.visible = true;
+    applyScene(2);
+    applyCityDim(0.5, 0.5);     // mid-fade: the ORIGINALS' clipped ghost flavor
+    renderer.setRenderTarget(frameCache);
+    renderer.render(scene, camera);
+    applyCityDim(0.0999, 0);    // full ghost: binds + compiles the twins
+    renderer.shadowMap.needsUpdate = true;   // shadow depth flavors, rack included
+    renderer.render(scene, camera);
+    // the bokeh depth pre-pass has its OWN override-material program
+    // family (base / instanced / clipped) that plain renders never
+    // build — run one pre-pass over the same staged scene. the cube
+    // lattice must STAND for it: its INSTANCED depth variant otherwise
+    // compiles at the lattice's first mid-scroll appearance — right at
+    // the ghost crossover, where the hitch's clamped dt also made the
+    // damped fades jump a step ("fix stick between u go in gost mode")
+    var wlv = cubeMeshG ? cubeMeshG.visible : null;
+    if (cubeMeshG){
+      cubeMeshG.visible = cubeMeshP.visible = cubeMeshF.visible = true;
+      cubeEdgeG.visible = cubeEdgeP.visible = cubeEdgeF.visible = true;
+    }
+    scene.overrideMaterial = bokeh.materialDepth;
+    renderer.setRenderTarget(bokeh.renderTargetDepth);
+    renderer.render(scene, camera);
+    scene.overrideMaterial = null;
+    renderer.setRenderTarget(null);
+    if (cubeMeshG && wlv === false){
+      cubeMeshG.visible = cubeMeshP.visible = cubeMeshF.visible = false;
+      cubeEdgeG.visible = cubeEdgeP.visible = cubeEdgeF.visible = false;
+    }
+    // ...and one full material sweep in the SAME final-lights, mode-2
+    // state: props the frames never drew (qblocks, door pockets, the
+    // kiosk) compile here instead of at their first mid-scroll appearance
+    renderer.compile(scene, camera);
+    if (rackRoot) rackRoot.visible = wrv;
+    applyCityDim(wf, wl);       // hand the live state back
+    applyScene(wm);
+    bokehStamp++;               // the staged depth map is garbage — re-render
+    renderer.shadowMap.needsUpdate = true;   // shadows back to the live state
+    frameCacheValid = false;    // the warm-up scribbled on the cache
+    frameDirtyFlag = true;
+  }
+  // ...and a safety net for a lamp callback that never lands (a failed
+  // model fetch would otherwise strand the counter forever — it already
+  // happened once, when the shared calculator/panel glbs went KTX2 and
+  // the r128 loader dropped them; they load from /models/_orig now):
+  // the timer warms with whatever lamp set actually made it in, which
+  // is exactly the set the reveal will render with.
+  function warmCityFallback(){
+    if (warmCityDone) return;
+    if (!cityMats.length){ setTimeout(warmCityFallback, 3000); return; }
+    warmCityFlavors();
+  }
+  setTimeout(warmCityFallback, 8000);
   var prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   // the low rung stands the ambient animators down exactly as the os
   // switch does — with nothing breathing, a settled shot renders nothing
@@ -4049,7 +4234,9 @@
   // + 5%') and LEFT 5% twice ('more left 5%', 'more left man !'). the
   // rack's screen spot goes 0.19 / 0.56 -> 0.09 / 0.71 and the laptop
   // rides with it, since the pose — orbit, fov, target — is untouched.
-  var AGENTS_DX = -0.16, AGENTS_DY = 0.21;
+  // ...then back UP 10% ('move items more top. + 10%' — the rack+laptop
+  // pair together): 0.09 / 0.71 -> 0.09 / 0.61.
+  var AGENTS_DX = -0.16, AGENTS_DY = 0.11;
   // 'who it is for' drops the LAPTOP well below mid-frame. it had been hand
   // set to +0.15 and that was right ("bottom was good"); it lost that when
   // the anchors were rewritten to the bare rule, which is what put it back
@@ -5241,8 +5428,9 @@
   // draw calls, triangles, programs, plus what the post chain is set to.
   // three resets render.calls/triangles on every render(), so this reads
   // whatever the last frame cost; call it after a frame has landed
-  window.__gpuDbg = function(){
+  window.__gpuDbg = function(withNames){
     var r = renderer.info.render, m = renderer.info.memory;
+    if (withNames) return renderer.info.programs.map(function(p){ return p.name + '#' + (p.cacheKey || '').length; });
     return {calls: r.calls, tris: r.triangles, lines: r.lines, points: r.points,
             geometries: m.geometries, textures: m.textures, programs: renderer.info.programs.length,
             chain: CHAIN_RES, dpr: renderer.getPixelRatio(), tier: MQ.tier,
@@ -5257,8 +5445,30 @@
             // the responsive frame's live state: fit 1 = the shot exactly
             // as logged, >1 = pulled back for a narrow viewport
             fit: +frameFitK.toFixed(3), chain: CHAIN_RES, coarse: coarsePointer, vpH: vpH(),
+            rackOp: rackMats.length ? rackMats[0].opacity : -1,
+            rackTr: rackMats.length ? rackMats[0].transparent : null,
+            rackVis: rackRoot ? rackRoot.visible : null,
             rackFade: rackFade, cubeFade: cubeFade, pcbFade: pcbFade, cubeHide: cubeHide, revFade: revFade, revSeal: revSeal, radialHide: radialHide, calcWin: calcWin.p, metalWin: metalWin.p, rackOutWin: rackOutWin.p, rack2Op: rack2Op, agentsWin: agentsWin.p, forWin: forWin.p, faqWin: faqWin.p, faqCube: faqCube, ctaWin: ctaWin.p, footWin: footWin.p, holeY: holeYQ, lapLid: lapLidQ, lapVert: lapLidVertQ,
             cam: camera.position.toArray(), tgt: controls.target.toArray()};
+  };
+  // testing hook: what city stands between the lens and the machines —
+  // a ray through screen fractions (0..1, y down) returns every city hit
+  // NEARER than the rack, with its world spot and material. used to place
+  // the agents view tunnel; harmless to keep, it runs only when called
+  window.__tunProbe = function(sx, sy){
+    var rc = new THREE.Raycaster();
+    rc.setFromCamera(new THREE.Vector2(sx * 2 - 1, 1 - sy * 2), camera);
+    var list = [];
+    for (var ti = 0; ti < cityAllMeshes.length; ti++) if (cityAllMeshes[ti].o.visible) list.push(cityAllMeshes[ti].o);
+    var rackD = camera.position.distanceTo(new THREE.Vector3(-0.35, 1.6, -1.72));
+    return rc.intersectObjects(list, false)
+      .filter(function(h){ return h.distance < rackD - 1.5; })
+      .map(function(h){
+        var hm = Array.isArray(h.object.material) ? h.object.material[0] : h.object.material;
+        return {d: +h.distance.toFixed(2),
+                p: [+h.point.x.toFixed(2), +h.point.y.toFixed(2), +h.point.z.toFixed(2)],
+                m: (hm && hm.name) || ''};
+      });
   };
   var scrubHome = null, scrubAz = 0, scrubAzD = 0, scrubFree = false, scrubScene = 1;
   // grabbing a number while scrolled pans into this offset, which rides on
@@ -5297,6 +5507,10 @@
   // snap on and off across the towers like real apartments at night.
   var winU = { time: { value: 0 } };
   function windowFlicker(m){
+    // once only: the material is shared across meshes and a re-assign
+    // here would wipe the tunnel patch chained on top of this one
+    if (m.userData.__flick) return;
+    m.userData.__flick = true;
     m.onBeforeCompile = function(shader){
       shader.uniforms.uWinTime = winU.time;
       shader.fragmentShader = 'uniform float uWinTime;\n' + shader.fragmentShader.replace(
@@ -5319,6 +5533,7 @@
   var wireMat = new THREE.MeshBasicMaterial({
     wireframe: true, color: 0x0ec435, transparent: true, opacity: 0.05, depthWrite: false
   });
+  tunnelPatch(wireMat);   // the green building lines clear the agents corridor too
   // the demo decodes vertex colors as srgb (its 3d settings say so); three
   // reads them linear, which renders every stroke brighter than the demo.
   function srgbToLinear(c){ return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
@@ -5478,6 +5693,14 @@
         if (m.map) m.map.anisotropy = maxAniso;
         if (m.emissiveMap) m.emissiveMap.anisotropy = maxAniso;
         if (cityMats.indexOf(m) === -1) cityMats.push(m);
+        // the agents view tunnel rides every city material; the BODY
+        // families also carry the deep-field fade (never the hanging
+        // wire strokes or the street neons — the green city look stays;
+        // 'Light' — the window dots — DOES fade there: at this depth
+        // they were the orange mud, and the near signs live inside the
+        // deep mask's z > -4 margin anyway)
+        tunnelPatch(m, m.name !== 'Wire' && m.name !== 'Streamers' &&
+                       m.name !== 'Waveform' && m.name !== 'Electricity');
       });
       var dm = Array.isArray(o.material) ? o.material[0] : o.material;
       if (dm && dm.name === 'Wire'){
@@ -5548,6 +5771,10 @@
     // the whole tree on every one of its passes
     scene.updateMatrixWorld(true);
     scene.autoUpdate = false;
+    // (the city's mode-2 shader warm-up — warmCityFlavors — waits for the
+    // LAST lamp of the model chain: light count is part of every lit
+    // program's identity, so warming here, before the prop lamps land,
+    // compiles flavors the reveal would never use)
     loader.load('/models/server_racking_system.glb', function(r){
       var groundY = -0.15, topY = 3.45;
       if (towerMesh){
@@ -6381,6 +6608,7 @@
         termLamp = new THREE.PointLight(0xffe6c0, 0, 6);
         termLamp.position.set(2.3, 2.2, 1.6);
         scene.add(termLamp);
+        if (--warmLights === 0) setTimeout(warmCityFlavors, 0);
         renderer.compile(scene, camera);
         // ── the payment card, child of the kiosk: it rides twrap's
         // own scale/heading, sliding into the reader in local space ──
@@ -6516,6 +6744,7 @@
         doorLamp = new THREE.PointLight(0xffe6c0, 0, 6);
         doorLamp.position.set(0.6, rackTopY * 0.75, rackBox.max.z + 2.1);
         scene.add(doorLamp);
+        if (--warmLights === 0) setTimeout(warmCityFlavors, 0);
         renderer.compile(scene, camera);
         if (--dracoPending === 0) draco.dispose();
       });
@@ -6530,7 +6759,10 @@
       // not draco and 3mb of pngs: it streams in the background like the
       // pcb (no preload link, no dracoPending slot) and simply isn't
       // there until it lands — the fade block guards on panelRoot.
-      loader.load('/models/sci-fi_control_panel.glb', function(cp){
+      // _orig path: /models/sci-fi_control_panel.glb is KTX2/BASIS now
+      // (variant 12 shares the file) and the r128 loader here can't read
+      // it — this copy is the last webp build, byte-identical look
+      loader.load('/models/_orig/sci-fi_control_panel.glb', function(cp){
         var cr = cp.scene;
         cr.updateMatrixWorld(true);
         var cb = new THREE.Box3().setFromObject(cr);
@@ -6861,6 +7093,7 @@
         panelLamp.position.set(rackBox.max.x + 2.2, rackBotY + rackH * 0.32,
                                (rackBox.min.z + rackBox.max.z) * 0.5);
         scene.add(panelLamp);
+        if (--warmLights === 0) setTimeout(warmCityFlavors, 0);
         renderer.compile(scene, camera);
         frameDirtyFlag = true;
       });
@@ -7167,7 +7400,9 @@
       // shot) ── its spot is solved per frame from the live camera (screen
       // 0.78/0.5 at the focus distance), so here it only needs normalizing:
       // recentered in a group, sized to one world unit, faded to zero
-      loader.load('/models/calculator.glb', function(cg){
+      // _orig path: same story as the control panel — the shared
+      // /models/calculator.glb went KTX2 for variant 12, unreadable here
+      loader.load('/models/_orig/calculator.glb', function(cg){
         var cr = cg.scene;
         var cb = new THREE.Box3().setFromObject(cr);
         var cs = new THREE.Vector3(); cb.getSize(cs);
@@ -7466,6 +7701,7 @@
         calcLamp = new THREE.PointLight(new THREE.Color(calcLightCfg.key.c), 0, 12, 2);
         calcFill = new THREE.PointLight(new THREE.Color(calcLightCfg.fill.c), 0, 12, 2);
         scene.add(calcLamp); scene.add(calcFill);
+        if (--warmLights === 0) setTimeout(warmCityFlavors, 0);
         for (var cei = 0; cei < calcMats.length; cei++){
           calcMats[cei].emissiveIntensity = calcLightCfg.emis;
           calcMats[cei].metalness = calcLightCfg.metal;
@@ -8400,6 +8636,7 @@
         // glass ("light is on display") — mirrored left it slides off
         lapLamp.position.set(lwrap.position.x - 1.6, groundY + 1.6, lwrap.position.z + 1.9);
         scene.add(lapLamp);
+        if (--warmLights === 0) setTimeout(warmCityFlavors, 0);
         // compile now, in load idle — the first visible frame comes right
         // as the addons cover thins; a shader stall there would hitch it
         renderer.compile(scene, camera);
@@ -8967,6 +9204,19 @@
       for (var cj2 = 0; cj2 < RIDE.length; cj2++) RIDE[cj2].w.p = RIDE[cj2].w.raw;
       frameDirtyFlag = true;
     }
+    // the agents entrance glide: the rack, laptop, lid and view tunnel
+    // all ride the addons rack window, which is RAW scroll over ~16vh —
+    // any normal gesture crosses that in a blink and the pair popped in
+    // solid ("show hide not works its statik"). one damped mirror gives
+    // the whole train the page's usual glide, both directions — and it
+    // deliberately SITS OUT the coverJump snap above: emerging from
+    // under the opaque cover, the camera must jump-cut but this fade IS
+    // the entrance — it glides from wherever it stood (1 under the
+    // cover), so the pair fades in even when one wheel flick crossed
+    // the whole window while the loop was hard-skipping.
+    var addonsHideRaw = window.__addonsRackHide || 0;
+    addonsHideP += (addonsHideRaw - addonsHideP) * (1 - Math.exp(-dt * 6));
+    if (Math.abs(addonsHideP - addonsHideRaw) < 0.002) addonsHideP = addonsHideRaw;
     // leg 10's laptop: faded on the agents window, quantized like the
     // fade block (the entrance itself lives under the addons cover).
     // driven OUTSIDE the ride gate so free-cam keeps it for framing.
@@ -8979,7 +9229,7 @@
       // 'our metal' now follows 'who it is for' (order rewire): it
       // retires the laptop + slider the same way the faq used to
       var metalE2 = revealEase(Math.min(1, metalWin.p / 0.5));
-      var lapNext = Math.round(revealEase(agentsWin.p) * (1 - (window.__addonsRackHide || 0)) * (1 - Math.max(faqE, metalE2)) * 200) / 200;
+      var lapNext = Math.round(revealEase(agentsWin.p) * (1 - addonsHideP) * (1 - Math.max(faqE, metalE2)) * 200) / 200;
       if (lapNext !== lapQ){
         lapQ = lapNext;
         var lapOn = lapQ > 0.001;
@@ -9006,7 +9256,7 @@
       // and FULLY OPEN whenever the rack stands at opacity 1 — the two
       // land together, always in step, reversible with the scroll
       if (lapLid){
-        var lidNext = Math.round((1 - (window.__addonsRackHide || 0)) * 200) / 200;
+        var lidNext = Math.round((1 - addonsHideP) * 200) / 200;
         // slider mode straightens the panel to exactly 90° while the
         // terminal un-types, dead vertical right as the slides take the
         // glass at forWin.p 0.45 — scroll-scrubbed, reversible
@@ -9023,6 +9273,23 @@
           if (lapScreenMat) lapScreenMat.opacity = Math.max(0, lapQ) * lidNext;
           frameDirtyFlag = true;
         }
+      }
+      // the agents view tunnel: the ghost blocks standing in the street
+      // between the lens and the machines fade out as the laptop opens —
+      // scroll-scrubbed both ways, on the laptop's own reveal factors —
+      // and the street is handed back across the 'for' approach (that
+      // leg stands INSIDE the corridor and ships with its blocks up)
+      var tunNext = Math.round(revealEase(agentsWin.p) * (1 - addonsHideP) * (1 - revealEase(forWin.p)) * 200) / 200;
+      if (tunNext !== tunQ){
+        tunQ = tunNext;
+        tunU.value = tunQ;
+        // the cleared corridor exposes the DEEP city — at this shot's
+        // shallow angle that content sits at max blur and read as green
+        // mush. ride the blur ceiling down with the tunnel so the
+        // backdrop keeps its structure; every other scene keeps 0.0075
+        bokeh.uniforms['maxblur'].value = 0.0075 * (1 - 0.85 * tunQ);
+        bokehStamp++;   // the depth pre-pass discards masked fragments — keep its map in step
+        frameDirtyFlag = true;
       }
       // the hologram's motor: an endless turn about its own vertical,
       // running whenever the laptop is on stage (reduced-motion holds it
@@ -9862,7 +10129,7 @@
       // the addons flat (the board script at the bottom): as the addons
       // section rides in, it pulls the rack out FIRST, ahead of the gray
       // cover that then takes the radial — whichever hide is deeper wins
-      radHideNext = Math.max(radHideNext, Math.round((window.__addonsRackHide || 0) * 200) / 200);
+      radHideNext = Math.max(radHideNext, Math.round(addonsHideP * 200) / 200);
       if (rackFade !== rackNext || cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || revSeal !== sealNext || radialHide !== radHideNext || faqCube !== faqCubeNext || ctaWink !== ctaWinkNext || s2LineQ !== s2Cube || s3CubeQ !== s3Cube){
         var hideMoved = cubeHide !== hideNext;
         var s2LineMoved = s2LineQ !== s2Cube;

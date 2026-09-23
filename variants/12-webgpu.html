@@ -1,49 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <link rel="preconnect" href="https://www.googletagmanager.com">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TXPX5SYRNJ"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'G-TXPX5SYRNJ');
-    </script>
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="systemctl">
-    <meta name="theme-color" content="#11A32A">
-    <meta name="msapplication-TileImage" content="../img/fav.png">
-    <meta name="msapplication-TileColor" content="#11A32A">
-    <meta name="content-signal" content="search=yes, ai-train=yes, ai-input=yes">
-    <link rel="canonical" href="https://usectl.com/variants/11-yoozap">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://usectl.com/variants/11-yoozap">
-    <meta property="og:title" content="usectl — Your machine. Your wires. Your walls.">
-    <meta property="og:description" content="Every project gets a machine: a private slice of a real server, with its own Postgres, Redis, S3 and domain. One command to deploy. One flat price.">
-    <meta property="og:image:alt" content="usectl — Your machine. Your wires. Your walls.">
-    <meta name="twitter:url" content="https://usectl.com/variants/11-yoozap">
-    <meta name="twitter:title" content="usectl — Your machine. Your wires. Your walls.">
-    <meta name="twitter:description" content="Every project gets a machine: a private slice of a real server, with its own Postgres, Redis, S3 and domain. One command to deploy. One flat price.">
-    <meta property="og:image" content="https://usectl.com/img/og.png">
-    <meta property="og:image:secure_url" content="https://usectl.com/img/og.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:site_name" content="usectl">
-    <meta property="og:locale" content="en_US">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://usectl.com/img/og.png">
-    <meta name="twitter:site" content="@usectl">
-    <meta name="twitter:creator" content="@usectl">
-    <link rel="icon" type="image/png" sizes="32x32" href="../img/fav.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../img/fav.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="../img/fav.png">
-    <link rel="manifest" href="../site.webmanifest">
-    <title>usectl — Your machine. Your wires. Your walls.</title>
+    <!-- @site-head: shared head (gtag, charset, og/twitter, icons, manifest) injected from index.html by vite.config.js -->
+    <title>usectl — Your machine. Your wires. Your walls. [webgpu]</title>
     <meta name="description" content="Every project gets a machine: a private slice of a real server, with its own Postgres, Redis, S3 and domain. One command to deploy. One flat price.">
     <meta name="robots" content="noindex, follow">
 
@@ -52,13 +11,13 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-    <link rel="stylesheet" href="../commercial/gsap/commercial.css">
+    <link rel="stylesheet" href="/commercial/gsap/commercial.css">
     <!-- start the model downloads in parallel with the script tags below;
          GLTFLoader's fetch then hits the http cache instead of the network.
          THE FIRST FRAME NEEDS EXACTLY THESE TWO — 11.07 of the 18.47 MB —
          and they are the only two that ask for the bandwidth at full price -->
-    <link rel="preload" href="../models/virtual-city.glb" as="fetch" crossorigin>
-    <link rel="preload" href="../models/server_racking_system.glb" as="fetch" crossorigin>
+    <link rel="preload" href="/models/virtual-city.glb" as="fetch" crossorigin>
+    <link rel="preload" href="/models/server_racking_system.glb" as="fetch" crossorigin>
     <!-- the late-loading props start their downloads at t=0 too: their
          loader.load calls in the rack callback then hit the http cache.
          they are DEMOTED, not dropped: `as=fetch` preloads default to HIGH
@@ -70,13 +29,13 @@
          loader chain below still hits a warm cache when it gets to them.
          (unsupported in older browsers, where it is ignored — i.e. exactly
          the behaviour this line had before.) -->
-    <link rel="preload" href="../models/pcb.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="../models/_orig/calculator.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="../models/laptop.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="../models/qblock.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="../models/door.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="../models/terminal.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="../models/card.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/models/pcb.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/models/calculator.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/models/laptop.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/models/qblock.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/models/door.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/models/terminal.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/models/card.glb" as="fetch" crossorigin fetchpriority="low">
 <style>
   :root{
     /* manager-usectl dark theme */
@@ -244,6 +203,8 @@
      the MuiSlider-track ::after it copies. the fill tracks the gltf
      queue through plVeil.progress(); hide() drives it home to 100%. */
   .pl-bar{position:relative;margin-top:26px;height:2px;background:var(--border)}
+  /* the [40%] readout: terminal mono, dim, centered under the bar */
+  .pl-pct{margin-top:12px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--dim);text-align:center;font-variant-numeric:tabular-nums}
   .pl-bar-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent);transition:width .4s ease-out;overflow-x:clip;overflow-y:visible;--glow-left:0%;--glow-opacity:0}
   .pl-bar-fill::after{content:'';position:absolute;top:-3px;bottom:-3px;left:var(--glow-left);width:64px;border-radius:4px;background:linear-gradient(90deg,transparent 0%,var(--accent) 50%,transparent 100%);filter:blur(4px);opacity:var(--glow-opacity);pointer-events:none}
 
@@ -1364,8 +1325,9 @@
     </defs>
   </svg>
   <div class="pl-mark">
-    <img id="plLogo" src="../img/logo.svg" alt="" width="230" height="37">
+    <img id="plLogo" src="/img/logo.svg" alt="" width="230" height="37">
     <div class="pl-bar"><div class="pl-bar-fill" id="plBarFill"></div></div>
+    <div class="pl-pct" id="plPct">[0%]</div>
   </div>
 </div>
 <script>
@@ -1380,6 +1342,7 @@
     var img = document.getElementById('plLogo');
     var clip = document.getElementById('plClipPath');
     var fill = document.getElementById('plBarFill');
+    var pct = document.getElementById('plPct');
     if (!veil || !img || !clip || !fill) return;
     var PATHS = [
       "M400,21.66V10.49h-116.29V0H39.36V54.56H0v36.09H101.25v9.77H.23v5.52H101.25v14.44H22.77v15.29H13.82v39.06H.23v6.79H13.82v15.29h60.63v20.81H10.25v51.17H.23v26.75H61.69v30.57h-29.35v12.1H0v30.57H22.77v31.36H400v-25.41h-31.43v-5.95h31.43v-8.28h-31.43v-15.92h-9.57v-14.65h32.56v-13.38h8.44v-10.83h-8.44v-52.23h-79.37v-21.02h69.78v-7.64h18.03v-24.7h-8.44v-52.58h-22.99v-11.89h31.43v-15.29h-31.43v-36.3h31.43V35.03h-116.29v-13.38h116.29ZM138.57,120.38h15.14v15.29h-15.14v-15.29ZM74.45,386.85v-18.08h39.56v14.01h144.19v4.06H74.45Zm89.32-42.28v-6.37h-34.45v-12.1h48.49v18.47h-14.04Zm56.73-25.48h-5.05v-2.55h5.05v2.55Zm-5.05-13.38v-10.19h5.05v10.19h-5.05Z",
@@ -1411,7 +1374,7 @@
     // — only real news and hide() go further), and the slider's glow
     // timeline is swept by hand: gsap isn't on the wire yet up here.
     var shown = 0, trickle = null, raf = null, g0 = Date.now();
-    function paint(){ fill.style.width = (shown * 100).toFixed(1) + '%'; }
+    function paint(){ fill.style.width = (shown * 100).toFixed(1) + '%'; if (pct) pct.textContent = '[' + Math.round(shown * 100) + '%]'; }
     trickle = setInterval(function(){
       if (shown < 0.9){ shown = Math.min(0.9, shown + 0.004 + (0.9 - shown) * 0.012); paint(); }
     }, 250);
@@ -1457,7 +1420,7 @@
     <div class="nav-inner">
       <div class="nav-left">
         <a href="/" class="nav-logo" aria-label="usectl home">
-          <img src="../img/logo.svg" alt="usectl logo" width="83" height="22">
+          <img src="/img/logo.svg" alt="usectl logo" width="83" height="22">
         </a>
       </div>
       <div class="nav-right">
@@ -1978,7 +1941,7 @@
   <footer>
     <div class="f-inner">
       <div class="f-brand">
-        <div class="f-logo"><img src="../img/logo.svg" alt="usectl logo" width="83" height="22" loading="lazy"></div>
+        <div class="f-logo"><img src="/img/logo.svg" alt="usectl logo" width="83" height="22" loading="lazy"></div>
         <div class="f-copy">© 2026 <a class="co" href="https://systemctl.sh/" target="_blank" rel="noopener">systemctl</a>. All rights reserved.</div>
       </div>
       <nav class="f-links" aria-label="Footer">
@@ -1997,8 +1960,8 @@
   </footer>
 </main>
 
-<script src="../commercial/gsap/gsap.min.js"></script>
-<script src="../commercial/gsap/commercial.js"></script>
+<script src="/commercial/gsap/gsap.min.js"></script>
+<script src="/commercial/gsap/commercial.js"></script>
 <script>
   // the master timeline is kept on window: on a portrait phone the sheet
   // is the only thing that can show the film, so it is the only thing
@@ -2011,21 +1974,50 @@
     window.__commercial.pause(0);
   }
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/SVGLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/GammaCorrectionShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/BokehShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FXAAShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
+<!-- ── WEBGPU PORT (variant 12) ─────────────────────────────────────
+     the same landing as 11-yoozap, rendered by three r186's
+     WebGPURenderer. the scene script below is the yoozap body with
+     the WebGL-specific organs transplanted:
+       · the r128 EffectComposer chain (dof → bloom → plates → gamma →
+         fxaa → lens → grade) is rebuilt as a TSL node graph;
+       · the r128 BokehShader's 41-tap gather is ported tap-for-tap
+         (and its 17-tap travel kernel rides a uniform branch instead
+         of runtime shader surgery);
+       · the bicubic bloom composite lives on as a patched BloomNode;
+       · ColorManagement is OFF: hex colors stay raw and the gamma
+         lives in the chain, exactly the r128 pipeline this page was
+         tuned under;
+       · WebGPU has no legacy-lights mode, so every light wears a ×π
+         shim to keep the r128 irradiance;
+       · the dof depth pre-pass is GONE — the beauty pass's own depth
+         attachment feeds the bokeh, which r128 could not do.
+     no WebGPU → WebGPURenderer falls back to WebGL2 on its own;
+     ?gpu=gl forces the fallback for A/B comparison. -->
+<!-- three 0.186 comes from node_modules via vite (the r128 CDN scripts
+     above it in variant 11 were classic scripts; the webgpu build is
+     ESM-only, and vite owns module resolution in this repo) -->
+<script type="module">
+  import * as CORE from 'three/webgpu';
+  import * as TSL from 'three/tsl';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+  import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+  import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+  import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+  import { fxaa } from 'three/addons/tsl/display/FXAANode.js';
+  const THREE = {};
+  for (const k in CORE) THREE[k] = CORE[k];
+  THREE.OrbitControls = OrbitControls;
+  THREE.GLTFLoader = GLTFLoader;
+  THREE.DRACOLoader = DRACOLoader;
+  THREE.KTX2Loader = KTX2Loader;
+  THREE.SVGLoader = SVGLoader;
+  window.THREE = THREE;
+  window.__TSL = TSL;
+  window.__fx = { bloom, fxaa };
+  if (window.__bootScene) window.__bootScene().catch(function(e){ console.error('yoozap-webgpu boot failed:', e); });
+</script>
 <!-- lil-gui (the 'calc light' tester panel) retired: the script is gone,
      the window.lil guard in the scene script skips the panel cleanly -->
 <script>
@@ -2052,24 +2044,36 @@
     }
     if (document.readyState === 'complete') pageIn = true;
     else window.addEventListener('load', function(){ pageIn = true; lower(); });
-    if (window.THREE && THREE.DefaultLoadingManager){
-      THREE.DefaultLoadingManager.onProgress = function(url, ld, tot){
+    // three arrives as an ES module now, AFTER this classic script runs —
+    // the scene script calls this hook once the loading manager exists.
+    // if the module never lands (no webgpu AND no webgl2, or a cdn
+    // failure) the 15s net below still lowers the veil.
+    window.__veilGlbWire = function(mgr){
+      mgr.onProgress = function(url, ld, tot){
         // itemsTotal grows as nested loads queue, so the ratio can dip —
         // plVeil.progress() is monotonic and shrugs those off
         if (window.plVeil && tot) window.plVeil.progress(ld / tot);
       };
-      THREE.DefaultLoadingManager.onLoad = function(){ glbIn = true; lower(); };
-    } else glbIn = true;   // no three at all — nothing to wait for
+      mgr.onLoad = function(){ glbIn = true; lower(); };
+    };
     setTimeout(function(){ pageIn = glbIn = true; lower(); }, 15000);
     lower();
   })();
 </script>
 <script>
-(function(){
+window.__bootScene = async function(){
   var stage = document.getElementById('stage');
   var canvas = document.getElementById('cityCanvas');
   var hint = document.getElementById('hint');
   if (!canvas || typeof THREE === 'undefined') return;
+  // r128 semantics, on purpose: hex colors land raw (no auto sRGB→linear
+  // on Color.set) and the gamma is applied by the chain's own tail —
+  // the whole page was tuned under that pipeline. sRGB TEXTURES still
+  // decode in hardware (the backend picks *-srgb formats from
+  // texture.colorSpace regardless of this flag), which is exactly what
+  // r128's sRGBEncoding did.
+  THREE.ColorManagement.enabled = false;
+  var TSL = window.__TSL, FXN = window.__fx;
 
   // the eight cameras from the sketchfab demo, exactly as published
   // (annotation eye/target/hotspot, converted z-up -> y-up)
@@ -2092,8 +2096,52 @@
   // so the multisample buffer only costs resolve bandwidth and shows nothing
   // stencil on: the leg-3 reveal uses it to keep the ghosted city from
   // drawing over the rack's silhouette
-  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:false, stencil:true, powerPreference:'high-performance'});
-  renderer.debug.checkShaderErrors = false;   // dev-only introspection, costs compile time
+  // WEBGPU: the renderer picks its backend itself — dawn/metal where
+  // navigator.gpu answers, webgl2 otherwise; ?gpu=gl forces the fallback
+  // so the two can be compared on the same machine.
+  var FORCE_GL = /[?&]gpu=(0|gl|webgl)/i.test(location.search || '');
+  var renderer = new THREE.WebGPURenderer({canvas:canvas, antialias:false, stencil:true, powerPreference:'high-performance', forceWebGL:FORCE_GL});
+  await renderer.init();   // webgpu device acquisition is async; nothing below runs without it
+  window.__gpuBackend = (renderer.backend && renderer.backend.isWebGPUBackend) ? 'webgpu' : 'webgl2';
+  console.info('[12-webgpu] backend: ' + window.__gpuBackend);
+  if (renderer.debug) renderer.debug.checkShaderErrors = false;   // dev-only introspection, costs compile time
+  // ── pin the pipeline cache ── on webgpu three EVICTS a render pipeline
+  // the instant no render object references it (usedTimes → 0, then
+  // Pipelines._releasePipeline deletes it from the cache). the ghost city
+  // holds ONE render object per mesh, and it alternates between the opaque
+  // hero pipeline and the transparent+stencil reveal pipeline — so every
+  // split crossing drops whichever variant just went idle, and the boot
+  // warm's entire ghost pipeline set is thrown away the moment its
+  // temp-visible meshes revert. THAT eviction is the hero→split recompile
+  // storm: ~238 pipelines rebuilt per crossing, each a Metal shader
+  // compile the software gpu hides but a real panel stalls on (the "lag
+  // the moment the split starts", still felt after the warm because the
+  // warm's work was being freed before the ride reached it). the page's
+  // pipeline set is small, static and fully enumerated by the boot warm,
+  // so pin it: releasing a pipeline from the cache is a no-op. the warm
+  // now sticks and every reveal reuses it — measured 238 → 48 compiles a
+  // crossing (the 48 left are the shadow map's, tracked separately). the
+  // WGSL programs still free normally; only the cheap-to-hold, expensive-
+  // to-rebuild pipeline objects are kept.
+  try {
+    var _pl = renderer._pipelines;
+    if (_pl && typeof _pl._releasePipeline === 'function') _pl._releasePipeline = function(){};
+  } catch(e){}
+  // the plate pass clears its color target to transparent black and the
+  // main scene always has a background, so this global clear color only
+  // ever shows where it is meant to
+  renderer.setClearColor(0x000000, 0);
+  // r128 ran its lights in legacy mode, which multiplied every light's
+  // irradiance by π in the shader. modern three has no such mode — the
+  // shim keeps the page's tuned intensities meaning what they meant.
+  function LP(l){
+    l.userData.__i = l.intensity;
+    Object.defineProperty(l, 'intensity', {
+      get: function(){ return this.userData.__i * Math.PI; },
+      set: function(v){ this.userData.__i = v; }
+    });
+    return l;
+  }
 
   // ── THE PHONE LADDER ────────────────────────────────────────────
   // under 767 the page runs on a gpu a tenth of a laptop's behind a
@@ -2133,6 +2181,20 @@
   //   calm   the switch prefers-reduced-motion throws: with the ambient
   //          animators down, a settled shot renders nothing at all.
   var MOBILE = window.innerWidth <= 767;
+  // ── ULTRA (?q=ultra, desktop only) ── the settings the WebGL page
+  // could not afford, as a webgpu flex: the chain at FULL device
+  // resolution (r128 measured ~37ms/frame on an M4 and rejected it —
+  // no depth pre-pass and no hidden resolve here, so we try again),
+  // 4x MSAA on the beauty pass (dropped on webgl because ANGLE's
+  // multisample resolve collided with the css glass; webgpu resolves
+  // explicitly, per pass), and a 4096 shadow map.
+  // ULTRA IS THE DEFAULT now ("this is good, move to 12 version"):
+  // every desktop gets the device-res chain, the cinema glass and the
+  // governor; on a high-refresh panel the governor's 120hz line engages
+  // by itself (the old ?fps=120). an explicit classic tier (?q=2 etc.)
+  // still opts out for A/B.
+  var ULTRA = !MOBILE && !/[?&]q=(0|1|2|low|mid|high|base)\b/i.test(location.search || '');
+  if (ULTRA) console.info('[12-webgpu] ULTRA (default): device-res chain, cinema focus, self-governing');
   var MQ = (function(){
     var Q = [
       // 0 — the bad phone: everything that can be off, is — EXCEPT the
@@ -2155,19 +2217,11 @@
     ];
     var M = {tier: 2, k: Q[2], mobile: MOBILE, forced: false, booted: false,
              ceil: 2, why: 'desktop', gpu: '', cores: 0, mem: 0, panel: 0};
-    // the fxaa pass doubles as the static cache's filler, so the low rung
-    // cannot simply switch it off — it swaps the shader for a plain copy
-    // and the pass keeps feeding the cache
-    var copyMat = null;
-    function cheapMat(){
-      if (!copyMat && THREE.CopyShader) copyMat = new THREE.ShaderMaterial({
-        uniforms: THREE.UniformsUtils.clone(THREE.CopyShader.uniforms),
-        vertexShader: THREE.CopyShader.vertexShader,
-        fragmentShader: THREE.CopyShader.fragmentShader
-      });
-      return copyMat;
-    }
-    var fxaaMat = null, fxaaUni = null;
+    // WEBGPU: the low rung's "fxaa → plain copy" swap is gone as such —
+    // the composer shim picks between two prebuilt node graphs (full and
+    // lite) off MQ.k, and the lite one simply has no fxaa node in it.
+    // both still end in the lens cache, so the static-frame replay works
+    // the same on every rung.
     // ── the fill bench: MEASURE the gpu instead of guessing from masked
     // strings. its own tiny context (nothing of the page's state), a
     // fragment-heavy quad drawn 16 times over 768² with blending — the
@@ -2241,9 +2295,18 @@
       var panel = (scr.width * dpr) * (scr.height * dpr);   // device pixels the panel asks for
       var gpu = '';
       try {
-        var gl = renderer.getContext();
-        var ext = gl.getExtension('WEBGL_debug_renderer_info');
-        if (ext) gpu = String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || '');
+        // WEBGPU: no getContext — the adapter's info is the closest thing
+        // to the old UNMASKED_RENDERER string (and just as masked on
+        // apple). the webgl2 fallback backend still answers the old way.
+        var bk = renderer.backend;
+        if (bk && bk.adapter && bk.adapter.info){
+          var ai = bk.adapter.info;
+          gpu = [ai.vendor || '', ai.architecture || '', ai.device || '', ai.description || ''].join(' ').replace(/\s+/g, ' ').trim();
+        } else {
+          var gl = bk && bk.gl;
+          var ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
+          if (ext) gpu = String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || '');
+        }
       } catch(e){}
       M.gpu = gpu; M.cores = cores; M.mem = mem; M.panel = panel;
       var g = gpu.toLowerCase();
@@ -2304,6 +2367,8 @@
       var ws = cityWireStrokes, ov = cityWireMeshes;
       if (ws) for (var i = 0; i < ws.length; i++) ws[i].visible = k.wires;
       if (ov) for (var j = 0; j < ov.length; j++) ov[j].visible = k.overlay;
+      if (window.__dbgScene) { /* bundle may not exist yet at boot */ }
+      if (typeof cityBundleDirty === 'function') cityBundleDirty();
       frameDirtyFlag = true;
       if (typeof bokehStamp === 'number') bokehStamp++;
     }
@@ -2314,13 +2379,9 @@
       var k = M.k;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, k.dpr));
       if (M.booted){
-        // the tail: fxaa full or a plain copy (the pass still fills the
-        // cache either way), and the grain that decides whether a static
-        // frame has anything to draw at all
-        if (!fxaaMat){ fxaaMat = fxaa.material; fxaaUni = fxaa.uniforms; }
-        var cm = k.fxaa ? null : cheapMat();
-        fxaa.material = cm || fxaaMat;
-        fxaa.uniforms = cm ? cm.uniforms : fxaaUni;
+        // the tail: the composer shim reads MQ.k and picks the full or
+        // the lite chain on the next render — nothing to swap here. the
+        // grain still decides whether a static frame draws at all.
         grade.uniforms.grain.value = k.grain;
         reducedMotion = prefersReducedMotion || k.calm;
         controls.autoRotate = !reducedMotion;
@@ -2366,6 +2427,7 @@
       }
     }
     M.apply = apply; M.watch = watch; M.scene = scene; M.remember = memWrite;
+    M.bench = bench;   // the fill bench serves the desktop profile too
     // the ceiling is where the PROBE put us: the watchdog may walk down
     // from there and back up to it, never past it. a phone that opens on
     // rung 1 is never promoted into the settings that are the reason
@@ -2383,14 +2445,52 @@
     return M;
   })();
   window.__mq = MQ;
+  // ── THE DEVICE PROFILE (desktop) ── measure the machine, then set
+  // its TOP sustainable config before the first frame: the fill bench
+  // (a real timed render on THIS gpu — the same one the phone ladder
+  // trusts), the core count, and the panel's device pixels pick the
+  // ultra chain cap; a genuinely weak gpu gets the classic desktop
+  // tier, which IS its top quality. the live governor still refines
+  // from there, and the 120hz line arms itself on fast panels.
+  var ULTRA_CAP = 1.5;   // fallback; the strong-device branch below grants 2.0 — post-optimization (pipeline pinning, warm sweeps, resolutionScale fix) a strong retina desktop affords the full device-res chain, and the governor's [1.75, 1.5, 1.25] ladder still steps down on measured misses
+  if (!MOBILE && ULTRA){
+    var dBench = MQ.bench ? MQ.bench() : -1;
+    var dCores = navigator.hardwareConcurrency || 0;
+    var dDpr = window.devicePixelRatio || 1;
+    var dPanel = (screen.width || 0) * dDpr * (screen.height || 0) * dDpr;
+    // ?chain=<1..2> pins the cap over the measured profile (A/B and the
+    // headless rigs, whose bench never matches the real panel's gpu)
+    var dForce = (location.search || '').match(/[?&]chain=(\d(?:\.\d+)?)/i);
+    if (dForce){
+      ULTRA_CAP = Math.min(2, Math.max(1, parseFloat(dForce[1]) || 1.5));
+    } else if (dBench > 45 || (dCores && dCores <= 2)){
+      ULTRA = false;   // weak gpu/cpu: the classic tier is this device's best
+    } else {
+      // every ultra desktop STARTS at the full device-res chain (beauty,
+      // dof gather and fxaa 1:1 with panel pixels) — the plain url is the
+      // top config, deterministically. the one-shot bench proved too
+      // noisy to gate quality (5-19ms across runs on ONE machine); the
+      // governor's ladder (2.0→1.75→1.5→1.25, working since the
+      // lastCapCR fix) is the measured demotion and settles a machine
+      // that can't hold it within its first ride
+      ULTRA_CAP = 2.0;
+      if (dPanel >= 8.3e6) ULTRA_CAP = 1.5;   // 4k-class panel: the fill is the budget even now
+    }
+    try {
+      var dAd = renderer.backend && renderer.backend.adapter && renderer.backend.adapter.info;
+      console.info('[12-webgpu] device profile: gpu "' + (dAd ? (dAd.vendor + ' ' + (dAd.architecture || '')) : 'masked') +
+        '", bench ' + Math.round(dBench) + 'ms, cores ' + dCores + ', panel ' + (dPanel / 1e6).toFixed(1) + 'mp -> ' +
+        (ULTRA ? 'ultra, chain cap ' + ULTRA_CAP : 'classic tier'));
+    } catch(e){}
+  }
   // ── the context-loss net: the os killing the webgl context IS the
   // strongest "this mobile is bad" signal there is — ios does it under
   // memory pressure with no error anywhere else. remember a rung below
   // the one that died and reload ONCE (session-guarded, so a device
   // that even fails rung 0 does not reload forever); the next boot
   // opens on the remembered rung via the probe's memory.
-  canvas.addEventListener('webglcontextlost', function(ev){
-    ev.preventDefault();
+  function ctxLost(ev){
+    if (ev && ev.preventDefault) ev.preventDefault();
     try {
       MQ.remember(Math.max(0, MQ.tier - 1), true);   // hard: the probe honors this one untested
       if (!sessionStorage.getItem('yz_ctxr')){
@@ -2398,7 +2498,13 @@
         location.reload();
       }
     } catch(e){}
-  }, false);
+  }
+  canvas.addEventListener('webglcontextlost', ctxLost, false);   // the webgl2 fallback backend
+  // WEBGPU: the device reports its own death — same meaning, same move
+  try {
+    if (renderer.backend && renderer.backend.device && renderer.backend.device.lost)
+      renderer.backend.device.lost.then(function(){ ctxLost(null); });
+  } catch(e){}
   // ── the crash net: jetsam — ios killing the whole TAB under memory
   // pressure — fires NO event at all: no context loss, no error, no
   // pagehide, nothing. it is only visible from the NEXT visit: a
@@ -2431,16 +2537,25 @@
   // grazing angles that need 16 are the city's road texture read across
   // a 390px frame, where the difference is a pixel wide and the sampler
   // cost is per-fragment on the tightest gpu in the ladder
-  var ANISO = MOBILE ? Math.min(4, renderer.capabilities.getMaxAnisotropy())
-                     : renderer.capabilities.getMaxAnisotropy();
-  renderer.toneMapping = THREE.ReinhardToneMapping;   // sketchfab: reinhard, exposure 1
-  renderer.toneMappingExposure = 1;
+  var maxAniso = 16;   // the webgpu spec's own ceiling
+  try {
+    if (renderer.capabilities && renderer.capabilities.getMaxAnisotropy) maxAniso = renderer.capabilities.getMaxAnisotropy();
+    else if (renderer.backend && renderer.backend.getMaxAnisotropy) maxAniso = renderer.backend.getMaxAnisotropy();
+  } catch(e){}
+  var ANISO = MOBILE ? Math.min(4, maxAniso) : maxAniso;
+  // NO renderer-level tone mapping: passes render linear into their
+  // targets on webgpu whatever this is set to, so the reinhard lives in
+  // the chain itself (applied per dof tap, right where r128's
+  // per-material tonemap put its values). sketchfab: reinhard, exposure 1.
+  renderer.toneMapping = THREE.NoToneMapping;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   // the lights and the city never move: render the 2048 shadow map once,
-  // then only when the scene actually changes (load, toggle, rack fade)
-  renderer.shadowMap.autoUpdate = false;
-  renderer.shadowMap.needsUpdate = true;
+  // then only when the scene actually changes (load, toggle, rack fade).
+  // WEBGPU: freezing is per-LIGHT now (shadow.autoUpdate on spotB, the
+  // one caster) — renderer.shadowMap.needsUpdate below is a shim that
+  // forwards to it, so the fifty dirty-flag writes in this file keep
+  // working unchanged.
   renderer.localClippingEnabled = true;   // the scene-2 building clip box
 
   var scene = new THREE.Scene();
@@ -2452,15 +2567,15 @@
 
   // ── the demo's lights, neutralized: our buildings are black, not blue ──
   // dim environment fill (env exposure 0.25 in the scene settings)
-  scene.add(new THREE.HemisphereLight(0x9a9a98, 0x0c0c0b, 0.09));
+  scene.add(LP(new THREE.HemisphereLight(0x9a9a98, 0x0c0c0b, 0.09)));
   // spot a: faint grazer from the north-west, high up (was blue in the demo)
-  var spotA = new THREE.SpotLight(new THREE.Color(0.30, 0.30, 0.32), 0.33);
+  var spotA = LP(new THREE.SpotLight(new THREE.Color(0.30, 0.30, 0.32), 0.33));
   spotA.angle = 42.19 * Math.PI / 180; spotA.penumbra = 0.25; spotA.decay = 0; spotA.distance = 0;
   spotA.position.set(-8.426, 5.25, -9.161);
   spotA.target.position.set(-2.388, 3.905, -4.088);
   scene.add(spotA); scene.add(spotA.target);
   // spot b: the key. neutral grey (was bluish-white), over the core, shadows on
-  var spotB = new THREE.SpotLight(new THREE.Color(0.45, 0.45, 0.45), 2.9);
+  var spotB = LP(new THREE.SpotLight(new THREE.Color(0.45, 0.45, 0.45), 2.9));
   spotB.angle = 40.29 * Math.PI / 180; spotB.penumbra = 0.3; spotB.decay = 0; spotB.distance = 0;
   spotB.position.set(-0.004, 2.245, -0.934);
   spotB.target.position.set(-0.661, -5.728, -0.934);
@@ -2473,11 +2588,29 @@
   // the map is re-rendered on every scene mutation — the rack fades, the
   // glitch that used to fire. enabled stays ON at every rung: switching
   // shadows off recompiles every program in the scene mid-ride)
+  // NOT 4096 in ultra: the shadow map re-renders the WHOLE city + rack
+  // at every component anchor (prop entrances, fade endpoints) — that
+  // one-frame stall IS the anchor lag, and 4096 made it 4× v11's cost
+  // for edge softness the page's own notes call sub-pixel here.
   var SHADOW_PX = MOBILE ? 512 : (window.innerWidth <= 1024 ? 1536 : 2048);
   spotB.shadow.mapSize.set(SHADOW_PX, SHADOW_PX);
   spotB.shadow.bias = -0.0004;
   spotB.shadow.camera.near = 0.2; spotB.shadow.camera.far = 30;
   scene.add(spotB); scene.add(spotB.target);
+  // WEBGPU: spotB is the only shadow caster — freeze ITS map and make
+  // the renderer-level flag this file writes everywhere forward to it
+  spotB.shadow.autoUpdate = false;
+  spotB.shadow.needsUpdate = true;
+  // IMMEDIATE shadow refresh, like v11 ("i see some stick in city"):
+  // deferring it to a scroll pause made the light POP when the user
+  // stopped to look — a visible style stick. with the rebuild storms
+  // long dead, the flip-frame shadow render is a small, scroll-synced
+  // cost: the light changes exactly when the scene does.
+  Object.defineProperty(renderer.shadowMap, 'needsUpdate', {
+    configurable: true,
+    get: function(){ return spotB.shadow.needsUpdate === true; },
+    set: function(v){ spotB.shadow.needsUpdate = !!v; }
+  });
 
   var controls = new THREE.OrbitControls(camera, canvas);
   controls.enableDamping = true;
@@ -2513,164 +2646,289 @@
   // composer locks its pixelRatio to 1), so its taps landed inside one
   // texel and it never engaged. that dead fxaa is why msaa looked
   // indispensable here in the first place.
-  var composerParams = {minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
-                        format: THREE.RGBAFormat, stencilBuffer: true};
-  var composer = new THREE.EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, composerParams));
-  var renderPass = new THREE.RenderPass(scene, camera);
-  composer.addPass(renderPass);
-  var bokeh = new THREE.BokehPass(scene, camera, {focus: 1.8, aperture: 0.0003, maxblur: 0.0075});
-  composer.addPass(bokeh);
-  // the bokeh depth pre-pass re-renders the whole scene. two mesh families
-  // can sit it out with no change to the image (the beauty pass ran first):
-  //  - the wireframe overlays: they trace the exact geometry of the meshes
-  //    they sit on, so their depth is already in the buffer;
-  //  - the hanging-wire strokes: over a million indices of hair-thin lines
-  //    whose depth is invisible at maxblur 0.0075 — the costliest geometry
-  //    in the scene, gone from the pre-pass.
-  // visibility is saved/restored (not just set true) so meshes that scene 2
-  // hides stay hidden.
+  // ══ WEBGPU CHAIN ══════════════════════════════════════════════
+  // the r128 composer above is rebuilt as one TSL node graph:
+  //   scenePass → reinhard → 41-tap bokeh → bloom(bicubic) → plates →
+  //   gamma → fxaa → lens ⇒ lensCache; grade replays lensCache + grain.
+  // the shim objects below (composer/renderPass/bokeh/bloom/gammaPass/
+  // fxaa/lens/grade/platePass) keep the names and fields the rest of
+  // this file pokes, so the 8k lines of ride code run unchanged.
+  var u_ = TSL.uniform, tx_ = TSL.texture, uv_ = TSL.uv, Fn_ = TSL.Fn,
+      v2_ = TSL.vec2, v3_ = TSL.vec3, v4_ = TSL.vec4, f_ = TSL.float;
+
+  // the beauty pass renders into its own target WITH a stencil aspect —
+  // the leg-3 reveal stamps the rack into it exactly as before. webgpu
+  // will not let a depth+stencil texture be SAMPLED (the view would span
+  // two aspects), so the bokeh's viewZ ships as a second color
+  // attachment (mrt) instead, and the depth texture stays attachment-only.
+  // NO msaa, not even in ultra: v11 measured the multisample RESOLVE
+  // colliding with the css glass (backdrop-filter) on chrome/metal —
+  // ~45ms/frame stalls exactly while cards overlap the canvas — and
+  // dropped msaa for fxaa. the same collision reproduced here the
+  // moment ultra brought samples back (headless never shows it: no
+  // real compositor). device-res chain + fxaa carry the edges.
+  var scenePass = TSL.pass(scene, camera, {stencilBuffer: true});
+  // PassNode's own depth texture defaults to depth-only; give it the
+  // stencil aspect the reveal needs (it belongs to the pass target, so
+  // the backend keeps it sized)
+  var passDepthTex = scenePass.renderTarget.depthTexture;
+  passDepthTex.format = THREE.DepthStencilFormat;
+  passDepthTex.type = THREE.UnsignedInt248Type;
+  scenePass.setMRT(TSL.mrt({
+    output: TSL.output,
+    // splat: alpha = clamp(viewZ) = 0 for anything in front of the eye,
+    // so transparent overlays (the ghost city) leave the opaque city's
+    // viewZ in place — the r128 depth pre-pass behaved the same way
+    vz: TSL.vec4(TSL.positionView.z),
+    // nt: the "toneMapped = false" mask. r128 skipped reinhard per
+    // MATERIAL (the neons feed the bloom raw); with the tonemap living
+    // in the chain now, the neon materials stamp their coverage here
+    // (their own fragment alpha, so a fading sign masks exactly as much
+    // as it shows) and the chain leaves those pixels raw.
+    nt: v4_(0.0)
+  }));
+  var beautyTex = scenePass.getTextureNode();
+  var vzTex = scenePass.getTextureNode('vz');
+  var ntTex = scenePass.getTextureNode('nt');
+  // the neon marker: merged over the pass mrt for just that material
+  var NOTM_MRT = TSL.mrt({ nt: v4_(TSL.output.a) });
+  function noTM(m){ m.toneMapped = false; m.mrtNode = NOTM_MRT; return m; }
+
+  // r128 applied reinhard per MATERIAL, before the chain saw anything —
+  // so the chain tonemaps ONCE into its own buffer (raw where the nt
+  // mask says so), and dof/bloom sample that buffer exactly as the r128
+  // passes sampled the beauty target. exposure 1.
+  function reinhard(c){ return TSL.saturate(c.div(c.add(1.0))); }
+  var tmNode = Fn_(function(){
+    var vUv = uv_();
+    var c = beautyTex.sample(vUv);
+    var m = TSL.saturate(ntTex.sample(vUv).x);
+    return v4_(TSL.mix(reinhard(c.rgb), c.rgb, m), c.a);
+  })();
+  // ── EXPLICIT STAGE TARGETS ── the r128 composer's buffers, reborn.
+  // deep convertToTexture nesting is a trap on the node system: a
+  // 4-level RTT chain (tm → dof → fxaa → lens) leaves the innermost
+  // targets unrendered — measured black on dawn while every stage
+  // probed fine at top level. so each stage renders as its OWN
+  // top-level quad into its own target, exactly the way the old
+  // EffectComposer marched its buffers. tmTex/dofRead/etc are plain
+  // texture reads of the previous stage's target.
+  function mkRT(hdr){
+    return new THREE.RenderTarget(1, 1, {
+      minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
+      format: THREE.RGBAFormat, depthBuffer: false,
+      type: hdr ? THREE.HalfFloatType : THREE.UnsignedByteType
+    });
+  }
+  var rtTM = mkRT(true);      // tonemapped (raw where nt says so) — carries >1 neons
+  var rtDOF = mkRT(true);     // after the bokeh gather
+  var rtSRGB = mkRT(false);   // after bloom + plates + gamma — LDR from here on
+  var rtFXAA = mkRT(false);   // the anti-aliased frame (r128's frameCache)
+  var tmTex = tx_(rtTM.texture);
+
+  // ── the r128 BokehShader, tap for tap ── the depth PRE-PASS is gone:
+  // the beauty pass's own depth attachment feeds the blur radius, which
+  // r128 could not read back and had to re-render 1.2M triangles for.
+  // the whole camera-stamp depth cache died with it.
+  var focusU = u_(1.8), apertureU = u_(0.0003), maxblurU = u_(0.0075),
+      aspectU = u_(1), dofLodU = u_(0);
+  // ── CINEMA GLASS (ultra) ── the page's dof is a whisper (aperture
+  // 0.0003); ultra opens it up like a fast prime: the leg's SUBJECT —
+  // the rack, the pods, whichever prop the flight targets — stays
+  // sharp while the city melts behind it. every focus write the ride
+  // makes already points at the subject (flight.e1→t1 distance), so
+  // wider glass turns that into real subject isolation. the writes
+  // land on focusGoal; the composer eases the lens toward it like a
+  // focus puller (see the pull in composer.render).
+  var focusGoal = {v: 1.8};
+  var cinePos = new THREE.Vector3();   // scratch for the subject-tracking pull
+  // the carved building's opacity fade: multiplies whatever the city dim
+  // writes (materialOpacity reads .opacity live), so the tower can
+  // dissolve in step with the rack's show without fighting the dim
+  var towerFadeU = u_(1);
+  // the metal corridor: fades ONLY city fragments that sit in front of
+  // the racks (inside their screen rect AND nearer than them) while the
+  // two-rack metal scene plays — the backdrop city stays
+  var metalClearU = u_(0);
+  var metalRectU = TSL.uniform(new THREE.Vector4(2, 2, 3, 3));   // screen-uv minX,minY,maxX,maxY — parked off-screen
+  var metalNearU = TSL.uniform(1e6);   // fragments nearer than this many view-meters count as "in front"
+  // the puller focuses the subject's NEAR FACE, not its origin: the
+  // rack's origin sits at the floor, and a slide close-up framing one
+  // row would land metres off it. a cached local-space box transformed
+  // by the live matrixWorld, clamped to the camera, gives the surface
+  // the audience actually reads — for the wide shots and the close-ups
+  // alike.
+  var cineBox = new THREE.Box3();
+  var cineAnchors = {};
+  function cineFocusDist(root, key){
+    var e = cineAnchors[key];
+    if (!e){
+      var wb = new THREE.Box3().setFromObject(root);
+      if (wb.isEmpty()) return null;
+      var inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
+      e = cineAnchors[key] = {box: wb.applyMatrix4(inv)};
+    }
+    cineBox.copy(e.box).applyMatrix4(root.matrixWorld);
+    cineBox.clampPoint(camera.position, cinePos);
+    return camera.position.distanceTo(cinePos);
+  }
+  // the metal corridor's geometry feed: both racks' world boxes projected
+  // into one padded screen rect + the near threshold. runs only while the
+  // corridor fade is active — 16 corner projections, cheap.
+  var mcBoxL = null, mcVec = new THREE.Vector3(), mcBoxW = new THREE.Box3();
+  function metalRectSync(){
+    if (!rackRoot) return;
+    if (!mcBoxL){
+      var mwb = new THREE.Box3().setFromObject(rackRoot);
+      if (mwb.isEmpty()) return;
+      mcBoxL = mwb.applyMatrix4(new THREE.Matrix4().copy(rackRoot.matrixWorld).invert());
+    }
+    var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9, near = 1e9;
+    var roots = (rackRoot2 && rackRoot2.visible) ? [rackRoot, rackRoot2] : [rackRoot];
+    for (var ri = 0; ri < roots.length; ri++){
+      mcBoxW.copy(mcBoxL).applyMatrix4(roots[ri].matrixWorld);
+      mcBoxW.clampPoint(camera.position, mcVec);
+      var dN = camera.position.distanceTo(mcVec);
+      if (dN < near) near = dN;
+      for (var ci = 0; ci < 8; ci++){
+        mcVec.set(ci & 1 ? mcBoxW.max.x : mcBoxW.min.x,
+                  ci & 2 ? mcBoxW.max.y : mcBoxW.min.y,
+                  ci & 4 ? mcBoxW.max.z : mcBoxW.min.z).project(camera);
+        // screenUV is BOTTOM-left origin (ScreenNode flips the wgpu
+        // fragment coord) — ndc y maps straight through, no flip
+        var ux = (mcVec.x + 1) * 0.5, uy = (mcVec.y + 1) * 0.5;
+        if (ux < minX) minX = ux; if (ux > maxX) maxX = ux;
+        if (uy < minY) minY = uy; if (uy > maxY) maxY = uy;
+      }
+    }
+    metalRectU.value.set(minX - 0.04, minY - 0.04, maxX + 0.04, maxY + 0.04);
+    metalNearU.value = Math.max(0.1, near - 0.25);
+    window.__mc = {q: metalClearU.value, rect: [+minX.toFixed(2), +minY.toFixed(2), +maxX.toFixed(2), +maxY.toFixed(2)], near: +metalNearU.value.toFixed(1)};
+  }
+  // ULTRA depth-of-field: keep a GENTLE subject-focus cue but do NOT
+  // smear the distant city ("far-from-center looks blurry"). the wide
+  // 0.0009/0.012 cinema glass melted the mid/far skyline; 0.0005 keeps
+  // the subject crisp and only softens what's truly far, and maxblur
+  // 0.005 CAPS the far-city blur so the skyline stays readable.
+  if (ULTRA){ apertureU.value = 0.0005; maxblurU.value = 0.005; }
+  // the ring tables, verbatim from the shader; k marks the taps the
+  // mobile travel kernel keeps (the old runtime shader surgery: outer
+  // ring halved, the .9 ring dropped, .7 and .4 halved, centre kept)
+  var DOF_R1 = [[0,.4,1],[.15,.37,0],[.29,.29,1],[-.37,.15,0],[.40,0,1],[.37,-.15,0],[.29,-.29,1],[-.15,-.37,0],
+                [0,-.4,1],[-.15,.37,0],[-.29,.29,1],[.37,.15,0],[-.4,0,1],[-.37,-.15,0],[-.29,-.29,1],[.15,-.37,0]];
+  var DOF_R9 = [[.15,.37],[-.37,.15],[.37,-.15],[-.15,-.37],[-.15,.37],[.37,.15],[-.37,-.15],[.15,-.37]];
+  var DOF_R7 = [[.29,.29,1],[.40,0,0],[.29,-.29,1],[0,-.4,0],[-.29,.29,1],[-.4,0,0],[-.29,-.29,1],[0,.4,0]];
+  var DOF_R4 = [[.29,.29,1],[.4,0,0],[.29,-.29,1],[0,-.4,0],[-.29,.29,1],[-.4,0,0],[-.29,-.29,1],[0,.4,0]];
+  var dofNode = Fn_(function(){
+    var vUv = uv_();
+    var viewZ = vzTex.sample(vUv).x;                    // <= 0, like r128's
+    var factor = focusU.add(viewZ);
+    var blur = TSL.clamp(factor.mul(apertureU), maxblurU.negate(), maxblurU);
+    var acorr = v2_(1.0, aspectU);
+    function tap(x, y, ringScale){
+      var off = v2_(x, y).mul(acorr).mul(blur).mul(ringScale);
+      return tmTex.sample(vUv.add(off)).rgb;
+    }
+    var col = tmTex.sample(vUv).rgb.toVar();
+    var n = f_(1).toVar();
+    var i;
+    TSL.If(dofLodU.lessThan(0.5), function(){
+      for (i = 0; i < DOF_R1.length; i++) col.addAssign(tap(DOF_R1[i][0], DOF_R1[i][1], 1.0));
+      for (i = 0; i < DOF_R9.length; i++) col.addAssign(tap(DOF_R9[i][0], DOF_R9[i][1], 0.9));
+      for (i = 0; i < DOF_R7.length; i++) col.addAssign(tap(DOF_R7[i][0], DOF_R7[i][1], 0.7));
+      for (i = 0; i < DOF_R4.length; i++) col.addAssign(tap(DOF_R4[i][0], DOF_R4[i][1], 0.4));
+      n.assign(41.0);
+    }).Else(function(){
+      for (i = 0; i < DOF_R1.length; i++) if (DOF_R1[i][2]) col.addAssign(tap(DOF_R1[i][0], DOF_R1[i][1], 1.0));
+      for (i = 0; i < DOF_R7.length; i++) if (DOF_R7[i][2]) col.addAssign(tap(DOF_R7[i][0], DOF_R7[i][1], 0.7));
+      for (i = 0; i < DOF_R4.length; i++) if (DOF_R4[i][2]) col.addAssign(tap(DOF_R4[i][0], DOF_R4[i][1], 0.4));
+      n.assign(17.0);
+    });
+    return v4_(col.div(n), 1.0);
+  })();
+  // (the low rung's no-dof base is tmTex itself — see buildChain)
+  // the r128 depth pre-pass machinery is gone (see above) — but its
+  // bookkeeping names survive as inert stubs: overlay creation still
+  // pushes into depthSkip, and bokehStamp++ is this file's idiom for
+  // "the scene changed" (the loop reads the shadow flag alongside it).
   var depthSkip = [], depthSkipVis = [];
   var wireOverlays = depthSkip;   // overlay creation pushes here
-  // custom bokeh render (r128 body) with a cached depth pre-pass: the
-  // depth map only re-renders when the camera moved or the scene changed
-  // (tracked via the shadow-map dirty flag, which every scene mutation in
-  // this file already sets). at a settled leg 3 the pre-pass re-rendered
-  // 1.2M triangles per frame for an identical map — a fifth of the budget.
-  var bokehPrevCam = new THREE.Matrix4().makeScale(0, 0, 0);   // ≠ anything real
-  var bokehPrevNear = -1, bokehStamp = 0, bokehSeenStamp = -1, bokehCamAge = 0;
-  bokeh.render = function(renderer2, writeBuffer, readBuffer){
-    var bokehSceneSame = bokehPrevNear === camera.near && bokehSeenStamp === bokehStamp;
-    var fresh = bokehSceneSame && bokehPrevCam.equals(camera.matrixWorld);
-    // camera-ONLY staleness may ride exactly one extra rendered frame:
-    // the depth map only steers the blur radius, and during a scrub a
-    // radius one frame old is invisible under the motion itself — this
-    // halves the city's second geometry pass on precisely the heaviest
-    // (scrolling) frames. any scene change (a prop entered/left, the
-    // near-plane wipe) still re-renders immediately, and the moment the
-    // camera stops the age is already spent, so the very next frame
-    // re-renders at the exact final pose — a settled shot can never sit
-    // on a stale map.
-    // ...and while the page is ACTIVELY scrolling it may ride three: the
-    // depth map only steers the blur radius, the scene is a second full
-    // geometry pass (3.7M triangles at the rack), and a radius ~50ms old
-    // under motion the eye cannot see — exactly the frames where the
-    // budget is tightest. the age is spent the moment scrolling stops, so
-    // the settled shot still re-renders at the final pose.
-    if (fresh){ bokehCamAge = 0; }
-    // ...and on a phone it rides longer still: that second geometry pass
-    // is the single most expensive thing in a scrolling frame there, and
-    // a blur radius five frames old under a moving camera is invisible
-    // on a 390px screen. the age is spent the instant scrolling stops
-    else if (bokehSceneSame && bokehCamAge < (scrollActive ? (MOBILE ? 5 : 3) : (MOBILE ? 2 : 1))){ bokehCamAge++; fresh = true; }
-    if (!fresh){
-      bokehCamAge = 0;
-      bokehPrevCam.copy(camera.matrixWorld);
-      bokehPrevNear = camera.near;
-      bokehSeenStamp = bokehStamp;
-      for (var i = 0; i < depthSkip.length; i++){ depthSkipVis[i] = depthSkip[i].visible; depthSkip[i].visible = false; }
-      scene.overrideMaterial = bokeh.materialDepth;
-      renderer2.getClearColor(bokeh._oldClearColor);
-      var oldAlpha = renderer2.getClearAlpha();
-      var oldAuto = renderer2.autoClear;
-      renderer2.autoClear = false;
-      renderer2.setClearColor(0xffffff);
-      renderer2.setClearAlpha(1.0);
-      renderer2.setRenderTarget(bokeh.renderTargetDepth);
-      renderer2.clear();
-      renderer2.render(scene, camera);
-      scene.overrideMaterial = null;
-      renderer2.setClearColor(bokeh._oldClearColor);
-      renderer2.setClearAlpha(oldAlpha);
-      renderer2.autoClear = oldAuto;
-      for (var j = 0; j < depthSkip.length; j++) depthSkip[j].visible = depthSkipVis[j];
-    }
-    bokeh.uniforms['tColor'].value = readBuffer.texture;
-    bokeh.uniforms['nearClip'].value = camera.near;
-    bokeh.uniforms['farClip'].value = camera.far;
-    if (bokeh.renderToScreen){
-      renderer2.setRenderTarget(null);
-      bokeh.fsQuad.render(renderer2);
-    } else {
-      renderer2.setRenderTarget(writeBuffer);
-      renderer2.clear();
-      bokeh.fsQuad.render(renderer2);
-    }
+  var bokehStamp = 0;
+  // the shim the rest of the file talks to: focus writes land on the
+  // TSL uniform, the depth-target pokes go nowhere
+  var bokeh = {
+    enabled: true,
+    uniforms: {
+      // ultra: focus writes become the puller's TARGET; the composer
+      // eases the actual lens uniform toward it. plain mode writes
+      // straight through — parity with 11.
+      focus: ULTRA ? {get value(){ return focusGoal.v; }, set value(v){ focusGoal.v = v; }} : focusU,
+      aperture: apertureU, maxblur: maxblurU,
+      textureWidth: {value: 0}, textureHeight: {value: 0}
+    },
+    renderTargetDepth: {setSize: function(){}},
+    materialDepth: null, materialBokeh: null,
+    fsQuad: {material: null}
   };
-  var bloom = new THREE.UnrealBloomPass(new THREE.Vector2(1,1), 0.45, 0.3, 0.17);  // sketchfab: 0.233/0.15/0.167
-  // soften the high-pass knee (r128 ships a hard 0.01): broad flat
-  // brights — the rack name plates, the led strips — otherwise cut a
-  // hard-edged rectangle into the mip chain and the upsample shows it
-  // as terraced boxes around the glow
-  bloom.highPassUniforms['smoothWidth'].value = 0.25;
-  // r128's bloom composite reads every mip with plain bilinear taps. the
-  // deepest mip is ~47×22 texels for the WHOLE screen; magnified ×32,
-  // each texel is a 32-px block — a bright glyph's halo composites as
-  // nested grey rectangles (the slabs around the rack name plates). the
-  // fix is in the reconstruction: b-spline bicubic sampling per mip (4
-  // bilinear fetches instead of 1, one fullscreen pass, ~free) turns the
-  // block grid into a continuous gradient. intensities untouched.
-  (function(){
-    var cm = bloom.compositeMaterial;
-    for (var mi2 = 1; mi2 <= 5; mi2++) cm.uniforms['texSize' + mi2] = {value: new THREE.Vector2(1, 1)};
-    cm.fragmentShader = [
-      'varying vec2 vUv;',
-      'uniform sampler2D blurTexture1; uniform sampler2D blurTexture2;',
-      'uniform sampler2D blurTexture3; uniform sampler2D blurTexture4;',
-      'uniform sampler2D blurTexture5;',
-      'uniform vec2 texSize1; uniform vec2 texSize2; uniform vec2 texSize3;',
-      'uniform vec2 texSize4; uniform vec2 texSize5;',
-      'uniform float bloomStrength; uniform float bloomRadius;',
-      'uniform float bloomFactors[NUM_MIPS];',
-      'uniform vec3 bloomTintColors[NUM_MIPS];',
-      'float lerpBloomFactor(const in float factor){',
-      '  float mirrorFactor = 1.2 - factor;',
-      '  return mix(factor, mirrorFactor, bloomRadius);',
-      '}',
-      'vec4 cubicW(float v){',
-      '  vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;',
-      '  vec4 s = n * n * n;',
-      '  float x = s.x;',
-      '  float y = s.y - 4.0 * s.x;',
-      '  float z = s.z - 4.0 * s.y + 6.0 * s.x;',
-      '  float w = 6.0 - x - y - z;',
-      '  return vec4(x, y, z, w) * (1.0 / 6.0);',
-      '}',
-      'vec4 texBicubic(sampler2D tex, vec2 uv, vec2 ts){',
-      '  vec2 tc = uv * ts - 0.5;',
-      '  vec2 fxy = fract(tc);',
-      '  tc -= fxy;',
-      '  vec4 xc = cubicW(fxy.x);',
-      '  vec4 yc = cubicW(fxy.y);',
-      '  vec4 c = tc.xxyy + vec2(-0.5, 1.5).xyxy;',
-      '  vec4 s = vec4(xc.xz + xc.yw, yc.xz + yc.yw);',
-      '  vec4 off = (c + vec4(xc.yw, yc.yw) / s) / ts.xxyy;',
-      '  vec4 s0 = texture2D(tex, off.xz);',
-      '  vec4 s1 = texture2D(tex, off.yz);',
-      '  vec4 s2 = texture2D(tex, off.xw);',
-      '  vec4 s3 = texture2D(tex, off.yw);',
-      '  float sx = s.x / (s.x + s.y);',
-      '  float sy = s.z / (s.z + s.w);',
-      '  return mix(mix(s3, s2, sx), mix(s1, s0, sx), sy);',
-      '}',
-      'void main(){',
-      '  gl_FragColor = bloomStrength * (',
-      '    lerpBloomFactor(bloomFactors[0]) * vec4(bloomTintColors[0], 1.0) * texBicubic(blurTexture1, vUv, texSize1) +',
-      '    lerpBloomFactor(bloomFactors[1]) * vec4(bloomTintColors[1], 1.0) * texBicubic(blurTexture2, vUv, texSize2) +',
-      '    lerpBloomFactor(bloomFactors[2]) * vec4(bloomTintColors[2], 1.0) * texBicubic(blurTexture3, vUv, texSize3) +',
-      '    lerpBloomFactor(bloomFactors[3]) * vec4(bloomTintColors[3], 1.0) * texBicubic(blurTexture4, vUv, texSize4) +',
-      '    lerpBloomFactor(bloomFactors[4]) * vec4(bloomTintColors[4], 1.0) * texBicubic(blurTexture5, vUv, texSize5));',
-      '}'
-    ].join('\n');
-    cm.needsUpdate = true;
-    // the mip sizes mirror UnrealBloomPass.setSize's own halving walk
-    bloom.__setMipSizes = function(bw, bh){
-      var rx = Math.round(bw / 2), ry = Math.round(bh / 2);
-      for (var i = 1; i <= 5; i++){
-        cm.uniforms['texSize' + i].value.set(Math.max(1, rx), Math.max(1, ry));
-        rx = Math.round(rx / 2); ry = Math.round(ry / 2);
-      }
+  // ── bloom: r186's BloomNode IS the old UnrealBloomPass (same 5 mips,
+  // same lerpBloomFactor composite, same bilinear taps) — so the same
+  // two yoozap fixes ride along:
+  //   · the soft high-pass knee (smoothWidth 0.25 against the stock
+  //     hard 0.01) — a uniform now, no shader edit needed;
+  //   · the b-spline bicubic composite: the deepest mip is ~47×22
+  //     texels magnified ×32, and stock bilinear shows it as terraced
+  //     boxes around the plates' glow. the node's setup() is wrapped
+  //     and its composite material is rebuilt with bicubic taps.
+  // the deep-mip factors (2..4) also become UNIFORMS — the rack fade
+  // rides them down every frame (r128 poked the material's array).
+  var bfU = [u_(1.0), u_(0.8), u_(0.6), u_(0.4), u_(0.2)];
+  var cubicW = function(v){
+    var n = v4_(1.0, 2.0, 3.0, 4.0).sub(v);
+    var s = n.mul(n).mul(n);
+    var x = s.x;
+    var y = s.y.sub(s.x.mul(4.0));
+    var z = s.z.sub(s.y.mul(4.0)).add(s.x.mul(6.0));
+    var w = f_(6.0).sub(x).sub(y).sub(z);
+    return v4_(x, y, z, w).mul(1.0 / 6.0);
+  };
+  function texBicubic(tex, ts){
+    var tc = uv_().mul(ts).sub(0.5);
+    var fxy = TSL.fract(tc);
+    tc = tc.sub(fxy);
+    var xc = cubicW(fxy.x);
+    var yc = cubicW(fxy.y);
+    var c = tc.xxyy.add(v2_(-0.5, 1.5).xyxy);
+    var s = v4_(xc.xz.add(xc.yw), yc.xz.add(yc.yw));
+    var off = c.add(v4_(xc.yw, yc.yw).div(s)).div(ts.xxyy);
+    var s0 = tx_(tex, off.xz), s1 = tx_(tex, off.yz);
+    var s2 = tx_(tex, off.xw), s3 = tx_(tex, off.yw);
+    var sx = s.x.div(s.x.add(s.y));
+    var sy = s.z.div(s.z.add(s.w));
+    return TSL.mix(TSL.mix(s3, s2, sx), TSL.mix(s1, s0, sx), sy);
+  }
+  function makeBloom(inputTex){
+    var bn = FXN.bloom(inputTex, 0.45, 0.3, 0.17);   // sketchfab: 0.233/0.15/0.167
+    bn.smoothWidth.value = 0.25;
+    var protoSetup = Object.getPrototypeOf(bn).setup;
+    bn.setup = function(builder){
+      var out = protoSetup.call(this, builder);
+      var self = this;
+      this._compositeMaterial.fragmentNode = Fn_(function(){
+        var sum = null;
+        for (var i = 0; i < 5; i++){
+          var t = self._renderTargetsVertical[i].texture;
+          var tsz = v2_(TSL.textureSize(tx_(t)));
+          var lf = TSL.mix(bfU[i], f_(1.2).sub(bfU[i]), self.radius);
+          var c = texBicubic(t, tsz).mul(lf);
+          sum = sum ? sum.add(c) : c;
+        }
+        return sum.mul(self.strength);
+      })();
+      this._compositeMaterial.needsUpdate = true;
+      return out;
     };
-  })();
+    return bn;
+  }
   // ── motion shader lod (phones only) ───────────────
   // the mobile-engineer read of a scrolling frame is BANDWIDTH: every
   // fullscreen pass is a full read+write of the chain, and the two
@@ -2692,61 +2950,95 @@
   // soft") — this trims taps, never pixels. both travel programs are
   // compiled and primed behind the boot veil below, so the first real
   // scroll never meets a shader compile.
-  var bokehMatLo = null, bloomCompLo = null, bloomCompHi = null, motionLodOn = false;
-  if (MOBILE) (function(){
-    try {
-      var src = THREE.BokehShader && THREE.BokehShader.fragmentShader;
-      if (src){
-        var nOut = 0, n9 = 0, n7 = 0, n4 = 0, nC = 0, kOut = 0, k7 = 0, k4 = 0;
-        var kept = src.split('\n').filter(function(L){
-          if (L.indexOf('col += texture2D( tColor') === -1) return true;
-          if (/dofblur9\s*\)/.test(L)){ n9++; return false; }
-          if (/dofblur7\s*\)/.test(L)){ n7++; return (k7++ % 2) === 0; }
-          if (/dofblur4\s*\)/.test(L)){ n4++; return (k4++ % 2) === 0; }
-          if (/dofblur\s*\)/.test(L)){ nOut++; return (kOut++ % 2) === 0; }
-          nC++; return true;   // the centre tap
-        }).join('\n');
-        if (nOut === 16 && n9 === 8 && n7 === 8 && n4 === 8 && nC === 1 && kept.indexOf('col / 41.0') !== -1){
-          bokehMatLo = new THREE.ShaderMaterial({
-            defines: Object.assign({}, bokeh.materialBokeh.defines),
-            uniforms: bokeh.materialBokeh.uniforms,   // SHARED: every per-frame write lands in both
-            vertexShader: THREE.BokehShader.vertexShader,
-            fragmentShader: kept.replace('col / 41.0', 'col / 17.0')
-          });
-        }
-      }
-      if (bloom.getCompositeMaterial){
-        bloomCompHi = bloom.compositeMaterial;         // the bicubic one, patched above
-        bloomCompLo = bloom.getCompositeMaterial(5);   // stock r128 bilinear
-        bloomCompLo.uniforms = bloomCompHi.uniforms;   // shared for the same reason
-      }
-      // prime: one 2px draw each behind the veil compiles the programs
-      var prt = new THREE.WebGLRenderTarget(2, 2);
-      var pfm = bokeh.fsQuad.material;
-      renderer.setRenderTarget(prt);
-      if (bokehMatLo){ bokeh.fsQuad.material = bokehMatLo; bokeh.fsQuad.render(renderer); }
-      if (bloomCompLo){ bokeh.fsQuad.material = bloomCompLo; bokeh.fsQuad.render(renderer); }
-      bokeh.fsQuad.material = pfm;
-      renderer.setRenderTarget(null);
-      prt.dispose();
-    } catch(e){ bokehMatLo = null; bloomCompLo = null; }
-  })();
-  composer.addPass(bloom);
+  // WEBGPU: the travel kernel is no longer cut out of the shipped shader
+  // at runtime — it is a UNIFORM BRANCH baked into the dof node (see the
+  // If(dofLodU...) above): same 17 taps, same divisor, and uniform
+  // control flow means the gpu skips the untaken side outright. no
+  // second program, so nothing to prime behind the veil either.
+  // the bloom travel composite (stock bilinear while scrolling) is NOT
+  // carried over — the bicubic runs always. if a phone leg ever reads
+  // slow, that is the first knob to bring back.
+  var bokehMatLo = true, bloomCompLo = null, bloomCompHi = null, motionLodOn = false;   // desktop rides the travel kernel too now — webgpu ultra pays 41 taps at device res otherwise
   // the rack name plates render OVER the bloomed image, not into it:
   // their own two-mesh scene, drawn after bloom and before the gamma /
   // fxaa / grade tail. the text can be pure #fff — the bloom pass never
   // sees the plates, so no deep-mip stain ever hangs on the black sky
   // (the halo is baked into the plate texture instead).
   var plateScene = new THREE.Scene();
-  var platePass = new THREE.RenderPass(plateScene, camera);
-  platePass.clear = false;
-  platePass.enabled = false;   // switched on by the plates' driver
-  composer.addPass(platePass);
-  var gammaPass = new THREE.ShaderPass(THREE.GammaCorrectionShader);
-  composer.addPass(gammaPass);
-  // fxaa: the composer bypasses msaa, this brings the edges back
-  var fxaa = new THREE.ShaderPass(THREE.FXAAShader);
-  composer.addPass(fxaa);
+  // WEBGPU: the plates render into their OWN pass (own depth — sharing
+  // the beauty pass's depth texture across two render targets trips
+  // dawn's stale-view validation on every resize). the r128 chain
+  // depth-tested them against the city as a side effect of reusing the
+  // composer target; here they only test among themselves — in every
+  // shot that shows them the camera is on the rack with nothing in
+  // front, so nothing changes on screen. the composite still alpha-overs
+  // them AFTER bloom, so the deep mips never see the pure-white type.
+  var platePassNode = TSL.pass(plateScene, camera);
+  var plateTex = platePassNode.getTextureNode();
+  var platePass = {enabled: false, clear: false};   // the driver's switch; the pass itself renders an empty scene when the plates hide
+  var gammaPass = {enabled: true};                  // gamma is a node in the chain now
+  var fxaa = {enabled: true, material: null, uniforms: {resolution: {value: new THREE.Vector2()}}};
+
+  // ── the chain, assembled as STAGES ── every arrow is one top-level
+  // quad render into an explicit target (see the trap note above):
+  //   ppTM:    scenePass ⇒ rtTM        (reinhard, nt-masked)
+  //   ppDOF:   rtTM ⇒ rtDOF            (41-tap bokeh; rung 0 copies instead)
+  //   ppMain:  rtDOF ⇒ rtSRGB          (+bloom mips, plates over, gamma)
+  //   ppFXAA:  rtSRGB ⇒ rtFXAA         (or a copy on the low rung)
+  //   ppLens:  rtFXAA ⇒ lensCache      (aberration + vignette)
+  //   ppGrade: lensCache ⇒ canvas      (grain — the one static-frame pass)
+  function mkPP(node){
+    var pp = new THREE.PostProcessing(renderer, node);
+    pp.outputColorTransform = false;   // the chain owns its own gamma
+    return pp;
+  }
+  var dofRead = tx_(rtDOF.texture);
+  var srgbRead = tx_(rtSRGB.texture);
+  var fxRead = tx_(rtFXAA.texture);
+  var ppTM = mkPP(tmNode);
+  var ppDOF = mkPP(dofNode);
+  var ppCopyTM = mkPP(v4_(tmTex));         // rung 0: no gather, straight through
+  var bloomNode = makeBloom(dofRead);
+  var mainNode = (function(){
+    var afterBloom = v4_(dofRead.rgb.add(bloomNode.rgb), 1.0);
+    var withPlate = v4_(afterBloom.rgb.mul(plateTex.a.oneMinus()).add(plateTex.rgb), 1.0);
+    return TSL.sRGBTransferOETF(withPlate);   // the old GammaCorrectionShader, exactly
+  })();
+  var ppMain = mkPP(mainNode);
+  var ppFXAA = mkPP(FXN.fxaa(srgbRead));
+  var ppCopyFX = mkPP(v4_(srgbRead));      // rung 0: the pass still fills the cache
+  // LENS: aberration + vignette, on the ANTI-ALIASED image (the whole
+  // reason this is a separate stage), r128 body verbatim
+  var lensNode = Fn_(function(){
+    var vUv = uv_();
+    var c = vUv.sub(0.5);
+    var r = TSL.length(c);
+    var dir = c.div(TSL.max(r, 1e-5));
+    var ca = r.mul(0.0028);
+    var cr = fxRead.sample(vUv.add(dir.mul(ca))).r;
+    var base2 = fxRead.sample(vUv);
+    var cb = fxRead.sample(vUv.sub(dir.mul(ca))).b;
+    // smoothstep(1.08, 0.42, r) — wgsl wants edges ordered; identical curve
+    var col = v3_(cr, base2.g, cb).mul(TSL.smoothstep(0.42, 1.08, r).oneMinus());
+    return v4_(col, base2.a);
+  })();
+  var ppLens = mkPP(lensNode);
+  // the shim the rack fade talks to (threshold + deep-mip factors)
+  var bfProxy = {};
+  [0, 1, 2, 3, 4].forEach(function(i){
+    Object.defineProperty(bfProxy, i, {
+      get: function(){ return bfU[i].value; },
+      set: function(v){ bfU[i].value = v; }
+    });
+  });
+  var bloom = {
+    enabled: true,
+    get threshold(){ return bloomNode.threshold.value; },
+    set threshold(v){ bloomNode.threshold.value = v; },
+    compositeMaterial: {uniforms: {bloomFactors: {value: bfProxy}}},
+    highPassUniforms: {smoothWidth: bloomNode.smoothWidth},
+    setSize: function(){}, __setMipSizes: function(){}
+  };
   // ── the tail, split in two ──────────────────────────────────────
   // this used to be ONE pass: chromatic aberration + vignette + grain,
   // all of it at canvas resolution, three texture fetches per fragment.
@@ -2767,39 +3059,11 @@
   // is computed in chain pixels and magnified with everything else; at
   // 6 canvas px in the corner and 0 at centre it is a soft colour shift,
   // not detail, so the magnification cannot show.
-  var lens = new THREE.ShaderPass({
-    uniforms: { tDiffuse: {value:null} },
-    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-    fragmentShader: [
-      'uniform sampler2D tDiffuse; varying vec2 vUv;',
-      'void main(){',
-      '  vec2 c = vUv - 0.5; float r = length(c); vec2 dir = c / max(r, 1e-5);',
-      '  float ca = 0.0028 * r;',
-      '  float cr = texture2D(tDiffuse, vUv + dir * ca).r;',
-      '  vec4 base = texture2D(tDiffuse, vUv);',
-      '  float cb = texture2D(tDiffuse, vUv - dir * ca).b;',
-      '  vec3 col = vec3(cr, base.g, cb);',
-      '  col *= smoothstep(1.08, 0.42, r);',
-      '  gl_FragColor = vec4(col, base.a);',
-      '}'
-    ].join('\n')
-  });
-  composer.addPass(lens);
-  // grain 0.15 animated — the only thing in the tail that moves
-  var grade = new THREE.ShaderPass({
-    uniforms: { tDiffuse: {value:null}, time: {value:0}, grain: {value: 0.055} },
-    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-    fragmentShader: [
-      'uniform sampler2D tDiffuse; uniform float time; uniform float grain; varying vec2 vUv;',
-      'float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }',
-      'void main(){',
-      '  vec4 base = texture2D(tDiffuse, vUv);',
-      '  float g = hash(vUv * 941.7 + fract(time) * 17.0);',
-      '  gl_FragColor = vec4(base.rgb + (g - 0.5) * grain, base.a);',
-      '}'
-    ].join('\n')
-  });
-  composer.addPass(grade);
+  // WEBGPU: LENS is baked into each chain's tail (see buildChain above),
+  // so the pass object here is only the loop's enable flag. GRADE is its
+  // own tiny node graph over the lens cache — the one draw a static
+  // frame still makes, where the grain lives.
+  var lens = {enabled: true};
 
   // ── static-frame cache ──
   // when nothing that reaches the canvas changed (camera still, scene
@@ -2809,32 +3073,236 @@
   // reads from it; on a static frame every pass before grade is skipped
   // and the living grain plays over the cached image. a settled leg 3
   // costs one fullscreen pass instead of the whole city.
-  var frameCache = new THREE.WebGLRenderTarget(1, 1, {
+  var frameCache = new THREE.RenderTarget(1, 1, {
     minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat
   });
-  // ...and the cache is now TWO targets, because the tail is two passes.
-  // frameCache holds the anti-aliased frame; lensCache holds it again
-  // with the aberration and the vignette on it. only grade runs on a
-  // static frame, and it reads lensCache — so the resting cost is one
-  // fetch and the grain, nothing else. both are filled together on every
-  // live frame, so they can never disagree about which frame they hold.
-  var lensCache = new THREE.WebGLRenderTarget(1, 1, {
+  // ...the cache is ONE target now: the whole live chain (lens included)
+  // lands in lensCache, and grade reads it back. frameCache survives
+  // only as the hidden warm-up renders' scratch target further down.
+  var lensCache = new THREE.RenderTarget(1, 1, {
     minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat
   });
-  var frameCacheRB = {texture: frameCache.texture};
-  var lensCacheRB = {texture: lensCache.texture};
-  var shaderPassRender = THREE.ShaderPass.prototype.render;
-  fxaa.render = function(r2, wb, rb, dt2, mask){
-    shaderPassRender.call(fxaa, r2, frameCache, rb, dt2, mask);
+  // GRADE: one fetch plus the living grain — r128 body verbatim
+  var timeU = u_(0), grainU = u_(0.055);
+  var gradeNode = Fn_(function(){
+    var vUv = uv_();
+    var base = tx_(lensCache.texture, vUv);
+    var p = vUv.mul(941.7).add(TSL.fract(timeU).mul(17.0));
+    var g = TSL.fract(TSL.sin(TSL.dot(p, v2_(12.9898, 78.233))).mul(43758.5453));
+    return v4_(base.rgb.add(g.sub(0.5).mul(grainU)), base.a);
+  })();
+  var ppGrade = new THREE.PostProcessing(renderer, gradeNode);
+  ppGrade.outputColorTransform = false;
+  var grade = {enabled: true, uniforms: {time: timeU, grain: grainU}};
+  // the composer shim: a live frame runs the rung's chain into the lens
+  // cache; every drawn frame replays the cache through grade. exactly
+  // the r128 pass-reroute, with the enable flags the loop already sets.
+  var renderPass = {enabled: true};
+  var composer = {
+    setSize: function(cw, ch){
+      // the working stages live at CHAIN resolution, like r128's composer
+      rtTM.setSize(cw, ch);
+      rtDOF.setSize(cw, ch);
+      rtSRGB.setSize(cw, ch);
+      // rtFXAA is clamped with the lens cache in resize() below — it IS
+      // the old frameCache
+    },
+    render: function(){
+      if (renderPass.enabled){
+        syncClipGroups();   // material clip state -> the groups the webgpu renderer actually reads
+        // the cinema focus pull (ultra): every focus write lands on a
+        // TARGET and the lens eases toward it like a focus puller's
+        // hand — ~0.2s to settle, and the frame stays live until sharp
+        if (ULTRA && Math.abs(focusGoal.v - focusU.value) > 1e-3){
+          // the pull rides the SCROLL: while the page is moving the lens
+          // travels fast enough to land with the leg (a rack move on the
+          // wheel racks focus in step); parked, it settles like a hand
+          var pullK = scrollActive ? 0.3 : 0.12;
+          focusU.value += (focusGoal.v - focusU.value) * pullK;
+          if (Math.abs(focusGoal.v - focusU.value) < 1e-3) focusU.value = focusGoal.v;
+          frameDirtyFlag = true;
+        }
+        renderer.setRenderTarget(rtTM); ppTM.render();
+        renderer.setRenderTarget(rtDOF); (MQ.k.dof ? ppDOF : ppCopyTM).render();
+        renderer.setRenderTarget(rtSRGB); ppMain.render();
+        renderer.setRenderTarget(rtFXAA); (MQ.k.fxaa ? ppFXAA : ppCopyFX).render();
+        renderer.setRenderTarget(lensCache); ppLens.render();
+        renderer.setRenderTarget(null);
+      }
+      ppGrade.render();
+    }
   };
-  fxaa.needsSwap = false;
-  lens.render = function(r2, wb, rb, dt2, mask){
-    shaderPassRender.call(lens, r2, lensCache, frameCacheRB, dt2, mask);
-  };
-  lens.needsSwap = false;
-  grade.render = function(r2, wb, rb, dt2, mask){
-    shaderPassRender.call(grade, r2, wb, lensCacheRB, dt2, mask);
-  };
+  // ── the clip bridge (webgpu) ────────────────────────────────────
+  // material.clippingPlanes is a WEBGL-era channel: the webgpu renderer
+  // never reads it — clipping only flows through ClippingGroup scene
+  // nodes (renderer: `object.isClippingGroup && object.enabled`). every
+  // clip animation on this page (the rack's one-floor gap, the corner
+  // wedge, the glitch bands, the pcb bands, the building carve, the
+  // laptop diorama) writes material planes. AND the group check only
+  // fires on isGroup nodes — a duck-typed mesh never reaches it — so
+  // the bridge splices a real Group WRAPPER above each clipped mesh
+  // (transform-neutral: identity local, parent's world, the nearest
+  // group's renderOrder) and mirrors the material's clip state onto it
+  // before every scene render. per-mesh wrappers, so the door's Frame
+  // keeps a different plane set than its pocket exactly like the
+  // per-material planes did; plane ARRAYS are shared by reference, so
+  // constants animate with zero copying. flipping clipIntersection
+  // changes the context cacheKey — the pipeline rebuild that implies
+  // is exactly what the warm bench below pre-bakes.
+  // each clipped mesh wears TWO nested transform-neutral wrapper
+  // groups: the outer carries union-mode planes (clipIntersection
+  // false), the inner intersection-mode planes. both keep a GROW-ONLY
+  // plane pool padded with mode-correct neutrals, so once a mesh's
+  // capacity is grown (behind the veil, in the state warm) the clipping
+  // cacheKey never changes again — and with it neither do the node
+  // builds nor the pipelines. a mode flip that cost v11 a cached GL
+  // program switch, and cost this page a FULL TSL rebuild storm per
+  // card change (measured ~950ms at the slides), becomes a plain
+  // uniform write.
+  var clipWraps = [];
+  function nearestGroupOrder(n){
+    while (n){
+      if (n.isGroup) return n.renderOrder;
+      n = n.parent;
+    }
+    return 0;
+  }
+  function mkClipGroup(inter){
+    var g = new THREE.Group();
+    g.isClippingGroup = true;
+    g.enabled = false;
+    g.clipIntersection = inter;
+    g.clipShadows = false;
+    g.__pool = [];
+    g.clippingPlanes = g.__pool;
+    return g;
+  }
+  function ensureClipWrap(o){
+    var gI = o.parent;
+    if (gI && gI.__clipInner === o) return gI.parent;   // outer
+    var p = o.parent;
+    var gU = mkClipGroup(false);   // union mode (outer)
+    gI = mkClipGroup(true);        // intersection mode (inner)
+    gU.__clipOuter = o; gI.__clipInner = o;
+    gU.renderOrder = gI.renderOrder = nearestGroupOrder(p);
+    var idx = p.children.indexOf(o);
+    p.children[idx] = gU;          // keep the sibling slot
+    gU.parent = p;
+    gU.children.push(gI); gI.parent = gU;
+    gI.children.push(o); o.parent = gI;
+    gU.matrix.identity(); gI.matrix.identity();
+    gU.matrixWorld.copy(p.matrixWorld);
+    gI.matrixWorld.copy(p.matrixWorld);
+    clipWraps.push(gU, gI);
+    return gU;
+  }
+  // feed one mode-group: real planes when this mode is active, neutral
+  // padding otherwise. neutrals differ by mode: union pads KEEP-ALL
+  // (+1e7 — contributes no discard to the OR), an ACTIVE intersection
+  // pads KEEP-NOTHING (-1e7 — leaves the AND to the real planes), and
+  // an INACTIVE intersection goes all keep-all (one keep-all breaks the
+  // AND, so nothing discards).
+  function feedClipGroup(g, src, active, shadows){
+    var pool = g.__pool;
+    var need = src ? src.length : 0;
+    while (pool.length < need) pool.push(new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e7));
+    var inter = g.clipIntersection;
+    for (var i = 0; i < pool.length; i++){
+      var d = pool[i];
+      if (active && src && i < src.length){
+        d.normal.copy(src[i].normal);
+        d.constant = src[i].constant;
+      } else {
+        d.normal.set(0, 1, 0);
+        d.constant = (inter && active) ? -1e7 : 1e7;
+      }
+    }
+    g.enabled = pool.length > 0;
+    g.clipShadows = shadows;
+  }
+  var __clipScan = [];
+  var __clipScanAge = 0;
+  function __clipCollect(o){
+    if ((o.isMesh || o.isLineSegments) && o.material) __clipScan.push(o);
+  }
+  function syncClipGroups(force){
+    // the mesh set is static after load — re-walking ~400 nodes every
+    // live frame was the bridge's own biggest line in the profile. the
+    // scan refreshes every ~2s (and on every warm), which covers the
+    // load-time additions without paying traverse per frame.
+    if (force || !__clipScan.length || --__clipScanAge <= 0){
+      __clipScan.length = 0;
+      scene.traverse(__clipCollect);
+      __clipScanAge = 120;
+    }
+    for (var i = 0; i < __clipScan.length; i++){
+      var o = __clipScan[i];
+      var m = o.material;
+      var mm = Array.isArray(m) ? m[0] : m;
+      var pl = mm.clippingPlanes;
+      var wrapped = o.parent && o.parent.__clipInner === o;
+      if ((pl && pl.length) || wrapped){
+        var gU = ensureClipWrap(o);
+        var gI = gU.children[0];
+        var inter = mm.clipIntersection === true;
+        var sh = mm.clipShadows === true;
+        feedClipGroup(gU, pl, !!(pl && pl.length) && !inter, sh);
+        feedClipGroup(gI, pl, !!(pl && pl.length) && inter, sh);
+      }
+    }
+  }
+  // ── the pipeline warm bench (webgpu) ────────────────────────────
+  // on webgpu every material STATE combo (stencil, blending,
+  // clipIntersection, msaa count, attachment formats) is its own
+  // render pipeline, created on first DRAW. the r128 warms compiled GL
+  // programs, which were target-agnostic — here a warm must render
+  // through the REAL scene pass or it builds pipelines for the wrong
+  // attachment state and the ride hitches anyway. the trick: pipelines
+  // key on formats and sample counts, never on SIZE — so the warm
+  // renders the whole scene through the pass at 5% resolution, which
+  // costs nearly nothing and still touches every buffer, texture and
+  // pipeline the real frame will need.
+  function warmScenePass(){
+    syncClipGroups(true);   // fresh scan: warms often follow brand-new meshes
+    // r186: PassNode's scale is the private _resolutionScale behind
+    // set/getResolutionScale() — the bare `.resolutionScale = x` this file
+    // used was an inert expando, so this warm silently ran at FULL res.
+    // the real setter makes it the intended 5%: cheap, and pipelines key
+    // on formats/samples not SIZE, so the compiled set is identical.
+    var rs = scenePass.getResolutionScale();
+    scenePass.setResolutionScale(0.05);
+    try {
+      renderer.setRenderTarget(rtTM);
+      ppTM.render();
+    } catch(e){} finally {
+      renderer.setRenderTarget(null);
+      scenePass.setResolutionScale(rs);
+    }
+    frameDirtyFlag = true; frameCacheValid = false;   // the warm scribbled the pass target
+  }
+  // the reveal-sweep warm needs the LIVE pipeline set, not warmScenePass's:
+  // a pipeline keys on the pass's clip/stencil/blend context, and the split's
+  // shadow + ghost variants only build through the SAME full chain the ride
+  // renders (warmScenePass's single 5% ppTM pass builds differently-keyed
+  // pipelines — measured: it compiled 600+ that the live split never reused).
+  // this is composer.render() verbatim MINUS the final ppGrade — so every
+  // scene/shadow/dof/bloom pipeline the reveal will hit compiles here, but
+  // nothing is presented to the canvas (grade is the only pass that paints
+  // it), which keeps the load-time warm invisible with no veil dependency.
+  function warmChainOffscreen(){
+    syncClipGroups();
+    // full res: a reduced scene pass builds DIFFERENT pipelines than the
+    // split's live full-res frame (measured — the reveal recompiled), so the
+    // warm has to render at the size the ride will. the output is discarded
+    // (no ppGrade, nothing presented) — this only exists to compile.
+    renderer.setRenderTarget(rtTM); ppTM.render();
+    renderer.setRenderTarget(rtDOF); (MQ.k.dof ? ppDOF : ppCopyTM).render();
+    renderer.setRenderTarget(rtSRGB); ppMain.render();
+    renderer.setRenderTarget(rtFXAA); (MQ.k.fxaa ? ppFXAA : ppCopyFX).render();
+    renderer.setRenderTarget(lensCache); ppLens.render();
+    renderer.setRenderTarget(null);
+    frameDirtyFlag = true; frameCacheValid = false;
+  }
   var staticPrevCam = new THREE.Matrix4().makeScale(0, 0, 0);
   var frameDirtyFlag = true, frameCacheValid = false;
   // ── ambient frame pacing ── the endless idle animators (hologram
@@ -2865,12 +3333,25 @@
   // holds 120 never trips it; on a 60hz panel nativeDt stays ~16.7ms
   // and the trip condition can never fire at all.
   var nativeDt = 1, liveMiss = 0, liveCap = false, quietT = 0;
+  // ── the desktop chain governor ── ultra asks for device-res pixels;
+  // whether this machine can carry them is MEASURED, not assumed. live
+  // frames that keep missing 60hz while the page is riding walk the
+  // chain supersample down one notch. a chain step is a SIZE change
+  // only — nothing on webgpu keys a pipeline on size — so the step is
+  // one quiet target realloc, never a rebuild storm. it steps down
+  // only: a session that dipped once would just oscillate otherwise.
+  var dgHot = 0, dgCool = 0, dgPending = null;
+  // ?fps=120: the governor defends the PROMOTION tick instead of 60 —
+  // on a 120hz panel a dip to ~70fps still reads as drag even though
+  // 60-defence never fires. costs chain res sooner at the heavy zones;
+  // opt-in, the default stays the 60fps line.
+  var DG_T = /[?&]fps=120\b/i.test(location.search || '') ? 0.0105 : 0.0165;
   // live-scroll detector: true while the page position is actually
   // changing (plus a 0.25s tail). the slider's band glitch stands down
   // behind it and its 5s beat waits for quiet — a rip mid-scroll costs
   // full-rate frames at the worst moment and the eye can't follow it
   // anyway ("when i am scrolin u can stop glitch of slider")
-  var scrollActive = false, scrollLastY = -1, scrollQuietT = 1e3;
+  var scrollActive = false, scrollLastY = -1, scrollQuietT = 1e3, scrollSkip = false;
 
   // no rendering while the stage is scrolled out of view: the whole frame
   // (two scene passes + 5 fullscreen passes) is skipped, the rAF stays alive
@@ -2957,15 +3438,25 @@
       // cap) and the lower rungs scale down from THAT, not from css.
       return Math.min(window.devicePixelRatio || 1, MQ.k.dpr) * MQ.k.chain;
     }
+    // ultra: device-res chain up to the device profile's cap — 2.0 on a
+    // strong retina desktop (every stage 1:1 with panel pixels), 1.25-1.5
+    // where the profile measured the fill budget tighter; the live
+    // governor steps CHAIN_RES down from the cap on real missed frames
+    if (ULTRA) return Math.min(window.devicePixelRatio || 1, ULTRA_CAP);
     return w <= 1024 ? 1.25 : 1.5;
   }
   var CHAIN_HI = chainRes(), CHAIN_LAP = CHAIN_HI, CHAIN_RES = CHAIN_HI;
-  var lastRW = -1, lastRH = -1, lastRC = -1;
+  var lastRW = -1, lastRH = -1, lastRC = -1, lastCapCR = CHAIN_HI;
   function resize(){
     var w = stage.clientWidth, h = stage.clientHeight;
-    // the width ladder may have crossed a step (rotate / window drag)
+    // the width ladder may have crossed a step (rotate / window drag).
+    // compare against the LAST CAP, not CHAIN_HI: the governor steps
+    // CHAIN_HI below an unchanged cap on purpose, and comparing to it
+    // here undid every governor step the moment setChainRes re-entered
+    // (nine no-op "chain governor ->" lines in one ride, chain still
+    // at the cap after all of them)
     var cr = chainRes();
-    if (cr !== CHAIN_HI){ CHAIN_HI = CHAIN_LAP = CHAIN_RES = cr; }
+    if (cr !== lastCapCR){ lastCapCR = cr; CHAIN_HI = CHAIN_LAP = CHAIN_RES = cr; }
     // a phone fires `resize` on every url-bar slide, and the stage is svh
     // so its box never actually changed — realloc'ing the whole post chain
     // on those is pure stall. nothing moved, nothing to do.
@@ -2975,6 +3466,17 @@
     renderer.setSize(w, h, false);
     var cw = Math.round(w * CHAIN_RES), ch = Math.round(h * CHAIN_RES);
     composer.setSize(cw, ch);
+    // WEBGPU: the chain's supersample maps onto the passes' own
+    // resolutionScale — the pass targets track the drawing buffer
+    // (css × dpr), so CHAIN_RES × css means a scale of CHAIN_RES / dpr.
+    // beauty and plates must agree exactly: they share a depth texture.
+    var prScale = CHAIN_RES / Math.max(0.0001, renderer.getPixelRatio());
+    // r186: set/getResolutionScale() — the bare property assignment was an
+    // inert expando, which left the beauty pass pinned at FULL device res
+    // (2.0) instead of the CHAIN_RES cap. the real setter applies the cap.
+    scenePass.setResolutionScale(prScale);
+    platePassNode.setResolutionScale(prScale);
+    aspectU.value = w > 0 && h > 0 ? (w / h) : 1;   // r128 fed camera.aspect into the bokeh
     // bloom keeps its mips at css resolution, NOT the supersampled
     // chain: its per-mip blur kernels are fixed in pixels, so at 1.5×
     // they cover a third less screen — the halos tightened into the
@@ -3004,6 +3506,7 @@
     var cacheW = Math.min(cw, Math.round(w * pr)), cacheH = Math.min(ch, Math.round(h * pr));
     frameCache.setSize(cacheW, cacheH);
     lensCache.setSize(cacheW, cacheH);   // the tail's second half, same grid
+    rtFXAA.setSize(cacheW, cacheH);      // the anti-aliased frame — r128's frameCache grid
     frameDirtyFlag = true;   // the cache died with the old size
     // fxaa taps step in the CHAIN's texels (a custom-target composer runs
     // at pixelRatio 1, so the chain is cw×ch, not w*pr×h*pr). this was set
@@ -3030,10 +3533,283 @@
   // resolution always — crispness beats frame rate here.
 
   // ── the city, exactly as the file has it: no moves, no scale, no touch ──
+  // the veil's clock listens on the module's loading manager (three
+  // arrives as ESM now, after the veil script ran)
+  if (window.__veilGlbWire) window.__veilGlbWire(THREE.DefaultLoadingManager);
+  // ── the transition warm ── when the whole gltf queue drains (still
+  // behind the veil), cycle the scene through the states the RIDE will
+  // flip mid-scroll and warm each through the real pass: the leg-3
+  // ghost (scene 2: clip planes on, stencil ghosting, the unlit twin),
+  // and the rack's transparent fade flavor. every one of these is a
+  // different set of webgpu pipelines, and building them here is why
+  // the reveal doesn't hitch on first scroll.
+  (function(){
+    var veilOnLoad = THREE.DefaultLoadingManager.onLoad;
+    var warmed = false;   // the manager fires on every later queue drain too
+    var veilLifted = false, warmSweepStarted = false;
+    // the veil only drops ONCE, and only after the site is fully loaded
+    // AND snapped to the hero — never mid-warm ("load the whole site,
+    // then show it"). a 6s net lifts it even if the warm never completes.
+    function liftVeil(){ if (veilLifted) return; veilLifted = true; if (veilOnLoad) veilOnLoad(); }
+    // net well past the full-res warm sweep (~1.5s on real hw, longer on a
+    // weak gpu) so the veil waits for the hero snap, not a mid-warm frame.
+    setTimeout(liftVeil, 16000);
+    THREE.DefaultLoadingManager.onLoad = function(){
+      var warmedNow = false;
+      try {
+        if (!warmed && rackRoot && cityMats.length){
+          warmed = true; warmedNow = true;
+          // 1) EVERY HIDDEN PROP, IN BATCHES: the load-site warms only
+          // drew what was visible at load, so every hidden prop's
+          // textures and pipelines were still waiting for its section
+          // to arrive — that upload+compile spike WAS the section-entry
+          // lag. warming them all in ONE frame just moves the spike
+          // (measured 1.9s), so the cast walks on stage a few actors
+          // per frame: each batch is made visible (ancestors too), one
+          // 5%-res warm uploads its textures and builds its pipelines,
+          // then it steps back off. a dozen quiet frames, no stall.
+          (function(){
+            var hidden = [];
+            scene.traverse(function(o){ if (o.isMesh || o.isLineSegments) hidden.push(o); });
+            var bi = 0, BATCH = Math.max(8, Math.ceil(hidden.length / 12));
+            (function warmChunk(){
+              if (bi >= hidden.length) return;
+              var end = Math.min(hidden.length, bi + BATCH), touched = [];
+              for (var k = bi; k < end; k++){
+                var n = hidden[k];
+                while (n){   // the mesh AND its ancestor chain must stand
+                  if (!n.visible){ touched.push(n); n.visible = true; }
+                  n = n.parent;
+                }
+              }
+              warmScenePass();
+              for (var t = 0; t < touched.length; t++) touched[t].visible = false;
+              bi = end;
+              requestAnimationFrame(warmChunk);
+            })();
+          })();
+          // 2) the state flavors the ride flips mid-scroll
+          var rv = rackRoot.visible;
+          var m0 = sceneMode;   // a mid-page refresh may already stand in
+                                // scene 2 — the warm must hand back the
+                                // mode the ride owns, or the loop's
+                                // change-guard never re-applies it and
+                                // the rack stays hidden until the user
+                                // re-crosses the reveal edge
+          rackRoot.visible = true;
+          applyScene(2);                       // ghost clip/stencil variants
+          applyCityDim(0.5, 0.5);
+          warmScenePass();
+          cityTwinBind(true);                  // the unlit twin's pipelines
+          warmScenePass();
+          // ...and the twin-under-mode-1 combo: a fast scroll back up
+          // leaves the twins bound while the city returns to mode 1 —
+          // that render-object combination was never built, and its
+          // first-build storm was the flick's landing stall
+          applyCityDim(1, 1);
+          applyScene(1);
+          warmScenePass();
+          applyScene(2);
+          applyCityDim(0.5, 0.5);
+          cityTwinBind(false);
+          var rT = [];
+          for (var i = 0; i < rackMats.length; i++){ rT[i] = rackMats[i].transparent; rackMats[i].transparent = true; }
+          warmScenePass();                     // the fade flavor (blending on)
+          // ...crossed with the union clip mode (slide 2 opening while a
+          // fade still runs) — the last rack combo a violent ride can hit
+          for (var iu = 0; iu < rackMats.length; iu++) rackMats[iu].clipIntersection = true;
+          warmScenePass();
+          for (var ju = 0; ju < rackMats.length; ju++) rackMats[ju].clipIntersection = false;
+          for (var j = 0; j < rackMats.length; j++) rackMats[j].transparent = rT[j];
+          // the clone at mid-fade: its own materials, its own combos
+          if (rackRoot2){
+            var r2v = rackRoot2.visible;
+            rackRoot2.visible = true;
+            var r2T = [];
+            for (var k2 = 0; k2 < rack2Mats.length; k2++){ r2T[k2] = rack2Mats[k2].transparent; rack2Mats[k2].transparent = true; }
+            warmScenePass();
+            for (var k3 = 0; k3 < rack2Mats.length; k3++) rack2Mats[k3].transparent = r2T[k3];
+            rackRoot2.visible = r2v;
+          }
+          applyCityDim(1, 1);
+          applyScene(m0);                      // the mode the ride owns, not a hardcoded hero
+          rackRoot.visible = rv;
+          warmScenePass();                     // back on the live state
+          // 3) the name plates live in the SEPARATE plate scene — the
+          // mesh warm never saw them, so their pipelines compiled at
+          // the split's anchor. one full chain frame with the plates up
+          // bakes them here.
+          if (rackLbl1){
+            var pv1 = rackLbl1.visible, pv2 = rackLbl2 ? rackLbl2.visible : false;
+            rackLbl1.visible = true;
+            if (rackLbl2) rackLbl2.visible = true;
+            try { composer.render(); } catch(pe){}
+            rackLbl1.visible = pv1;
+            if (rackLbl2) rackLbl2.visible = pv2;
+            frameDirtyFlag = true; frameCacheValid = false;
+          }
+          // 4) THE SPLIT REVEAL ITSELF, off-screen. the instant state warms
+          // above compile the discrete flavors, but the reveal's live pipeline
+          // set is bigger than any static pose: the whole-city+rack SHADOW
+          // pass (measured 7 caster pipelines warmed vs 74 the split needs),
+          // and each city material's ghost × stencil × depthWrite-off × clip
+          // variants, only ever build when the ACTUAL reveal runs — its clip
+          // sweep grows each mesh's plane pool, its rack fade toggles
+          // transparency, its endpoints fire the shadow. left cold that was a
+          // 300-pipeline / ~380ms compile storm ON the first scroll into the
+          // split — the "lag the moment the split starts". so RUN the reveal
+          // now, at load: drive the ride's scroll INPUT (window.__warmY, NOT
+          // window.scroll — no scrollbar, no scroll-restore fight, so it is
+          // not the banned "veil tour") through the split band while the loop
+          // renders each step OFF-SCREEN through the real full chain (the
+          // __warmY intercept in the render block calls warmChainOffscreen —
+          // composer.render minus the canvas-presenting grade). aborts the
+          // instant the user really scrolls, and only from a top-of-page
+          // load, so it can never hijack the ride.
+          (function(){
+            function runRevealSweep(){
+            // rackFade tracks scroll EXACTLY here (the leg damp is snapped
+            // while __warmY is set), so a fine one-frame-per-step sweep lands
+            // on every discrete state — ghost-on (dim<0.999), depthWrite-off
+            // (dim<0.3), the stencil flip, the clip-pool grow, and the shadow
+            // endpoints — in a single pass each way. 760→1370 spans the whole
+            // reveal (scene toggles ~806, rackFade hits 1 by ~955).
+            var band0 = 760, band1 = 1370, STEPS = 26, seq = [], s, h, y;
+            // PRE-REVEAL camera path (hero → the split's edge). the sweep used
+            // to start at 760, but the live scroll from 0 travels the camera
+            // through the whole city first, and each scene-1 building mesh
+            // compiles its OPAQUE pipeline the frame it first enters the
+            // frustum — ~16 compiles smeared across the scroll INTO the split
+            // that the reveal-band warm never touched (it only ever rendered
+            // the camera at 760+). sweep the camera down that path too, coarse
+            // (no ghost/stencil variants live out here, just frustum entry),
+            // two draws a step for the metal finalize like the band below.
+            var PRE0 = 40, PRE_STEPS = 16;
+            for (s = 0; s <= PRE_STEPS; s++){ y = PRE0 + (band0 - PRE0) * s / PRE_STEPS; seq.push(y); seq.push(y); }
+            // ONE up sweep, TWO frames per step: metal finalizes a pipeline's
+            // shader on first GPU EXECUTION, not on create — one rushed draw
+            // submits it but the next step's draw can land before it flushes,
+            // so each state is drawn twice to force the finalize while the
+            // reveal is still off the clock. no down sweep: the split is
+            // symmetric (scroll-out traverses the same material states as
+            // scroll-in), so those pipelines are already warm. the whole-scene
+            // shadow (the split's entry cost) compiles as rackFade leaves 0.
+            for (s = 0; s <= STEPS; s++){ y = band0 + (band1 - band0) * s / STEPS; seq.push(y); seq.push(y); }   // up
+            for (h = 0; h < 5; h++) seq.push(band1);                                                              // settle at rackFade 1 (the === 1 whole-scene shadow + dim<0.3)
+            warmSweepStarted = true;
+            var i = 0, warmup = 24, startY = window.pageYOffset || 0;
+            (function step(){
+              // let the batched hidden-prop warm above finish its visibility
+              // dance first, so our shadow pass sees the full, settled cast
+              if (warmup > 0){ warmup--; requestAnimationFrame(step); return; }
+              var swAborted = Math.abs((window.pageYOffset || 0) - startY) > 4;
+              if (swAborted){
+                // the user took the scroll mid-sweep: hand EVERYTHING back
+                // to the live ride — NO hero reset (they are not at the
+                // hero; the old unconditional reset stranded sceneMode 1
+                // while parked past the toggle and the rack never showed).
+                // scrubScene -1 re-arms the scene gate's outer change-guard
+                // so applyScene fires for wherever they actually stand —
+                // the exact trap the state warm's own comment warns about.
+                window.__warmY = null;
+                scrubScene = -1;
+                bootSnap = performance.now() + 400; coverJump = true;
+                frameDirtyFlag = true; frameCacheValid = false;
+                liftVeil();
+                return;
+              }
+              if (i >= seq.length){
+                // ── warm done: SNAP to the live scroll (the hero on a top
+                // refresh) BEFORE the veil lifts. the sweep left the camera
+                // and the radial at the reveal end (other side, hole left);
+                // bootSnap in the future makes the next on-screen frames
+                // jump-cut every LEG/RIDE damp + the radial to raw = the
+                // correct hero framing. hold the veil ~4 frames so that
+                // settled hero is what actually paints, then lift it. THIS
+                // is "load the whole site, THEN show it".
+                window.__warmY = null;
+                // HARD-RESET to the hero: the sweep left the scene at the
+                // reveal end (rackFade 1, sceneMode 2, city ghosted). rackFade
+                // otherwise time-fades over 0.5s (caught mid-decrement at the
+                // veil lift), so force it to 0 and put the scene back on the
+                // hero explicitly; coverJump + bootSnap snap the camera pose
+                // and the radial to their scroll-0 values on the next frame.
+                try {
+                  rackFade = 0; sceneMode = 1; applyScene(1); applyCityDim(1, 1);
+                  // put the CAMERA OBJECT physically at the hero start — the
+                  // sweep left it at the reveal pose, and just snapping the
+                  // ride's scroll values let OrbitControls EASE it home = the
+                  // "camera starts one place and animates on refresh". set it
+                  // + the target + fov + controls.update() so it is simply
+                  // THERE, static, when the veil lifts.
+                  camera.position.fromArray(START.eye);
+                  controls.target.fromArray(START.target);
+                  camera.fov = HOME_FOV; camera.updateProjectionMatrix();
+                  scrubHome = null; scrubFree = false;
+                  controls.update();
+                  radialP = 0; gradQ2 = -1;   // snap the see-through circle to its hero seat (right), no ease-in
+                  if (stage) stage.style.setProperty('--holeX', '78%');
+                  renderer.shadowMap.needsUpdate = true;   // one clean shadow at the hero, before reveal
+                } catch(e){}
+                scrubScene = -1;   // re-arm the scene gate (see the abort branch)
+                bootSnap = performance.now() + 700; coverJump = true;
+                frameDirtyFlag = true; frameCacheValid = false;
+                var hold = 6;
+                (function settle(){ if (hold-- > 0){ requestAnimationFrame(settle); return; } liftVeil(); })();
+                return;
+              }
+              window.__warmY = seq[i++];
+              requestAnimationFrame(step);
+            })();
+            }
+            if ((window.pageYOffset || 0) > 4){
+              // mid-page load: the boot sweep would fight the live view,
+              // so the reveal's pipelines stayed COLD and the first scroll
+              // into the split hit the ~300-pipeline compile storm — the
+              // "stick between u go in gost mode" of the refresh-below-
+              // then-browse pattern. wait for the page to stand PARKED AT
+              // THE TOP (the sweep's settled-hero tail is exactly right
+              // there) and run it then; until that happens the reveal
+              // stays the old cold path, no worse than before.
+              var dLastY = -1;
+              (function deferSweep(){
+                var dy = window.pageYOffset || 0;
+                var dQuiet = dy === dLastY; dLastY = dy;
+                if (dy <= 4 && dQuiet){ runRevealSweep(); return; }
+                setTimeout(deferSweep, 1500);
+              })();
+              return;
+            }
+            runRevealSweep();
+          })();
+        }
+      } catch(e){}
+      // the warm sweep (if it started) lifts the veil itself at its
+      // settled-hero completion; otherwise (no warm / mid-page refresh)
+      // lift it now.
+      if (!warmSweepStarted) liftVeil();
+      // the veil tour is GONE ("remove this shitty autoscroll when i
+      // refresh") — the warm above never moves window.scroll, it drives an
+      // internal scroll input and renders off-screen, so nothing shows and
+      // there is no scroll-restore fight. the reveal's whole pipeline set is
+      // now compiled at load, so the first scroll into the split no longer
+      // hitches. (the veil is lifted by liftVeil, above — after the warm
+      // sweep settles on the hero, or immediately if no sweep ran.)
+    };
+  })();
   var loader = new THREE.GLTFLoader();
   var draco = new THREE.DRACOLoader();
-  draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.1/');
+  draco.setDecoderPath('/draco/');   // vendored 1.4.1 (public/draco): the page decodes with no network
   loader.setDRACOLoader(draco);
+  // ── KTX2 / Basis textures ── the prop sheets (calculator, laptop,
+  // control panel: 2048²/1024²) shipped as webp that DECODED to ~200MB
+  // of raw RGBA on the gpu and uploaded on first draw — a real slice of
+  // the scroll-in hitch. re-encoded to ETC1S KTX2 (public/models), they
+  // transcode in a worker and upload as gpu-COMPRESSED (~13MB total,
+  // ~16× less vram and upload bandwidth). the transcoder is vendored
+  // (public/basis), so no network; detectSupport picks the gpu's format.
+  var ktx2 = new THREE.KTX2Loader().setTranscoderPath('/basis/').detectSupport(renderer);
+  loader.setKTX2Loader(ktx2);
   // ── the texture governor (phones only) ────────────
   // the models carry ~300MB of textures once decoded: the laptop and
   // the calculator alone hold four 2048² webp sheets EACH (~90MB a
@@ -3066,6 +3842,11 @@
             var t = m[key];
             if (!t || !t.isTexture || !t.image || tameSeen[t.uuid]) continue;
             tameSeen[t.uuid] = true;
+            // KTX2/Basis textures are already gpu-compressed with their
+            // own mip chain — they cannot be canvas-redrawn, and they
+            // are ~16× smaller than the old raw sheets anyway, so the
+            // governor leaves them alone (initTexture below still warms).
+            if (t.isCompressedTexture){ if (renderer.initTexture) renderer.initTexture(t); continue; }
             var im = t.image, w = im.width || 0, h = im.height || 0;
             if (w > cap || h > cap){
               var sc = cap / Math.max(w, h);
@@ -3097,6 +3878,8 @@
   // (the road's double-dropout shape) fired every 2-9s at random
   var redNeons = [], redBlinkAt = 2 + Math.random() * 7, redBlinkStart = -1;
   // scene toggle state (testing): 1 = the building, 2 = the rack
+  var cityBundle = null;
+  function cityBundleDirty(){ if (cityBundle) cityBundle.needsUpdate = true; }
   var sceneMode = 1, towerMesh = null, rackRoot = null, rackLamp = null, rackSpot = null, rackMats = [], rackFade = 0;
   // the studio rig's other two points (key = rackLamp + rackSpot):
   // a soft indigo FILL front-left and a cool RIM spot from behind-right
@@ -3166,6 +3949,16 @@
   var revSeal = 0;   // revert phase 2: the shell closes back to the solid rack
   var radialHide = 0;   // leg 6's last window: the rack fades out as the radial crosses
   var radialT = 0;   // the radial's own ride: waits for the seal to finish
+  var radialP = 0;   // damped follower: a fast down-up puts the five source
+                     // windows out of phase and their max() WAVES — the
+                     // circle used to play the crossing 2-3 times. the damp
+                     // collapses the waves into one glide.
+  var radialLastD = 0, radialSlowUntil = 0;
+  var shellPlay = -1;
+  var shellChase = -1;   // the shell follower's live target (see the fade block)   // eased follower for the rack shell opacity — kills the fast-scroll fade-out-and-in swing (the damped fade-in × fade-out windows dip out of phase)   // direction-aware rate: only a
+                     // REVERSAL slows the follower — a clean monotone return
+                     // (fast flick to the hero) lands almost instantly, so
+                     // the glide never fights the hero leg's own driver
   // the ride's last beat: the calculator standing in the radial's right
   // circle, scale 0.8→1 and opacity 0→1 on radialT's own scrub — the
   // right-side twin of the rack standing in the left circle
@@ -3176,11 +3969,11 @@
   // the lid: a hinge group around the screen mesh — born closed, open
   // exactly whenever the rack stands at opacity 1 (rides __addonsRackHide)
   var lapLid = null, lapLidClose = 0, lapLidQ = -1;
-  // the agents view tunnel's last quantized strength (uniform tunU)
-  var tunQ = -1;
   // the damped mirror of the addons rack window — the agents entrance's
   // one shared fade driver (rack, laptop, lid, tunnel all consume it)
   var addonsHideP = 0;
+  // the agents view tunnel + ghost body-hide strengths (TSL uniforms)
+  var tunQ = -1;
   // slider mode stands the panel dead vertical (90° off the deck) so the
   // slides read flat, like a 2d screen — rides forWin, lands at the exact
   // scroll where the slider takes the glass (forWin.p 0.45)
@@ -3273,6 +4066,7 @@
   // enters, the radial un-crosses back to the left (shadow right again)
   // and the rack fades back to full — both on this one scrub
   var metalWin = {start: 0, end: 1, raw: 0, p: 0};
+  var metalClearQ = 0;   // the metal clearing: 1 = ghost city fully hidden behind the two racks
   // the rack's own fade-out window on the math panel: right after the
   // radial finishes crossing (leg done at top 70% vh), before the
   // calculator is fully up — between "too fast" and "too late"
@@ -3787,100 +4581,70 @@
       // only ever hide what is currently shown, and only restore what WE
       // hid — the city has its own visibility rules (the flat ground cull
       // at load, annexWire) and they must keep the last word
-      if (gone){ if (e.o.visible){ e.o.visible = false; e.hid = true; } }
-      else if (e.hid){ e.o.visible = true; e.hid = false; }
+      if (gone){ if (e.o.visible){ e.o.visible = false; e.hid = true; cityBundleDirty(); } }
+      else if (e.hid){ e.o.visible = true; e.hid = false; cityBundleDirty(); }
     }
   }
-  // ── the agents view tunnel ──────────────────────────────────────────
-  // 'built for agents' looks down the street at the rack+laptop pair from
-  // a low angle, THROUGH the ghost blocks standing between the lens and
-  // the machines ("u need make tunnel for rack and laptop... buildings
-  // must hide with scroll opacity in front of items"). a world-space soft
-  // box over that corridor (measured with __tunProbe at the settled shot:
-  // hits span x -3.5..+4.9, z +1.3..+8.4, tops y <= 3.1) multiplies the
-  // city's alpha down as the laptop opens — per FRAGMENT, because each
-  // city mesh spans many buildings and hiding one whole would take
-  // neighbors ten blocks away along. every city material (the originals,
-  // the unlit ghost twins, the wire overlays) wears the same chunk and
-  // shares one uniform; the scroll drive lives with the laptop's reveal.
-  var tunU = {value: 0};
-  // the GHOST body-hide: rides the city's own ghost factor (rackFade —
-  // scroll-scrubbed, reversible), so entering ANY rack scene fades the
-  // building BODIES out with the scroll and leaves the green wireframe
-  // city + wires + neon ("u hiddin black materials of building and show
-  // only lines. u need hide materials on scroll man"). the hero and the
-  // footer (ghost 0) keep the full lit city.
-  var ghostU = {value: 0};
-  var TUN_GLSL = [
-    'uniform float uTunK;',
-    'uniform float uGhostB;',
-    'varying vec3 vTunW;',
-    // returns the FADE STRENGTH (0..1): the agents corridor carries
-    // uTunK, the body ghost-hide carries uGhostB — each term owns its
-    // own gate, so the bodies fade at EVERY ghost scene while the
-    // corridor only clears during agents
-    'float tunnelMask(vec3 w){',
-    // FULL HEIGHT on purpose — a y ceiling would slice a tall corridor
-    // building horizontally; buildings leave whole or not at all.
-    '  float mx = smoothstep(-6.0, -4.5, w.x) * (1.0 - smoothstep(5.5, 7.0, w.x));',
-    '  float mz = smoothstep(0.9, 1.6, w.z) * (1.0 - smoothstep(9.0, 10.8, w.z));',
-    '  float m = uTunK * mx * mz;',
-    // ...and the city's BODY materials (TUN_DEEP — never the wire
-    // overlays, the hanging strokes or the street neons) fade with the
-    // GHOST itself: dozens of stacked 10%-alpha walls read as
-    // green-orange mud ("i dont like quality here"), so wherever the
-    // city ghosts, the bodies go and the backdrop is the site's own
-    // annotation look — the green wireframe city, its hanging wires
-    // and the neon ribbons — scrubbed in and out by the scroll.
-    '#ifdef TUN_DEEP',
-    '  m = max(m, uGhostB);',
-    '#endif',
-    '  return m;',
-    '}'
-  ].join('\n');
+  // ── the agents view tunnel + the ghost body-hide (ported from v11,
+  // TSL instead of shader-string patches) ──────────────────────────────
+  // tunU: 'built for agents' clears the street corridor between the lens
+  // and the rack+laptop ("make tunnel for rack and laptop... buildings
+  // must hide with scroll opacity in front of items").
+  // ghostU: wherever the city ghosts (scroll-scrubbed via rackFade), the
+  // building BODIES fade out entirely and the backdrop becomes the green
+  // wireframe city + wires + neon ("u hiddin black materials of building
+  // and show only lines. u need hide materials on scroll man"). the wire
+  // strokes, the wireframe overlays and the street neons never fade.
+  var tunU = TSL.uniform(0);
+  var ghostU = TSL.uniform(0);
+  var tunCorrNode = (function(){
+    var w = TSL.positionWorld;
+    // FULL HEIGHT: a y ceiling would slice tall corridor buildings
+    var mx = TSL.smoothstep(-6.0, -4.5, w.x).mul(TSL.oneMinus(TSL.smoothstep(5.5, 7.0, w.x)));
+    var mz = TSL.smoothstep(0.9, 1.6, w.z).mul(TSL.oneMinus(TSL.smoothstep(9.0, 10.8, w.z)));
+    return tunU.mul(mx).mul(mz);
+  })();
+  window.__tunSet = function(v){ ghostU.value = v; cityBundleDirty(); frameDirtyFlag = true; frameCacheValid = false; };
+  window.__tunDbg12 = function(){
+    var deep = 0, patched = 0;
+    for (var i = 0; i < cityMats.length; i++){
+      if (cityMats[i].userData.__tun) patched++;
+      if (cityMats[i].userData.__tunDeep) deep++;
+    }
+    return {tun: tunU.value, ghost: ghostU.value, hideP: addonsHideP, hideRaw: window.__addonsRackHide || 0,
+            mats: cityMats.length, patched: patched, deep: deep,
+            node: cityMats.length ? !!cityMats[0].opacityNode : null,
+            dim: cityDimNow, twinOn: cityTwinOn};
+  };
   function tunnelPatch(m, deep){
     if (m.userData.__tun) return;
     m.userData.__tun = true;
     m.userData.__tunDeep = !!deep;   // the twins inherit the family
-    var prev = m.onBeforeCompile;
-    m.onBeforeCompile = function(sh, r){
-      if (prev) prev(sh, r);
-      sh.uniforms.uTunK = tunU;
-      sh.uniforms.uGhostB = ghostU;
-      sh.vertexShader = sh.vertexShader
-        .replace('#include <common>', '#include <common>\nvarying vec3 vTunW;')
-        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTunW = (modelMatrix * vec4(position, 1.0)).xyz;');
-      sh.fragmentShader = sh.fragmentShader
-        .replace('#include <common>', '#include <common>\n' + (deep ? '#define TUN_DEEP\n' : '') + TUN_GLSL)
-        .replace('#include <dithering_fragment>',
-          '#include <dithering_fragment>\n  gl_FragColor.a *= 1.0 - tunnelMask(vTunW);');
-    };
-    // the default program cache key is onBeforeCompile.toString() — the
-    // SAME source for every patched material even when the chained `prev`
-    // differs (the window flicker), so those flavors would collide into
-    // one compiled program. name them apart explicitly.
-    m.customProgramCacheKey = function(){ return (deep ? 'tunD' : 'tun') + (prev ? '+' + String(prev).length : ''); };
+    var fade = deep ? TSL.max(tunCorrNode, ghostU) : tunCorrNode;
+    m.opacityNode = (m.opacityNode || TSL.materialOpacity).mul(TSL.oneMinus(fade));
+    // the renderer touched these materials during load (the veil's wire
+    // preview) — without this the pipeline keeps the node-less shader
+    // and the fade silently never applies (measured: zero effect until
+    // a needsUpdate; 391k px move after)
+    m.needsUpdate = true;
   }
-  // ...and the bokeh depth pre-pass must not see what the tunnel faded:
-  // the corridor blocks kept writing depth after fading out, so the far
-  // city revealed behind them wore a patchwork of stale blur radii —
-  // sharp corridor-shaped patches floating in the max-blur backdrop
-  // ("i dont like quality here"). the override depth material discards
-  // the same masked fragments the beauty pass fades.
-  (function(){
-    var dm = bokeh.materialDepth;
-    dm.onBeforeCompile = function(sh){
-      sh.uniforms.uTunK = tunU;
-      sh.uniforms.uGhostB = ghostU;
-      sh.vertexShader = sh.vertexShader
-        .replace('#include <common>', '#include <common>\nvarying vec3 vTunW;')
-        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvTunW = (modelMatrix * vec4(position, 1.0)).xyz;');
-      sh.fragmentShader = sh.fragmentShader
-        .replace('#include <common>', '#include <common>\n' + TUN_GLSL)
-        .replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n  if (tunnelMask(vTunW) > 0.5) discard;');
-    };
-    dm.customProgramCacheKey = function(){ return 'tundepth'; };
-  })();
+  // WORKAROUND, proven at runtime: the load-time needsUpdate on the
+  // patched materials is not enough — the city's pipelines still end up
+  // built without the opacityNode (the veil's load preview + the bundle
+  // path re-cache around it; hiding the body meshes removed 430k px the
+  // "live" fade did not). re-arming the SAME flags after load settles
+  // rebuilt the pipelines correctly every time it was done by hand, so
+  // it is done automatically here — twice, in case a late loader pass
+  // rebuilds them again.
+  var tunnelRearmed = 0, tunnelArmB = '';
+  function tunnelRearm(){
+    if (!cityMats.length) return;
+    for (var ti = 0; ti < cityMats.length; ti++) if (cityMats[ti].userData.__tun) cityMats[ti].needsUpdate = true;
+    if (cityTwins) cityTwins.forEach(function(t){ if (t.userData.__tun) t.needsUpdate = true; });
+    cityBundleDirty();
+    frameDirtyFlag = true; frameCacheValid = false;
+    tunnelRearmed++;
+  }
   function cityTwinFor(m){
     if (!m || !(m.isMeshStandardMaterial || m.isMeshPhysicalMaterial)) return m;   // already unlit
     var t = cityTwins.get(m.uuid);
@@ -3894,7 +4658,7 @@
       depthTest: m.depthTest, depthWrite: m.depthWrite
     });
     t.userData.__src = m;
-    tunnelPatch(t, m.userData.__tunDeep);   // the agents view tunnel rides the ghost twins too
+    tunnelPatch(t, m.userData.__tunDeep);   // the tunnel + ghost hide ride the ghost twins too
     cityTwins.set(m.uuid, t);
     return t;
   }
@@ -3907,19 +4671,37 @@
       t.stencilWrite = b.stencilWrite; t.stencilWriteMask = b.stencilWriteMask;
       t.stencilRef = b.stencilRef; t.stencilFunc = b.stencilFunc;
       t.clipIntersection = b.clipIntersection; t.clipShadows = b.clipShadows;
-      if (t.clippingPlanes !== b.clippingPlanes){ t.clippingPlanes = b.clippingPlanes; t.needsUpdate = true; }
+      // NO needsUpdate on the plane swap: the clip bridge carries planes
+      // on wrapper groups — bumping ~100 twin material versions here at
+      // every reveal crossing was the ~500ms of TSL builds the profiler
+      // caught at the anchors
+      if (t.clippingPlanes !== b.clippingPlanes) t.clippingPlanes = b.clippingPlanes;
     });
   }
+  // ATOMIC bind again ("i see some stick in city"): the stagger was a
+  // multi-frame wave through the city's materials — a visible style
+  // creep, and a scroll-law violation. the one-frame storm it once
+  // dodged was really cityTwinSync's needsUpdate rebuilds, dead since;
+  // a plain pointer swap over ~100 materials is cheap and lands
+  // frame-locked with the scroll state that asked for it.
   function cityTwinBind(on){
+    // DESKTOP NEVER SWAPS ("stick between styles of cities"): the twin
+    // binds only at the SETTLED rack (rackFade>0.978), and on webgpu the
+    // unlit twin is +4.7 luma brighter than the π-lit city there — a
+    // one-step pop as you settle/leave. the settled frame is already
+    // served by the static frame cache, so the twin saves nothing on
+    // desktop; dropping it makes the city a pure continuous scrub. the
+    // phone still swaps — there the cheap resting city earns its keep.
+    if (!MOBILE) return;
     if (!cityTwins || on === cityTwinOn || !cityMeshList.length) return;
     cityTwinOn = on;
     for (var i = 0; i < cityMeshList.length; i++){
       var e = cityMeshList[i];
       e.o.material = on ? e.t : e.m;
     }
-    // first bind pays the twins' shader compile once, off a scroll frame
-    if (on && !cityTwinWarm){ cityTwinWarm = true; renderer.compile(scene, camera); }
+    if (on && !cityTwinWarm){ cityTwinWarm = true; warmScenePass(); }
     frameDirtyFlag = true;
+    cityBundleDirty();
   }
   function applyScene(mode){
     sceneMode = mode;
@@ -3927,8 +4709,22 @@
       var m = cityMats[ci];
       m.clippingPlanes = mode === 2 ? (m.name === 'Wire' ? wirePlanes : clipPlanes) : null;
       m.clipIntersection = mode === 2;
-      m.clipShadows = mode === 2;
-      m.needsUpdate = true;
+      // clipShadows STAYS OFF (was mode===2). the shadow map is cast by
+      // spotB, which sits at y≈2.2 UNDER the building roof the reveal's
+      // clip box carves away — so clipping that geometry out of the depth
+      // pass changes no visible pixel (verified against the lit reveal at
+      // rackFade 0.3 and 1). what it DID cost: on webgpu the on-demand
+      // shadow re-render (autoUpdate off, fired at the reveal endpoints)
+      // hands each caster a freshly-allocated ClippingContext, whose id is
+      // baked into the pipeline cache key — so every clipped shadow caster
+      // recompiled its depth pipeline on each crossing (~48 Metal shader
+      // builds, the residual hero→split hitch after the pipeline-pin
+      // above). off, the shadow casters key on the stable root context and
+      // the crossing compiles nothing. (measured 48 → 0 per crossing.)
+      // NO needsUpdate: the clip bridge carries the planes on wrapper
+      // groups with a stable cacheKey — bumping the material version
+      // here forced a full node rebuild per city mesh at every reveal
+      // crossing (measured ~1s) for state the material no longer owns
     }
     // the carved building's furniture (mast, conduit, scaffolds) is NOT
     // hidden here anymore — a binary hide at the toggle popped mid-scroll.
@@ -3937,17 +4733,34 @@
     if (mode !== 2) for (var wi = 0; wi < annexWire.length; wi++) annexWire[wi].visible = true;
     cityTwinSync();   // the clip planes just moved
     renderer.shadowMap.needsUpdate = true;   // clipShadows changed
+    cityBundleDirty();
   }
   // scene 2 ghosts the whole city to REAL alpha so the rack reads through
   // the buildings standing in front of it — x-ray style. rides rackFade,
   // so both run in lockstep. while ghosted the city stops writing depth:
   // it can't occlude itself out of order, and the opaque rack shows
   // through every wall while still hiding the city behind it.
-  var cityDimNow = 1, cityLightsNow = 1;
+  var cityDimNow = 1, cityLightsNow = 1, cityGhostWas = false;
   function applyCityDim(f, lights){
     if (Math.abs(f - cityDimNow) < 0.003 && Math.abs(lights - cityLightsNow) < 0.003) return;
     cityDimNow = f; cityLightsNow = lights;
     var ghost = f < 0.999;
+    if (ghost !== cityGhostWas){
+      cityGhostWas = ghost;
+      cityBundleDirty();   // transparent/depthWrite flip = new pipelines = re-record
+    }
+    // the corridor node's pipelines can be stale-cached (see tunnelRearm)
+    // — but a rearm is a full city pipeline REBUILD, and firing it on
+    // live ghost crossings was itself a mid-scroll stick ("like better
+    // but some sthick again"). the ghost body-hide rides m.opacity now
+    // and needs NO rearm; only the agents corridor node does. so re-arm
+    // per pipeline bucket ONLY while the boot warm sweep drives the ride
+    // (__warmY set = rendered off-screen behind the veil — free); the
+    // deferred sweep after a mid-page refresh covers the rest.
+    if (window.__warmY != null){
+      var tunnelB = (ghost ? 'g' : 'o') + (f < 0.3 ? 'd' : '') + (f < 0.12 ? 'f' : '');
+      if (tunnelB !== tunnelArmB && tunnelRearmed < 16){ tunnelArmB = tunnelB; tunnelRearm(); }
+    }
     for (var di = 0; di < cityMats.length; di++){
       var m = cityMats[di];
       if (!m.userData.__dim) m.userData.__dim = {op: m.opacity, tr: m.transparent, dw: m.depthWrite, ei: m.emissiveIntensity};
@@ -3965,13 +4778,25 @@
       // it only ever does anything while the fade is actually under way.
       var a = b.op * f;
       if (m.userData.__culled) a = 1 - (1 - a) * (1 - a);
+      // the ghost body-hide, on the OPACITY path (workaround: this path
+      // is proven live through the twins and the render bundles — the
+      // TSL node path silently kept stale pipelines). body families
+      // fade OUT with the ghost; the wire strokes, the overlays and the
+      // street neons keep the ghost look. FLOORED above zero on purpose:
+      // at exactly 0 cityCullInvisible hides the mesh — and the green
+      // wireframe OVERLAYS are CHILDREN of these very meshes, so the
+      // whole line city vanished with its parents ("u broked ghost
+      // city"). 0.002 is under one 8-bit step per layer, invisible, and
+      // keeps every child overlay alive.
+      if (m.userData.__tunDeep && a > 0)
+        a = Math.max(0.002, a * (1 - Math.max(0, Math.min(1, (1 - f) / 0.9))));
       m.opacity = a;
       m.transparent = ghost || b.tr;
       // depth writing stays ON until the city is genuinely faint: flipping
       // it at the start of the fade made every wall blend through every
       // other wall in one frame at ~full opacity — the walls "stuck".
       // below 0.3 alpha the x-ray look eases in unnoticed.
-      m.depthWrite = f < 0.3 ? false : b.dw;
+      m.depthWrite = f < 0.3 ? false : b.dw;   // matches v11; the one-frame self-occlusion switch is inherent to the x-ray technique
       // ghost buildings carry NO lights: every emissive — windows, neons,
       // wire glow, signs — fades to zero with the reveal (the flicker
       // loops stand down while any reveal is active)
@@ -3988,7 +4813,12 @@
     }
     // the body ghost-hide rides the same scrubbed factor as the ghost
     // itself: f 1 (lit hero/footer) -> 0, f 0.1 (full ghost) -> 1
-    ghostU.value = Math.max(0, Math.min(1, (1 - f) / 0.9));
+    var gNew = Math.max(0, Math.min(1, (1 - f) / 0.9));
+    if (gNew !== ghostU.value){
+      ghostU.value = gNew;
+      cityBundleDirty();   // bundled meshes skip per-frame updates: a
+                           // uniform value only reaches the gpu on re-record
+    }
     // FULL ghost only: the lights argument is already at zero there (no
     // emissive left to lose) and the reveal has finished, so the swap can
     // never land mid-crossover where the lamps still reach the buildings
@@ -4002,92 +4832,6 @@
     // lines and they stay. cityWireMeshes is kept for the cull below.
     cityCullInvisible();
   }
-  // ── city shader warm-up: every program flavor the reveal will ask for,
-  // compiled in load idle instead of mid-scroll. the reveal always built
-  // these on the hero→split stretch (applyScene's clip planes and the
-  // full-ghost twin bind are separate flavors), and any edit to the city
-  // shaders cold-starts the browser's program cache — measured 20+ fresh
-  // compiles mid-scroll after the tunnel patch: the canvas froze on each
-  // while the page kept scrolling and the green building lines visibly
-  // jumped ("like bug blink"). warmed with real hidden renders (the pcb
-  // recipe), NOT renderer.compile — compile() reads whatever clipping
-  // state the last drawn frame left, so it can bake the wrong
-  // numClippingPlanes for exactly these flavors. runs ONCE, after the
-  // model chain's five lamp-adding callbacks (terminal, door, panel,
-  // calculator, laptop) have all landed: light count is part of every
-  // lit program's identity, so an earlier warm compiles dead flavors.
-  var warmLights = 5, warmCityDone = false;
-  // testing hook: how many lamp callbacks the warm-up still waits for
-  window.__warmDbg = function(){ return {left: warmLights, done: warmCityDone}; };
-  function warmCityFlavors(){
-    if (warmCityDone || !cityMats.length) return;
-    // NEVER mid-reveal or mid-scroll: the warm is one synchronous
-    // ~100-300ms block (two renders + compiles). fired against a moving
-    // damp it ate the rack's whole fade ramp in one clamped dt step —
-    // the rack popped in solid ("rack is goin in with stick",
-    // "opacities of rack not works"). parked fades and a quiet page
-    // only; otherwise try again in a moment.
-    if (scrollActive || (rackFade > 0.001 && rackFade < 0.999)){ setTimeout(warmCityFlavors, 1000); return; }
-    warmCityDone = true;
-    var wm = sceneMode, wf = cityDimNow, wl = cityLightsNow;
-    // stage the reveal's full cast: the rack draws (alpha 0 — invisible,
-    // but a draw is what compiles its lit program with the TRUE clipping
-    // state; the rack callback's compile() bakes a stale plane count and
-    // the recompile used to land exactly as the rack faded in)
-    var wrv = rackRoot ? rackRoot.visible : false;
-    if (rackRoot) rackRoot.visible = true;
-    applyScene(2);
-    applyCityDim(0.5, 0.5);     // mid-fade: the ORIGINALS' clipped ghost flavor
-    renderer.setRenderTarget(frameCache);
-    renderer.render(scene, camera);
-    applyCityDim(0.0999, 0);    // full ghost: binds + compiles the twins
-    renderer.shadowMap.needsUpdate = true;   // shadow depth flavors, rack included
-    renderer.render(scene, camera);
-    // the bokeh depth pre-pass has its OWN override-material program
-    // family (base / instanced / clipped) that plain renders never
-    // build — run one pre-pass over the same staged scene. the cube
-    // lattice must STAND for it: its INSTANCED depth variant otherwise
-    // compiles at the lattice's first mid-scroll appearance — right at
-    // the ghost crossover, where the hitch's clamped dt also made the
-    // damped fades jump a step ("fix stick between u go in gost mode")
-    var wlv = cubeMeshG ? cubeMeshG.visible : null;
-    if (cubeMeshG){
-      cubeMeshG.visible = cubeMeshP.visible = cubeMeshF.visible = true;
-      cubeEdgeG.visible = cubeEdgeP.visible = cubeEdgeF.visible = true;
-    }
-    scene.overrideMaterial = bokeh.materialDepth;
-    renderer.setRenderTarget(bokeh.renderTargetDepth);
-    renderer.render(scene, camera);
-    scene.overrideMaterial = null;
-    renderer.setRenderTarget(null);
-    if (cubeMeshG && wlv === false){
-      cubeMeshG.visible = cubeMeshP.visible = cubeMeshF.visible = false;
-      cubeEdgeG.visible = cubeEdgeP.visible = cubeEdgeF.visible = false;
-    }
-    // ...and one full material sweep in the SAME final-lights, mode-2
-    // state: props the frames never drew (qblocks, door pockets, the
-    // kiosk) compile here instead of at their first mid-scroll appearance
-    renderer.compile(scene, camera);
-    if (rackRoot) rackRoot.visible = wrv;
-    applyCityDim(wf, wl);       // hand the live state back
-    applyScene(wm);
-    bokehStamp++;               // the staged depth map is garbage — re-render
-    renderer.shadowMap.needsUpdate = true;   // shadows back to the live state
-    frameCacheValid = false;    // the warm-up scribbled on the cache
-    frameDirtyFlag = true;
-  }
-  // ...and a safety net for a lamp callback that never lands (a failed
-  // model fetch would otherwise strand the counter forever — it already
-  // happened once, when the shared calculator/panel glbs went KTX2 and
-  // the r128 loader dropped them; they load from /models/_orig now):
-  // the timer warms with whatever lamp set actually made it in, which
-  // is exactly the set the reveal will render with.
-  function warmCityFallback(){
-    if (warmCityDone) return;
-    if (!cityMats.length){ setTimeout(warmCityFallback, 3000); return; }
-    warmCityFlavors();
-  }
-  setTimeout(warmCityFallback, 8000);
   var prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   // the low rung stands the ambient animators down exactly as the os
   // switch does — with nothing breathing, a settled shot renders nothing
@@ -4275,8 +5019,7 @@
   // + 5%') and LEFT 5% twice ('more left 5%', 'more left man !'). the
   // rack's screen spot goes 0.19 / 0.56 -> 0.09 / 0.71 and the laptop
   // rides with it, since the pose — orbit, fov, target — is untouched.
-  // ...then back UP 10% ('move items more top. + 10%' — the rack+laptop
-  // pair together): 0.09 / 0.71 -> 0.09 / 0.61.
+  // ...then back UP 10% ('move items more top. + 10%' — ported from v11)
   var AGENTS_DX = -0.16, AGENTS_DY = 0.11;
   // 'who it is for' drops the LAPTOP well below mid-frame. it had been hand
   // set to +0.15 and that was right ("bottom was good"); it lost that when
@@ -5301,9 +6044,12 @@
       // is a seventh of a viewport on any shape.
       calcWin.start = calcTop - VH * 0.70;
       calcWin.end = Math.max(calcWin.start + 1, calcTop - VH * 0.40);
-      // the rack leaves over math top 75% → 50% vh ("delay is so big" —
-      // the whole math train moved 10% vh earlier)
-      rackOutWin.start = calcTop - LU * 0.75;
+      // the rack leaves over math top 100% → 50% vh — DOUBLED from the
+      // old 75→50 quarter-unit: at riding speed that window compressed
+      // the fade into a pop, and the yoozap law is that the animation
+      // IS the scrub ("everything happend on scroll, nothing stick") —
+      // so the fade gets more SCROLL, never a timer
+      rackOutWin.start = calcTop - LU * 1.0;
       rackOutWin.end = Math.max(rackOutWin.start + 1, calcTop - LU * 0.5);
       // the release point: once the math panel's bottom passes the
       // calculator's bottom, the whole composition scrolls out with it
@@ -5469,11 +6215,19 @@
   // draw calls, triangles, programs, plus what the post chain is set to.
   // three resets render.calls/triangles on every render(), so this reads
   // whatever the last frame cost; call it after a frame has landed
-  window.__gpuDbg = function(withNames){
-    var r = renderer.info.render, m = renderer.info.memory;
-    if (withNames) return renderer.info.programs.map(function(p){ return p.name + '#' + (p.cacheKey || '').length; });
-    return {calls: r.calls, tris: r.triangles, lines: r.lines, points: r.points,
-            geometries: m.geometries, textures: m.textures, programs: renderer.info.programs.length,
+  // testing: raw handles for the console (webgpu bring-up)
+  window.__dbgScene = scene; window.__dbgRenderer = renderer; window.__dbgCamera = camera;
+  window.__dbgCity = {dim: applyCityDim, twin: cityTwinBind, render: function(){ composer.render(); }};
+  window.__dbgChain = {sync: syncClipGroups, scenePass: scenePass, plate: platePassNode, lensCache: lensCache,
+                       ppGrade: ppGrade, tmTex: tmTex, dofNode: dofNode,
+                       rts: {tm: rtTM, dof: rtDOF, srgb: rtSRGB, fxaa: rtFXAA},
+                       pps: {tm: ppTM, dof: ppDOF, main: ppMain, fxaa: ppFXAA, lens: ppLens},
+                       u: {focus: focusU, aperture: apertureU, maxblur: maxblurU, aspect: aspectU, lod: dofLodU}};
+  window.__gpuDbg = function(){
+    var inf = renderer.info || {};
+    var r = inf.render || {}, m = inf.memory || {};
+    return {backend: window.__gpuBackend, calls: r.calls, tris: r.triangles, lines: r.lines, points: r.points,
+            geometries: m.geometries, textures: m.textures,
             chain: CHAIN_RES, dpr: renderer.getPixelRatio(), tier: MQ.tier,
             dof: bokeh.enabled, bloom: bloom.enabled, live: !!(window.__liveWhy && window.__liveWhy.live)};
   };
@@ -5491,25 +6245,6 @@
             rackVis: rackRoot ? rackRoot.visible : null,
             rackFade: rackFade, cubeFade: cubeFade, pcbFade: pcbFade, cubeHide: cubeHide, revFade: revFade, revSeal: revSeal, radialHide: radialHide, calcWin: calcWin.p, metalWin: metalWin.p, rackOutWin: rackOutWin.p, rack2Op: rack2Op, agentsWin: agentsWin.p, forWin: forWin.p, faqWin: faqWin.p, faqCube: faqCube, ctaWin: ctaWin.p, footWin: footWin.p, holeY: holeYQ, lapLid: lapLidQ, lapVert: lapLidVertQ,
             cam: camera.position.toArray(), tgt: controls.target.toArray()};
-  };
-  // testing hook: what city stands between the lens and the machines —
-  // a ray through screen fractions (0..1, y down) returns every city hit
-  // NEARER than the rack, with its world spot and material. used to place
-  // the agents view tunnel; harmless to keep, it runs only when called
-  window.__tunProbe = function(sx, sy){
-    var rc = new THREE.Raycaster();
-    rc.setFromCamera(new THREE.Vector2(sx * 2 - 1, 1 - sy * 2), camera);
-    var list = [];
-    for (var ti = 0; ti < cityAllMeshes.length; ti++) if (cityAllMeshes[ti].o.visible) list.push(cityAllMeshes[ti].o);
-    var rackD = camera.position.distanceTo(new THREE.Vector3(-0.35, 1.6, -1.72));
-    return rc.intersectObjects(list, false)
-      .filter(function(h){ return h.distance < rackD - 1.5; })
-      .map(function(h){
-        var hm = Array.isArray(h.object.material) ? h.object.material[0] : h.object.material;
-        return {d: +h.distance.toFixed(2),
-                p: [+h.point.x.toFixed(2), +h.point.y.toFixed(2), +h.point.z.toFixed(2)],
-                m: (hm && hm.name) || ''};
-      });
   };
   var scrubHome = null, scrubAz = 0, scrubAzD = 0, scrubFree = false, scrubScene = 1;
   // grabbing a number while scrolled pans into this offset, which rides on
@@ -5546,35 +6281,41 @@
   // real windows: ~30% of the lights are off at any moment, and each window
   // re-rolls its state every few seconds at its own staggered time, so lights
   // snap on and off across the towers like real apartments at night.
-  var winU = { time: { value: 0 } };
+  // WEBGPU: node materials have no onBeforeCompile — the same per-cell
+  // random on/off is an emissiveNode now, byte-for-byte the r128 math.
+  // the emissive map's sRGB decode is the sampler's own (hardware format).
+  var winTimeU = TSL.uniform(0);
+  var winU = { time: winTimeU };
   function windowFlicker(m){
-    // once only: the material is shared across meshes and a re-assign
-    // here would wipe the tunnel patch chained on top of this one
-    if (m.userData.__flick) return;
-    m.userData.__flick = true;
-    m.onBeforeCompile = function(shader){
-      shader.uniforms.uWinTime = winU.time;
-      shader.fragmentShader = 'uniform float uWinTime;\n' + shader.fragmentShader.replace(
-        '#include <emissivemap_fragment>',
-        [
-          '#ifdef USE_EMISSIVEMAP',
-          '  vec4 emissiveColor = texture2D( emissiveMap, vUv );',
-          '  emissiveColor.rgb = emissiveMapTexelToLinear( emissiveColor ).rgb;',
-          '  vec2 wcell = floor( vUv * 24.0 );',
-          '  float wh = fract( sin( dot( wcell, vec2(12.9898, 78.233) ) ) * 43758.5453 );',
-          '  float wslot = floor( uWinTime / 5.0 + wh * 43.0 );',
-          '  float wr = fract( sin( dot( wcell, vec2(39.3468, 11.135) ) + wslot * 7.13 ) * 24634.6345 );',
-          '  float won = step( 0.3, wr );',
-          '  totalEmissiveRadiance *= emissiveColor.rgb * won;',
-          '#endif'
-        ].join('\n')
-      );
-    };
+    if (!m.emissiveMap) return;
+    var vUv = TSL.uv();
+    var texel = TSL.texture(m.emissiveMap, vUv);
+    var wcell = TSL.floor(vUv.mul(24.0));
+    var wh = TSL.fract(TSL.sin(TSL.dot(wcell, TSL.vec2(12.9898, 78.233))).mul(43758.5453));
+    var wslot = TSL.floor(winTimeU.div(5.0).add(wh.mul(43.0)));
+    var wr = TSL.fract(TSL.sin(TSL.dot(wcell, TSL.vec2(39.3468, 11.135)).add(wslot.mul(7.13))).mul(24634.6345));
+    var won = TSL.step(0.3, wr);
+    m.emissiveNode = texel.rgb
+      .mul(TSL.materialReference('emissive', 'color'))
+      .mul(TSL.materialReference('emissiveIntensity', 'float'))
+      .mul(won);
   }
   var wireMat = new THREE.MeshBasicMaterial({
     wireframe: true, color: 0x0ec435, transparent: true, opacity: 0.05, depthWrite: false
   });
   tunnelPatch(wireMat);   // the green building lines clear the agents corridor too
+  // "perfect shape": the overlay's lines trace the EXACT triangles of
+  // the faces they sit on, and lines rasterize depth on a different
+  // grid than triangles — so the depth test dashed every coplanar
+  // stroke (naked at the 2.0 chain's 1:1 pixel grid; the depthTest-off
+  // probe drew them continuous). metal ignores depthBias on line
+  // primitives, so the bias lives in the vertex stage instead: every
+  // wire vertex is pulled 0.02% of its distance straight along the
+  // sight line — the projected screen position is mathematically
+  // unchanged, only depth separates from the face underneath. assigned
+  // at creation, before any draw: one pipeline, no runtime rebuild.
+  wireMat.vertexNode = TSL.cameraProjectionMatrix.mul(TSL.cameraViewMatrix).mul(
+    TSL.vec4(TSL.positionWorld.add(TSL.cameraPosition.sub(TSL.positionWorld).mul(0.0002)), 1.0));
   // the demo decodes vertex colors as srgb (its 3d settings say so); three
   // reads them linear, which renders every stroke brighter than the demo.
   function srgbToLinear(c){ return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
@@ -5734,12 +6475,9 @@
         if (m.map) m.map.anisotropy = maxAniso;
         if (m.emissiveMap) m.emissiveMap.anisotropy = maxAniso;
         if (cityMats.indexOf(m) === -1) cityMats.push(m);
-        // the agents view tunnel rides every city material; the BODY
-        // families also carry the deep-field fade (never the hanging
-        // wire strokes or the street neons — the green city look stays;
-        // 'Light' — the window dots — DOES fade there: at this depth
-        // they were the orange mud, and the near signs live inside the
-        // deep mask's z > -4 margin anyway)
+        // the tunnel + ghost body-hide ride every city material; the
+        // BODY families carry the ghost fade (never the hanging wire
+        // strokes or the street neons — the green city look stays)
         tunnelPatch(m, m.name !== 'Wire' && m.name !== 'Streamers' &&
                        m.name !== 'Waveform' && m.name !== 'Electricity');
       });
@@ -5768,6 +6506,12 @@
     });
     overlays.forEach(function(x){ x.parent.add(x.mesh); });
     MQ.scene();   // the rung decides whether the strokes and overlays draw at all
+    // NO render bundle here, and it was tried: WebGPU bundle encoders
+    // have no setStencilReference — the ghost city's stencil states
+    // crash the recording (upstream three limitation). the per-item
+    // churn at the split stays engine-side until #30560 or a
+    // stencil-free bundle split. cityBundle stays null; the dirty
+    // hooks are dormant no-ops kept for the day it works.
     scene.add(g.scene);
     // no asphalt, nothing in its place: the ground is just the #1e1d1d void.
     // neon street ribbons stay.
@@ -5787,9 +6531,36 @@
     // front just proud of the south wall so it reads on camera. the building
     // itself is untouched.
     g.scene.traverse(function(o){
-      if (!towerMesh && o.isMesh && o.name === 'FlatDeprecated_geo_FlatDeprecated_0_1') towerMesh = o;
+      if (!towerMesh && o.isMesh && o.name === 'FlatDeprecated_geo_FlatDeprecated_0_1'){
+        towerMesh = o;
+        var twm = Array.isArray(o.material) ? o.material[0] : o.material;
+        twm.opacityNode = TSL.materialOpacity.mul(towerFadeU);   // the reveal's opacity dissolve
+      }
     });
     cityMats.push(wireMat);
+    // ── THE METAL CORRIDOR MASK ── ("only in front! buildings that are
+    // front of racks"): a per-fragment fade multiplied into every city
+    // material's opacity — active only for pixels inside the racks'
+    // padded screen rect AND nearer the lens than the racks, so the mush
+    // crossing the pair fades while the backdrop city stays. soft 5%-uv
+    // edges, 6m depth feather; all three inputs are uniforms, so the
+    // whole thing is uniform-only per frame — one pipeline, no rebuilds.
+    (function(){
+      var mUV = TSL.screenUV;
+      var inX = TSL.smoothstep(metalRectU.x, metalRectU.x.add(0.05), mUV.x)
+        .mul(TSL.oneMinus(TSL.smoothstep(metalRectU.z.sub(0.05), metalRectU.z, mUV.x)));
+      var inY = TSL.smoothstep(metalRectU.y, metalRectU.y.add(0.05), mUV.y)
+        .mul(TSL.oneMinus(TSL.smoothstep(metalRectU.w.sub(0.05), metalRectU.w, mUV.y)));
+      // tight cut: the mask lives ONLY in city materials, so nothing of
+      // the rack can be caught — anything nearer than the rack's front
+      // face fades fully, with a 2.5m feather right at the face
+      var mFront = TSL.oneMinus(TSL.smoothstep(metalNearU.sub(2.5), metalNearU, TSL.positionView.z.negate()));
+      var mMask = TSL.oneMinus(metalClearU.mul(inX).mul(inY).mul(mFront));
+      for (var mci = 0; mci < cityMats.length; mci++){
+        var mcm = cityMats[mci];
+        mcm.opacityNode = (mcm.opacityNode || TSL.materialOpacity).mul(mMask);
+      }
+    })();
     // build the twins BEFORE the first applyScene/applyCityDim so the
     // mirror has something to write to (the overlays' wireMat is already
     // unlit and is handed back unchanged — twin === original for those)
@@ -5811,11 +6582,7 @@
     // it) — bake all world matrices once and stop the renderer re-walking
     // the whole tree on every one of its passes
     scene.updateMatrixWorld(true);
-    scene.autoUpdate = false;
-    // (the city's mode-2 shader warm-up — warmCityFlavors — waits for the
-    // LAST lamp of the model chain: light count is part of every lit
-    // program's identity, so warming here, before the prop lamps land,
-    // compiles flavors the reveal would never use)
+    scene.matrixWorldAutoUpdate = false;   // r186 name for the old scene.autoUpdate = false
     loader.load('/models/server_racking_system.glb', function(r){
       var groundY = -0.15, topY = 3.45;
       if (towerMesh){
@@ -5915,6 +6682,12 @@
             var c2 = m.clone();
             c2.clippingPlanes = glitchPlanes;   // clone() froze a dead copy — relink the live array
             c2.transparent = true; c2.opacity = 0;
+            // the clone was born BEFORE the original's stencil stamp
+            // (line ~6694), so its materials never stamped ref 1 — and
+            // the ghost city's NotEqual test happily painted mush all
+            // over the second rack while the original stayed clean.
+            // stamp here so BOTH racks own their silhouettes.
+            c2.stencilWrite = true; c2.stencilRef = 1; c2.stencilZPass = THREE.ReplaceStencilOp;
             m2cache[m.uuid] = c2;
             rack2Mats.push(c2);
           }
@@ -5935,7 +6708,7 @@
         var tex = new THREE.CanvasTexture(cv);
         tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
         tex.anisotropy = ANISO;
-        tex.encoding = THREE.sRGBEncoding;
+        tex.colorSpace = THREE.SRGBColorSpace;
         var mat = new THREE.MeshBasicMaterial({map: tex, transparent: true, opacity: 0});
         mat.toneMapped = false;
         mat.depthTest = false; mat.depthWrite = false;
@@ -6075,16 +6848,9 @@
           // draw across the machines either
           m.stencilWrite = true; m.stencilRef = 1; m.stencilZPass = THREE.ReplaceStencilOp;
           // per-instance fade lane (slide 2's opacity wave): an aFade
-          // instanced attribute multiplies the alpha — baked into the
-          // program at load, driven from the same masked writer
-          m.onBeforeCompile = function(sh){
-            sh.vertexShader = sh.vertexShader
-              .replace('#include <common>', '#include <common>\nattribute float aFade;\nvarying float vFade;')
-              .replace('void main() {', 'void main() {\n\tvFade = aFade;');
-            sh.fragmentShader = sh.fragmentShader
-              .replace('#include <common>', '#include <common>\nvarying float vFade;')
-              .replace('#include <color_fragment>', '#include <color_fragment>\n\tdiffuseColor.a *= vFade;');
-          };
+          // instanced attribute multiplies the alpha — a one-line
+          // opacityNode on webgpu instead of the old shader-string patch
+          m.opacityNode = TSL.materialOpacity.mul(TSL.attribute('aFade', 'float'));
           return m;
         }
         // each mesh needs its OWN geometry for its own aFade lane —
@@ -6172,7 +6938,7 @@
         // flips clipIntersection for its gap — compile the union
         // variant now so the flip never builds shaders mid-ride
         for (var wm = 0; wm < rackMats.length; wm++) rackMats[wm].clipIntersection = true;
-        renderer.compile(scene, camera);
+        warmScenePass();
         for (var wm2 = 0; wm2 < rackMats.length; wm2++) rackMats[wm2].clipIntersection = false;
 
         // ── the floor logos: real product icons (the manager's
@@ -6221,7 +6987,7 @@
           }
           s2Logos.visible = false;
           scene.add(s2Logos);
-          renderer.compile(scene, camera);
+          warmScenePass();
         })();
         function instIdx(target){
           var c = 0;
@@ -6355,7 +7121,7 @@
           var qt = new THREE.DataTexture(qd, 256, 1, THREE.RGBAFormat);
           qt.magFilter = THREE.NearestFilter; qt.minFilter = THREE.NearestFilter;
           qt.generateMipmaps = false;
-          qt.encoding = THREE.sRGBEncoding;   // the gamma pass washes raw bytes otherwise
+          qt.colorSpace = THREE.SRGBColorSpace;   // the gamma pass washes raw bytes otherwise
           qt.needsUpdate = true;
           return qt;
         }
@@ -6396,7 +7162,7 @@
           qArr[2].instanceColor.needsUpdate = true;
         })();
         qBlocks = qArr;
-        renderer.compile(scene, camera);   // no mid-scroll program build
+        warmScenePass();   // no mid-scroll program build
         frameDirtyFlag = true;
       });
       // ── the pcb inside the free cube (leg 5's payload) ──
@@ -6449,7 +7215,7 @@
           hcv.width = 1024; hcv.height = 512;
           var hcx = hcv.getContext('2d');
           termHoloTex = new THREE.CanvasTexture(hcv);
-          termHoloTex.encoding = THREE.sRGBEncoding;
+          termHoloTex.colorSpace = THREE.SRGBColorSpace;
           termHoloTex.flipY = true;   // OUR plane, standard canvas orientation
           termHoloTex.minFilter = THREE.LinearFilter;
           termHoloTex.generateMipmaps = false;
@@ -6462,6 +7228,7 @@
             // bias can never cut it — its draw slot alone decides
             depthWrite: false, depthTest: false
           });
+          noTM(termHoloMat);
           termHoloMat.stencilWrite = true; termHoloMat.stencilRef = 1; termHoloMat.stencilZPass = THREE.ReplaceStencilOp;
 
           // the plate's REAL aspect drives the canvas — the layout is
@@ -6646,11 +7413,10 @@
         twrap.updateMatrixWorld(true);
         termRoot = twrap;
         scene.add(twrap);
-        termLamp = new THREE.PointLight(0xffe6c0, 0, 6);
+        termLamp = LP(new THREE.PointLight(0xffe6c0, 0, 6));
         termLamp.position.set(2.3, 2.2, 1.6);
         scene.add(termLamp);
-        if (--warmLights === 0) setTimeout(warmCityFlavors, 0);
-        renderer.compile(scene, camera);
+        warmScenePass();
         // ── the payment card, child of the kiosk: it rides twrap's
         // own scale/heading, sliding into the reader in local space ──
         loader.load('/models/card.glb', function(cg2){
@@ -6697,7 +7463,7 @@
           twrap.add(cwrap2);
           cwrap2.updateMatrixWorld(true);
           cardRoot = cwrap2;
-          renderer.compile(scene, camera);
+          warmScenePass();
           if (--dracoPending === 0) draco.dispose();
         });
         if (--dracoPending === 0) draco.dispose();
@@ -6782,11 +7548,10 @@
         scene.add(dwrap);
         // its own warm key, driven by the fade — dark panels read as a
         // hole under the rack lamp alone (the calculator taught this)
-        doorLamp = new THREE.PointLight(0xffe6c0, 0, 6);
+        doorLamp = LP(new THREE.PointLight(0xffe6c0, 0, 6));
         doorLamp.position.set(0.6, rackTopY * 0.75, rackBox.max.z + 2.1);
         scene.add(doorLamp);
-        if (--warmLights === 0) setTimeout(warmCityFlavors, 0);
-        renderer.compile(scene, camera);
+        warmScenePass();
         if (--dracoPending === 0) draco.dispose();
       });
       // ── the wall control panel (slide 4, 'workloads and previews') ──
@@ -6800,10 +7565,7 @@
       // not draco and 3mb of pngs: it streams in the background like the
       // pcb (no preload link, no dracoPending slot) and simply isn't
       // there until it lands — the fade block guards on panelRoot.
-      // _orig path: /models/sci-fi_control_panel.glb is KTX2/BASIS now
-      // (variant 12 shares the file) and the r128 loader here can't read
-      // it — this copy is the last webp build, byte-identical look
-      loader.load('/models/_orig/sci-fi_control_panel.glb', function(cp){
+      loader.load('/models/sci-fi_control_panel.glb', function(cp){
         var cr = cp.scene;
         cr.updateMatrixWorld(true);
         var cb = new THREE.Box3().setFromObject(cr);
@@ -7112,7 +7874,7 @@
           };
           panelTex = new THREE.CanvasTexture(panelCv);
           panelTex.flipY = false;   // the gltf uv convention of the map it replaces
-          panelTex.encoding = THREE.sRGBEncoding;
+          panelTex.colorSpace = THREE.SRGBColorSpace;
           panelTex.wrapS = pEm.wrapS; panelTex.wrapT = pEm.wrapT;
           // redrawn every visible frame: mipmaps would be rebuilt on
           // every upload (the holo screen's lesson)
@@ -7130,12 +7892,11 @@
         // its own warm key, driven by the fade: this wall is the rack's
         // shadowed side and the dark body reads as a hole without it
         // (the door lamp's lesson)
-        panelLamp = new THREE.PointLight(0xffe6c0, 0, 7);
+        panelLamp = LP(new THREE.PointLight(0xffe6c0, 0, 7));
         panelLamp.position.set(rackBox.max.x + 2.2, rackBotY + rackH * 0.32,
                                (rackBox.min.z + rackBox.max.z) * 0.5);
         scene.add(panelLamp);
-        if (--warmLights === 0) setTimeout(warmCityFlavors, 0);
-        renderer.compile(scene, camera);
+        warmScenePass();
         frameDirtyFlag = true;
       });
       loader.load('/models/pcb.glb', function(pg){
@@ -7189,14 +7950,12 @@
         // warm the board now, in load idle: compile its programs AND
         // push its 45mb of buffers to the gpu with one hidden render —
         // otherwise the first visible frame stalls right at the leg-4 seam
-        renderer.compile(scene, camera);
+        // one hidden pass-warm with the board visible: compiles ITS
+        // pipelines against the real attachment state and pushes its
+        // 45mb of buffers in the same tiny draw
         pr.visible = true;
-        renderer.setRenderTarget(frameCache);
-        renderer.render(scene, camera);
-        renderer.setRenderTarget(null);
+        warmScenePass();
         pr.visible = false;
-        frameCacheValid = false;   // the warm-up scribbled on the cache
-        frameDirtyFlag = true;
         pcbRoot = pr;
         // leg 5's frame is SOLVED from the board's own width (see
         // measureBoardShot) and pcbW only exists from this moment —
@@ -7367,7 +8126,7 @@
             }
             podsDraw();
             var ptex = new THREE.CanvasTexture(pcv);
-            ptex.encoding = THREE.sRGBEncoding;
+            ptex.colorSpace = THREE.SRGBColorSpace;
             ptex.minFilter = THREE.LinearMipmapLinearFilter;   // trilinear: the plate minifies ~2x on screen
             ptex.generateMipmaps = true;
             ptex.anisotropy = ANISO;
@@ -7380,6 +8139,7 @@
               toneMapped: false, side: THREE.DoubleSide,
               depthWrite: false, depthTest: false   // a floating panel, like every holo on this stage
             });
+            noTM(s3PodsMat);
             s3PodsMat.stencilWrite = true; s3PodsMat.stencilRef = 1; s3PodsMat.stencilZPass = THREE.ReplaceStencilOp;
             // covers the board's FACE: its full depth wide, the canvas
             // aspect tall (≈ the slab height), dead center, a hair proud
@@ -7433,7 +8193,7 @@
           // change-detect so the settled frame picks it up once
           s3CubeQ = -1;
           frameDirtyFlag = true;
-          renderer.compile(scene, camera);
+          warmScenePass();
         })();
         if (--dracoPending === 0) draco.dispose();   // free the decoder workers
       });
@@ -7441,9 +8201,7 @@
       // shot) ── its spot is solved per frame from the live camera (screen
       // 0.78/0.5 at the focus distance), so here it only needs normalizing:
       // recentered in a group, sized to one world unit, faded to zero
-      // _orig path: same story as the control panel — the shared
-      // /models/calculator.glb went KTX2 for variant 12, unreadable here
-      loader.load('/models/_orig/calculator.glb', function(cg){
+      loader.load('/models/calculator.glb', function(cg){
         var cr = cg.scene;
         var cb = new THREE.Box3().setFromObject(cr);
         var cs = new THREE.Vector3(); cb.getSize(cs);
@@ -7531,9 +8289,9 @@
         // (the minification moiré on the digits read as constant glitching)
         dtex.minFilter = THREE.LinearFilter; dtex.generateMipmaps = false;
         dtex.anisotropy = ANISO;
-        dtex.encoding = THREE.sRGBEncoding;   // canvas colors are sRGB; keep them honest through the gamma pass
+        dtex.colorSpace = THREE.SRGBColorSpace;   // canvas colors are sRGB; keep them honest through the gamma pass
         var dmat = new THREE.MeshBasicMaterial({map: dtex, transparent: true, opacity: 0});
-        dmat.toneMapped = false;   // neon: skip reinhard, feed the bloom raw
+        noTM(dmat);   // neon: skip reinhard, feed the bloom raw
         // the plate floats sub-millimeter off the glass: at ride distance
         // the depth buffer can't split them and pixels flicker (the
         // "gloss glitch"). draw order stacks the layers, depth sits out
@@ -7583,9 +8341,9 @@
         calcTextDraw(null);
         ttex.minFilter = THREE.LinearFilter; ttex.generateMipmaps = false;
         ttex.anisotropy = ANISO;
-        ttex.encoding = THREE.sRGBEncoding;
+        ttex.colorSpace = THREE.SRGBColorSpace;
         calcTextMat = new THREE.MeshBasicMaterial({map: ttex, transparent: true, opacity: 0});
-        calcTextMat.toneMapped = false;
+        noTM(calcTextMat);
         calcTextMat.depthTest = false; calcTextMat.depthWrite = false;
         calcTextMat.stencilWrite = true; calcTextMat.stencilRef = 1; calcTextMat.stencilZPass = THREE.ReplaceStencilOp;
         var dtextm = new THREE.Mesh(new THREE.PlaneGeometry(0.104, 0.041), calcTextMat);
@@ -7667,9 +8425,9 @@
         ltex = new THREE.CanvasTexture(lcv);
         ltex.minFilter = THREE.LinearFilter; ltex.generateMipmaps = false;
         ltex.anisotropy = ANISO;
-        ltex.encoding = THREE.sRGBEncoding;
+        ltex.colorSpace = THREE.SRGBColorSpace;
         var lmat = new THREE.MeshBasicMaterial({map: ltex, transparent: true, opacity: 0});
-        lmat.toneMapped = false;
+        noTM(lmat);
         lmat.depthTest = false; lmat.depthWrite = false;
         lmat.stencilWrite = true; lmat.stencilRef = 1; lmat.stencilZPass = THREE.ReplaceStencilOp;
         calcLabel = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.14), lmat);
@@ -7692,9 +8450,9 @@
         ggx.fillStyle = grad;
         ggx.fillRect(0, 0, 256, 256);
         var gtex = new THREE.CanvasTexture(gcv);
-        gtex.encoding = THREE.sRGBEncoding;
+        gtex.colorSpace = THREE.SRGBColorSpace;
         calcGlowMat = new THREE.MeshBasicMaterial({map: gtex, transparent: true, opacity: 0});
-        calcGlowMat.toneMapped = false;
+        noTM(calcGlowMat);
         calcGlowMat.depthTest = false; calcGlowMat.depthWrite = false;
         calcGlowMat.stencilWrite = true; calcGlowMat.stencilRef = 1; calcGlowMat.stencilZPass = THREE.ReplaceStencilOp;
         calcGlow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1.35), calcGlowMat);
@@ -7708,14 +8466,11 @@
         scene.updateMatrixWorld(true);
         // warm the textures now, off the ride: compile + one hidden render
         // so the first visible frame doesn't stall mid-scroll
-        renderer.compile(scene, camera);
+        // hidden pass-warm with the calculator visible: right pipelines,
+        // textures pushed, one tiny draw
         cwrap.visible = true;
-        renderer.setRenderTarget(frameCache);
-        renderer.render(scene, camera);
-        renderer.setRenderTarget(null);
+        warmScenePass();
         cwrap.visible = false;
-        frameCacheValid = false;   // the warm-up scribbled on the cache
-        frameDirtyFlag = true;
         calcRoot = cwrap;
         // testing probe (like __scrubDbg): raycast the calculator from a
         // screen fraction to read the hit's UV — maps render→texture px
@@ -7739,10 +8494,9 @@
         // deliberately: the power below is 9× what it was, and a long
         // cutoff would carry all of that onto the ghosted city standing
         // behind the right circle. past 12 units this rig lights nothing
-        calcLamp = new THREE.PointLight(new THREE.Color(calcLightCfg.key.c), 0, 12, 2);
-        calcFill = new THREE.PointLight(new THREE.Color(calcLightCfg.fill.c), 0, 12, 2);
+        calcLamp = LP(new THREE.PointLight(new THREE.Color(calcLightCfg.key.c), 0, 12, 2));
+        calcFill = LP(new THREE.PointLight(new THREE.Color(calcLightCfg.fill.c), 0, 12, 2));
         scene.add(calcLamp); scene.add(calcFill);
-        if (--warmLights === 0) setTimeout(warmCityFlavors, 0);
         for (var cei = 0; cei < calcMats.length; cei++){
           calcMats[cei].emissiveIntensity = calcLightCfg.emis;
           calcMats[cei].metalness = calcLightCfg.metal;
@@ -7867,9 +8621,9 @@
           // the calculator's crispness recipe: no mip shimmer at fov 8
           stex.minFilter = THREE.LinearFilter; stex.generateMipmaps = false;
           stex.anisotropy = ANISO;
-          stex.encoding = THREE.sRGBEncoding;
+          stex.colorSpace = THREE.SRGBColorSpace;
           lapScreenMat = new THREE.MeshBasicMaterial({map: stex, transparent: true, opacity: 0});
-          lapScreenMat.toneMapped = false;   // self-lit like the city's signs
+          noTM(lapScreenMat);   // self-lit like the city's signs
           // sub-millimeter off the glass: draw order stacks it, depth sits out
           lapScreenMat.depthTest = false; lapScreenMat.depthWrite = false;
           lapScreenMat.stencilWrite = true; lapScreenMat.stencilRef = 1; lapScreenMat.stencilZPass = THREE.ReplaceStencilOp;
@@ -7961,7 +8715,7 @@
         var DIO_RO = 20010;   // above the whole laptop stack
         var lapDioPlates = [];   // {draw, tex} — repainted when the font lands
         function dioMat(M, aRest){
-          M.transparent = true; M.opacity = 0; M.toneMapped = false;
+          M.transparent = true; M.opacity = 0; noTM(M);
           M.depthTest = false; M.depthWrite = false;
           M.stencilWrite = true; M.stencilRef = 1; M.stencilZPass = THREE.ReplaceStencilOp;
           M.clippingPlanes = lapDioClip;
@@ -7992,7 +8746,7 @@
           var pt6 = new THREE.CanvasTexture(pc);
           pt6.minFilter = THREE.LinearFilter; pt6.generateMipmaps = false;
           pt6.anisotropy = ANISO;
-          pt6.encoding = THREE.sRGBEncoding;
+          pt6.colorSpace = THREE.SRGBColorSpace;
           lapDioPlates.push({draw: doDraw, tex: pt6});
           return dioObj(new THREE.Mesh(new THREE.PlaneGeometry(w6, h6),
             dioMat(new THREE.MeshBasicMaterial({map: pt6, side: THREE.DoubleSide}), 1)), ro);
@@ -8502,7 +9256,7 @@
         function lapSwap(tex, cv, srgb){
           var t = new THREE.CanvasTexture(cv);
           t.flipY = false;   // gltf convention — the model's UVs expect it
-          if (srgb) t.encoding = THREE.sRGBEncoding;
+          if (srgb) t.colorSpace = THREE.SRGBColorSpace;
           t.wrapS = tex.wrapS; t.wrapT = tex.wrapT;
           t.minFilter = tex.minFilter; t.magFilter = tex.magFilter;
           t.anisotropy = tex.anisotropy;
@@ -8609,7 +9363,7 @@
             // the calculator's crispness recipe: no mip shimmer at fov 8
             tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
             tex.anisotropy = ANISO;
-            tex.encoding = THREE.sRGBEncoding;
+            tex.colorSpace = THREE.SRGBColorSpace;
             tex.wrapS = THREE.RepeatWrapping;
             tex.repeat.x = 2;   // the message twice around the drum
             return {tex: tex, draw: draw,
@@ -8671,16 +9425,15 @@
         }
         // its own small warm key, in the scene from load (constant light
         // count) — the dark body would read as a hole against the night
-        lapLamp = new THREE.PointLight(0xffe6c0, 0, 6, 2);
+        lapLamp = LP(new THREE.PointLight(0xffe6c0, 0, 6, 2));
         // key from the LEFT: the leg-11 lens looks from the left, so a
         // right-side lamp lands its specular hotspot square on the lid
         // glass ("light is on display") — mirrored left it slides off
         lapLamp.position.set(lwrap.position.x - 1.6, groundY + 1.6, lwrap.position.z + 1.9);
         scene.add(lapLamp);
-        if (--warmLights === 0) setTimeout(warmCityFlavors, 0);
         // compile now, in load idle — the first visible frame comes right
         // as the addons cover thins; a shader stall there would hitch it
-        renderer.compile(scene, camera);
+        warmScenePass();
         // ...and push every texture the laptop stages to the gpu in the
         // same breath: the scrubbed 2k body maps, the lid's terminal
         // canvas and the hologram bands otherwise upload lazily on their
@@ -8710,14 +9463,14 @@
       // the key light points straight down, so the rack's faces would render
       // black; one small warm lamp in the street lets the servers read.
       // it fades in and out with the rack.
-      rackLamp = new THREE.PointLight(0xffe6c0, 0.55 * rackFade, 6, 2);
+      rackLamp = LP(new THREE.PointLight(0xffe6c0, 0.55 * rackFade, 6, 2));
       rackLamp.position.set(0.95, 1.7, -0.25);
       scene.add(rackLamp);
       // leg 3's key: a warm beam standing FRONT-RIGHT of the rack (as the
       // leg-3 camera sees it) — it lights the face and rakes the right
       // flank at ~45°. it rises with the same scroll scrub as the reveal
       // (while spotB, the city key, dims away).
-      rackSpot = new THREE.SpotLight(0xffe6c0, 2.4 * rackFade);
+      rackSpot = LP(new THREE.SpotLight(0xffe6c0, 2.4 * rackFade));
       rackSpot.angle = 28 * Math.PI / 180; rackSpot.penumbra = 0.5; rackSpot.decay = 0; rackSpot.distance = 0;
       rackSpot.position.set(3.2, 9.5, 6.6);   // front-right and high
       rackSpot.target.position.set(-0.35, 1.6, -1.72);
@@ -8726,7 +9479,7 @@
       // FILL: a soft indigo point front-LEFT at ~1/3 the key's weight —
       // lifts the shadow side the warm key leaves void, and the
       // warm-key/cool-fill split is the classic color contrast
-      rackFill = new THREE.PointLight(0xa5b4fc, 0.2 * rackFade, 8, 2);
+      rackFill = LP(new THREE.PointLight(0xa5b4fc, 0.2 * rackFade, 8, 2));
       rackFill.position.set(-2.6, 1.3, 1.9);
       rackFill.updateMatrixWorld(true);
       scene.add(rackFill);
@@ -8734,7 +9487,7 @@
       // leg looks from the front/left, so this rakes the far edges and
       // separates the black rack (and the laptop's top line) from the
       // black night. no shadows, decay 0 like the key spot.
-      rackRim = new THREE.SpotLight(0xdce6ff, 1.6 * rackFade);
+      rackRim = LP(new THREE.SpotLight(0xdce6ff, 1.6 * rackFade));
       rackRim.angle = 40 * Math.PI / 180; rackRim.penumbra = 0.65; rackRim.decay = 0; rackRim.distance = 0;
       rackRim.position.set(2.8, 8.2, -8.0);
       rackRim.target.position.set(-0.35, 1.6, -1.72);
@@ -8745,10 +9498,10 @@
       // so without these it renders near-black. added at load like every
       // light (constant light count = no mid-ride recompile); intensity
       // rides the metal window with the copy's fade.
-      rackLamp2 = new THREE.PointLight(0xffe6c0, 0, 6, 2);
+      rackLamp2 = LP(new THREE.PointLight(0xffe6c0, 0, 6, 2));
       rackLamp2.position.set(0.95 + rack2Dx, 1.7, -0.25);
       scene.add(rackLamp2);
-      rackSpot2 = new THREE.SpotLight(0xffe6c0, 0);
+      rackSpot2 = LP(new THREE.SpotLight(0xffe6c0, 0));
       rackSpot2.angle = 28 * Math.PI / 180; rackSpot2.penumbra = 0.5; rackSpot2.decay = 0; rackSpot2.distance = 0;
       rackSpot2.position.set(3.2 + rack2Dx, 9.5, 6.6);
       rackSpot2.target.position.set(-0.35 + rack2Dx, 1.6, -1.72);
@@ -8764,7 +9517,7 @@
       setTimeout(function(){
         if (sceneMode !== 1 || scrubHome) return;   // already revealed or riding
         applyScene(2);
-        renderer.compile(scene, camera);
+        warmScenePass();
         applyScene(1);
         renderer.shadowMap.needsUpdate = true;
       }, 200);
@@ -9113,8 +9866,14 @@
       return;
     }
     dbgDt += (dt - dbgDt) * 0.05;
-    // scroll drives the ride; a light damp on p rounds off wheel steps
-    var scrollNow = window.pageYOffset || 0;
+    // scroll drives the ride; a light damp on p rounds off wheel steps.
+    // __warmY (set only by the boot reveal-sweep warm, below) drives the
+    // ride's scroll INPUT without touching the page — no scrollbar move, no
+    // scroll-restore fight — so the loop runs the REAL reveal at load and
+    // every ghost/stencil/depthWrite/clip/shadow pipeline it needs compiles
+    // behind the veil (rendered off-screen, see the __warmY intercept in the
+    // render block). the banned "veil tour" moved window.scrollTo; this does not.
+    var scrollNow = window.__warmY != null ? window.__warmY : (window.pageYOffset || 0);
     if (scrollNow !== scrollLastY){ scrollLastY = scrollNow; scrollQuietT = 0; }
     else scrollQuietT += dt;
     scrollActive = scrollQuietT < 0.25;
@@ -9122,12 +9881,14 @@
     // back on the FIRST quiet frame — in the same breath as a forced
     // re-render, so the settled shot is always full craft. rung 0 has
     // no dof pass to swap and keeps whatever bloom it runs.
-    if (MOBILE && (bokehMatLo || bloomCompLo)){
-      var lodNow = scrollActive && MQ.tier > 0;
+    if (bokehMatLo){
+      // phones gate on the ladder; the desktop always wears the travel
+      // kernel while the page is actually moving — under motion the
+      // 41-tap craft is invisible and the fragment bill is not
+      var lodNow = scrollActive && (!MOBILE || MQ.tier > 0);
       if (lodNow !== motionLodOn){
         motionLodOn = lodNow;
-        if (bokehMatLo) bokeh.fsQuad.material = lodNow ? bokehMatLo : bokeh.materialBokeh;
-        if (bloomCompLo) bloom.compositeMaterial = lodNow ? bloomCompLo : bloomCompHi;
+        dofLodU.value = lodNow ? 1 : 0;   // the 17-tap travel kernel is a uniform branch now
         if (!lodNow){ frameDirtyFlag = true; frameCacheValid = false; }
       }
     }
@@ -9140,6 +9901,11 @@
       // snap the asymptotic tail: a camera that keeps creeping sub-pixel
       // amounts shimmers the thin ghost strokes behind the rack
       if (Math.abs(LL.raw - LL.p) < 0.001) LL.p = LL.raw;
+      // the boot warm sweeps scroll to compile the reveal off the clock:
+      // snap so rackFade tracks the swept position EXACTLY, hitting every
+      // discrete ghost/depthWrite/stencil/clip step in one fine pass instead
+      // of lagging past them behind the damp.
+      if (window.__warmY != null) LL.p = LL.raw;
     }
     // every window in the registry, damped and snapped together. the damp
     // factor is the legs' own — true exponential damping, so a frame-time
@@ -9152,6 +9918,7 @@
              : Math.min(1, Math.max(0, (scrollNow - RW.start) / (RW.end - RW.start)));
       RW.p += (RW.raw - RW.p) * rideDamp;
       if (Math.abs(RW.raw - RW.p) < RD.e) RW.p = RW.raw;
+      if (window.__warmY != null) RW.p = RW.raw;   // exact tracking for the boot reveal warm
     }
     // the calculator's window damps exactly like a leg
     // the machine cards: slideAwayP (any card but the first — plays the
@@ -9245,16 +10012,13 @@
       for (var cj2 = 0; cj2 < RIDE.length; cj2++) RIDE[cj2].w.p = RIDE[cj2].w.raw;
       frameDirtyFlag = true;
     }
-    // the agents entrance glide: the rack, laptop, lid and view tunnel
-    // all ride the addons rack window, which is RAW scroll over ~16vh —
-    // any normal gesture crosses that in a blink and the pair popped in
-    // solid ("show hide not works its statik"). one damped mirror gives
-    // the whole train the page's usual glide, both directions — and it
-    // deliberately SITS OUT the coverJump snap above: emerging from
-    // under the opaque cover, the camera must jump-cut but this fade IS
-    // the entrance — it glides from wherever it stood (1 under the
-    // cover), so the pair fades in even when one wheel flick crossed
-    // the whole window while the loop was hard-skipping.
+    // the agents entrance glide (ported from v11): the rack, laptop, lid
+    // and view tunnel all ride the addons rack window, which is RAW
+    // scroll over ~16vh — any normal gesture crosses that in a blink and
+    // the pair popped in solid. one damped mirror gives the whole train
+    // the page's usual glide, both directions — and it deliberately SITS
+    // OUT the coverJump snap above: the camera must jump-cut out of the
+    // cover, but this fade IS the entrance.
     var addonsHideRaw = window.__addonsRackHide || 0;
     addonsHideP += (addonsHideRaw - addonsHideP) * (1 - Math.exp(-dt * 6));
     if (Math.abs(addonsHideP - addonsHideRaw) < 0.002) addonsHideP = addonsHideRaw;
@@ -9318,18 +10082,13 @@
       // the agents view tunnel: the ghost blocks standing in the street
       // between the lens and the machines fade out as the laptop opens —
       // scroll-scrubbed both ways, on the laptop's own reveal factors —
-      // and the street is handed back across the 'for' approach (that
-      // leg stands INSIDE the corridor and ships with its blocks up)
+      // and the street is handed back across the 'for' approach
       var tunNext = Math.round(revealEase(agentsWin.p) * (1 - addonsHideP) * (1 - revealEase(forWin.p)) * 200) / 200;
       if (tunNext !== tunQ){
         tunQ = tunNext;
         tunU.value = tunQ;
-        // the cleared corridor exposes the DEEP city — at this shot's
-        // shallow angle that content sits at max blur and read as green
-        // mush. ride the blur ceiling down with the tunnel so the
-        // backdrop keeps its structure; every other scene keeps 0.0075
-        bokeh.uniforms['maxblur'].value = 0.0075 * (1 - 0.85 * tunQ);
-        bokehStamp++;   // the depth pre-pass discards masked fragments — keep its map in step
+        cityBundleDirty();   // see the ghostU drive: bundles re-record to see it
+        bokehStamp++;
         frameDirtyFlag = true;
       }
       // the hologram's motor: an endless turn about its own vertical,
@@ -9449,7 +10208,17 @@
     // where the scrubbed fade segment begins, so the rack rises from zero
     // opacity with the scroll; scrolling back seals it again. the corner
     // buttons still override for testing.
-    var wantScene = LEGS[1] && LEGS[1].p > 0.35 ? 2 : 1;
+    // RAW, not the damped .p ("everything on scroll, nothing sticks"): the
+    // rackFade scrub starts at LEGS[1].raw 0.35 (revealEase((raw-0.35)/0.5),
+    // = 0 exactly there), but this scene GATE toggled on the LAGGING .p, so
+    // on any real scroll .raw had already run past 0.35 by the time .p
+    // reached it — and rackFade snapped 0→revealEase((raw-0.35)/0.5) in the
+    // one frame the gate flipped (fast flick: 0→1.0 in a single frame; the
+    // ghost city held vivid green, then jumped dark = the stick). tying the
+    // gate to the SAME raw 0.35 makes rackFade C0-continuous across the
+    // toggle both ways (it is 0 at the threshold), so the whole dissolve is
+    // scroll-position-locked: instant on a fast flick, smooth on a slow one.
+    var wantScene = LEGS[1] && LEGS[1].raw > 0.35 ? 2 : 1;
     if (wantScene !== scrubScene){
       scrubScene = wantScene;
       if (sceneMode !== wantScene){
@@ -9532,14 +10301,30 @@
           // MIDDLE, not the right: the cards are a full-bleed slider
           // there, so no side is the text's ("move radial to center").
           // 0.5 of the 22→78 ride is exactly 50%.
+          // RAW windows, on purpose: the damped .p values decay one by
+          // one after a fast ride and their max() staircases — the
+          // radial looked like it AWAITED each container's effect to
+          // finish before following the scroll. the raws are scroll-true
+          // and radialP below is the one smoothing stage.
           radialT = Math.max(
-            Math.min(1, Math.max(0, LEGS[2].p)) * (1 - Math.min(1, LEGS[3].p / 0.5)) * (1 - s2Rad),
-            forWin.p * (1 - metalWin.p) * (window.innerWidth <= 767 ? 0.5 : 1),
-            (window.innerWidth <= 767 ? metalWin.p * (1 - machineWin.p) * 0.5 : 0),
-            machineWin.p * (1 - faqWin.p),
-            ctaWin.p * 0.5);
-          if (radialT > 0.001 || gradQ2 > 0){
-            var gq2 = Math.round(radialT * 100) / 100;
+            Math.min(1, Math.max(0, LEGS[2].raw)) * (1 - Math.min(1, LEGS[3].raw / 0.5)) * (1 - s2Rad),
+            forWin.raw * (1 - metalWin.raw) * (window.innerWidth <= 767 ? 0.5 : 1),
+            (window.innerWidth <= 767 ? metalWin.raw * (1 - machineWin.raw) * 0.5 : 0),
+            machineWin.raw * (1 - faqWin.raw),
+            ctaWin.raw * 0.5);
+          var rdD = radialT - radialP;
+          if (rdD !== 0 && rdD * radialLastD < 0) radialSlowUntil = performance.now() + 300;
+          if (rdD !== 0) radialLastD = rdD;
+          // glued to the wheel in normal riding (k=26 ≈ one frame of
+          // trail), briefly soft only right after a reversal so the
+          // wave-absorb still holds
+          radialP += rdD * (1 - Math.exp(-dt * (performance.now() < radialSlowUntil ? 7 : 26)));
+          if (Math.abs(radialT - radialP) < 0.002) radialP = radialT;
+          if (LEGS[0].p < 0.05 && radialT < 0.01) radialP = radialT;   // the hero owns the dial — hand it over clean
+          if (performance.now() < bootSnap) radialP = radialT;   // jump cuts stay jump cuts
+          if (radialP !== radialT) frameDirtyFlag = true;        // keep the glide alive to its landing
+          if (radialP > 0.001 || gradQ2 > 0){
+            var gq2 = Math.round(radialP * 100) / 100;
             if (gq2 !== gradQ2){
               if (gradQ2 <= 0) gradRide2.invalidate();   // re-lock start at the live 22%
               gradQ2 = gq2;
@@ -10041,9 +10826,15 @@
       // scale animation, same seeded thresholds), running a hair ahead
       // of the seal so the pops read before the shell closes over them
       var ctaWinkNext = ctaOn ? Math.round(revealEase(Math.min(1, ctaWin.p / 0.4)) * 200) / 200 : 0;
-      if (LEGS[1] && LEGS[1].p > 0.001 && !scrubFree && sceneMode === 2){
+      if (LEGS[1] && LEGS[1].raw > 0.001 && !scrubFree && sceneMode === 2){
         // quantized so the damped scrub actually settles — otherwise the
         // asymptotic tail keeps this block (and its costs) running forever
+        // DAMPED .p, synced to the camera: the reveal is choreographed —
+        // the building hide, the rack rise, the lights and the camera
+        // pose must move as ONE. sourcing this from raw scroll desynced
+        // the building hide (instant) from the camera (eased), so the
+        // building faded before the rack was framed = a stick. back on
+        // the same clock the camera rides.
         rackNext = Math.round(revealEase(Math.min(1, Math.max(0, (LEGS[1].p - 0.35) / 0.5))) * (1 - ctaHero) * 200) / 200;
         // the leg-3 tail (p 0.7→1): the shell turns to glass and the
         // machine grid inside comes up — same eased, quantized scrub
@@ -10171,6 +10962,8 @@
       // section rides in, it pulls the rack out FIRST, ahead of the gray
       // cover that then takes the radial — whichever hide is deeper wins
       radHideNext = Math.max(radHideNext, Math.round(addonsHideP * 200) / 200);
+      // NO time follower here — the widened rackOutWin window IS the
+      // animation, scrubbed and reversible like everything on this page
       if (rackFade !== rackNext || cubeFade !== cubeNext || pcbFade !== pcbNext || cubeHide !== hideNext || revFade !== revNext || revSeal !== sealNext || radialHide !== radHideNext || faqCube !== faqCubeNext || ctaWink !== ctaWinkNext || s2LineQ !== s2Cube || s3CubeQ !== s3Cube){
         var hideMoved = cubeHide !== hideNext;
         var s2LineMoved = s2LineQ !== s2Cube;
@@ -10197,7 +10990,21 @@
         // slide 2 keeps the WHOLE rack solid — no glass dim, the open
         // side is the only look inside (s2Hand is 0 while slide 2
         // owns the rack, so the glass factor blends out both ways)
-        var shellOp = rackFade * (1 - 0.6 * cubeFade * s2Hand) * (1 - shellHide) * (1 - radialHide);
+        // RAW-window target so the fade-in and fade-out resolve to their
+        // scroll-true values monotonically instead of dipping out of
+        // phase on a fast flick (traced: opacity 0.97→0.37→0.82, a
+        // visible rack fade-out-and-back — the "stick between styles").
+        // rackFade/radialHide stay damped for the CAMERA; only the
+        // shell OPACITY reads raw, then one follower smooths it.
+        var rackFadeRaw = revealEase(Math.min(1, Math.max(0, (LEGS[1].raw - 0.35) / 0.5))) * (1 - ctaHero);
+        var radialHideRaw = (LEGS[5] && !scrubFree && sceneMode === 2)
+          ? revealEase(rackOutWin.raw) * (1 - revealEase(Math.min(1, faqWin.raw / 0.5))) : 0;
+        radialHideRaw = Math.max(radialHideRaw, addonsHideP);
+        var shellOpRaw = rackFadeRaw * (1 - 0.6 * cubeFade * s2Hand) * (1 - shellHide) * (1 - radialHideRaw);
+        shellChase = shellOpRaw;   // the after-guard follower keeps chasing this
+        if (shellPlay < 0 || performance.now() < bootSnap) shellPlay = shellOpRaw;   // seed / jump-cut
+        else { shellPlay += (shellOpRaw - shellPlay) * (1 - Math.exp(-dt * 12)); if (Math.abs(shellOpRaw - shellPlay) < 0.004) shellPlay = shellOpRaw; }
+        var shellOp = shellPlay;
         for (var ri = 0; ri < rackMats.length; ri++){
           rackMats[ri].opacity = shellOp;
           rackMats[ri].transparent = shellOp < 1;
@@ -10489,8 +11296,13 @@
         // clip box floor sweeps from the roof to the ground, so the block
         // that stood where the rack is erases smoothly instead of popping
         // at the scene toggle (the box is empty at that moment)
+        // IN SYNC with the rack ("in sync man"): the tower rides rackFade
+        // ITSELF — the same scrubbed clock the rack's shell, lamps and
+        // ghost ride — no follower, no lag. the clip sweep and the
+        // opacity dissolve land frame-locked with the rack's rise.
         clipPlanes[3].constant = CLIP_BOX.maxY + (CLIP_BOX.minY - CLIP_BOX.maxY) * rackFade;
         wirePlanes[3].constant = WIRE_BOX.maxY + (WIRE_BOX.minY - WIRE_BOX.maxY) * rackFade;
+        towerFadeU.value = 1 - revealEase(Math.min(1, rackFade));
         // shadows only refresh at the endpoints — mid-sweep stale shadows
         // of one ghosted building are invisible, per-frame re-renders not
         if (rackFade === 1 || rackFade === 0) renderer.shadowMap.needsUpdate = true;
@@ -10515,6 +11327,35 @@
       // scroll opacity fade as the rest of the ghost city (the stencil
       // keeps them off the rack, and with their lights at zero there is
       // no bloom left to haze it) — nothing ever vanishes in a hard cut
+    }
+    // ── THE METAL CORRIDOR ── the scroll envelope (in with the metal
+    // panel, out as the machine panel calls the clone home) drives the
+    // per-fragment fade of city pixels IN FRONT of the racks. NOT a
+    // whole-city hide ("only in front!") — the backdrop stays; only the
+    // mush between the lens and the pair goes.
+    var mcNext = sceneMode === 2
+      ? Math.round(revealEase(Math.min(1, Math.max(0, (metalWin.p - 0.15) / 0.5)))
+          * (1 - revealEase(Math.min(1, Math.max(0, (machineWin.p - 0.35) / 0.45))))
+          * 200) / 200 : 0;
+    if (mcNext !== metalClearQ){
+      metalClearQ = mcNext;
+      metalClearU.value = mcNext;
+      frameDirtyFlag = true;   // the corridor moved: the cached frame is stale
+    }
+    if (metalClearQ > 0) metalRectSync();   // the rect rides the scrubbed camera
+    // the shell follower must keep ticking AFTER the quantized drivers
+    // settle: it lived only inside the fade guard above, and whenever the
+    // last 1/200 driver step landed before it converged, the rack parked
+    // mid-fade forever (the agents entrance froze it at ~0.7 opacity —
+    // "opacities of rack not works"). runs every frame until it lands.
+    if (shellPlay >= 0 && shellChase >= 0 && Math.abs(shellPlay - shellChase) > 0.0001){
+      shellPlay += (shellChase - shellPlay) * (1 - Math.exp(-dt * 12));
+      if (Math.abs(shellChase - shellPlay) < 0.004) shellPlay = shellChase;
+      for (var rjf = 0; rjf < rackMats.length; rjf++){
+        rackMats[rjf].opacity = shellPlay;
+        rackMats[rjf].transparent = shellPlay < 1;
+      }
+      frameDirtyFlag = true;
     }
     // the second rack ('on yours'), staged on the metal panel's window:
     // the ORIGINAL returns first (its radialHide releases over metalWin
@@ -11124,6 +11965,24 @@
     // frames render the whole chain and refill the cache; static frames
     // replay the cache through the grain pass only. pixel-identical.
     camera.updateMatrixWorld();   // the gate must see the LIVE matrix — render passes are skipped on static frames
+    // ── boot reveal-sweep warm ── the reveal block above already ran this
+    // frame off the __warmY scroll input, setting the ghost/clip/rack/shadow
+    // material state the split will hit live. render it through the REAL
+    // scene pass at 5% res (off-screen, into rtTM — nothing reaches the
+    // canvas) so every pipeline compiles NOW, behind the veil, instead of
+    // hitching the FIRST scroll into the split. skips the pacing/canvas
+    // present entirely; the next real frame re-renders live (cache is dirtied).
+    if (window.__warmY != null){
+      // mirror the cinema focus pull (it lives below this intercept) so the
+      // DOF renders at the rack's focus the split actually hits — otherwise
+      // the reveal's first DOF-at-rack frame builds cold live (~35% in)
+      if (ULTRA){
+        if (rackFade > 0.35 && rackRoot && rackRoot.visible){ var wcd = cineFocusDist(rackRoot, 'rack'); if (wcd > 0.01) focusGoal.v = wcd; }
+        else focusGoal.v = camera.position.distanceTo(controls.target);
+        focusU.value += (focusGoal.v - focusU.value) * 0.5;
+      }
+      bokeh.enabled = MQ.k.dof; bloom.enabled = MQ.k.bloom; warmChainOffscreen(); staticPrevCam.makeScale(0, 0, 0); return;
+    }
     var camMoved = !staticPrevCam.equals(camera.matrixWorld);
     var frameLive = camMoved || renderer.shadowMap.needsUpdate || frameDirtyFlag ||
                     (!reducedMotion && !ghostCalm) || cubeBobbing || ambientDirtyFlag ||
@@ -11135,6 +11994,19 @@
     W.amb = ambientDirtyFlag || cubeBobbing;
     W.cache = !frameCacheValid; W.live = frameLive;
     W.rackFade = rackFade; W.p2 = LEGS[1] ? LEGS[1].p : -1;
+    /* __DBG_GREEN_TRACE */
+    W.raw2 = LEGS[1] ? LEGS[1].raw : -1;
+    W.smode = sceneMode;
+    W.tier = (typeof M !== 'undefined' && M) ? M.tier : -1;
+    W.wiresK = (typeof M !== 'undefined' && M && M.k) ? M.k.wires : null;
+    W.dimF = cityDimNow; W.lightsF = cityLightsNow;
+    if (cityWireStrokes){ var _vs=0; for (var _i=0;_i<cityWireStrokes.length;_i++) if(cityWireStrokes[_i].visible) _vs++; W.wireStrokeVis=_vs; W.wireStrokeN=cityWireStrokes.length; }
+    if (cityWireMeshes){ var _vm=0; for (var _j=0;_j<cityWireMeshes.length;_j++) if(cityWireMeshes[_j].visible) _vm++; W.wireMeshVis=_vm; W.wireMeshN=cityWireMeshes.length; }
+    W.wireMatOp = (typeof wireMat!=='undefined'&&wireMat)?wireMat.opacity:-1;
+    if (neonMats && neonMats.length){ W.neonEmit=neonMats[0].emissiveIntensity; W.neonN=neonMats.length; }
+    if (redNeons && redNeons.length){ W.redEmit=redNeons[0].emissiveIntensity; }
+    W.towerFade = (typeof towerFadeU!=='undefined'&&towerFadeU)?towerFadeU.value:-1;
+    /* end __DBG_GREEN_TRACE */
     // the judder governor's bookkeeping: learn the native tick, count
     // misses while the camera rides, release after half a second quiet
     if (dt > 0.004) nativeDt = Math.min(nativeDt, dt);
@@ -11163,6 +12035,36 @@
     // the page is actually riding — a settled shot is a cache replay and
     // says nothing about what the device can carry
     if (MOBILE) MQ.watch(dt, liveCost, scrollActive || camMoved);
+    if (!MOBILE){
+      // ultra on a ProMotion panel defends the high-refresh feel by
+      // itself: once the native tick is learned under 11ms, the line
+      // tightens to the 120hz miss point (?fps=120 forces it anywhere).
+      // NOT at the full-res cap (2.0): sharpness-first — the 10.5ms line
+      // would walk the device-res chain straight back down on the heavy
+      // legs; a strong device defends 60 and keeps its pixels, and
+      // ?fps=120 stays the explicit framerate-first choice via DG_T
+      var dgLine = (ULTRA && nativeDt < 0.011 && ULTRA_CAP < 1.9) ? Math.min(DG_T, 0.0105) : DG_T;
+      if ((scrollActive || camMoved) && frameLive && liveCost > dgLine) dgHot += dt;
+      else dgHot = Math.max(0, dgHot - dt * 0.5);
+      if (dgCool > 0) dgCool -= dt;
+      if (dgHot > 0.6 && dgCool <= 0){
+        var dgSteps = ULTRA ? [1.75, 1.5, 1.25] : [1.5, 1.25];
+        var dgNext = null;
+        for (var dg = 0; dg < dgSteps.length; dg++) if (dgSteps[dg] < CHAIN_RES - 0.01){ dgNext = dgSteps[dg]; break; }
+        if (dgNext !== null) dgPending = dgNext;
+        dgHot = 0; dgCool = 8;
+      }
+      // the step itself reallocs six targets — measured as the WORST
+      // stall of the ride when it landed mid-scroll. it waits for the
+      // first scroll pause and lands invisibly, like the addons cover
+      // swap always has.
+      if (dgPending !== null && !scrollActive){
+        CHAIN_HI = CHAIN_LAP = dgPending;   // the cover-swap must not undo the step
+        setChainRes(dgPending);
+        console.info('[12-webgpu] chain governor -> chain ' + dgPending + ' (applied at scroll pause)');
+        dgPending = null;
+      }
+    }
     var ambientOnly = !camMoved && !frameDirtyFlag;
     // scroll and the judder governor keep the fixed 60hz grid; only the
     // idle animators ride the adaptive hold
@@ -11175,6 +12077,20 @@
     // noise the eye reads identically at 60
     W.paced = skipOk && (frameLive ? (ambientOnly || liveCap) : true);
     if (W.paced){ ambientDirtyFlag = false; return; }
+    // ── SCROLL PRIORITY (desktop) ── the heavy 3D submission (hundreds
+    // of meshes) blocks the main thread, and the PAGE's own scroll (the
+    // text, over a fixed canvas, with backdrop-filter glass) janks
+    // behind it. while actively scrolling, redraw the 3D every OTHER
+    // frame (~30fps) so the compositor keeps the text scroll at 60. the
+    // scrub state above still advanced this frame, so nothing is lost —
+    // only the redraw is skipped, and it returns to full rate the
+    // instant scrolling stops (frameDirtyFlag persists → next frame
+    // renders). the scene under motion at 30fps is hidden by the dof
+    // and the motion itself.
+    if (!MOBILE && scrollActive && frameLive){
+      scrollSkip = !scrollSkip;
+      if (scrollSkip) return;   // main thread free this frame for the page scroll
+    } else scrollSkip = false;
     if (camMoved) staticPrevCam.copy(camera.matrixWorld);
     ambClock = 0;
     liveCostLast = frameLive;
@@ -11194,6 +12110,64 @@
     // pixel-identical to the image already on the canvas. the paced
     // return above holds it for 16ms; this drops the draw for good — a
     // settled shot on the low rung costs the gpu nothing at all
+    // ── the focus puller's eye (ultra) ── the ride's own focus writes
+    // aim at the FRAMING point, which on the telephoto legs sits well in
+    // front of the actual subject (measured: 21m short of the rack at
+    // the reveal — invisible at the page's whisper aperture, mush at the
+    // cinema one). when a hero prop is on stage, the pull re-aims at ITS
+    // anchor: the laptop while it stands, else the rack through the
+    // reveal and the machine slides. everything else keeps the ride's
+    // framing distance.
+    if (ULTRA){
+      var cineD = null, cineKey = 'frame';
+      // the slide's own prop outranks the rack while its show plays:
+      // the wall panel on the last card, the kiosk on the third
+      if (s4Show > 0.3 && panelRoot && panelRoot.visible){ cineD = cineFocusDist(panelRoot, 'panel'); cineKey = 'panel'; }
+      else if (s3Show > 0.3 && termRoot && termRoot.visible){
+        // ONE BILL: the pod groups play on the rack WHILE the kiosk
+        // stands — both must read. the plane lands midway between the
+        // two anchors and the field widens below (mbWant) to hold the
+        // pair; either anchor alone would melt the other.
+        cineD = cineFocusDist(termRoot, 'term'); cineKey = 'bill';
+        if (rackRoot && rackRoot.visible && cineD !== null){
+          var dGrp = cineFocusDist(rackRoot, 'rack');
+          if (dGrp !== null) cineD = (cineD + dGrp) * 0.5;
+        }
+      }
+      // the calculator floats near the lens on the math leg — without
+      // its own anchor the plane stays on the rack/framing far behind
+      // it and the whole prop melts (user screenshot)
+      else if (calcRoot && calcRoot.visible && calcWin.p > 0.05){ cineD = cineFocusDist(calcRoot, 'calc'); cineKey = 'calc'; }
+      // the laptop owns the agents legs the moment it starts standing up
+      else if (lapRoot && lapRoot.visible && lapQ > 0.3){ cineD = cineFocusDist(lapRoot, 'lap'); cineKey = 'laptop'; }
+      else if (rackFade > 0.35 && rackRoot && rackRoot.visible){
+        cineD = cineFocusDist(rackRoot, 'rack'); cineKey = 'rack';
+        // the metal pair: while the clone stands beside the original the
+        // plane lands between the two racks so BOTH read sharp
+        if (rack2Op > 0.3 && rackRoot2 && rackRoot2.visible && cineD !== null){
+          var dR2 = cineFocusDist(rackRoot2, 'rack2');
+          if (dR2 !== null) cineD = (cineD + dR2) * 0.5;
+        }
+      }
+      if (cineD !== null && cineD > 0.01) focusGoal.v = cineD;
+      // no prop on stage: glue the goal to the live framing distance —
+      // a zoom (orbit dolly, free-scrub) re-racks focus by itself
+      else focusGoal.v = camera.position.distanceTo(controls.target);
+      // ── HERO DEEP FOCUS ── with no subject on stage (the hero city, the
+      // footer), the WHOLE city should read sharp ("focus bigger, on whole
+      // city") — so the dof relaxes to a deep field: maxblur eases toward
+      // ~0 so nothing melts. the instant a subject enters (rack/prop), the
+      // shallow subject-isolation dof eases back in. one shared uniform,
+      // eased so the change is never a pop.
+      var cineHasSubject = (cineKey !== 'frame');
+      // the dual-subject slide (bill) halves the blur ceiling: the plane
+      // sits between the kiosk and the rack groups, so each is a few
+      // meters off it — the tighter cap keeps both readable while the
+      // far city still blurs at its own cap
+      var mbWant = cineKey === 'bill' ? 0.0025 : (cineHasSubject ? 0.005 : 0.0006);
+      maxblurU.value += (mbWant - maxblurU.value) * (1 - Math.exp(-dt * 6));
+      window.__cine = {subject: cineKey, goal: +focusGoal.v.toFixed(2), lens: +focusU.value.toFixed(2), maxblur: +maxblurU.value.toFixed(4)};
+    }
     if (!frameLive && !MQ.k.grain && frameCacheValid) return;
     if (frameLive) frameCacheValid = true;
     composer.render();
@@ -11236,7 +12210,8 @@
     gui.add({log: function(){ console.log('calcLight ' + JSON.stringify(calcLightCfg)); }}, 'log').name('log to console');
     gui.add({reset: function(){ try { localStorage.removeItem('calcLight'); } catch(e){} location.reload(); }}, 'reset');
   }
-})();
+};
+if (window.THREE && window.__TSL) window.__bootScene().catch(function(e){ console.error('yoozap-webgpu boot failed:', e); });
 </script>
 
 <script>
