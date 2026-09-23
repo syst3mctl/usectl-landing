@@ -50,68 +50,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{background:rgb(30,29,29);color:#fff;font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-  a{color:#11A32A;text-decoration:none}
-  a:hover{color:#35E055}
-  .uc-cta:hover{background:#35E055;border-color:#35E055}
-  .uc-cta-ghost:hover{background:rgba(255,255,255,.05)}
-  @keyframes ucBlink{0%,49%{opacity:1}50%,100%{opacity:0}}
-  /* a live pin is a destination, so it has to read as one under the hero scrim:
-     a hairline square sight around the dot, tightening on hover. planned sites get
-     nothing — they are markers, not targets. */
-  .uc-pins button[data-go]::after{content:'';position:absolute;left:50%;top:50%;width:21px;height:21px;
-    transform:translate(-50%,-50%);border:1px solid rgba(17,163,42,.5);transition:border-color .12s ease}
-  .uc-pins button[data-go]:hover::after{border-color:#35E055}
-  .uc-pins button[data-go] span{transition:width .12s ease,height .12s ease,box-shadow .12s ease}
-  .uc-pins button[data-go]:hover span{width:13px !important;height:13px !important;
-    box-shadow:0 0 0 3px rgba(6,16,10,.85),0 0 0 9px rgba(17,163,42,.3) !important}
-  /* the written spine is the no-scene fallback: hidden from sight, read by assistive
-     tech, and promoted to real content wherever the lead-in is skipped */
-  .uc-beats{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-  /* reserve the site-list column so the centred copy can never enter it */
-  @media (min-width:761px){
-    .uc-hero{ padding-right:300px !important; }
-  }
-  @media (max-width:760px){
-    .uc-term{ flex-direction:column !important; }
-    .uc-term > div:first-child{ border-right:0 !important; border-bottom:1px solid rgba(100,116,136,.22); }
-    .uc-term{left:14px !important;right:14px !important;bottom:14px !important;width:auto !important}
-  }
-  @media (max-width:900px){
-    .uc-grid{ grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
-    .uc-grid.two{ grid-template-columns:minmax(0,1fr) !important; }
-    .uc-many{ grid-template-columns:minmax(0,1fr) !important; }
-    .uc-faq-row{ grid-template-columns:minmax(0,1fr) !important; row-gap:7px; }
-    .uc-bar{ display:none !important; }
-    #cta{ grid-template-columns:minmax(0,1fr) !important; row-gap:26px; }
-    .uc-sec{ grid-template-columns:minmax(0,1fr) !important; row-gap:18px; }
-    .uc-sec li{ grid-template-columns:2.6em minmax(0,1fr) !important; row-gap:6px; }
-    .uc-sec li p:last-child{ grid-column:2; }
-    .uc-term-row{ grid-template-columns:minmax(0,1fr) !important; }
-    .uc-term-row > div{ border-right:0 !important; border-bottom:1px solid rgba(100,116,136,.18); padding:12px 0 !important; display:flex; gap:14px; }
-  }
-  /* No motion, no scene: the stage is nothing but scroll-driven animation, so it is
-     removed outright and the six beats it teaches become readable prose instead.
-     Everything in the stage is absolutely positioned, so the stage must lose its
-     children as well as its height — collapsing it alone piles the canvas, the hero
-     and the bottom strip on top of each other in a band a few hundred pixels tall. */
-  @media (prefers-reduced-motion:reduce){
-    .uc-scene-wrap{height:auto !important}
-    .uc-scene-sticky{position:static !important;height:auto !important;overflow:visible !important}
-    #uc-canvas,.uc-pins,.uc-sites,.uc-hero,#uc-roomhead,.uc-term{display:none !important}
-    .uc-beats{position:static;width:auto;height:auto;clip-path:none;white-space:normal;
-      max-width:1180px;margin:0 auto;padding:88px 26px 0}
-    .uc-beats h3{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:26px 0 8px;color:#fff}
-    .uc-beats p{font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);max-width:36em}
-    .uc-beats pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;
-      color:#8fae99;overflow-x:auto;margin:0 0 10px;padding-bottom:2px}
-  }
-  @media (max-width:560px){
-    .uc-grid{ grid-template-columns:minmax(0,1fr) !important; }
-  }
-</style>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{color:#fff;-webkit-font-smoothing:antialiased;background:#1e1d1d;font-family:Space Grotesk,system-ui,sans-serif}a{color:#11a32a;text-decoration:none}a:hover{color:#35e055}.uc-cta:hover{background:#35e055;border-color:#35e055}.uc-cta-ghost:hover{background:#ffffff0d}@keyframes ucBlink{0%,49%{opacity:1}50%,to{opacity:0}}.uc-pins button[data-go]:after{content:"";border:1px solid #11a32a80;width:21px;height:21px;transition:border-color .12s;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}.uc-pins button[data-go]:hover:after{border-color:#35e055}.uc-pins button[data-go] span{transition:width .12s,height .12s,box-shadow .12s}.uc-pins button[data-go]:hover span{width:13px!important;height:13px!important;box-shadow:0 0 0 3px #06100ad9,0 0 0 9px #11a32a4d!important}.uc-beats{clip-path:inset(50%);white-space:nowrap;width:1px;height:1px;position:absolute;overflow:hidden}@media (width>=761px){.uc-hero{padding-right:300px!important}}@media (width<=760px){.uc-term{flex-direction:column!important}.uc-term>div:first-child{border-bottom:1px solid #64748838;border-right:0!important}.uc-term{width:auto!important;bottom:14px!important;left:14px!important;right:14px!important}}@media (width<=900px){.uc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.uc-grid.two,.uc-many{grid-template-columns:minmax(0,1fr)!important}.uc-faq-row{row-gap:7px;grid-template-columns:minmax(0,1fr)!important}.uc-bar{display:none!important}#cta{row-gap:26px;grid-template-columns:minmax(0,1fr)!important}.uc-sec{row-gap:18px;grid-template-columns:minmax(0,1fr)!important}.uc-sec li{row-gap:6px;grid-template-columns:2.6em minmax(0,1fr)!important}.uc-sec li p:last-child{grid-column:2}.uc-term-row{grid-template-columns:minmax(0,1fr)!important}.uc-term-row>div{border-bottom:1px solid #6474882e;gap:14px;display:flex;border-right:0!important;padding:12px 0!important}}@media (prefers-reduced-motion:reduce){.uc-scene-wrap{height:auto!important}.uc-scene-sticky{height:auto!important;position:static!important;overflow:visible!important}#uc-canvas,.uc-pins,.uc-sites,.uc-hero,#uc-roomhead,.uc-term{display:none!important}.uc-beats{clip-path:none;white-space:normal;width:auto;max-width:1180px;height:auto;margin:0 auto;padding:88px 26px 0;position:static}.uc-beats h3{letter-spacing:-.01em;color:#fff;margin:26px 0 8px;font-size:15px;font-weight:600}.uc-beats p{color:#ffffffb8;max-width:36em;font-size:14.5px;line-height:1.5}.uc-beats pre{color:#8fae99;margin:0 0 10px;padding-bottom:2px;font-family:JetBrains Mono,monospace;font-size:13px;line-height:1.75;overflow-x:auto}}@media (width<=560px){.uc-grid{grid-template-columns:minmax(0,1fr)!important}}</style>
 </head>
 <body>
 
