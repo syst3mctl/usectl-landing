@@ -3280,6 +3280,31 @@ window.__bootScene = async function(){
     }
     frameDirtyFlag = true; frameCacheValid = false;   // the warm scribbled the pass target
   }
+  // a LATE-landing prop (the panel streams in after the load-site mesh
+  // warm; terminal/card/door can too) uploads its textures and builds
+  // its pipelines on FIRST DRAW — a 500-700ms stall right as the slider
+  // starts ("i have lags when slider startin... first time"). warm it
+  // the moment it lands instead: stage it (children + ancestors), one
+  // 5%-res pass, restore. idempotent — re-warms cost ~nothing.
+  // ...and never mid-scroll: a warm pass fired while the user rides =
+  // its own stall (measured 485ms at the reveal). defer until quiet.
+  function warmPropSoon(getRoot, delay){
+    setTimeout(function retry(){
+      if (scrollActive){ setTimeout(retry, 600); return; }
+      warmProp(getRoot());
+    }, delay);
+  }
+  function warmProp(root){
+    if (!root) return;
+    try {
+      var touched = [];
+      root.traverse(function(o){ if (!o.visible){ touched.push(o); o.visible = true; } });
+      var wn = root;
+      while (wn){ if (!wn.visible){ touched.push(wn); wn.visible = true; } wn = wn.parent; }
+      warmScenePass();
+      for (var wi = 0; wi < touched.length; wi++) touched[wi].visible = false;
+    } catch(e){}
+  }
   // the reveal-sweep warm needs the LIVE pipeline set, not warmScenePass's:
   // a pipeline keys on the pass's clip/stencil/blend context, and the split's
   // shadow + ghost variants only build through the SAME full chain the ride
@@ -3289,6 +3314,33 @@ window.__bootScene = async function(){
   // scene/shadow/dof/bloom pipeline the reveal will hit compiles here, but
   // nothing is presented to the canvas (grade is the only pass that paints
   // it), which keeps the load-time warm invisible with no veil dependency.
+  // ── the hero handover heal ── everything the "back at the top" release
+  // must restore, shared by the natural scroll-home handover in the loop's
+  // else-branch and the boot warm's completion. the completion nulls
+  // scrubHome itself, so the natural branch can never fire for it — and the
+  // full-page warm tail rides every deep-page state (--holeY down to the
+  // footer's -1, the leg-1 gradient/veil to its end, the calculator up, the
+  // lap's autoRotate off), which a hand-picked partial reset left standing:
+  // the hero radial + city sat visibly wrong at veil lift.
+  function homeHeal(){
+    controls.enabled = !coarsePointer;
+    camera.fov = HOME_FOV; camera.updateProjectionMatrix();
+    if (!reducedMotion) controls.autoRotate = true;
+    bokeh.uniforms['focus'].value = camera.position.distanceTo(controls.target);
+    if (gradRide){ gradQ = 0; gradRide.progress(0); }
+    gradQ2 = -1;   // force the composed --holeX writer's next write
+    // the circle's vertical seat resets with it — the inline value comes
+    // OFF instead of being pinned: the css owns the parked seat (50 on a
+    // desktop, 76 in the phone hero's corner) and stays responsive to a
+    // rotation at the top
+    if (holeYQ !== -999){ holeYQ = -999; stage.style.removeProperty('--holeY'); }
+    if (calcRoot && calcRoot.visible){ calcRoot.visible = false; calcQ = -1; calcCQ = -1; bokehStamp++; frameDirtyFlag = true; }
+    if (calcCubes) calcCubes.visible = false;
+    if (calcLabel) calcLabel.visible = false;
+    if (calcGlow) calcGlow.visible = false;
+    if (calcLamp){ calcLamp.intensity = 0; calcFill.intensity = 0; }
+    radialT = 0;
+  }
   function warmChainOffscreen(){
     syncClipGroups();
     // full res: a reduced scene pass builds DIFFERENT pipelines than the
@@ -3546,14 +3598,22 @@ window.__bootScene = async function(){
   (function(){
     var veilOnLoad = THREE.DefaultLoadingManager.onLoad;
     var warmed = false;   // the manager fires on every later queue drain too
-    var veilLifted = false, warmSweepStarted = false;
+    var veilLifted = false, warmSweepStarted = false, warmKill = false;
     // the veil only drops ONCE, and only after the site is fully loaded
     // AND snapped to the hero — never mid-warm ("load the whole site,
-    // then show it"). a 6s net lifts it even if the warm never completes.
+    // then show it"). a 16s net backstops a warm that runs long.
     function liftVeil(){ if (veilLifted) return; veilLifted = true; if (veilOnLoad) veilOnLoad(); }
-    // net well past the full-res warm sweep (~1.5s on real hw, longer on a
-    // weak gpu) so the veil waits for the hero snap, not a mid-warm frame.
-    setTimeout(liftVeil, 16000);
+    // net past the full-res warm sweep (~4-7s on real hw with the full-page
+    // tail; minutes on a software gpu). if the sweep is STILL riding when
+    // the net fires, never lift blind — a mid-warm frame is the broken
+    // radial/dim city the veil exists to hide. warmKill makes the sweep
+    // jump to its own completion (hero snap + homeHeal), which lifts the
+    // veil itself a few frames later; the un-swept rest of the page just
+    // stays cold, the pre-tail behavior for those sections.
+    setTimeout(function(){
+      if (warmSweepStarted && window.__warmY != null){ warmKill = true; return; }
+      liftVeil();
+    }, 16000);
     THREE.DefaultLoadingManager.onLoad = function(){
       var warmedNow = false;
       try {
@@ -3696,6 +3756,29 @@ window.__bootScene = async function(){
             // shadow (the split's entry cost) compiles as rackFade leaves 0.
             for (s = 0; s <= STEPS; s++){ y = band0 + (band1 - band0) * s / STEPS; seq.push(y); seq.push(y); }   // up
             for (h = 0; h < 5; h++) seq.push(band1);                                                              // settle at rackFade 1 (the === 1 whole-scene shadow + dim<0.3)
+            // ── THE NEW-ASSET TAIL ── everything PAST the split paid the
+            // same first-visit toll the split used to: the door, the pcb
+            // dive, the laptop, the clone rack, the calculator and the
+            // dioramas each compile their LIVE pipeline sets (and Metal
+            // finalizes them on first execution) the first time the user
+            // scrolls in. the batched prop warm above bakes each mesh's
+            // BOOT state, but not the combos the ride flips mid-scroll —
+            // fade transparency × clip wrappers × stencil × per-section
+            // MRT — so keep sweeping: ride __warmY on through the WHOLE
+            // page to the footer. coarse steps: past the reveal the
+            // discrete state flips live in scroll windows hundreds of px
+            // wide, so ~150px cannot skip one, two draws each like the
+            // bands above, capped so a phone's taller document keeps the
+            // boot bounded. the DOM riders (cover, terminals) read the
+            // REAL scroll and never move, so the cover hard-skip cannot
+            // fire mid-warm and the under-cover laptop states render too.
+            // ?tail=0 skips it — the A/B hook for the perf rigs.
+            if (!/[?&]tail=0/.test(location.search)){
+              var maxY = Math.max(band1, (document.documentElement.scrollHeight || 0) - window.innerHeight);
+              var TAIL_STEPS = Math.min(48, Math.ceil((maxY - band1) / 150));
+              for (s = 1; s <= TAIL_STEPS; s++){ y = band1 + (maxY - band1) * s / TAIL_STEPS; seq.push(y); seq.push(y); }
+              for (h = 0; h < 5; h++) seq.push(maxY);   // settle at the footer pose (its own static-cache state)
+            }
             warmSweepStarted = true;
             var i = 0, warmup = 24, startY = window.pageYOffset || 0;
             (function step(){
@@ -3713,15 +3796,37 @@ window.__bootScene = async function(){
                 // the exact trap the state warm's own comment warns about.
                 window.__warmY = null;
                 scrubScene = -1;
+                // the tail sweep RIDES THE RADIAL (gradQ walked, gradQ2
+                // risen past 0 with its gsap start latched off a mid-warm
+                // --holeX): re-arm BOTH gradient guards so the live frames
+                // rebuild the circle from scratch — gradQ -1 forces the
+                // leg-1 base write, and gradQ2 -1 forces the invalidate/
+                // re-latch off that same-frame base (the refresh-ordering
+                // trick the crossings already rely on). without this a
+                // reload inside a section — the browser restores scrollY
+                // ASYNC, so the sweep starts before the restore lands and
+                // aborts right here — strands the circle mid-crossing
+                // ("on refresh radial goes to left in section").
+                gradQ = -1;
+                gradQ2 = -1;
+                if (holeYQ !== -999){ holeYQ = -999; stage.style.removeProperty('--holeY'); }
                 bootSnap = performance.now() + 400; coverJump = true;
                 frameDirtyFlag = true; frameCacheValid = false;
                 liftVeil();
+                // the reveal's pipeline set is still COLD after an abort —
+                // re-arm the deferred runner so it completes at the next
+                // parked-at-top quiet moment instead of never
+                armDeferredSweep();
                 return;
               }
+              if (warmKill) i = seq.length;   // the veil net fired mid-warm: complete NOW
               if (i >= seq.length){
                 // ── warm done: SNAP to the live scroll (the hero on a top
                 // refresh) BEFORE the veil lifts. the sweep left the camera
-                // and the radial at the reveal end (other side, hole left);
+                // and the radial at the page's far end (the footer, with the
+                // tail on — every ride window at its deep-page value; they
+                // all re-scrub to 0 in the settle frames below, since every
+                // applier rides the scroll);
                 // bootSnap in the future makes the next on-screen frames
                 // jump-cut every LEG/RIDE damp + the radial to raw = the
                 // correct hero framing. hold the veil ~4 frames so that
@@ -3744,10 +3849,18 @@ window.__bootScene = async function(){
                   // THERE, static, when the veil lifts.
                   camera.position.fromArray(START.eye);
                   controls.target.fromArray(START.target);
-                  camera.fov = HOME_FOV; camera.updateProjectionMatrix();
                   scrubHome = null; scrubFree = false;
+                  // the FULL scroll-home heal, not a hand-picked subset:
+                  // the tail sweep rode every deep-page state (--holeY to
+                  // the footer's -1, the leg-1 gradient/veil to its end,
+                  // the calculator up, autoRotate off) and the natural
+                  // handover in the loop can never fire for this path —
+                  // scrubHome is nulled right here. homeHeal IS that
+                  // handover's body (fov, gradients, holeY unpin, calc
+                  // hide, the hero lap).
+                  homeHeal();
                   controls.update();
-                  radialP = 0; gradQ2 = -1;   // snap the see-through circle to its hero seat (right), no ease-in
+                  radialP = 0;   // snap the see-through circle to its hero seat (right), no ease-in
                   if (stage) stage.style.setProperty('--holeX', '78%');
                   renderer.shadowMap.needsUpdate = true;   // one clean shadow at the hero, before reveal
                 } catch(e){}
@@ -3762,6 +3875,15 @@ window.__bootScene = async function(){
               requestAnimationFrame(step);
             })();
             }
+            function armDeferredSweep(){
+              var dLastY = -1;
+              (function deferSweep(){
+                var dy = window.pageYOffset || 0;
+                var dQuiet = dy === dLastY; dLastY = dy;
+                if (dy <= 4 && dQuiet){ runRevealSweep(); return; }
+                setTimeout(deferSweep, 1500);
+              })();
+            }
             if ((window.pageYOffset || 0) > 4){
               // mid-page load: the boot sweep would fight the live view,
               // so the reveal's pipelines stayed COLD and the first scroll
@@ -3771,13 +3893,7 @@ window.__bootScene = async function(){
               // THE TOP (the sweep's settled-hero tail is exactly right
               // there) and run it then; until that happens the reveal
               // stays the old cold path, no worse than before.
-              var dLastY = -1;
-              (function deferSweep(){
-                var dy = window.pageYOffset || 0;
-                var dQuiet = dy === dLastY; dLastY = dy;
-                if (dy <= 4 && dQuiet){ runRevealSweep(); return; }
-                setTimeout(deferSweep, 1500);
-              })();
+              armDeferredSweep();
               return;
             }
             runRevealSweep();
@@ -4832,6 +4948,38 @@ window.__bootScene = async function(){
     // lines and they stay. cityWireMeshes is kept for the cull below.
     cityCullInvisible();
   }
+  // ── stall attribution (testing hook): the crossing's suspects wear
+  // self-time accumulators; the loop logs every >40ms frame with the
+  // per-system breakdown into window.__stallLog ──
+  var profT = {};
+  function profWrap(pname, pfn){
+    return function(){
+      var pt0 = performance.now();
+      var pr = pfn.apply(this, arguments);
+      profT[pname] = (profT[pname] || 0) + (performance.now() - pt0);
+      return pr;
+    };
+  }
+  applyCityDim = profWrap('cityDim', applyCityDim);
+  applyScene = profWrap('scene', applyScene);
+  measureScrub = profWrap('measure', measureScrub);
+  cityTwinBind = profWrap('twinBind', cityTwinBind);
+  cityTwinSync = profWrap('twinSync', cityTwinSync);
+  cityCullInvisible = profWrap('cull', cityCullInvisible);
+  syncClipGroups = profWrap('clipSync', syncClipGroups);
+  warmScenePass = profWrap('warmPass', warmScenePass);
+  window.__stallLog = [];
+  function profFrame(){
+    var pn = performance.now();
+    if (profFrame.last && pn - profFrame.last > 40){
+      profT.gap = Math.round(pn - profFrame.last);
+      profT.y = Math.round(window.pageYOffset || 0);
+      profT.at = Math.round(pn);
+      window.__stallLog.push(profT);
+    }
+    profFrame.last = pn;
+    profT = {};
+  }
   var prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   // the low rung stands the ambient animators down exactly as the os
   // switch does — with nothing breathing, a settled shot renders nothing
@@ -5259,7 +5407,10 @@ window.__bootScene = async function(){
   // only, and the rack flight only — the map that flies in ahead of it
   // keeps the centre line.
   var SPLIT_Y_PHONE = 0.55;
-  function splitAnchorY(){ return window.innerWidth <= 767 ? SPLIT_Y_PHONE : FRAME_Y; }
+  // ...and the desktop takes the same 5% drop ("move it bottom +5%" off a
+  // split-settle screenshot — the rack's crown was kissing the frame top).
+  // rack flight only, like the phone rung: the map leg keeps the centre.
+  function splitAnchorY(){ return window.innerWidth <= 767 ? SPLIT_Y_PHONE : FRAME_Y + 0.05; }
   // 'what you get' slide 1 takes no pose of its own — the machine leg's
   // framing IS that slide (the blend weights the default pose for it) —
   // so this is where it is aimed on a phone. the cards there dock
@@ -6210,6 +6361,20 @@ window.__bootScene = async function(){
   // the webfont can land after load and reflow every section height —
   // re-measure so the scroll windows stay exact (cheap, runs once)
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureScrub);
+  // ...and the fonts.ready hook alone proved unreliable: on cached-font
+  // refreshes the swap reflow can land AFTER every hook above has run,
+  // and the ride then drives whole sections off a stale machine-top —
+  // measured live: the radial's crossing window overlapped the split's
+  // reading position on refresh boots only ("on refresh radial goes to
+  // left in section"). any change to the body's laid-out height
+  // re-measures, so the windows can simply never go stale.
+  if (window.ResizeObserver){
+    var mroPend = false;
+    new ResizeObserver(function(){
+      if (mroPend) return; mroPend = true;
+      requestAnimationFrame(function(){ mroPend = false; measureScrub(); });
+    }).observe(document.body);
+  }
   measureScrub();
   // testing hook: the renderer's own counters for the CURRENT frame —
   // draw calls, triangles, programs, plus what the post chain is set to.
@@ -6244,6 +6409,7 @@ window.__bootScene = async function(){
             rackTr: rackMats.length ? rackMats[0].transparent : null,
             rackVis: rackRoot ? rackRoot.visible : null,
             rackFade: rackFade, cubeFade: cubeFade, pcbFade: pcbFade, cubeHide: cubeHide, revFade: revFade, revSeal: revSeal, radialHide: radialHide, calcWin: calcWin.p, metalWin: metalWin.p, rackOutWin: rackOutWin.p, rack2Op: rack2Op, agentsWin: agentsWin.p, forWin: forWin.p, faqWin: faqWin.p, faqCube: faqCube, ctaWin: ctaWin.p, footWin: footWin.p, holeY: holeYQ, lapLid: lapLidQ, lapVert: lapLidVertQ,
+            radialT: radialT, radialP: radialP, gradQ: gradQ, gradQ2: gradQ2, machineWinRaw: machineWin.raw, faqWinRaw: faqWin.raw, leg2raw: LEGS[2] ? LEGS[2].raw : null, leg3raw: LEGS[3] ? LEGS[3].raw : null,
             cam: camera.position.toArray(), tgt: controls.target.toArray()};
   };
   var scrubHome = null, scrubAz = 0, scrubAzD = 0, scrubFree = false, scrubScene = 1;
@@ -6254,11 +6420,20 @@ window.__bootScene = async function(){
   // drives its progress in lockstep with the camera — the see-through
   // circle slides to the left side (where the scene lands at the split
   // title) and the hero's left text veil lifts out of the way
-  var gradRide = window.gsap ? gsap.to(stage, {'--holeX': '22%', '--veil': 0, ease: 'none', paused: true}) : null;
+  // ...the VEIL only: --holeX is NOT tweened here any more. it used to be
+  // TWO independent gsap tweens over the same var (this one 78→22 on the
+  // leg-1 blend, a second 22→78 on the crossing) and the composite was
+  // last-writer-wins by WHICH DAMP SETTLED LAST — a live ride and a
+  // refresh parked at the SAME scroll painted different circles (live:
+  // leg-1's final damped step landed last = 22%; refresh: bootSnap wrote
+  // leg-1 first frame and the crossing last = 41%). the circle's x is now
+  // COMPOSED in one closed form by the single writer in the bi===4 block.
+  var gradRide = window.gsap ? gsap.to(stage, {'--veil': 0, ease: 'none', paused: true}) : null;
   var gradQ = -1;   // last quantized progress the tween actually received
   // leg 6 slides the radial to the RIGHT: the math text owns the left,
-  // so the see-through circle crosses over while the rack returns
-  var gradRide2 = window.gsap ? gsap.to(stage, {'--holeX': '78%', ease: 'none', paused: true, overwrite: false}) : null;
+  // so the see-through circle crosses over while the rack returns —
+  // composed with the leg-1 base in the single writer; gradQ2 is its
+  // quantize guard (the last PERCENT written; -1 = force the next write)
   var gradQ2 = -1;
   // the reveal's motion curve comes from gsap: a power2.inOut ease over
   // the scroll segment instead of a raw linear ramp, so the rack fade,
@@ -7412,6 +7587,8 @@ window.__bootScene = async function(){
         }
         twrap.updateMatrixWorld(true);
         termRoot = twrap;
+        warmPropSoon(function(){ return termRoot; }, 80);
+        warmPropSoon(function(){ return termRoot; }, 4000);   // the nested card lands late
         scene.add(twrap);
         termLamp = LP(new THREE.PointLight(0xffe6c0, 0, 6));
         termLamp.position.set(2.3, 2.2, 1.6);
@@ -7545,6 +7722,7 @@ window.__bootScene = async function(){
         });
         dwrap.updateMatrixWorld(true);
         doorRoot = dwrap;
+        warmPropSoon(function(){ return doorRoot; }, 80);
         scene.add(dwrap);
         // its own warm key, driven by the fade — dark panels read as a
         // hole under the rack lamp alone (the calculator taught this)
@@ -7888,6 +8066,7 @@ window.__bootScene = async function(){
           pEm.dispose();   // the amber original: nothing points at it now
         }
         panelRoot = cwrap;
+        warmPropSoon(function(){ return panelRoot; }, 80);
         scene.add(cwrap);
         // its own warm key, driven by the fade: this wall is the rack's
         // shadowed side and the dark body reads as a hole without it
@@ -9852,6 +10031,7 @@ window.__bootScene = async function(){
   function loop(){
     requestAnimationFrame(loop);
     var dt = Math.min(clock.getDelta(), 0.05);
+    profFrame();
     if (!stageVisible || window.__sceneHold) return;   // scrolled away, or under the film's sheet: skip the whole frame
     // the addons flat is fully opaque: nothing of the scene can show —
     // skip the whole chain; the ride resumes as soon as the cover thins.
@@ -10276,7 +10456,7 @@ window.__bootScene = async function(){
         // the leg-6 radial ride waits for EVERYTHING: revert done, blink
         // played, shell fully sealed — only then does it cross, on its
         // own one-second clock
-        if (bi === 4 && gradRide2){
+        if (bi === 4 && stage){
           // order rewire — the crossings in the NEW page order:
           // 'what you get' (text left) crosses the circle RIGHT first
           // — its zoomed rack sits right — and the deploy dive pulls
@@ -10323,13 +10503,19 @@ window.__bootScene = async function(){
           if (LEGS[0].p < 0.05 && radialT < 0.01) radialP = radialT;   // the hero owns the dial — hand it over clean
           if (performance.now() < bootSnap) radialP = radialT;   // jump cuts stay jump cuts
           if (radialP !== radialT) frameDirtyFlag = true;        // keep the glide alive to its landing
-          if (radialP > 0.001 || gradQ2 > 0){
-            var gq2 = Math.round(radialP * 100) / 100;
-            if (gq2 !== gradQ2){
-              if (gradQ2 <= 0) gradRide2.invalidate();   // re-lock start at the live 22%
-              gradQ2 = gq2;
-              gradRide2.progress(gq2);
-            }
+          // ── THE ONE --holeX WRITER ── the leg-1 base (hero seat → 22 on
+          // the map leg's eased blend) and the crossing (back toward 78 on
+          // radialP) in closed form: base + (78 − base)·p. this reproduces
+          // the old crossing tween's start-latch semantics continuously —
+          // a crossing that begins mid-flight still sweeps from wherever
+          // the base stands — with no latch to go stale and no second
+          // writer to race (see the gradRide note at its creation).
+          var heroHx = phoneHeroMq.matches ? 85 : 78;
+          var hxBase = heroHx - (heroHx - 22) * leg0E;
+          var hxQ = Math.round((hxBase + (78 - hxBase) * radialP) * 100) / 100;
+          if (hxQ !== gradQ2){
+            gradQ2 = hxQ;
+            stage.style.setProperty('--holeX', hxQ + '%');
           }
           // the circle's vertical ride (cta only): 50% → 4% on the cta
           // window — the circle stands ON TOP of the centered title
@@ -10723,28 +10909,15 @@ window.__bootScene = async function(){
       bokeh.uniforms['focus'].value = srr;
     } else {
       if (scrubHome && LEGS[0].p === 0){
-        // back at the top: the controls resume the lap from this exact orbit
+        // back at the top: the controls resume the lap from this exact
+        // orbit. the body moved to homeHeal() — a fast scroll home from the
+        // footer used to strand --holeY near the top and the hero radial
+        // sat visibly wrong after a refresh at the bottom; the boot warm's
+        // completion needs the IDENTICAL restore (it nulls scrubHome, so
+        // this branch can never run for it), hence the shared function.
         scrubHome = null;
         scrubFree = false;
-        controls.enabled = !coarsePointer;
-        camera.fov = HOME_FOV; camera.updateProjectionMatrix();
-        if (!reducedMotion) controls.autoRotate = true;
-        bokeh.uniforms['focus'].value = camera.position.distanceTo(controls.target);
-        if (gradRide){ gradQ = 0; gradRide.progress(0); }
-        if (gradRide2) gradQ2 = -1;   // no render: leg 6 re-locks on next entry
-        // the circle's vertical seat resets with it — a fast scroll home
-        // from the footer used to strand --holeY near the top and the
-        // hero radial sat visibly wrong after a refresh at the bottom.
-        // the inline value comes OFF instead of being pinned: the css
-        // owns the parked seat (50 on a desktop, 76 in the phone hero's
-        // corner) and stays responsive to a rotation at the top
-        if (holeYQ !== -999){ holeYQ = -999; stage.style.removeProperty('--holeY'); }
-        if (calcRoot && calcRoot.visible){ calcRoot.visible = false; calcQ = -1; calcCQ = -1; bokehStamp++; frameDirtyFlag = true; }
-        if (calcCubes) calcCubes.visible = false;
-        if (calcLabel) calcLabel.visible = false;
-        if (calcGlow) calcGlow.visible = false;
-        if (calcLamp){ calcLamp.intensity = 0; calcFill.intensity = 0; }
-        radialT = 0;
+        homeHeal();
       }
       // free-cam with the calculator up: it has no spot to stand in
       // without the ride's camera solve, so it eases away like the pcb
@@ -12170,7 +12343,9 @@ window.__bootScene = async function(){
     }
     if (!frameLive && !MQ.k.grain && frameCacheValid) return;
     if (frameLive) frameCacheValid = true;
+    var prT0 = performance.now();
     composer.render();
+    profT.render = (profT.render || 0) + (performance.now() - prT0);
   }
   bokeh.uniforms['focus'].value = camera.position.distanceTo(controls.target);
   loop();
@@ -12830,6 +13005,9 @@ if (window.THREE && window.__TSL) window.__bootScene().catch(function(e){ consol
   sync();
 })();
 </script>
+
+<!-- scroll ride recorder for video capture: recordScroll({to}) / sectionTops() -->
+<script src="./scroll-record.js"></script>
 
 </body>
 </html>

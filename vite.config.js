@@ -124,6 +124,21 @@ function dirRedirectPlugin() {
   };
 }
 
+// Plugin: sidecar scripts under variants/ (classic <script src> files, e.g.
+// the scroll-record.js video-capture helper) are referenced as-is, not
+// bundled — vite warns and drops them, so carry them into dist verbatim.
+function variantSidecarPlugin() {
+  return {
+    name: 'variant-sidecars',
+    apply: 'build',
+    closeBundle() {
+      for (const f of fs.readdirSync('variants').filter((n) => n.endsWith('.js'))) {
+        fs.copyFileSync(path.join('variants', f), path.join('dist', 'variants', f));
+      }
+    },
+  };
+}
+
 // Every HTML file under variants/ is its own page in the build.
 const variantPages = Object.fromEntries(
   fs.readdirSync('variants')
@@ -133,7 +148,7 @@ const variantPages = Object.fromEntries(
 
 export default defineConfig({
   base: './',
-  plugins: [cssPreloadPlugin(), siteHeadPlugin(), dirRedirectPlugin()],
+  plugins: [cssPreloadPlugin(), siteHeadPlugin(), dirRedirectPlugin(), variantSidecarPlugin()],
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
