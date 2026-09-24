@@ -3616,6 +3616,7 @@ window.__bootScene = async function(){
   }
   var CHAIN_HI = chainRes(), CHAIN_LAP = CHAIN_HI, CHAIN_RES = CHAIN_HI;
   var lastRW = -1, lastRH = -1, lastRC = -1, lastCapCR = CHAIN_HI;
+  var liveCvTick = 0;   // see LIVE CANVAS CADENCE in the frame loop
   function resize(){
     var w = stage.clientWidth, h = stage.clientHeight;
     // the width ladder may have crossed a step (rotate / window drag).
@@ -7117,10 +7118,18 @@ window.__bootScene = async function(){
       // ── the name plates standing over the two racks, typed exactly
       // like the calculator's label: terminal mono, block cursor at the
       // tip, the count riding a scroll window (drawn in the loop) ──
+      var LBLK = MOBILE ? 0.5 : 1;   // typed-label raster scale (see the note in rackLblMake)
       function rackLblMake(text, hl){
+      // a typed label repaints — and re-uploads its WHOLE canvas — once
+      // per character as the ride types it: 1600×224 is 1.4MB a keystroke,
+      // and the phone profile measured 24 of them (33MB) in the two
+      // sections these live in. half the raster on a phone, art untouched:
+      // the draw below is written in 1600×224 space and the context
+      // carries the scale.
         var cv = document.createElement('canvas');
-        cv.width = 1600; cv.height = 224;
+        cv.width = Math.round(1600 * LBLK); cv.height = Math.round(224 * LBLK);
         var cx2 = cv.getContext('2d');
+        if (LBLK !== 1) cx2.setTransform(LBLK, 0, 0, LBLK, 0, 0);
         var tex = new THREE.CanvasTexture(cv);
         tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
         tex.anisotropy = ANISO;
@@ -8827,8 +8836,9 @@ window.__bootScene = async function(){
         // ── the equation between the projects and the bill, set in the
         // terminal's white mono, stacked to fit the narrow gap ──
         var lcv = document.createElement('canvas');
-        lcv.width = 1600; lcv.height = 224;
+        lcv.width = Math.round(1600 * LBLK); lcv.height = Math.round(224 * LBLK);   // same typed-label economy as the rack plates
         var lcx = lcv.getContext('2d');
+        if (LBLK !== 1) lcx.setTransform(LBLK, 0, 0, LBLK, 0, 0);
         var ltex;   // assigned below; the draw marks it stale
         var LBL = '[ 10 machines · 200$ a month ]';
         // typed like the terminal window: the first n characters, a block
@@ -9039,7 +9049,11 @@ window.__bootScene = async function(){
           var panL = 2 * Math.sqrt(panMidY * panMidY + panMidZ * panMidZ);
           var scrW = panW * 0.88, scrH = panL * 0.72;
           var scv = document.createElement('canvas');
-          scv.width = 1280; scv.height = Math.round(1280 * scrH / scrW);
+          // 1280×726 is 3.5MB of upload every time the session types a
+          // line. the draw below fits its font to the canvas width, so a
+          // phone simply gets a smaller one — same layout, quarter the bus.
+          var SCVW = MOBILE ? 640 : 1280;
+          scv.width = SCVW; scv.height = Math.round(SCVW * scrH / scrW);
           var scx = scv.getContext('2d');
           var stex = new THREE.CanvasTexture(scv);
           // the calculator's crispness recipe: no mip shimmer at fov 8
@@ -10285,6 +10299,17 @@ window.__bootScene = async function(){
     requestAnimationFrame(loop);
     var dt = Math.min(clock.getDelta(), 0.05);
     profFrame();
+    // ── LIVE CANVAS CADENCE (phones) ──
+    // a canvas texture costs its ENTIRE pixel count in bus traffic every
+    // time it repaints, and two of them repaint every frame while their
+    // section is on screen: the terminal's holo dashboard (1024×512 = 2MB
+    // a frame) and the control panel (512² = 1MB). measured on the phone
+    // profile as 64MB of mid-ride uploads — the "lag when new assets come
+    // in". both animations are a breathing scan band and drifting gauges;
+    // at half rate nothing about them reads differently, and the phone
+    // gets those megabytes back. desktop keeps every frame.
+    liveCvTick++;
+    var liveCvSkip = MOBILE && (liveCvTick & 1) === 1;
     if (!stageVisible || window.__sceneHold) return;   // scrolled away, or under the film's sheet: skip the whole frame
     // the addons flat is fully opaque: nothing of the scene can show —
     // skip the whole chain; the ride resumes as soon as the cover thins.
@@ -12014,7 +12039,7 @@ window.__bootScene = async function(){
       //     never streaks the bezel they are packed against
       //   · the whole map breathes, and drops out on the city roads'
       //     blink pattern — the laptop's and the payment card's beat
-      if (panelQ > 0.001 && !reducedMotion){
+      if (panelQ > 0.001 && !reducedMotion && !liveCvSkip){
         var pT = clock.elapsedTime;
         if (panelCx){
           panelCx.globalCompositeOperation = 'source-over';
@@ -12121,7 +12146,7 @@ window.__bootScene = async function(){
       // off first, the kiosk fades after). while on: rings turn,
       // charts drift, and the whole holo blinks on the city roads'
       // pattern (10s cycle, dropouts at 2-4% and 6-7%, dim 0.12)
-      if (termHoloMat && termRoot.visible && !reducedMotion){
+      if (termHoloMat && termRoot.visible && !reducedMotion && !liveCvSkip){
         var dspT = Math.min(1, Math.max(0, (s3Seq - 0.85) / 0.15));
         if (dspT <= 0.001){
           if (termHoloMat.opacity !== 0){ termHoloMat.opacity = 0; frameDirtyFlag = true; }
