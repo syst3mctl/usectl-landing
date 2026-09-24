@@ -911,9 +911,41 @@ window.__bootScene = async function(){
   // navigator.gpu answers, webgl2 otherwise; ?gpu=gl forces the fallback
   // so the two can be compared on the same machine.
   var FORCE_GL = /[?&]gpu=(0|gl|webgl)/i.test(location.search || '');
+  var MOBILE = window.innerWidth <= 767;   // needed HERE for the backend handoff — `var` hoists the name, not the value, and the old declaration sat 100 lines below the check that read it
+  // ── EVERY MOBILE GETS ITS BEST PATH ── a phone WITH webgpu rides this
+  // page as designed. a phone WITHOUT it (old ios, budget android) would
+  // land on the r186 webgl2 compatibility backend — which was MEASURED
+  // here and is not a path, it is a wall: no pipeline pinning exists
+  // there, ANGLE recompiles GLSL where dawn caches, and even capped at
+  // rung 1 with the warm tail skipped the first ride stalled 27s. but
+  // this site HAS a native webgl build of the same page — variant 11,
+  // the r128 original this file was ported from, tuned on real phones —
+  // so the honest move is a handoff, not a degraded imitation: same
+  // sections, same ride, a renderer built for that hardware. desktop
+  // keeps the webgl2 fallback (rare in 2026, and ?gpu=gl still forces it
+  // anywhere for A/B).
+  if (MOBILE && !FORCE_GL){
+    var gpuOk = false;
+    try { if (navigator.gpu) gpuOk = !!(await navigator.gpu.requestAdapter()); } catch(ge){}
+    if (!gpuOk){
+      console.info('[12-webgpu] no webgpu adapter on mobile — handing off to the native webgl build');
+      location.replace('/variants/11-yoozap.html' + (location.search || '') + (location.hash || ''));
+      return;
+    }
+  }
   var renderer = new THREE.WebGPURenderer({canvas:canvas, antialias:false, stencil:true, powerPreference:'high-performance', forceWebGL:FORCE_GL});
   await renderer.init();   // webgpu device acquisition is async; nothing below runs without it
   window.__gpuBackend = (renderer.backend && renderer.backend.isWebGPUBackend) ? 'webgpu' : 'webgl2';
+  // ...and the check repeats AFTER init: on a real android emulator the
+  // adapter probe above ANSWERED (navigator.gpu is there, requestAdapter
+  // returns something) and three still landed on webgl2 — device request
+  // failed inside init. the first probe merely saves a renderer boot when
+  // it can; THIS one is the decision that counts, whatever path led here.
+  if (MOBILE && !FORCE_GL && window.__gpuBackend !== 'webgpu'){
+    console.info('[12-webgpu] webgl2 backend on mobile — handing off to the native webgl build');
+    location.replace('/variants/11-yoozap.html' + (location.search || '') + (location.hash || ''));
+    return;
+  }
   console.info('[12-webgpu] backend: ' + window.__gpuBackend);
   if (renderer.debug) renderer.debug.checkShaderErrors = false;   // dev-only introspection, costs compile time
   // ── pin the pipeline cache ── on webgpu three EVICTS a render pipeline
@@ -991,7 +1023,7 @@ window.__bootScene = async function(){
   //          already on the canvas, so the loop skips the draw ENTIRELY.
   //   calm   the switch prefers-reduced-motion throws: with the ambient
   //          animators down, a settled shot renders nothing at all.
-  var MOBILE = window.innerWidth <= 767;
+  // (MOBILE is assigned at the top of the boot, beside FORCE_GL)
   // ── ULTRA (?q=ultra, desktop only) ── the settings the WebGL page
   // could not afford, as a webgpu flex: the chain at FULL device
   // resolution (r128 measured ~37ms/frame on an M4 and rejected it —
@@ -1067,6 +1099,10 @@ window.__bootScene = async function(){
     // a 1×1 readPixels to force the tile gpu to actually finish. ~5ms on
     // a desktop, tens on a phone soc, hundreds on the ones rung 0 exists
     // for. the context is explicitly lost afterwards.
+    // milliseconds for the cpu bench's 300k iterations: under the first
+    // number is flagship-class single-core, then a rung per band. measured
+    // reference points live in the memory file; recalibrate here.
+    var CPU_T = [14, 30, 60];
     var benchMs = null;
     function bench(){
       if (benchMs !== null) return benchMs;
@@ -1102,11 +1138,59 @@ window.__bootScene = async function(){
       } catch(e){}
       return benchMs;
     }
+    // ── THE CPU BENCH ── the fill bench measures the gpu; half of this
+    // page's phone cost is the main thread (the scrub machinery, three's
+    // per-object work, canvas painting), and `hardwareConcurrency` says
+    // nothing about single-core speed — safari even under-reports the
+    // count on the exact iphones we care about. so time real work: a
+    // fixed arithmetic loop, ~2-4ms on a desktop, 3-6x that on a phone
+    // soc. returns MILLISECONDS for 300k iterations — smaller is faster.
+    var cpuMs = null;
+    function cpuBench(){
+      if (cpuMs !== null) return cpuMs;
+      var t0 = performance.now(), a = 0;
+      for (var i = 1; i < 300000; i++) a += Math.sqrt(i) * Math.sin(i * 0.001);
+      cpuMs = performance.now() - t0;
+      if (a === 12345.6789) cpuMs += 0;   // keep the loop from being optimised away
+      return cpuMs;
+    }
+    // ── WHAT KIND OF GPU IS THIS ── webgpu hands over an adapter info
+    // record and a limits table. on android the architecture string is
+    // real ("adreno-7xx", "mali-g78"), which is the single best class
+    // signal there is; on apple everything is masked to "apple", so the
+    // limits and the two benches carry the verdict instead. the limits
+    // ARE a signal: maxBufferSize and maxTextureDimension2D track the
+    // hardware class closely enough to separate a flagship from a budget
+    // soc when the strings say nothing.
+    function gpuClass(arch, limits){
+      var a = (arch || '').toLowerCase();
+      if (/swiftshader|llvmpipe|软件|software/.test(a)) return {n: 'software', t: 0};
+      if (/apple/.test(a)) return {n: 'apple', t: 3};                         // a-series/m-series: the benches decide the rest
+      if (/adreno-?[78]\d\d|adreno-?[78]xx/.test(a)) return {n: 'adreno 7xx/8xx', t: 3};
+      if (/adreno-?6[4-9]\d|adreno-?6xx/.test(a)) return {n: 'adreno 6xx', t: 2};
+      if (/adreno-?[1-5]/.test(a)) return {n: 'adreno legacy', t: 0};
+      if (/mali-?g(7[0-9]|[78]1\d|9\d\d)/.test(a)) return {n: 'mali g7x+', t: 2};
+      if (/mali-?g(5|6)/.test(a)) return {n: 'mali g5x/g6x', t: 1};
+      if (/mali/.test(a)) return {n: 'mali legacy', t: 0};
+      if (/xclipse/.test(a)) return {n: 'xclipse', t: 2};
+      if (/powervr|videocore/.test(a)) return {n: 'powervr/vc', t: 0};
+      // unknown silicon: let the limits speak IF they are there. a 4GB
+      // buffer ceiling with a 16k texture ceiling is flagship territory; a
+      // low texture ceiling is a real tell of a small gpu.
+      if (limits && limits.maxBufferSize >= 2147483648 && limits.maxTextureDimension2D >= 16384) return {n: 'unknown (flagship limits)', t: 3};
+      if (limits && limits.maxTextureDimension2D && limits.maxTextureDimension2D < 8192) return {n: 'unknown (small limits)', t: 1};
+      // NO EVIDENCE IS NOT EVIDENCE. headless chrome, a privacy-masked
+      // safari and a locked-down webview all report nothing here; capping
+      // them at rung 2 for having no string demoted every one of them
+      // (measured: this profile landed on 2 with an empty adapter.info).
+      // the two benches below are real measurements — they decide.
+      return {n: limits ? 'unknown' : 'unreported', t: 3};
+    }
     // ── tier memory: what the bench + watchdog learned about THIS device
     // survives the visit, so the next load opens on the learned rung
     // instead of re-janking its way down. keyed on the device's own
     // shape; a week old and it re-measures.
-    var MEM_KEY = 'yz_mq2';   /* v2: v1 tiers were chosen by the strict thresholds */
+    var MEM_KEY = 'yz_mq3';   /* v3: the ultra rung + the 336MB budget — every rung learned against the old 552MB page is void */
     function memSig(){ return [M.gpu, navigator.hardwareConcurrency || 0, (screen.width || 0) + 'x' + (screen.height || 0), window.devicePixelRatio || 1].join('|'); }
     function memRead(){
       try {
@@ -1131,7 +1215,7 @@ window.__bootScene = async function(){
       var dpr = window.devicePixelRatio || 1;
       var scr = window.screen || {width: 0, height: 0};
       var panel = (scr.width * dpr) * (scr.height * dpr);   // device pixels the panel asks for
-      var gpu = '';
+      var gpu = '', arch = '', lim = null;
       try {
         // WEBGPU: no getContext — the adapter's info is the closest thing
         // to the old UNMASKED_RENDERER string (and just as masked on
@@ -1140,15 +1224,22 @@ window.__bootScene = async function(){
         if (bk && bk.adapter && bk.adapter.info){
           var ai = bk.adapter.info;
           gpu = [ai.vendor || '', ai.architecture || '', ai.device || '', ai.description || ''].join(' ').replace(/\s+/g, ' ').trim();
+          arch = [ai.architecture || '', ai.vendor || '', ai.device || ''].join(' ');
+          try { var L = bk.adapter.limits; lim = {maxBufferSize: L.maxBufferSize, maxTextureDimension2D: L.maxTextureDimension2D, maxStorageBufferBindingSize: L.maxStorageBufferBindingSize}; } catch(le){}
         } else {
           var gl = bk && bk.gl;
           var ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
           if (ext) gpu = String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || '');
         }
       } catch(e){}
-      M.gpu = gpu; M.cores = cores; M.mem = mem; M.panel = panel;
+      M.gpu = gpu; M.cores = cores; M.mem = mem; M.panel = panel; M.limits = lim;
       var g = gpu.toLowerCase();
       var why = [];
+      // webgl2 fallback: the unmasked renderer string is all there is. and
+      // when even that is empty (safari masks, headless reports nothing),
+      // the user agent still names the family — an iphone is apple silicon
+      // whatever the adapter refuses to say.
+      if (!arch) arch = g || (/iphone|ipad|ipod/i.test(navigator.userAgent || '') ? 'apple' : '');
       // the default is the FULL page now ("i have iphone 12. and i need
       // see good quality on it"): a phone opens on rung 2 and only the
       // tells below walk it down. safari masks the gpu to "apple gpu"
@@ -1172,7 +1263,37 @@ window.__bootScene = async function(){
       // again into a black canvas — that rung is honored untested.
       var remembered = memRead();
       if (remembered && remembered.hard){ M.why = 'remembered rung ' + remembered.t + ' (context loss)'; return remembered.t; }
-      t = 3;   // a phone now OPENS on ultra and is measured down, not up
+      // 0. the BACKEND. webgpu = the page as designed. webgl2 = the
+      //    compatibility path: no pipeline pinning, GLSL recompiles where
+      //    dawn caches — measured 99s boot + 7s ride stalls if allowed to
+      //    run the ultra rung. it gets rung 1 and the watchdog from there.
+      if (window.__gpuBackend !== 'webgpu'){
+        M.why = 'webgl2 fallback: rung 1 cap';
+        return Math.min(1, cls0());
+      }
+      // ── WHAT THIS DEVICE IS, in three independent readings ──
+      // 1. the SILICON, by architecture string (real on android, masked on
+      //    apple) with the adapter limits as the fallback signal
+      function cls0(){
+        var c = gpuClass(arch, lim);
+        M.cls = c.n;
+        var cm = cpuBench(); M.cpu = Math.round(cm * 10) / 10;
+        var c2 = cm < CPU_T[0] ? 3 : (cm < CPU_T[1] ? 2 : (cm < CPU_T[2] ? 1 : 0));
+        return Math.min(c.t, c2);
+      }
+      var cls = gpuClass(arch, lim);
+      M.cls = cls.n;
+      t = cls.t;
+      why.push('gpu ' + cls.n);
+      // 2. the CPU, timed right here. this page spends as much of a phone
+      //    frame on the main thread as on the gpu, and a slow single core
+      //    shows up nowhere else: safari under-reports cores, android
+      //    big.LITTLE reports eight of which two matter.
+      var cms = cpuBench();
+      M.cpu = Math.round(cms * 10) / 10;
+      var ct = cms < CPU_T[0] ? 3 : (cms < CPU_T[1] ? 2 : (cms < CPU_T[2] ? 1 : 0));
+      if (ct < t){ t = ct; }
+      why.push('cpu ' + M.cpu + 'ms→' + ct);
       var apple = /apple/.test(g) || /iphone|ipad|ipod/i.test(navigator.userAgent || '');
       if (!apple && cores && cores <= 4){ t--; why.push('cores ' + cores); }
       if (!apple && mem && mem <= 3){ t--; why.push('ram ' + mem + 'gb'); }
@@ -1331,6 +1452,44 @@ window.__bootScene = async function(){
     return M;
   })();
   window.__mq = MQ;
+  // ── ?dbg=1 — THE DEVICE READOUT ──
+  // I cannot measure someone's phone from here, and a forwarded
+  // screenshot is a quarter-resolution jpeg. this is the loop-closer: the
+  // phone prints what it IS (silicon class, both benches, the rung it
+  // chose and why) and what it is DOING (live fps, worst frame in the
+  // last five seconds, gpu memory), in a corner, big enough to read in a
+  // screenshot. costs nothing unless the flag is on.
+  if (/[?&]dbg=1/.test(location.search || '')) (function(){
+    var el = document.createElement('div');
+    el.style.cssText = 'position:fixed;left:6px;top:6px;z-index:2147483647;pointer-events:none;' +
+      'font:11px/1.45 ui-monospace,Menlo,monospace;color:#c8ffd2;background:rgba(0,0,0,.74);' +
+      'padding:7px 9px;border:1px solid rgba(120,255,160,.35);border-radius:6px;white-space:pre;' +
+      'text-shadow:0 1px 2px #000;max-width:82vw';
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(el); });
+    if (document.body) document.body.appendChild(el);
+    var frames = 0, worst = 0, last = performance.now(), t0 = performance.now(), fps = 0;
+    (function tick(now){
+      var dt = now - last; last = now; frames++;
+      if (dt > worst) worst = dt;
+      if (now - t0 >= 1000){
+        fps = Math.round(frames * 1000 / (now - t0)); frames = 0; t0 = now;
+        var i = MQ.info(), cv = renderer.domElement;
+        var mem = 0;
+        try { var m = renderer.info.memory; mem = Math.round((m.texturesSize + m.attributesSize + m.indexAttributesSize) / 1048576); } catch(e){}
+        el.textContent =
+          'rung ' + i.tier + '   dpr ' + (+i.dpr).toFixed(2) + '   ' + cv.width + '\u00d7' + cv.height + '\n' +
+          'gpu  ' + (MQ.cls || '?') + (MQ.gpu ? ' [' + MQ.gpu.slice(0, 28) + ']' : '') + '\n' +
+          'cpu  ' + (MQ.cpu != null ? MQ.cpu + 'ms' : '?') + '   fill ' + Math.round(MQ.bench()) + 'ms' +
+            '   cores ' + (MQ.cores || '?') + '   ram ' + (MQ.mem || '?') + '\n' +
+          'back ' + (renderer.backend && renderer.backend.isWebGPUBackend ? 'webgpu' : 'webgl2') +
+            '   vram ~' + mem + 'MB\n' +
+          'fps  ' + fps + '   worst ' + Math.round(worst) + 'ms\n' +
+          'why  ' + String(i.why || '').slice(0, 80);
+        worst = 0;
+      }
+      requestAnimationFrame(tick);
+    })(performance.now());
+  })();
   // ── THE DEVICE PROFILE (desktop) ── measure the machine, then set
   // its TOP sustainable config before the first frame: the fill bench
   // (a real timed render on THIS gpu — the same one the phone ladder
@@ -2727,7 +2886,14 @@ window.__bootScene = async function(){
             // REAL scroll and never move, so the cover hard-skip cannot
             // fire mid-warm and the under-cover laptop states render too.
             // ?tail=0 skips it — the A/B hook for the perf rigs.
-            if (!/[?&]tail=0/.test(location.search)){
+            if (window.__gpuBackend !== 'webgpu'){
+              // webgl2: no pipeline pinning exists, so the tail's warm work
+              // is thrown away by GLSL program eviction anyway — and its
+              // 2-draw steps measured as a 99-SECOND boot on a phone
+              // profile. the reveal band above still warms (that one is
+              // felt on every backend); the deep page pays first-visit
+              // compile like v11 always has.
+            } else if (!/[?&]tail=0/.test(location.search)){
               var maxY = Math.max(band1, (document.documentElement.scrollHeight || 0) - window.innerHeight);
               var TAIL_STEPS = Math.min(warmParam('warmtail', 48), Math.ceil((maxY - band1) / 150));
               for (s = 1; s <= TAIL_STEPS; s++){ y = band1 + (maxY - band1) * s / TAIL_STEPS; seq.push(y); seq.push(y); }
@@ -7246,7 +7412,11 @@ window.__bootScene = async function(){
             // CARD_W 386, CARD_H_APPROX 110, CARD_PEEK 44, group width
             // CARD_W+20, label floating above the container at (-24, 17)
             var pcv = document.createElement('canvas');
-            var pk = (MOBILE && MQ.tier < 3) ? 0.5 : 1;   // half the pixels on a phone below ultra (6.2MB → 1.6MB)
+            // FULL raster on every rung: this plate carries the pod deck's
+            // TEXT, it repaints only on blink toggles (not per frame), and the
+            // whole difference is 4.6MB. softness here is the "shitty quality"
+            // a phone screenshot shows first.
+            var pk = 1;
             pcv.width = Math.round(940 * pk); pcv.height = Math.round(1300 * pk);
             var pcx = pcv.getContext('2d');
             // the deck below is drawn in 940×1300 space and nests its own
@@ -7837,7 +8007,7 @@ window.__bootScene = async function(){
           // 1280×726 is 3.5MB of upload every time the session types a
           // line. the draw below fits its font to the canvas width, so a
           // phone simply gets a smaller one — same layout, quarter the bus.
-          var SCVW = MOBILE ? 640 : 1280;   // 640 covers this display 1:1 even at the ultra rung's device ratio
+          var SCVW = (MOBILE && MQ.tier < 3) ? 640 : 1280;   // the session text on the glass: full raster at ultra
           scv.width = SCVW; scv.height = Math.round(SCVW * scrH / scrW);
           var scx = scv.getContext('2d');
           var stex = new THREE.CanvasTexture(scv);
@@ -7960,7 +8130,10 @@ window.__bootScene = async function(){
         // the DRAW CODE IS UNTOUCHED: every constant in it is written in
         // 2048-space, so the context carries the scale and the plate is the
         // same picture at a quarter of the pixels.
-        var DIO_RASTER = !MOBILE ? 2048 : (MQ.tier >= 3 ? 1536 : 1024);
+        // the plates carry text too, and each is painted ONCE — raster is
+        // pure memory-for-legibility here, with no per-frame cost. ultra
+        // takes desktop parity.
+        var DIO_RASTER = (!MOBILE || MQ.tier >= 3) ? 2048 : 1024;
         function dioPlate(w6, h6, ro, drawFn){
           var pc = document.createElement('canvas');
           pc.width = Math.round(w6 * DIO_RASTER);
