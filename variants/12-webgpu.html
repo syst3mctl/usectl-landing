@@ -36,6 +36,11 @@
     <link rel="preload" href="/models/door.glb" as="fetch" crossorigin fetchpriority="low">
     <link rel="preload" href="/models/terminal.glb" as="fetch" crossorigin fetchpriority="low">
     <link rel="preload" href="/models/card.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/models/sci-fi_control_panel.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/draco/draco_decoder.wasm" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/draco/draco_wasm_wrapper.js" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/basis/basis_transcoder.wasm" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/basis/basis_transcoder.js" as="fetch" crossorigin fetchpriority="low">
 <style>
   :root{
     /* manager-usectl dark theme */
@@ -2519,15 +2524,27 @@ window.__bootScene = async function(){
   // sheets it crashed under stay small either way, so the climb can
   // never re-arm the bomb.
   if (MOBILE) (function(){
-    var K = 'yz_alive';
+    var K = 'yz_alive12';   // OWN key: 'yz_alive' was shared with v11 —
+                            // either page's unclean exit demoted the other
     try {
-      if (localStorage.getItem(K)) MQ.remember(Math.max(0, MQ.tier - 1), true);
-      localStorage.setItem(K, '1');
+      // demote only when the last visit died MID-RIDE (deep in the heavy
+      // scenes = the jetsam signature). ios rarely fires pagehide on a
+      // tab kill, so the old "flag still up" logic read every normal
+      // exit as a crash and walked the phone down a rung per visit —
+      // soft dpr, wires off ("mobile version is very lag, bad quality").
+      if (localStorage.getItem(K) === 'ride') MQ.remember(Math.max(0, MQ.tier - 1), true);
+      var aliveState = 'top';
+      localStorage.setItem(K, aliveState);
+      var mark = function(){
+        var st = (window.pageYOffset || 0) > 400 ? 'ride' : 'top';
+        if (st !== aliveState){ aliveState = st; try { localStorage.setItem(K, st); } catch(e){} }
+      };
+      window.addEventListener('scroll', mark, {passive: true});
       var lower = function(){ try { localStorage.removeItem(K); } catch(e){} };
       window.addEventListener('pagehide', lower);
       document.addEventListener('visibilitychange', function(){
         if (document.visibilityState === 'hidden') lower();
-        else { try { localStorage.setItem(K, '1'); } catch(e){} }
+        else { aliveState = ''; mark(); }
       });
     } catch(e){}
   })();
@@ -3301,7 +3318,11 @@ window.__bootScene = async function(){
       root.traverse(function(o){ if (!o.visible){ touched.push(o); o.visible = true; } });
       var wn = root;
       while (wn){ if (!wn.visible){ touched.push(wn); wn.visible = true; } wn = wn.parent; }
-      warmScenePass();
+      warmChainOffscreen();   // LIVE-chain keys — warmScenePass compiles
+                              // differently-keyed pipelines the ride never
+                              // reuses (the port's own measured lesson)
+      warmChainOffscreen();   // twice: metal finalizes a pipeline's shader
+                              // on first EXECUTION, not on create
       for (var wi = 0; wi < touched.length; wi++) touched[wi].visible = false;
     } catch(e){}
   }
@@ -3602,7 +3623,7 @@ window.__bootScene = async function(){
     // the veil only drops ONCE, and only after the site is fully loaded
     // AND snapped to the hero — never mid-warm ("load the whole site,
     // then show it"). a 16s net backstops a warm that runs long.
-    function liftVeil(){ if (veilLifted) return; veilLifted = true; if (veilOnLoad) veilOnLoad(); }
+    function liftVeil(){ if (veilLifted) return; veilLifted = true; window.__veilDown = true; if (veilOnLoad) veilOnLoad(); }
     // net past the full-res warm sweep (~4-7s on real hw with the full-page
     // tail; minutes on a software gpu). if the sweep is STILL riding when
     // the net fires, never lift blind — a mid-warm frame is the broken
@@ -3642,7 +3663,9 @@ window.__bootScene = async function(){
                   n = n.parent;
                 }
               }
-              warmScenePass();
+              // real presenting path under the veil (see the __warmY
+              // intercept: offscreen warms compile a parallel pipeline set)
+              try { composer.render(); composer.render(); } catch(we){ warmChainOffscreen(); }
               for (var t = 0; t < touched.length; t++) touched[t].visible = false;
               bi = end;
               requestAnimationFrame(warmChunk);
@@ -3833,6 +3856,19 @@ window.__bootScene = async function(){
                 // settled hero is what actually paints, then lift it. THIS
                 // is "load the whole site, THEN show it".
                 window.__warmY = null;
+                // two LIVE-path frames at the reveal end, under the veil —
+                // WITH a forced city-bundle re-record: the ghost-state
+                // bundle otherwise records for the first time on the
+                // USER'S first crossing, and dawn creates its whole
+                // pipeline set right there (traced: 236 pipelines,
+                // 1.46s in the gpu process). dirty it NOW so those 236
+                // compile behind the veil instead.
+                try {
+                  cityBundleDirty();
+                  composer.render();
+                  cityBundleDirty();   // twice: the metal finalize rule
+                  composer.render();
+                } catch(pe){}
                 // HARD-RESET to the hero: the sweep left the scene at the
                 // reveal end (rackFade 1, sceneMode 2, city ghosted). rackFade
                 // otherwise time-fades over 0.5s (caught mid-decrement at the
@@ -3914,6 +3950,47 @@ window.__bootScene = async function(){
     };
   })();
   var loader = new THREE.GLTFLoader();
+  // ── the texture governor (phones only; ported from v11) ── any map
+  // wider than the rung's cap is redrawn onto a canvas BEFORE its first
+  // upload: a 390px frame cannot resolve 2048² sheets, and the decode+
+  // upload spike mid-scroll was the ios jetsam signature. KTX2-compressed
+  // maps pass through (already small on the gpu, and not redrawable).
+  // desktop and ipad byte-identical.
+  if (MOBILE) (function(){
+    var tameSeen = {};
+    function tameTextures(root){
+      var cap = MQ.tier >= 2 ? 1024 : 512;
+      root.traverse(function(o){
+        if (!o.isMesh) return;
+        var mats = Array.isArray(o.material) ? o.material : [o.material];
+        for (var i = 0; i < mats.length; i++){
+          var m = mats[i]; if (!m) continue;
+          for (var key in m){
+            var t = m[key];
+            if (!t || !t.isTexture || t.isCompressedTexture || !t.image || tameSeen[t.uuid]) continue;
+            tameSeen[t.uuid] = true;
+            var im = t.image, w = im.width || 0, h = im.height || 0;
+            if (w > cap || h > cap){
+              var sc = cap / Math.max(w, h);
+              var cv = document.createElement('canvas');
+              cv.width = Math.max(1, Math.round(w * sc));
+              cv.height = Math.max(1, Math.round(h * sc));
+              cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+              t.image = cv;
+              t.needsUpdate = true;
+            }
+          }
+        }
+      });
+    }
+    var _gltfLoad = loader.load.bind(loader);
+    loader.load = function(url, onLoad, onProgress, onError){
+      return _gltfLoad(url, function(g){
+        try { tameTextures(g.scene); } catch(e){}
+        onLoad(g);
+      }, onProgress, onError);
+    };
+  })();
   var draco = new THREE.DRACOLoader();
   draco.setDecoderPath('/draco/');   // vendored 1.4.1 (public/draco): the page decodes with no network
   loader.setDRACOLoader(draco);
@@ -4873,10 +4950,13 @@ window.__bootScene = async function(){
     // per pipeline bucket ONLY while the boot warm sweep drives the ride
     // (__warmY set = rendered off-screen behind the veil — free); the
     // deferred sweep after a mid-page refresh covers the rest.
-    if (window.__warmY != null){
-      var tunnelB = (ghost ? 'g' : 'o') + (f < 0.3 ? 'd' : '') + (f < 0.12 ? 'f' : '');
-      if (tunnelB !== tunnelArmB && tunnelRearmed < 16){ tunnelArmB = tunnelB; tunnelRearm(); }
-    }
+    // (the bucket tunnelRearm that lived here is GONE: it needsUpdate'd
+    // every city material per pipeline bucket during the sweep, leaving
+    // version-bumped materials whose live-pass rebuilds landed on the
+    // user's first crossing. the ghost body-hide rides m.opacity and
+    // needs no rearm; the agents corridor uniform was wired at load,
+    // before any pipeline built. tunnelRearm stays defined for console
+    // use only.)
     for (var di = 0; di < cityMats.length; di++){
       var m = cityMats[di];
       if (!m.userData.__dim) m.userData.__dim = {op: m.opacity, tr: m.transparent, dw: m.depthWrite, ei: m.emissiveIntensity};
@@ -4904,7 +4984,10 @@ window.__bootScene = async function(){
       // whole line city vanished with its parents ("u broked ghost
       // city"). 0.002 is under one 8-bit step per layer, invisible, and
       // keeps every child overlay alive.
-      if (m.userData.__tunDeep && a > 0)
+      // ...and ONLY where the wire layers exist to replace them: a
+      // demoted rung runs wires:false, and hiding the bodies there left
+      // EMPTY black ghost scenes — the old 10% ghost stays instead
+      if (m.userData.__tunDeep && a > 0 && MQ.k.wires)
         a = Math.max(0.002, a * (1 - Math.max(0, Math.min(1, (1 - f) / 0.9))));
       m.opacity = a;
       m.transparent = ghost || b.tr;
@@ -12154,7 +12237,17 @@ window.__bootScene = async function(){
         else focusGoal.v = camera.position.distanceTo(controls.target);
         focusU.value += (focusGoal.v - focusU.value) * 0.5;
       }
-      bokeh.enabled = MQ.k.dof; bloom.enabled = MQ.k.bloom; warmChainOffscreen(); staticPrevCam.makeScale(0, 0, 0); return;
+      bokeh.enabled = MQ.k.dof; bloom.enabled = MQ.k.bloom;
+      // behind the veil the sweep renders the REAL presenting path:
+      // warmChainOffscreen sets its own explicit targets, and pipelines
+      // key on attachment formats/samples — its whole compiled set was a
+      // parallel universe the live ride never reused (traced: the first
+      // crossing still created 236-240 dawn pipelines / ~1.2-1.5s after
+      // every offscreen warm). presenting under the opaque veil is
+      // invisible; the deferred post-veil sweep keeps the offscreen path.
+      if (!window.__veilDown){ try { composer.render(); } catch(we){ warmChainOffscreen(); } }
+      else warmChainOffscreen();
+      staticPrevCam.makeScale(0, 0, 0); return;
     }
     var camMoved = !staticPrevCam.equals(camera.matrixWorld);
     var frameLive = camMoved || renderer.shadowMap.needsUpdate || frameDirtyFlag ||

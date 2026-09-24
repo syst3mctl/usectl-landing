@@ -3946,8 +3946,11 @@
       m.stencilFunc = ghost ? THREE.NotEqualStencilFunc : THREE.AlwaysStencilFunc;
     }
     // the body ghost-hide rides the same scrubbed factor as the ghost
-    // itself: f 1 (lit hero/footer) -> 0, f 0.1 (full ghost) -> 1
-    ghostU.value = Math.max(0, Math.min(1, (1 - f) / 0.9));
+    // itself: f 1 (lit hero/footer) -> 0, f 0.1 (full ghost) -> 1 —
+    // and ONLY where the wire layers exist to replace the bodies: a
+    // demoted phone rung runs wires:false, and hiding the bodies there
+    // would leave empty black ghost scenes
+    ghostU.value = MQ.k.wires ? Math.max(0, Math.min(1, (1 - f) / 0.9)) : 0;
     // FULL ghost only: the lights argument is already at zero there (no
     // emissive left to lose) and the reveal has finished, so the swap can
     // never land mid-crossover where the lamps still reach the buildings
