@@ -2174,14 +2174,23 @@ window.__bootScene = async function(){
   // sections, same ride, a renderer built for that hardware. desktop
   // keeps the webgl2 fallback (rare in 2026, and ?gpu=gl still forces it
   // anywhere for A/B).
+  async function swapToNativeBuild(tag){
+    try {
+      var res = await fetch('/variants/11-yoozap.html');
+      if (!res.ok) throw new Error('http ' + res.status);
+      var html = await res.text();
+      console.info('[12-webgpu] ' + tag + ' — swapping in the native webgl build, url unchanged');
+      document.open(); document.write(html); document.close();
+      return true;
+    } catch(se){
+      console.warn('[12-webgpu] native-build swap failed (' + se + ') — staying on the capped webgl2 path');
+      return false;   // the rung-1 webgl2 cap below is the last resort
+    }
+  }
   if (MOBILE && !FORCE_GL){
     var gpuOk = false;
     try { if (navigator.gpu) gpuOk = !!(await navigator.gpu.requestAdapter()); } catch(ge){}
-    if (!gpuOk){
-      console.info('[12-webgpu] no webgpu adapter on mobile — handing off to the native webgl build');
-      location.replace('/variants/11-yoozap.html' + (location.search || '') + (location.hash || ''));
-      return;
-    }
+    if (!gpuOk && await swapToNativeBuild('no webgpu adapter on mobile')) return;
   }
   var renderer = new THREE.WebGPURenderer({canvas:canvas, antialias:false, stencil:true, powerPreference:'high-performance', forceWebGL:FORCE_GL});
   await renderer.init();   // webgpu device acquisition is async; nothing below runs without it
@@ -2192,9 +2201,7 @@ window.__bootScene = async function(){
   // failed inside init. the first probe merely saves a renderer boot when
   // it can; THIS one is the decision that counts, whatever path led here.
   if (MOBILE && !FORCE_GL && window.__gpuBackend !== 'webgpu'){
-    console.info('[12-webgpu] webgl2 backend on mobile — handing off to the native webgl build');
-    location.replace('/variants/11-yoozap.html' + (location.search || '') + (location.hash || ''));
-    return;
+    if (await swapToNativeBuild('webgl2 backend on mobile')) return;
   }
   console.info('[12-webgpu] backend: ' + window.__gpuBackend);
   if (renderer.debug) renderer.debug.checkShaderErrors = false;   // dev-only introspection, costs compile time
