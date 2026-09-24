@@ -929,6 +929,15 @@ window.__bootScene = async function(){
       var res = await fetch('/variants/11-yoozap.html');
       if (!res.ok) throw new Error('http ' + res.status);
       var html = await res.text();
+      // REWRITE THE CDN SCRIPTS TO THE VENDORED COPIES (public/vendor/r128)
+      // before writing: chrome's document.write intervention blocks
+      // parser-blocking CROSS-ORIGIN scripts on slow networks — measured
+      // on the android emulator, where the swapped page's veil hung
+      // forever because three.min.js (cdnjs) never ran. same-origin
+      // scripts are exempt, and the vendored set is byte-identical.
+      html = html
+        .replace(/https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/three\.js\/r128\/three\.min\.js/g, '/vendor/r128/three.min.js')
+        .replace(/https:\/\/cdn\.jsdelivr\.net\/npm\/three@0\.128\.0\/examples\/js\//g, '/vendor/r128/');
       console.info('[12-webgpu] ' + tag + ' — swapping in the native webgl build, url unchanged');
       document.open(); document.write(html); document.close();
       return true;
@@ -2802,6 +2811,37 @@ window.__bootScene = async function(){
             if (rackLbl2) rackLbl2.visible = pv2;
             frameDirtyFlag = true; frameCacheValid = false;
           }
+          // 3b) THE LIVE CANVASES, painted once behind the veil. each of
+          // these paints lazily the frame its section first shows, and a
+          // canvas texture pays its full raster in upload right there —
+          // measured as the 104ms first-show hitch at the terminal
+          // (holo 2MB + label) on the phone profile. paint them now, push
+          // them to the gpu now; the section entry then uploads nothing.
+          try {
+            if (termHoloDraw){ termHoloDraw(0, null, false); if (termHoloTex){ termHoloTex.needsUpdate = true; renderer.initTexture(termHoloTex); } }
+            if (s3PodsDraw){ s3PodsDraw(false, null); if (s3PodsTex){ s3PodsTex.needsUpdate = true; renderer.initTexture(s3PodsTex); } }
+            if (typeof calcLabelDraw === 'function') calcLabelDraw(0);
+          } catch(lw){}
+          // 3c) THE PCB, IN ITS DIVE STATE. its load-site warm and the
+          // hidden-prop parade both rendered it from the HERO camera —
+          // where the board sits outside the frustum, so nothing drew and
+          // nothing compiled. the dive's first frame then built the whole
+          // blended set live (measured: 18 pipelines / 208ms at y7002,
+          // the last first-ride stall standing). render the REAL board,
+          // mid-fade, culling off so the frustum cannot silently skip it.
+          try {
+            if (pcbRoot && pcbMats.length){
+              var pcv0 = pcbRoot.visible, pcCull = [];
+              pcbRoot.visible = true;
+              pcbRoot.traverse(function(o){ if (o.isMesh){ pcCull.push([o, o.frustumCulled]); o.frustumCulled = false; } });
+              var pcOp = [];
+              for (var pw = 0; pw < pcbMats.length; pw++){ pcOp[pw] = pcbMats[pw].opacity; pcbMats[pw].opacity = 0.4; }
+              warmChainOffscreen(); warmChainOffscreen();   // metal finalizes on execution
+              for (pw = 0; pw < pcbMats.length; pw++) pcbMats[pw].opacity = pcOp[pw];
+              for (pw = 0; pw < pcCull.length; pw++) pcCull[pw][0].frustumCulled = pcCull[pw][1];
+              pcbRoot.visible = pcv0;
+            }
+          } catch(pcw){}
           // 4) THE SPLIT REVEAL ITSELF, off-screen. the instant state warms
           // above compile the discrete flavors, but the reveal's live pipeline
           // set is bigger than any static pose: the whole-city+rack SHADOW
@@ -6073,6 +6113,13 @@ window.__bootScene = async function(){
       rackRoot2.visible = false;
       scene.add(rackRoot2);
       rackRoot2.updateMatrixWorld(true);   // autoUpdate is off — bake once
+      // (a creation-site warm for the clone lived here for one build and
+      // was measured useless — 4/4 rides still compiled the 18-pipeline
+      // metal-split set. the clone's ride keys on state the load moment
+      // cannot reproduce; the descriptor evidence and the MRT-write-mask
+      // suspect are in the project notes. the cost is one intermittent
+      // one-time ~150-300ms hitch at the metal split on a COLD shader
+      // cache; the OS cache makes it once per device, not per visit.)
       // ── the name plates standing over the two racks, typed exactly
       // like the calculator's label: terminal mono, block cursor at the
       // tip, the count riding a scroll window (drawn in the loop) ──
@@ -7342,6 +7389,25 @@ window.__bootScene = async function(){
         // 45mb of buffers in the same tiny draw
         pr.visible = true;
         warmScenePass();
+        // ...and the DIVE state through the REAL chain, culling off: from
+        // the boot camera the board sits outside the frustum, so a plain
+        // warm draws nothing and compiles nothing (the 18-pipeline /
+        // ~200ms first-dive stall). mid-fade opacity keys the blended
+        // flavor the dive actually uses. HERE, in the load callback,
+        // because the one-shot warm block races the load order — some
+        // boots had pcbRoot still null when it ran.
+        try {
+          var pcCull = [];
+          pr.traverse(function(o){ if (o.isMesh){ pcCull.push([o, o.frustumCulled]); o.frustumCulled = false; } });
+          var pcOp = [];
+          for (var pw = 0; pw < pcbMats.length; pw++){ pcOp[pw] = pcbMats[pw].opacity; pcbMats[pw].opacity = 0.4; }
+          // the REAL presenting path — the offscreen warm keys a parallel
+          // pipeline universe (attachment formats differ; round 32)
+          if (!window.__veilDown){ try { composer.render(); composer.render(); } catch(cw){ warmChainOffscreen(); } }
+          else { warmChainOffscreen(); warmChainOffscreen(); }
+          for (pw = 0; pw < pcbMats.length; pw++) pcbMats[pw].opacity = pcOp[pw];
+          for (pw = 0; pw < pcCull.length; pw++) pcCull[pw][0].frustumCulled = pcCull[pw][1];
+        } catch(pcw){}
         pr.visible = false;
         pcbRoot = pr;
         // leg 5's frame is SOLVED from the board's own width (see
@@ -8014,7 +8080,7 @@ window.__bootScene = async function(){
           // 1280×726 is 3.5MB of upload every time the session types a
           // line. the draw below fits its font to the canvas width, so a
           // phone simply gets a smaller one — same layout, quarter the bus.
-          var SCVW = (MOBILE && MQ.tier < 3) ? 640 : 1280;   // the session text on the glass: full raster at ultra
+          var SCVW = MOBILE ? 640 : 1280;   // 640 covers this glass 1:1 even at ultra's device ratio; 1280 was 3.5MB of bus per typed line
           scv.width = SCVW; scv.height = Math.round(SCVW * scrH / scrW);
           var scx = scv.getContext('2d');
           var stex = new THREE.CanvasTexture(scv);
@@ -9274,7 +9340,7 @@ window.__bootScene = async function(){
     // at half rate nothing about them reads differently, and the phone
     // gets those megabytes back. desktop keeps every frame.
     liveCvTick++;
-    var liveCvSkip = MOBILE && MQ.tier < 3 && (liveCvTick & 1) === 1;
+    var liveCvSkip = MOBILE && (liveCvTick & 1) === 1;
     if (!stageVisible || window.__sceneHold) return;   // scrolled away, or under the film's sheet: skip the whole frame
     // the addons flat is fully opaque: nothing of the scene can show —
     // skip the whole chain; the ride resumes as soon as the cover thins.
