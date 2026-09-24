@@ -1381,7 +1381,7 @@
     var shown = 0, trickle = null, raf = null, g0 = Date.now();
     function paint(){ fill.style.width = (shown * 100).toFixed(1) + '%'; if (pct) pct.textContent = '[' + Math.round(shown * 100) + '%]'; }
     trickle = setInterval(function(){
-      if (shown < 0.9){ shown = Math.min(0.9, shown + 0.004 + (0.9 - shown) * 0.012); paint(); }
+      if (shown < 0.5){ shown = Math.min(0.5, shown + 0.004 + (0.5 - shown) * 0.012); paint(); }
     }, 250);
     function glowFrame(){
       var t = ((Date.now() - g0) % 4000) / 1000, left = 0, op;
@@ -2039,9 +2039,20 @@
     var veil = document.getElementById('preload');
     if (!veil) return;
     var t0 = Date.now(), pageIn = false, glbIn = false, down = false;
+    // HOLD THE PAGE while the veil stands. the veil is a fixed overlay,
+    // not a scroll lock — a swipe under it scrolled the real page, which
+    // ABORTED the boot warm sweep (leaving the site cold: "i have lag coz
+    // site was not uploaded till end") and dropped the visitor at a random
+    // scroll spot when it lifted ("sometimes scroll not work").
+    var held = false;
+    try { if (window.__holdPage){ window.__holdPage(true); held = true; } } catch(e){}
+    function release(){ if (!held) return; held = false; try { window.__holdPage(false); } catch(e){} }
+    setTimeout(release, 46000);   // the hold can never outlive the net below
     function lower(){
       if (down || !pageIn || !glbIn) return;
       down = true;
+      window.__veilDown = true;   // the scene's warm sweep reads this and stands down
+      release();
       setTimeout(function(){
         if (window.plVeil) window.plVeil.hide();
         else { veil.classList.add('out'); setTimeout(function(){ veil.remove(); }, 1400); }
@@ -2053,15 +2064,40 @@
     // the scene script calls this hook once the loading manager exists.
     // if the module never lands (no webgpu AND no webgl2, or a cdn
     // failure) the 15s net below still lowers the veil.
+    var lastMove = Date.now();   // last sign of life from the loaders
     window.__veilGlbWire = function(mgr){
       mgr.onProgress = function(url, ld, tot){
         // itemsTotal grows as nested loads queue, so the ratio can dip —
         // plVeil.progress() is monotonic and shrugs those off
-        if (window.plVeil && tot) window.plVeil.progress(ld / tot);
+        lastMove = Date.now();
+        // the DOWNLOAD is the first three quarters of the boot; the scene's
+        // warm phases report the rest through __veilPhase below. a bar that
+        // hit 100% and then hung for the warm read as a broken gauge.
+        if (window.plVeil && tot) window.plVeil.progress(0.75 * (ld / tot));
       };
       mgr.onLoad = function(){ glbIn = true; lower(); };
     };
-    setTimeout(function(){ pageIn = glbIn = true; lower(); }, 15000);
+    // the net was a flat 15s — on a phone's network that fired WHILE the
+    // models were still coming down and the warms had not run, so the
+    // veil lied and the site appeared half-built. it now waits for real
+    // silence: 15s minimum AND 6s with no loader progress AND the scene
+    // reporting no warm in flight — with a 45s hard cap so a dead cdn
+    // still lets the page in.
+    window.__veilWorking = function(){ return false; };   // the scene overrides this
+    // the scene's warm phases drive the last quarter of the gauge
+    window.__veilPhase = function(from, to, p){
+      if (!window.plVeil) return;
+      lastMove = Date.now();
+      window.plVeil.progress(from + (to - from) * Math.max(0, Math.min(1, p)));
+    };
+    (function net(){
+      var now = Date.now(), age = now - t0, working = false;
+      try { working = !!window.__veilWorking(); } catch(e){}
+      if (age > 45000 || (age > 15000 && !working && (now - lastMove) > 6000)){
+        pageIn = glbIn = true; lower(); return;
+      }
+      setTimeout(net, 1000);
+    })();
     lower();
   })();
 </script>
@@ -2401,23 +2437,51 @@ window.__bootScene = async function(){
     // actually doing — which means this can only ever detect the MISS,
     // never the headroom. hence: stepping DOWN is measured, stepping up
     // is a cautious one-shot that locks out the moment it is wrong.
-    var hot = 0, cool = 0, cd = 0, climbed = 0, bootAt = performance.now();
+    var hot = 0, cool = 0, cd = 0, climbed = 0, bootAt = performance.now(), rideAt = 0;
     function watch(dt, cost, riding){
       if (!M.mobile || M.forced) return;
+      // ── BOOT FRAMES ARE NOT THE VISITOR'S FRAMES ──
+      // measured on a throttled phone: the ladder demoted to rung 1 at
+      // t=9s, i.e. while the veil still stood and the models were landing
+      // (dpr 1.5, wire city off, for the whole visit — "my quality is
+      // bad"). NOTHING that happens behind the veil is evidence about
+      // what this device can carry on the real page: the loader's decode
+      // and upload spikes, the hidden-prop parade, and the reveal sweep's
+      // full-chain frames all land here, and all of them are one-time.
+      // the gate opens when the visitor does (liftVeil → bootMark, or the
+      // veil lowering by any other path).
+      if (window.__warmY != null){ hot = cool = 0; return; }   // the sweep drives the camera itself
+      if (!rideAt){
+        if (!window.__veilDown){ hot = cool = 0; return; }
+        // the veil went down without the scene's own lift (a net gave up):
+        // start the ride window here so the ladder is never mute
+        rideAt = bootAt = performance.now(); hot = cool = 0; cd = Math.max(cd, 6);
+      }
       if (cd > 0) cd -= dt;
       if (climbed > 0) climbed -= dt;
+      // a cooldown means no judging AT ALL — hot must not quietly pile up
+      // through it and convict the instant it expires (the post-warm
+      // liveCost ema still carries the sweep's weight for ~15 frames)
+      if (cd > 0){ hot = cool = 0; return; }
       var tick = Math.max(0.0166, nativeDt);   // judge against 60hz, never a 120hz panel's tick
       if (riding && cost){
         if (cost > tick * 1.7){ hot += dt; cool = 0; }
         else if (cost < tick * 1.1){ cool += dt; hot = 0; }
         else { hot = 0; }
       } else { hot = 0; }
-      if (cd > 0) return;
-      // the first seconds are the hero lap — live every frame, the
-      // page's first impression, and the place a phone the bench let
-      // through shows its hand. the demotion trigger runs at a third
-      // of its cruising patience there.
-      var hotAt = (performance.now() - bootAt < 15000) ? 0.4 : 1.2;
+      // the first seconds used to run a third of the cruising patience
+      // (0.4s of hot frames demotes). that fired on the FIRST RIDE, where
+      // the costs are one-time — texture uploads landing, the first
+      // shadow renders, pipeline residue — and walked good phones down a
+      // rung for the whole visit: soft dpr, wires off ("my quality is
+      // bad"). once the veil has lifted (rideAt), the visitor is on the
+      // real page and the watchdog judges at CRUISING patience only, so
+      // a demotion means sustained real misses, not a warm-up.
+      // the old impatient 0.4s window is dead by construction now — the
+      // gate above means every frame we judge is a RIDDEN frame, and those
+      // are judged at cruising patience. kept as the expression it was so
+      // the intent stays readable: nothing before the ride, 1.2s after.
+      var hotAt = rideAt ? 1.2 : 0.4;
       if (hot > hotAt && M.tier > 0){
         // a step down that lands right after a climb means the climb was
         // wrong: nail the ceiling shut so the two can never trade places
@@ -2431,6 +2495,18 @@ window.__bootScene = async function(){
         memWrite(M.tier);
       }
     }
+    // the impatient first-15s demotion window used to start at MQ
+    // construction — i.e. during LOADING. on a phone the boot (download +
+    // warm sweep) outlasts it, so the first real scroll frames (one-time
+    // pipeline costs) landed inside the trigger and walked the phone down
+    // a rung — soft dpr, wires off, for the whole visit ("my quality is
+    // bad"). the veil lift calls this: the window starts when the visitor
+    // does, and a 3s cooldown lets the one-time costs pass unjudged.
+    M.bootMark = function(){
+      bootAt = rideAt = performance.now();
+      hot = cool = 0;
+      cd = Math.max(cd, 6);   // six seconds of real riding before any verdict
+    };
     M.apply = apply; M.watch = watch; M.scene = scene; M.remember = memWrite;
     M.bench = bench;   // the fill bench serves the desktop profile too
     // the ceiling is where the PROBE put us: the watchdog may walk down
@@ -3623,18 +3699,39 @@ window.__bootScene = async function(){
     // the veil only drops ONCE, and only after the site is fully loaded
     // AND snapped to the hero — never mid-warm ("load the whole site,
     // then show it"). a 16s net backstops a warm that runs long.
-    function liftVeil(){ if (veilLifted) return; veilLifted = true; window.__veilDown = true; if (veilOnLoad) veilOnLoad(); }
-    // net past the full-res warm sweep (~4-7s on real hw with the full-page
-    // tail; minutes on a software gpu). if the sweep is STILL riding when
-    // the net fires, never lift blind — a mid-warm frame is the broken
-    // radial/dim city the veil exists to hide. warmKill makes the sweep
+    function liftVeil(){
+      if (veilLifted) return;
+      veilLifted = true; window.__veilDown = true;
+      try { if (MQ.bootMark) MQ.bootMark(); } catch(e){}   // the ride starts NOW, not at load
+      if (veilOnLoad) veilOnLoad();
+    }
+    // the veil's net asks this before giving up: while the scene still
+    // has models or warms in flight, the veil keeps standing
+    window.__veilWorking = function(){ return !veilLifted; };
+    // ── THE WARM NET, BUDGETED FROM THE SWEEP'S OWN START ──
+    // it used to be one flat 16s timer armed at SCENE BOOT. that budget
+    // covers the download too — so on a phone (measured: 4x-throttled
+    // ride, models in at 12.9s, sweep opening at ~16s) the net fired with
+    // the sweep 3.7% DONE and killed it. the page then went live COLD:
+    // 216 pipelines compiled under the visitor's thumb, a 506ms stall at
+    // the split and a 433ms one deeper in — exactly the "i have lag coz
+    // site was not uploaded till end" the honest veil was supposed to end.
+    // the download has no business spending the sweep's clock: the sweep
+    // gets SWEEP_MS from the moment it actually starts, and the load phase
+    // gets its own long fallback (the veil's 45s cap sits past both).
+    // when the budget does run out mid-sweep, warmKill makes the sweep
     // jump to its own completion (hero snap + homeHeal), which lifts the
-    // veil itself a few frames later; the un-swept rest of the page just
-    // stays cold, the pre-tail behavior for those sections.
-    setTimeout(function(){
-      if (warmSweepStarted && window.__warmY != null){ warmKill = true; return; }
-      liftVeil();
-    }, 16000);
+    // veil a few frames later; whatever was not reached stays cold.
+    var SWEEP_MS = 30000, LOAD_MS = 40000, netT0 = performance.now();
+    window.__sweepDeadline = 0;   // runRevealSweep stamps this
+    (function warmNet(){
+      if (veilLifted) return;
+      var now = performance.now();
+      if (warmSweepStarted){
+        if (window.__warmY != null && window.__sweepDeadline && now > window.__sweepDeadline){ warmKill = true; return; }
+      } else if (now - netT0 > LOAD_MS){ liftVeil(); return; }
+      setTimeout(warmNet, 500);
+    })();
     THREE.DefaultLoadingManager.onLoad = function(){
       var warmedNow = false;
       try {
@@ -3668,6 +3765,8 @@ window.__bootScene = async function(){
               try { composer.render(); composer.render(); } catch(we){ warmChainOffscreen(); }
               for (var t = 0; t < touched.length; t++) touched[t].visible = false;
               bi = end;
+              // the cast walking on stage: gauge 0.75 → 0.85
+              try { if (window.__veilPhase) window.__veilPhase(0.75, 0.85, bi / hidden.length); } catch(ge){}
               requestAnimationFrame(warmChunk);
             })();
           })();
@@ -3757,7 +3856,18 @@ window.__bootScene = async function(){
             // (dim<0.3), the stencil flip, the clip-pool grow, and the shadow
             // endpoints — in a single pass each way. 760→1370 spans the whole
             // reveal (scene toggles ~806, rackFade hits 1 by ~955).
-            var band0 = 760, band1 = 1370, STEPS = 26, seq = [], s, h, y;
+            // the phone walks the SAME ladder as the desktop, deliberately:
+            // a coarser one was tried and measured — it skipped states, and
+            // 134 pipelines / 660ms then compiled DURING the phone's scroll
+            // (the one thing that must never happen). the whole pipeline set
+            // is a fixed cost; it belongs behind the honest veil, where the
+            // visitor is already watching a loader, not under their thumb.
+            // band0 was 760; the ride still compiled ghost-stencil city
+            // variants at y738 (rackFade leaving 0 starts under 760, and the
+            // pre-path's 30px stride only ever drew the opaque flavor there).
+            // the band starts where the reveal does now, with the stride kept
+            // at ~23px by the extra step.
+            var band0 = 700, band1 = 1370, STEPS = 29, seq = [], s, h, y;
             // PRE-REVEAL camera path (hero → the split's edge). the sweep used
             // to start at 760, but the live scroll from 0 travels the camera
             // through the whole city first, and each scene-1 building mesh
@@ -3767,7 +3877,15 @@ window.__bootScene = async function(){
             // the camera at 760+). sweep the camera down that path too, coarse
             // (no ghost/stencil variants live out here, just frustum entry),
             // two draws a step for the metal finalize like the band below.
-            var PRE0 = 40, PRE_STEPS = 16;
+            var qs = location.search || '';
+            function warmParam(name, dflt){
+              var m = new RegExp('[?&]' + name + '=(\\d+)').exec(qs);
+              return m ? Math.max(1, Math.min(200, +m[1])) : dflt;
+            }
+            // frustum entry only out here, but coarsening it MEASURED WORSE:
+            // 14 steps left 10 compiles (city "20 - Default", Wire, Flat) to
+            // land on the visitor's scroll into the split. 24 it stays.
+            var PRE0 = 40, PRE_STEPS = warmParam('warmpre', 24);
             for (s = 0; s <= PRE_STEPS; s++){ y = PRE0 + (band0 - PRE0) * s / PRE_STEPS; seq.push(y); seq.push(y); }
             // ONE up sweep, TWO frames per step: metal finalizes a pipeline's
             // shader on first GPU EXECUTION, not on create — one rushed draw
@@ -3777,8 +3895,15 @@ window.__bootScene = async function(){
             // symmetric (scroll-out traverses the same material states as
             // scroll-in), so those pipelines are already warm. the whole-scene
             // shadow (the split's entry cost) compiles as rackFade leaves 0.
-            for (s = 0; s <= STEPS; s++){ y = band0 + (band1 - band0) * s / STEPS; seq.push(y); seq.push(y); }   // up
+            var FINE1 = 900, FINE_STEPS = 16;   // 700→900 at ~12px: the ghost/stencil/depthWrite flips all live in here
+            for (s = 0; s <= FINE_STEPS; s++){ y = band0 + (FINE1 - band0) * s / FINE_STEPS; seq.push(y); seq.push(y); }
+            for (s = 1; s <= STEPS; s++){ y = FINE1 + (band1 - FINE1) * s / STEPS; seq.push(y); seq.push(y); }   // up
             for (h = 0; h < 5; h++) seq.push(band1);                                                              // settle at rackFade 1 (the === 1 whole-scene shadow + dim<0.3)
+            // THE REST OF THE PAGE is the NEW-ASSET TAIL below — it already
+            // rides __warmY from band1 to the footer. a second coarse walk
+            // over the same 8000px lived here for one round and paid for
+            // nothing: 56 extra full-chain frames of veil on a phone,
+            // every one of them a y the tail visits anyway.
             // ── THE NEW-ASSET TAIL ── everything PAST the split paid the
             // same first-visit toll the split used to: the door, the pcb
             // dive, the laptop, the clone rack, the calculator and the
@@ -3798,13 +3923,28 @@ window.__bootScene = async function(){
             // ?tail=0 skips it — the A/B hook for the perf rigs.
             if (!/[?&]tail=0/.test(location.search)){
               var maxY = Math.max(band1, (document.documentElement.scrollHeight || 0) - window.innerHeight);
-              var TAIL_STEPS = Math.min(48, Math.ceil((maxY - band1) / 150));
+              var TAIL_STEPS = Math.min(warmParam('warmtail', 48), Math.ceil((maxY - band1) / 150));
               for (s = 1; s <= TAIL_STEPS; s++){ y = band1 + (maxY - band1) * s / TAIL_STEPS; seq.push(y); seq.push(y); }
+              var FOOT0 = Math.max(band1, maxY - 400);
+              for (s = 1; s <= 8; s++){ y = FOOT0 + (maxY - FOOT0) * s / 8; seq.push(y); seq.push(y); }
               for (h = 0; h < 5; h++) seq.push(maxY);   // settle at the footer pose (its own static-cache state)
             }
             warmSweepStarted = true;
-            var i = 0, warmup = 24, startY = window.pageYOffset || 0;
+            window.__sweepDeadline = performance.now() + SWEEP_MS;   // the net's clock starts HERE, not at boot
+            window.__sweepT0 = performance.now(); window.__sweepSteps = 0;
+            var i = 0, warmup = MOBILE ? 12 : 24, startY = window.pageYOffset || 0;
             (function step(){
+              // the veil came down some other way (the net gave up): the
+              // visitor can SEE the page now, and this sweep drives the
+              // ride off __warmY — their scroll would do nothing. hand
+              // everything back at once and finish the warm later.
+              if (window.__veilDown && !veilLifted){
+                window.__warmY = null; scrubScene = -1;
+                bootSnap = performance.now() + 400; coverJump = true;
+                frameDirtyFlag = true; frameCacheValid = false;
+                armDeferredSweep();
+                return;
+              }
               // let the batched hidden-prop warm above finish its visibility
               // dance first, so our shadow pass sees the full, settled cast
               if (warmup > 0){ warmup--; requestAnimationFrame(step); return; }
@@ -3907,7 +4047,9 @@ window.__bootScene = async function(){
                 (function settle(){ if (hold-- > 0){ requestAnimationFrame(settle); return; } liftVeil(); })();
                 return;
               }
-              window.__warmY = seq[i++];
+              // the reveal + whole-page sweep: gauge 0.85 → 0.99
+              try { if (window.__veilPhase) window.__veilPhase(0.85, 0.99, i / seq.length); } catch(ge){}
+              window.__warmY = seq[i++]; window.__sweepSteps = i; window.__sweepLen = seq.length;
               requestAnimationFrame(step);
             })();
             }
@@ -3920,7 +4062,7 @@ window.__bootScene = async function(){
                 setTimeout(deferSweep, 1500);
               })();
             }
-            if ((window.pageYOffset || 0) > 4){
+            if ((window.pageYOffset || 0) > 4 || veilLifted){
               // mid-page load: the boot sweep would fight the live view,
               // so the reveal's pipelines stayed COLD and the first scroll
               // into the split hit the ~300-pipeline compile storm — the
@@ -10285,6 +10427,16 @@ window.__bootScene = async function(){
     var addonsHideRaw = window.__addonsRackHide || 0;
     addonsHideP += (addonsHideRaw - addonsHideP) * (1 - Math.exp(-dt * 6));
     if (Math.abs(addonsHideP - addonsHideRaw) < 0.002) addonsHideP = addonsHideRaw;
+      // the boot sweep jumps the scroll input in 23-150px steps, so a
+      // TIME-eased follower lags it by far more than it ever lags a real
+      // ride (measured: the warm compiled the door's TRANSPARENT flavor
+      // and the ride then compiled its OPAQUE one under the visitor's
+      // thumb — the pipeline key carries blend, stencil and cull state,
+      // so a follower caught mid-glide warms a variant the ride never
+      // uses and misses the one it does). the scrub windows already snap
+      // to raw under __warmY for exactly this reason; the followers that
+      // gate MATERIAL state join them.
+    if (window.__warmY != null) addonsHideP = addonsHideRaw;
     // leg 10's laptop: faded on the agents window, quantized like the
     // fade block (the entrance itself lives under the addons cover).
     // driven OUTSIDE the ride gate so free-cam keeps it for framing.
@@ -10585,6 +10737,7 @@ window.__bootScene = async function(){
           if (Math.abs(radialT - radialP) < 0.002) radialP = radialT;
           if (LEGS[0].p < 0.05 && radialT < 0.01) radialP = radialT;   // the hero owns the dial — hand it over clean
           if (performance.now() < bootSnap) radialP = radialT;   // jump cuts stay jump cuts
+          if (window.__warmY != null) radialP = radialT;         // the boot sweep warms SETTLED states (see the follower note above)
           if (radialP !== radialT) frameDirtyFlag = true;        // keep the glide alive to its landing
           // ── THE ONE --holeX WRITER ── the leg-1 base (hero seat → 22 on
           // the map leg's eased blend) and the crossing (back toward 78 on
@@ -11258,7 +11411,7 @@ window.__bootScene = async function(){
         radialHideRaw = Math.max(radialHideRaw, addonsHideP);
         var shellOpRaw = rackFadeRaw * (1 - 0.6 * cubeFade * s2Hand) * (1 - shellHide) * (1 - radialHideRaw);
         shellChase = shellOpRaw;   // the after-guard follower keeps chasing this
-        if (shellPlay < 0 || performance.now() < bootSnap) shellPlay = shellOpRaw;   // seed / jump-cut
+        if (shellPlay < 0 || performance.now() < bootSnap || window.__warmY != null) shellPlay = shellOpRaw;   // seed / jump-cut / boot sweep
         else { shellPlay += (shellOpRaw - shellPlay) * (1 - Math.exp(-dt * 12)); if (Math.abs(shellOpRaw - shellPlay) < 0.004) shellPlay = shellOpRaw; }
         var shellOp = shellPlay;
         for (var ri = 0; ri < rackMats.length; ri++){
@@ -11607,6 +11760,7 @@ window.__bootScene = async function(){
     if (shellPlay >= 0 && shellChase >= 0 && Math.abs(shellPlay - shellChase) > 0.0001){
       shellPlay += (shellChase - shellPlay) * (1 - Math.exp(-dt * 12));
       if (Math.abs(shellChase - shellPlay) < 0.004) shellPlay = shellChase;
+      if (window.__warmY != null) shellPlay = shellChase;   // the rack's transparent/opaque flip must warm where the ride sits
       for (var rjf = 0; rjf < rackMats.length; rjf++){
         rackMats[rjf].opacity = shellPlay;
         rackMats[rjf].transparent = shellPlay < 1;
@@ -11752,6 +11906,7 @@ window.__bootScene = async function(){
         ? revealEase(dgT) * (1 - revealEase(ebT)) * (1 - Math.min(1, agentsWin.p / 0.4)) : 0;
       doorP += (dorT - doorP) * (1 - Math.exp(-dt * 8));
       if (Math.abs(dorT - doorP) < 0.003) doorP = dorT;
+      if (window.__warmY != null) doorP = dorT;   // ditto: the door's blend flavor keys a pipeline
       var dorNext = Math.round(doorP * 200) / 200;
       if (dorNext !== doorQ){
         doorQ = dorNext;
