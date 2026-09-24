@@ -23,27 +23,48 @@ T=$(mktemp -d)
 GT="npx --no-install gltf-transform"
 mkdir -p public/models/m "$T"
 
-build () {   # name ratio texsize
-  n=$1; ratio=$2; tex=$3
+# QUANTIZE ONLY WHAT THE PAGE DOES NOT TAKE APART.
+# gltf-transform's quantize rewrites positions into integer space and puts
+# the compensating scale/offset on the NODE. Any code that lifts a
+# geometry out of its node and re-uses it — the page instances qblock's
+# mesh for the faq's mario boxes — then draws integer coordinates as if
+# they were metres: the blocks came out shredded on the phone build while
+# the desktop build was clean ("our mario ? boxes in mobile are broken").
+# The whole vertex-memory win lives in the city and the racks anyway; the
+# props are a rounding error, so they keep their float32 geometry.
+build () {   # name ratio texsize quantize(0|1)
+  n=$1; ratio=$2; tex=$3; q=$4
   src=public/models/$n.glb
   a=$T/$n.a.glb; b=$T/$n.b.glb; c=$T/$n.c.glb
   if [ "$ratio" = "1" ]; then cp "$src" "$a"; else $GT simplify "$src" "$a" --ratio "$ratio" --error 0.004 >/dev/null 2>&1; fi
   $GT resize "$a" "$b" --width "$tex" --height "$tex" >/dev/null 2>&1 || cp "$a" "$b"
-  $GT quantize "$b" "$c" >/dev/null 2>&1 || cp "$b" "$c"
+  if [ "$q" = "1" ]; then $GT quantize "$b" "$c" >/dev/null 2>&1 || cp "$b" "$c"; else cp "$b" "$c"; fi
   $GT meshopt "$c" public/models/m/$n.glb >/dev/null 2>&1 || cp "$c" public/models/m/$n.glb
   s0=$(stat -f%z "$src"); s1=$(stat -f%z public/models/m/$n.glb)
   printf "  %-28s %6.2fMB → %6.2fMB  (ratio %s, tex %s)\n" "$n" "$(echo "scale=2;$s0/1048576"|bc)" "$(echo "scale=2;$s1/1048576"|bc)" "$ratio" "$tex"
 }
 
 echo "building phone asset set:"
-build virtual-city            0.45 1024
-build server_racking_system   0.6  512
-build pcb                     0.7  512
-build calculator              0.85 1024
-build sci-fi_control_panel    0.85 1024
-build laptop                  0.8  512
-build door                    0.8  512
-build terminal                0.8  512
-build card                    1    512
-build qblock                  1    512
+# A prop that needs neither decimation nor a smaller sheet is COPIED, not
+# re-encoded: the originals are draco, and running them through meshopt
+# without quantization only makes them bigger on the wire (pcb 0.88 →
+# 1.78MB) for no runtime gain at all.
+copy () { cp "public/models/$1.glb" "public/models/m/$1.glb"
+  printf "  %-28s %6.2fMB → copied as-is\n" "$1" "$(echo "scale=2;$(stat -f%z public/models/$1.glb)/1048576"|bc)"; }
+
+#     name                    ratio tex  quantize
+# the city and the racks carry the geometry bill and are used whole —
+# they simplify and quantize. everything else is a prop the page may take
+# apart, and its quality is what the visitor looks AT: untouched geometry,
+# full-size sheets, no quantization.
+build virtual-city            0.55  1024 1
+build server_racking_system   0.7   1024 1
+copy pcb
+copy calculator
+copy sci-fi_control_panel
+copy laptop
+copy door
+copy terminal
+copy card
+copy qblock
 echo "total:"; du -sh public/models/m

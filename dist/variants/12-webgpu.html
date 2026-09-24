@@ -1023,9 +1023,36 @@ window.__bootScene = async function(){
       {dpr: 1,   chain: 0.75, dof: false, bloom: true,  fxaa: false, grain: 0,     wires: false, overlay: true,  calm: true},
       // 1 — every phone starts here
       {dpr: 1.5, chain: 0.9,  dof: true,  bloom: true,  fxaa: true,  grain: 0.055, wires: false, overlay: true,  calm: false},
-      // 2 — the page as written (desktop always; a phone only by promotion)
-      {dpr: 2,   chain: 1,    dof: true,  bloom: true,  fxaa: true,  grain: 0.055, wires: true,  overlay: true,  calm: false}
+      // 2 — the page as written (desktop always; a phone by default)
+      {dpr: 2,   chain: 1,    dof: true,  bloom: true,  fxaa: true,  grain: 0.055, wires: true,  overlay: true,  calm: false},
+      // 3 — PHONE ULTRA ("we need make ultra in mobile too man"). rung 2
+      // renders a 3x-dpr phone at 2x and shrinks its rasters for memory;
+      // this rung gives a device that MEASURES strong its own pixels back:
+      // the panel's full device ratio, 1024 texture sheets, full-size
+      // diorama plates and typed labels, a 1024 shadow map and 8x
+      // anisotropy. everything else (the chain, the effects) is already
+      // the page as written. the watchdog owns the way down from here, so
+      // a phone that cannot hold it walks back to 2 within a second.
+      // fxaa STAYS ON. it was off here for one build — a ~10-fetch pass
+      // hunting 1px edges looked like the obvious thing to drop when the
+      // edges are a third of a css pixel — but the crops showed real
+      // stair-stepping on the cube edges against rung 2's smooth ones,
+      // and this rung exists to look BETTER, not merely sharper. it costs
+      // one pass and the ride measured clean with it.
+      {dpr: 3,   chain: 1,    dof: true,  bloom: true,  fxaa: true,  grain: 0.055, wires: true,  overlay: true,  calm: false}
     ];
+    // ── THE ULTRA FRAMEBUFFER BUDGET ──
+    // this chain keeps 19 render targets, most of them rgba16float, so a
+    // canvas pixel costs ~74 bytes of gpu memory. straight dpr 3 on a
+    // 390×844 phone measured 219MB of targets alone (513MB total, right
+    // back in the zone ios kills tabs for). so ultra does not ask for a
+    // RATIO, it asks for a PIXEL COUNT — ~2.2M, about 160MB of targets —
+    // and takes whatever ratio that buys on this panel: ~2.6x on a 6.1"
+    // phone, the full 3x on a small one, never more than the device has.
+    (function(){
+      var cssPx = Math.max(1, (window.innerWidth || 1) * (window.innerHeight || 1));
+      Q[3].dpr = Math.max(2, Math.min(window.devicePixelRatio || 1, Math.sqrt(2.2e6 / cssPx)));
+    })();
     var M = {tier: 2, k: Q[2], mobile: MOBILE, forced: false, booted: false,
              ceil: 2, why: 'desktop', gpu: '', cores: 0, mem: 0, panel: 0};
     // WEBGPU: the low rung's "fxaa → plain copy" swap is gone as such —
@@ -1096,8 +1123,8 @@ window.__bootScene = async function(){
     }
     function probe(){
       if (!MOBILE) return 2;
-      var f = /[?&]q=(0|1|2|low|mid|high)/i.exec(location.search || '');
-      if (f){ M.forced = true; M.why = 'forced ?q=' + f[1]; return {'0':0,'1':1,'2':2,low:0,mid:1,high:2}[f[1].toLowerCase()]; }
+      var f = /[?&]q=(0|1|2|3|low|mid|high|ultra)/i.exec(location.search || '');
+      if (f){ M.forced = true; M.why = 'forced ?q=' + f[1]; return {'0':0,'1':1,'2':2,'3':3,low:0,mid:1,high:2,ultra:3}[f[1].toLowerCase()]; }
       var t = 1;
       var cores = navigator.hardwareConcurrency || 0;
       var mem = navigator.deviceMemory || 0;           // chrome/android only — safari never reports it
@@ -1145,7 +1172,7 @@ window.__bootScene = async function(){
       // again into a black canvas — that rung is honored untested.
       var remembered = memRead();
       if (remembered && remembered.hard){ M.why = 'remembered rung ' + remembered.t + ' (context loss)'; return remembered.t; }
-      t = 2;
+      t = 3;   // a phone now OPENS on ultra and is measured down, not up
       var apple = /apple/.test(g) || /iphone|ipad|ipod/i.test(navigator.userAgent || '');
       if (!apple && cores && cores <= 4){ t--; why.push('cores ' + cores); }
       if (!apple && mem && mem <= 3){ t--; why.push('ram ' + mem + 'gb'); }
@@ -1160,11 +1187,19 @@ window.__bootScene = async function(){
       // generous at the top — the watchdog owns the fine corrections.
       var bm = bench();
       if (bm > 0){
-        var bt = bm < 130 ? 2 : (bm < 320 ? 1 : 0);   /* loosened: q=2 confirmed good on the 12 — the bench only catches the truly weak, the watchdog owns the rest */
+        // the fill bench is the one number measured on THIS gpu, and the
+        // bands moved up a rung: what used to buy "the page as written"
+        // now buys ULTRA. the old top band was 130ms and the 12 was
+        // confirmed good inside it, so 130 is exactly the line that hands
+        // a 12-class phone its own pixels. this is deliberately generous —
+        // the ladder's whole design is that DEMOTION is measured: a device
+        // that cannot hold ultra gets walked down by the watchdog within a
+        // second of real riding, and remembers it next visit.
+        var bt = bm < 130 ? 3 : (bm < 260 ? 2 : (bm < 400 ? 1 : 0));
         t = Math.min(t, bt);
         why.push('bench ' + Math.round(bm) + 'ms→' + bt);
       }
-      t = Math.max(0, Math.min(2, t));
+      t = Math.max(0, Math.min(3, t));
       if (remembered && remembered.t !== t) why.push('over remembered ' + remembered.t);
       M.why = why.length ? ('probe: ' + why.join(', ')) : 'probe: phone full';
       memWrite(t);
@@ -1184,7 +1219,7 @@ window.__bootScene = async function(){
       if (typeof bokehStamp === 'number') bokehStamp++;
     }
     function apply(t, why){
-      t = Math.max(0, Math.min(2, t));
+      t = Math.max(0, Math.min(3, t));
       if (M.booted && t === M.tier) return;
       M.tier = t; M.k = Q[t]; if (why) M.why = why;
       var k = M.k;
@@ -1287,7 +1322,7 @@ window.__bootScene = async function(){
     // the ceiling sits ONE rung over where the probe landed (capped at
     // 2): a bench hiccup or a remembered bad day can be climbed out of,
     // and the watchdog's wrong-climb lockout still nails it back down
-    M.boot = function(){ var t = probe(); M.booted = true; M.ceil = Math.min(2, t + 1); M.tier = -1; apply(t); };
+    M.boot = function(){ var t = probe(); M.booted = true; M.ceil = Math.min(3, t + 1); M.tier = -1; apply(t); };
     M.set = function(t){ M.forced = true; apply(t, 'manual'); return M.why; };
     M.info = function(){ return {tier: M.tier, why: M.why, gpu: M.gpu, cores: M.cores,
       mem: M.mem, panel: M.panel, dpr: renderer.getPixelRatio(), chain: CHAIN_RES, k: M.k}; };
@@ -1405,7 +1440,7 @@ window.__bootScene = async function(){
     if (renderer.capabilities && renderer.capabilities.getMaxAnisotropy) maxAniso = renderer.capabilities.getMaxAnisotropy();
     else if (renderer.backend && renderer.backend.getMaxAnisotropy) maxAniso = renderer.backend.getMaxAnisotropy();
   } catch(e){}
-  var ANISO = MOBILE ? Math.min(4, maxAniso) : maxAniso;
+  var ANISO = MOBILE ? Math.min(MQ.tier >= 3 ? 8 : 4, maxAniso) : maxAniso;
   // NO renderer-level tone mapping: passes render linear into their
   // targets on webgpu whatever this is set to, so the reinhard lives in
   // the chain itself (applied per dof tap, right where r128's
@@ -1455,7 +1490,7 @@ window.__bootScene = async function(){
   // at every component anchor (prop entrances, fade endpoints) — that
   // one-frame stall IS the anchor lag, and 4096 made it 4× v11's cost
   // for edge softness the page's own notes call sub-pixel here.
-  var SHADOW_PX = MOBILE ? 512 : (window.innerWidth <= 1024 ? 1536 : 2048);
+  var SHADOW_PX = MOBILE ? (MQ.tier >= 3 ? 1024 : 512) : (window.innerWidth <= 1024 ? 1536 : 2048);
   spotB.shadow.mapSize.set(SHADOW_PX, SHADOW_PX);
   spotB.shadow.bias = -0.0004;
   spotB.shadow.camera.near = 0.2; spotB.shadow.camera.far = 30;
@@ -2934,7 +2969,7 @@ window.__bootScene = async function(){
       // phone screen can resolve. the CLOSE-UP props (calculator, control
       // panel) ship as KTX2 and skip this branch entirely: gpu-compressed,
       // 16× cheaper, and still full resolution — the sharp things stay sharp.
-      var cap = MQ.tier >= 2 ? 512 : 384;
+      var cap = MQ.tier >= 3 ? 768 : (MQ.tier >= 2 ? 512 : 384);
       root.traverse(function(o){
         if (!o.isMesh) return;
         var mats = Array.isArray(o.material) ? o.material : [o.material];
@@ -5868,7 +5903,7 @@ window.__bootScene = async function(){
       // ── the name plates standing over the two racks, typed exactly
       // like the calculator's label: terminal mono, block cursor at the
       // tip, the count riding a scroll window (drawn in the loop) ──
-      var LBLK = MOBILE ? 0.5 : 1;   // typed-label raster scale (see the note in rackLblMake)
+      var LBLK = MOBILE ? 0.5 : 1;   // typed-label raster scale — every phone rung, ultra included (see the note in rackLblMake)
       function rackLblMake(text, hl){
       // a typed label repaints — and re-uploads its WHOLE canvas — once
       // per character as the ride types it: 1600×224 is 1.4MB a keystroke,
@@ -7211,7 +7246,7 @@ window.__bootScene = async function(){
             // CARD_W 386, CARD_H_APPROX 110, CARD_PEEK 44, group width
             // CARD_W+20, label floating above the container at (-24, 17)
             var pcv = document.createElement('canvas');
-            var pk = MOBILE ? 0.5 : 1;   // half the pixels on a phone (6.2MB → 1.6MB)
+            var pk = (MOBILE && MQ.tier < 3) ? 0.5 : 1;   // half the pixels on a phone below ultra (6.2MB → 1.6MB)
             pcv.width = Math.round(940 * pk); pcv.height = Math.round(1300 * pk);
             var pcx = pcv.getContext('2d');
             // the deck below is drawn in 940×1300 space and nests its own
@@ -7802,7 +7837,7 @@ window.__bootScene = async function(){
           // 1280×726 is 3.5MB of upload every time the session types a
           // line. the draw below fits its font to the canvas width, so a
           // phone simply gets a smaller one — same layout, quarter the bus.
-          var SCVW = MOBILE ? 640 : 1280;
+          var SCVW = MOBILE ? 640 : 1280;   // 640 covers this display 1:1 even at the ultra rung's device ratio
           scv.width = SCVW; scv.height = Math.round(SCVW * scrH / scrW);
           var scx = scv.getContext('2d');
           var stex = new THREE.CanvasTexture(scv);
@@ -7925,7 +7960,7 @@ window.__bootScene = async function(){
         // the DRAW CODE IS UNTOUCHED: every constant in it is written in
         // 2048-space, so the context carries the scale and the plate is the
         // same picture at a quarter of the pixels.
-        var DIO_RASTER = MOBILE ? 1024 : 2048;
+        var DIO_RASTER = !MOBILE ? 2048 : (MQ.tier >= 3 ? 1536 : 1024);
         function dioPlate(w6, h6, ro, drawFn){
           var pc = document.createElement('canvas');
           pc.width = Math.round(w6 * DIO_RASTER);
@@ -9059,7 +9094,7 @@ window.__bootScene = async function(){
     // at half rate nothing about them reads differently, and the phone
     // gets those megabytes back. desktop keeps every frame.
     liveCvTick++;
-    var liveCvSkip = MOBILE && (liveCvTick & 1) === 1;
+    var liveCvSkip = MOBILE && MQ.tier < 3 && (liveCvTick & 1) === 1;
     if (!stageVisible || window.__sceneHold) return;   // scrolled away, or under the film's sheet: skip the whole frame
     // the addons flat is fully opaque: nothing of the scene can show —
     // skip the whole chain; the ride resumes as soon as the cover thins.
