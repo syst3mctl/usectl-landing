@@ -15,9 +15,14 @@
     <!-- start the model downloads in parallel with the script tags below;
          GLTFLoader's fetch then hits the http cache instead of the network.
          THE FIRST FRAME NEEDS EXACTLY THESE TWO — 11.07 of the 18.47 MB —
-         and they are the only two that ask for the bandwidth at full price -->
-    <link rel="preload" href="/models/virtual-city.glb" as="fetch" crossorigin>
-    <link rel="preload" href="/models/server_racking_system.glb" as="fetch" crossorigin>
+         and they are the only two that ask for the bandwidth at full price.
+         each preload is paired: the desktop model over 768px, the phone's
+         own decimated/quantized twin (/models/m, ~13MB for the whole set)
+         under it, so a phone never pulls a byte of the desktop geometry. -->
+    <link rel="preload" href="/models/virtual-city.glb" as="fetch" crossorigin media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/virtual-city.glb" as="fetch" crossorigin media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <link rel="preload" href="/models/server_racking_system.glb" as="fetch" crossorigin media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/server_racking_system.glb" as="fetch" crossorigin media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
     <!-- the late-loading props start their downloads at t=0 too: their
          loader.load calls in the rack callback then hit the http cache.
          they are DEMOTED, not dropped: `as=fetch` preloads default to HIGH
@@ -29,14 +34,22 @@
          loader chain below still hits a warm cache when it gets to them.
          (unsupported in older browsers, where it is ignored — i.e. exactly
          the behaviour this line had before.) -->
-    <link rel="preload" href="/models/pcb.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/models/calculator.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/models/laptop.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/models/qblock.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/models/door.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/models/terminal.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/models/card.glb" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/models/sci-fi_control_panel.glb" as="fetch" crossorigin fetchpriority="low">
+    <link rel="preload" href="/models/pcb.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/pcb.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <link rel="preload" href="/models/calculator.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/calculator.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <link rel="preload" href="/models/laptop.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/laptop.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <link rel="preload" href="/models/qblock.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/qblock.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <link rel="preload" href="/models/door.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/door.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <link rel="preload" href="/models/terminal.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/terminal.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <link rel="preload" href="/models/card.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/card.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <link rel="preload" href="/models/sci-fi_control_panel.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/sci-fi_control_panel.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
     <link rel="preload" href="/draco/draco_decoder.wasm" as="fetch" crossorigin fetchpriority="low">
     <link rel="preload" href="/draco/draco_wasm_wrapper.js" as="fetch" crossorigin fetchpriority="low">
     <link rel="preload" href="/basis/basis_transcoder.wasm" as="fetch" crossorigin fetchpriority="low">
@@ -1480,9 +1493,14 @@
     pr.style.cssText = 'position:fixed;left:-2px;top:0;width:1px;height:100vh;visibility:hidden;pointer-events:none';
     if (window.CSS && CSS.supports && CSS.supports('height', '100svh')) pr.style.height = '100svh';
     document.documentElement.appendChild(pr);
+    var vpCache = 0;
     window.__vpH = function(){
-      return pr.clientHeight || window.innerHeight;
+      return vpCache || (vpCache = pr.clientHeight || window.innerHeight);
     };
+    function vpDrop(){ vpCache = 0; }
+    addEventListener('resize', vpDrop);
+    addEventListener('orientationchange', vpDrop);
+    if (window.visualViewport) visualViewport.addEventListener('resize', vpDrop);
   })();
   // ── NOTHING MOVES THE PAGE WHILE SOMETHING IS OVER IT ────────────
   // used by the nav's menu and by the film's sheet on a phone. the
@@ -2008,6 +2026,7 @@
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
   import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
   import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+  import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
   import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
   import { bloom } from 'three/addons/tsl/display/BloomNode.js';
   import { fxaa } from 'three/addons/tsl/display/FXAANode.js';
@@ -2017,6 +2036,7 @@
   THREE.GLTFLoader = GLTFLoader;
   THREE.DRACOLoader = DRACOLoader;
   THREE.KTX2Loader = KTX2Loader;
+  THREE.MeshoptDecoder = MeshoptDecoder;   // the phone set ships EXT_meshopt_compression (see /models/m)
   THREE.SVGLoader = SVGLoader;
   window.THREE = THREE;
   window.__TSL = TSL;
@@ -4092,45 +4112,33 @@ window.__bootScene = async function(){
     };
   })();
   var loader = new THREE.GLTFLoader();
-  // ── the texture governor (phones only; ported from v11) ── any map
-  // wider than the rung's cap is redrawn onto a canvas BEFORE its first
-  // upload: a 390px frame cannot resolve 2048² sheets, and the decode+
-  // upload spike mid-scroll was the ios jetsam signature. KTX2-compressed
-  // maps pass through (already small on the gpu, and not redrawable).
-  // desktop and ipad byte-identical.
-  if (MOBILE) (function(){
-    var tameSeen = {};
-    function tameTextures(root){
-      var cap = MQ.tier >= 2 ? 1024 : 512;
-      root.traverse(function(o){
-        if (!o.isMesh) return;
-        var mats = Array.isArray(o.material) ? o.material : [o.material];
-        for (var i = 0; i < mats.length; i++){
-          var m = mats[i]; if (!m) continue;
-          for (var key in m){
-            var t = m[key];
-            if (!t || !t.isTexture || t.isCompressedTexture || !t.image || tameSeen[t.uuid]) continue;
-            tameSeen[t.uuid] = true;
-            var im = t.image, w = im.width || 0, h = im.height || 0;
-            if (w > cap || h > cap){
-              var sc = cap / Math.max(w, h);
-              var cv = document.createElement('canvas');
-              cv.width = Math.max(1, Math.round(w * sc));
-              cv.height = Math.max(1, Math.round(h * sc));
-              cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
-              t.image = cv;
-              t.needsUpdate = true;
-            }
-          }
-        }
-      });
-    }
-    var _gltfLoad = loader.load.bind(loader);
+  // NOTE: this file carried TWO copies of the phone texture governor —
+  // the v11 port and the v12 one, each wrapping loader.load, so every
+  // model was traversed and every map initTexture'd twice at load. the
+  // v11 copy (it skipped compressed maps entirely) is gone; the one
+  // below, after the KTX2 wiring, is the governor.
+  // ── THE PHONE MODEL SET (/models/m) ──
+  // the desktop models carry 4.4M triangles and 198MB of FLOAT32 vertex
+  // attributes into a device with a few hundred MB of usable gpu memory —
+  // measured on the page, not guessed. the phone set is the same models
+  // decimated where the bill is real (city 0.45, rack 0.6, props 0.7-0.85),
+  // textures resized to 512-1024, and — the part that matters most —
+  // QUANTIZED (KHR_mesh_quantization: position i16, normal i8, colour u8)
+  // and meshopt-compressed instead of draco: a quarter of the vertex
+  // memory, and a decoder that is far cheaper on a phone cpu than draco's
+  // wasm. built by scratchpad/mobassets.sh; desktop still loads /models.
+  // the phone set also serves a TABLET ("if u need make other compresed
+  // assets for ipad mobile"): a coarse-pointer device up to 1024px runs a
+  // mobile-class gpu whatever its screen says. the <link rel=preload>
+  // pairs in the head carry the SAME condition, so a device downloads one
+  // set and only one.
+  var SMALL_ASSETS = MOBILE || !!(window.matchMedia &&
+    matchMedia('(pointer: coarse)').matches && window.innerWidth <= 1024);
+  var MODEL_DIR = SMALL_ASSETS ? '/models/m/' : '/models/';
+  (function(){
+    var _load = loader.load.bind(loader);
     loader.load = function(url, onLoad, onProgress, onError){
-      return _gltfLoad(url, function(g){
-        try { tameTextures(g.scene); } catch(e){}
-        onLoad(g);
-      }, onProgress, onError);
+      return _load(String(url).replace('/models/', MODEL_DIR), onLoad, onProgress, onError);
     };
   })();
   var draco = new THREE.DRACOLoader();
@@ -4145,6 +4153,7 @@ window.__bootScene = async function(){
   // (public/basis), so no network; detectSupport picks the gpu's format.
   var ktx2 = new THREE.KTX2Loader().setTranscoderPath('/basis/').detectSupport(renderer);
   loader.setKTX2Loader(ktx2);
+  loader.setMeshoptDecoder(THREE.MeshoptDecoder);
   // ── the texture governor (phones only) ────────────
   // the models carry ~300MB of textures once decoded: the laptop and
   // the calculator alone hold four 2048² webp sheets EACH (~90MB a
@@ -4167,7 +4176,14 @@ window.__bootScene = async function(){
   if (MOBILE) (function(){
     var tameSeen = {};
     function tameTextures(root){
-      var cap = MQ.tier >= 2 ? 1024 : 512;
+      // 1024 on rung 2 was set before the phone's bill was measured. it is
+      // measured now: 51 textures / 213MB on the gpu, fourteen of them 1024²
+      // rgba sheets at 5.3MB each — on props a 390px frame shows at a third
+      // of its width. 512 costs those a quarter of the memory and nothing a
+      // phone screen can resolve. the CLOSE-UP props (calculator, control
+      // panel) ship as KTX2 and skip this branch entirely: gpu-compressed,
+      // 16× cheaper, and still full resolution — the sharp things stay sharp.
+      var cap = MQ.tier >= 2 ? 512 : 384;
       root.traverse(function(o){
         if (!o.isMesh) return;
         var mats = Array.isArray(o.material) ? o.material : [o.material];
@@ -8436,8 +8452,12 @@ window.__bootScene = async function(){
             // CARD_W 386, CARD_H_APPROX 110, CARD_PEEK 44, group width
             // CARD_W+20, label floating above the container at (-24, 17)
             var pcv = document.createElement('canvas');
-            pcv.width = 940; pcv.height = 1300;
+            var pk = MOBILE ? 0.5 : 1;   // half the pixels on a phone (6.2MB → 1.6MB)
+            pcv.width = Math.round(940 * pk); pcv.height = Math.round(1300 * pk);
             var pcx = pcv.getContext('2d');
+            // the deck below is drawn in 940×1300 space and nests its own
+            // save/restore pairs inside this one base transform
+            if (pk !== 1) pcx.scale(pk, pk);
             var PB = '#a5b4fc';
             function prr(x, y, w, h, r){
               pcx.beginPath();
@@ -9135,15 +9155,23 @@ window.__bootScene = async function(){
         }
         // one plate = one canvas-painted mesh. w/h in design units
         // (frame = 1.0 × 0.56); the canvas rasters at 2048px per unit
+        // six plates at 2048px per design unit = six 2048×1147 canvases,
+        // 9MB of gpu memory apiece — 54MB of the phone's texture bill for
+        // art it renders into a 390px frame. a phone rasters at half that.
+        // the DRAW CODE IS UNTOUCHED: every constant in it is written in
+        // 2048-space, so the context carries the scale and the plate is the
+        // same picture at a quarter of the pixels.
+        var DIO_RASTER = MOBILE ? 1024 : 2048;
         function dioPlate(w6, h6, ro, drawFn){
           var pc = document.createElement('canvas');
-          pc.width = Math.round(w6 * 2048);
-          pc.height = Math.round(h6 * 2048);
+          pc.width = Math.round(w6 * DIO_RASTER);
+          pc.height = Math.round(h6 * DIO_RASTER);
           var px6 = pc.getContext('2d');
+          var dk = DIO_RASTER / 2048, lw6 = Math.round(w6 * 2048), lh6 = Math.round(h6 * 2048);
           var doDraw = function(){
-            px6.setTransform(1, 0, 0, 1, 0, 0);
-            px6.clearRect(0, 0, pc.width, pc.height);
-            drawFn(px6, pc.width, pc.height);
+            px6.setTransform(dk, 0, 0, dk, 0, 0);
+            px6.clearRect(0, 0, lw6, lh6);
+            drawFn(px6, lw6, lh6);
           };
           // NOT painted here: the idle walker below rasters one plate per
           // tick (all of them in one go was a long task in this callback)
@@ -13118,10 +13146,20 @@ if (window.THREE && window.__TSL) window.__bootScene().catch(function(e){ consol
   var addonsSec = document.getElementById('addons') || board;
   function win(v, a, b){ return Math.max(0, Math.min(1, (v - a) / (b - a))); }
   function ease(t){ return t * t * (3 - 2 * t); }
+  var addonsTopY = -1;
+  function addonsDrop(){ addonsTopY = -1; }
+  addEventListener('resize', addonsDrop);
+  addEventListener('orientationchange', addonsDrop);
+  if (window.ResizeObserver) try { new ResizeObserver(addonsDrop).observe(document.body); } catch(e){}
   function coverTick(){
     if (!cover) return;
     var vh = (window.__vpH ? window.__vpH() : window.innerHeight);
-    var r = addonsSec.getBoundingClientRect();
+    // the rect read used to happen here, on every scroll event — after the
+    // ride had written its css vars, so it flushed layout each frame. the
+    // page top is cached and invalidated by the observers above; the live
+    // top is that minus the scroll.
+    if (addonsTopY < 0) addonsTopY = addonsSec.getBoundingClientRect().top + (window.pageYOffset || 0);
+    var r = { top: addonsTopY - (window.pageYOffset || 0) };
     // entry: rack fades over section top 75%→50% vh (+20% later per user —
     // was 95→70; the seal completes at 75, so revert → fade → cover chain
     // stays ordered), cover over 68%→45%
