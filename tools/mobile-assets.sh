@@ -68,3 +68,6 @@ copy terminal
 copy card
 copy qblock
 echo "total:"; du -sh public/models/m
+echo ""
+echo "REMINDER: models changed -> bump VERSION in public/sw.js or return"
+echo "visitors keep serving the OLD models from Cache Storage forever."

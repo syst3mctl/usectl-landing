@@ -910,6 +910,13 @@ window.__bootScene = async function(){
   // WEBGPU: the renderer picks its backend itself — dawn/metal where
   // navigator.gpu answers, webgl2 otherwise; ?gpu=gl forces the fallback
   // so the two can be compared on the same machine.
+  // ── THE REVISIT CACHE ── /sw.js serves models, vendored scripts,
+  // decoders and hashed bundles from on-disk Cache Storage on every
+  // return visit: the 13-18MB re-download becomes ~0 bytes / ~0ms, and
+  // the page works offline after one visit. registered here, before the
+  // model preloads matter, and never awaited — the first visit populates
+  // the cache in passing, only later visits feel it.
+  try { if ('serviceWorker' in navigator && !/[?&]nosw/.test(location.search || '')) navigator.serviceWorker.register('/sw.js'); } catch(swE){}
   var FORCE_GL = /[?&]gpu=(0|gl|webgl)/i.test(location.search || '');
   var MOBILE = window.innerWidth <= 767;   // needed HERE for the backend handoff — `var` hoists the name, not the value, and the old declaration sat 100 lines below the check that read it
   // ── EVERY MOBILE GETS ITS BEST PATH ── a phone WITH webgpu rides this
@@ -1207,6 +1214,13 @@ window.__bootScene = async function(){
     // instead of re-janking its way down. keyed on the device's own
     // shape; a week old and it re-measures.
     var MEM_KEY = 'yz_mq3';   /* v3: the ultra rung + the 336MB budget — every rung learned against the old 552MB page is void */
+    // a completed full warm is also remembered (same signature idea): on
+    // a revisit the OS shader cache holds every pipeline this device
+    // compiled, so the sweep's SECOND draw per step — Metal finalizes on
+    // execution, the reason the fresh sweep draws everything twice — buys
+    // nothing. the revisit sweep walks the same path at one draw per
+    // step: same states, half the veil time. cleared by the MEM_KEY
+    // generation like the tier.
     function memSig(){ return [M.gpu, navigator.hardwareConcurrency || 0, (screen.width || 0) + 'x' + (screen.height || 0), window.devicePixelRatio || 1].join('|'); }
     function memRead(){
       try {
@@ -1468,6 +1482,15 @@ window.__bootScene = async function(){
     return M;
   })();
   window.__mq = MQ;
+  var WARM_KEY = 'yz_warm3';
+  var warmFast = false;   // set true when this device completed a full sweep before
+  try {
+    var wv = JSON.parse(localStorage.getItem(WARM_KEY) || 'null');
+    warmFast = !!(wv && wv.sig === ((MQ.gpu || '') + '|' + (screen.width || 0) + 'x' + (screen.height || 0)) && (Date.now() - wv.at) < 6048e5);
+  } catch(we){}
+  function warmDone(){
+    try { localStorage.setItem(WARM_KEY, JSON.stringify({sig: (MQ.gpu || '') + '|' + (screen.width || 0) + 'x' + (screen.height || 0), at: Date.now()})); } catch(we){}
+  }
   // ── ?dbg=1 — THE DEVICE READOUT ──
   // I cannot measure someone's phone from here, and a forwarded
   // screenshot is a quarter-resolution jpeg. this is the loop-closer: the
@@ -2682,6 +2705,7 @@ window.__bootScene = async function(){
     // then show it"). a 16s net backstops a warm that runs long.
     function liftVeil(){
       if (veilLifted) return;
+      if (warmSweepStarted && !warmKill) try { warmDone(); } catch(wde){}   // a COMPLETED warm; a killed or skipped one must not fast-path the next visit
       veilLifted = true; window.__veilDown = true;
       try { if (MQ.bootMark) MQ.bootMark(); } catch(e){}   // the ride starts NOW, not at load
       if (veilOnLoad) veilOnLoad();
@@ -2898,7 +2922,7 @@ window.__bootScene = async function(){
             // 14 steps left 10 compiles (city "20 - Default", Wire, Flat) to
             // land on the visitor's scroll into the split. 24 it stays.
             var PRE0 = 40, PRE_STEPS = warmParam('warmpre', 24);
-            for (s = 0; s <= PRE_STEPS; s++){ y = PRE0 + (band0 - PRE0) * s / PRE_STEPS; seq.push(y); seq.push(y); }
+            for (s = 0; s <= PRE_STEPS; s++){ y = PRE0 + (band0 - PRE0) * s / PRE_STEPS; seq.push(y); if (!warmFast) seq.push(y); }
             // ONE up sweep, TWO frames per step: metal finalizes a pipeline's
             // shader on first GPU EXECUTION, not on create — one rushed draw
             // submits it but the next step's draw can land before it flushes,
@@ -2908,8 +2932,8 @@ window.__bootScene = async function(){
             // scroll-in), so those pipelines are already warm. the whole-scene
             // shadow (the split's entry cost) compiles as rackFade leaves 0.
             var FINE1 = 900, FINE_STEPS = 16;   // 700→900 at ~12px: the ghost/stencil/depthWrite flips all live in here
-            for (s = 0; s <= FINE_STEPS; s++){ y = band0 + (FINE1 - band0) * s / FINE_STEPS; seq.push(y); seq.push(y); }
-            for (s = 1; s <= STEPS; s++){ y = FINE1 + (band1 - FINE1) * s / STEPS; seq.push(y); seq.push(y); }   // up
+            for (s = 0; s <= FINE_STEPS; s++){ y = band0 + (FINE1 - band0) * s / FINE_STEPS; seq.push(y); if (!warmFast) seq.push(y); }
+            for (s = 1; s <= STEPS; s++){ y = FINE1 + (band1 - FINE1) * s / STEPS; seq.push(y); if (!warmFast) seq.push(y); }   // up
             for (h = 0; h < 5; h++) seq.push(band1);                                                              // settle at rackFade 1 (the === 1 whole-scene shadow + dim<0.3)
             // THE REST OF THE PAGE is the NEW-ASSET TAIL below — it already
             // rides __warmY from band1 to the footer. a second coarse walk
@@ -2943,9 +2967,9 @@ window.__bootScene = async function(){
             } else if (!/[?&]tail=0/.test(location.search)){
               var maxY = Math.max(band1, (document.documentElement.scrollHeight || 0) - window.innerHeight);
               var TAIL_STEPS = Math.min(warmParam('warmtail', 48), Math.ceil((maxY - band1) / 150));
-              for (s = 1; s <= TAIL_STEPS; s++){ y = band1 + (maxY - band1) * s / TAIL_STEPS; seq.push(y); seq.push(y); }
+              for (s = 1; s <= TAIL_STEPS; s++){ y = band1 + (maxY - band1) * s / TAIL_STEPS; seq.push(y); if (!warmFast) seq.push(y); }
               var FOOT0 = Math.max(band1, maxY - 400);
-              for (s = 1; s <= 8; s++){ y = FOOT0 + (maxY - FOOT0) * s / 8; seq.push(y); seq.push(y); }
+              for (s = 1; s <= 8; s++){ y = FOOT0 + (maxY - FOOT0) * s / 8; seq.push(y); if (!warmFast) seq.push(y); }
               for (h = 0; h < 5; h++) seq.push(maxY);   // settle at the footer pose (its own static-cache state)
             }
             warmSweepStarted = true;
