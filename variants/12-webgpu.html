@@ -4269,7 +4269,17 @@ window.__bootScene = async function(){
               // profile. the reveal band above still warms (that one is
               // felt on every backend); the deep page pays first-visit
               // compile like v11 always has.
-            } else if (!/[?&]tail=0/.test(location.search)){
+            } else if (!/[?&]tail=0/.test(location.search) && (!MOBILE || warmFast || /[?&]tail=1/.test(location.search))){
+              // PHONES SKIP THE TAIL ON THE FIRST VISIT ("i need just
+              // loading be faster in mobile"): the deep-page walk is ~2.4s
+              // of a phone's veil, and rounds 35-41 killed the worst deep
+              // stalls at their sources (load-site warms, the parade, the
+              // pcb dive, the canvas pre-paints) — what the tail still
+              // buys is the milder combo class, measured below 150ms. a
+              // REVISIT runs the tail as always (warmFast, single-draw,
+              // behind a short veil), so a device converges to full
+              // coverage from its second load. desktop keeps the tail
+              // every visit — its veil is seconds, not fifteen.
               var maxY = Math.max(band1, (document.documentElement.scrollHeight || 0) - window.innerHeight);
               var TAIL_STEPS = Math.min(warmParam('warmtail', 48), Math.ceil((maxY - band1) / 150));
               for (s = 1; s <= TAIL_STEPS; s++){ y = band1 + (maxY - band1) * s / TAIL_STEPS; seq.push(y); if (!warmFast) seq.push(y); }
