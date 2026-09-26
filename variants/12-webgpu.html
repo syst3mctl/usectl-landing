@@ -184,7 +184,7 @@
      follows, so the city is already lit underneath. z 500: over the
      nav (100) and the film sheet (200), under nothing the visitor can
      see. */
-  .preload{position:fixed;inset:0;z-index:500;background:#1e1d1d;display:flex;align-items:center;justify-content:center;transition:opacity .45s ease-in-out .3s}
+  .preload{position:fixed;inset:0;z-index:500;background:#1e1d1d;display:flex;align-items:center;justify-content:center;transition:opacity .85s ease-in-out}
   .preload.out{opacity:0;pointer-events:none}
   .pl-defs{position:absolute;width:0;height:0}
   .pl-mark{position:relative;transition:opacity .35s ease .25s}
@@ -1328,6 +1328,15 @@
   </div>
 </div>
 <script>
+  // the ride always OPENS AT THE HERO ("i need site always open from hero
+  // on refresh"): scroll restoration is taken from the browser before its
+  // async restore can fire mid-boot and drop the visitor at a remembered
+  // depth. a real #anchor in the url still navigates — only the restored
+  // position is refused.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  if (!location.hash) window.scrollTo(0, 0);
+</script>
+<script>
   // the veil's pulse — the manager's GlitchLogo.tsx timing verbatim:
   // a burst lasts 0.6s and swaps shape + jitter every 80ms. only the
   // idle differs: the manager rests 40s between bursts, a loading
@@ -1402,9 +1411,13 @@
         if (raf) cancelAnimationFrame(raf);
         shown = 1; paint();
         fill.style.setProperty('--glow-opacity', '0');
-        burst(700);
-        veil.classList.add('out');
-        setTimeout(function(){ veil.remove(); window.plVeil = null; }, 1400);
+        burst(600);
+        // the END reads as a sequence, not a cut ("loading must fade out
+        // after end"): the bar lands on 100%, holds a beat under the last
+        // burst, and only then the whole veil fades — the .85s opacity
+        // ease on the .preload rule.
+        setTimeout(function(){ veil.classList.add('out'); }, 350);
+        setTimeout(function(){ veil.remove(); window.plVeil = null; }, 1700);
       }
     };
   })();
