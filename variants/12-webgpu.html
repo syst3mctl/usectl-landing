@@ -23,37 +23,16 @@
     <link rel="preload" href="/models/m/virtual-city.glb" as="fetch" crossorigin media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
     <link rel="preload" href="/models/server_racking_system.glb" as="fetch" crossorigin media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
     <link rel="preload" href="/models/m/server_racking_system.glb" as="fetch" crossorigin media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
-    <!-- the late-loading props start their downloads at t=0 too: their
-         loader.load calls in the rack callback then hit the http cache.
-         they are DEMOTED, not dropped: `as=fetch` preloads default to HIGH
-         priority, so these seven (7.40 MB of props the ride does not reach
-         for several screens) were sharing the pipe with the city the hero
-         cannot draw without — on a constrained link the opening shot waits
-         behind the calculator. at fetchpriority=low the browser serves the
-         city and the rack first and warms these out of what is left, so the
-         loader chain below still hits a warm cache when it gets to them.
-         (unsupported in older browsers, where it is ignored — i.e. exactly
-         the behaviour this line had before.) -->
-    <link rel="preload" href="/models/pcb.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
-    <link rel="preload" href="/models/m/pcb.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
-    <link rel="preload" href="/models/calculator.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
-    <link rel="preload" href="/models/m/calculator.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
-    <link rel="preload" href="/models/laptop.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
-    <link rel="preload" href="/models/m/laptop.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
-    <link rel="preload" href="/models/qblock.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
-    <link rel="preload" href="/models/m/qblock.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
-    <link rel="preload" href="/models/door.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
-    <link rel="preload" href="/models/m/door.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
-    <link rel="preload" href="/models/terminal.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
-    <link rel="preload" href="/models/m/terminal.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
-    <link rel="preload" href="/models/card.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
-    <link rel="preload" href="/models/m/card.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
-    <link rel="preload" href="/models/sci-fi_control_panel.glb" as="fetch" crossorigin fetchpriority="low" media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
-    <link rel="preload" href="/models/m/sci-fi_control_panel.glb" as="fetch" crossorigin fetchpriority="low" media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <!-- the seven props + the basis transcoder are preloaded DYNAMICALLY by
+         the boot (search __propPreloads) once the backend decision lands:
+         a phone without webgpu swaps to the native v11 build, which loads
+         different codecs of the same props (draco/webp from /models and
+         /models/_orig) — static prop preloads were ~4.4MB of pure double
+         download on exactly the slowest devices. still fetchpriority=low,
+         still ahead of the loader chain's own requests by several seconds.
+         draco stays static: BOTH paths decode the city/rack with it. -->
     <link rel="preload" href="/draco/draco_decoder.wasm" as="fetch" crossorigin fetchpriority="low">
     <link rel="preload" href="/draco/draco_wasm_wrapper.js" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/basis/basis_transcoder.wasm" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/basis/basis_transcoder.js" as="fetch" crossorigin fetchpriority="low">
 <style>
   :root{
     /* manager-usectl dark theme */
@@ -2067,7 +2046,7 @@
     var held = false;
     try { if (window.__holdPage){ window.__holdPage(true); held = true; } } catch(e){}
     function release(){ if (!held) return; held = false; try { window.__holdPage(false); } catch(e){} }
-    setTimeout(release, 46000);   // the hold can never outlive the net below
+    setTimeout(release, 181000);   // the hold can never outlive the net below (which now waits out live downloads)
     function lower(){
       if (down || !pageIn || !glbIn) return;
       down = true;
@@ -2090,6 +2069,7 @@
         // itemsTotal grows as nested loads queue, so the ratio can dip —
         // plVeil.progress() is monotonic and shrugs those off
         lastMove = Date.now();
+        window.__glbLastMove = lastMove;   // the scene's warm net reads this: a live download must never be judged "stuck"
         // the DOWNLOAD is the first three quarters of the boot; the scene's
         // warm phases report the rest through __veilPhase below. a bar that
         // hit 100% and then hung for the warm read as a broken gauge.
@@ -2113,7 +2093,13 @@
     (function net(){
       var now = Date.now(), age = now - t0, working = false;
       try { working = !!window.__veilWorking(); } catch(e){}
-      if (age > 45000 || (age > 15000 && !working && (now - lastMove) > 6000)){
+      // the hard cap fires on SILENCE, not on a clock: the old flat 45s
+      // lifted the veil MID-DOWNLOAD on a phone's cell link (a Galaxy S10
+      // pulling the model set came up half-built — "loading not worked").
+      // while the loaders keep reporting, the gauge is honest and the veil
+      // stands; a dead cdn stops reporting and falls through in seconds.
+      // 180s is the true doom line for a pathological trickle.
+      if (age > 180000 || (age > 15000 && !working && (now - lastMove) > 6000)){
         pageIn = glbIn = true; lower(); return;
       }
       setTimeout(net, 1000);
@@ -2220,6 +2206,23 @@ window.__bootScene = async function(){
     if (await swapToNativeBuild('webgl2 backend on mobile')) return;
   }
   console.info('[12-webgpu] backend: ' + window.__gpuBackend);
+  // ── __propPreloads ── the backend decision has landed and this page is
+  // staying: NOW warm the seven prop models + the basis transcoder (the
+  // head's comment explains why these are not static tags). one set only,
+  // picked by the same condition as MODEL_DIR below.
+  (function(){
+    var sm = MOBILE || !!(window.matchMedia && matchMedia('(pointer: coarse)').matches && window.innerWidth <= 1024);
+    var dir = sm ? '/models/m/' : '/models/';
+    var names = ['pcb', 'calculator', 'laptop', 'qblock', 'door', 'terminal', 'card', 'sci-fi_control_panel'];
+    function pl(href){
+      var l = document.createElement('link');
+      l.rel = 'preload'; l.as = 'fetch'; l.crossOrigin = 'anonymous';
+      l.setAttribute('fetchpriority', 'low'); l.href = href;
+      document.head.appendChild(l);
+    }
+    for (var i = 0; i < names.length; i++) pl(dir + names[i] + '.glb');
+    pl('/basis/basis_transcoder.wasm'); pl('/basis/basis_transcoder.js');
+  })();
   if (renderer.debug) renderer.debug.checkShaderErrors = false;   // dev-only introspection, costs compile time
   // ── pin the pipeline cache ── on webgpu three EVICTS a render pipeline
   // the instant no render object references it (usedTimes → 0, then
@@ -2599,6 +2602,18 @@ window.__bootScene = async function(){
         var bt = bm < 130 ? 3 : (bm < 260 ? 2 : (bm < 400 ? 1 : 0));
         t = Math.min(t, bt);
         why.push('bench ' + Math.round(bm) + 'ms→' + bt);
+        // ── ultra over the name ── a RECOGNIZED mid-class string (adreno
+        // 6xx, mali g7x+, xclipse) caps at 2 above — but those families
+        // span 2019 phones and 2023 flagships (a pixel 8's mali-g715 was
+        // pinned to a galaxy s10's rung). when BOTH live measurements come
+        // back flagship-class, the benches outvote the name upward: one
+        // rung, on stricter bands than the generic ladder (fill <100 vs
+        // <130), and the watchdog still walks a pretender down within a
+        // second of real riding. class-0/1 strings stay a hard cap — the
+        // demote-only law holds for silicon the table actually fears.
+        if (cls.t === 2 && t === 2 && cms < CPU_T[0] && bm < 100){
+          t = 3; why.push('benches flagship-class -> ultra over the name');
+        }
       }
       t = Math.max(0, Math.min(3, t));
       if (remembered && remembered.t !== t) why.push('over remembered ' + remembered.t);
@@ -3984,7 +3999,15 @@ window.__bootScene = async function(){
       var now = performance.now();
       if (warmSweepStarted){
         if (window.__warmY != null && window.__sweepDeadline && now > window.__sweepDeadline){ warmKill = true; return; }
-      } else if (now - netT0 > LOAD_MS){ liftVeil(); return; }
+      } else if (now - netT0 > LOAD_MS){
+        // the load fallback must not fire while bytes are still ARRIVING —
+        // a slow cell link is a working boot, not a dead one (the flat 40s
+        // was round 34's fix for the download eating the sweep's budget;
+        // on a 2019 phone's network the download alone can outlive it).
+        // silence for 8s = genuinely stuck; 180s = doom line either way.
+        var mv = window.__glbLastMove || 0;
+        if (now - netT0 > 180000 || !mv || (Date.now() - mv) > 8000){ liftVeil(); return; }
+      }
       setTimeout(warmNet, 500);
     })();
     THREE.DefaultLoadingManager.onLoad = function(){

@@ -1,64 +1,42 @@
 #!/bin/bash
-# Build the phone/tablet asset set: public/models/m/*.glb
+# Build the model sets. Two outputs per heavy model:
 #
-#   simplify (where the triangle bill is real) → resize textures → quantize → meshopt
+#   public/models/<name>.glb     desktop — dedup + dead-attribute prune + draco
+#                                (render-identical; the city was 9.83MB of
+#                                which ~5MB was 9x-replicated tiles and dead
+#                                Float32 UVs no material ever sampled)
+#   public/models/m/<name>.glb   phone/tablet — same passes + per-class
+#                                simplify (wires/far ring 0.35, buildings
+#                                keep 0.55) + KHR_mesh_quantization + meshopt
 #
-# WHY each step, measured on the page at a 390x844 dsf3 phone profile:
-#   simplify  city 3.13M → 1.41M triangles (the wire overlay rides the same
-#             geometry, so it thins with it — checked against shots)
-#   resize    the props' 1024² sheets are more than a 390px frame resolves;
-#             the KTX2 close-ups (calculator, control panel) pass through
-#   quantize  KHR_mesh_quantization — position i16, normal i8, colour u8:
-#             198MB → 38MB of vertex attributes, the single biggest win
-#   meshopt   replaces draco: slightly larger on the wire, MUCH cheaper to
-#             decode on a phone cpu, and it keeps the quantized types in vram
-#             (draco decodes back to float32 and throws the win away)
+# The heavy lifting lives in tools/model-diet.mjs — read its header for the
+# measured numbers and the WHY of every pass.
 #
-# Run after changing anything in public/models/. Needs @gltf-transform/cli
-# (devDependency). The page picks the set by viewport+pointer — see
-# MODEL_DIR / SMALL_ASSETS and the paired <link rel=preload> tags.
+# SOURCES: the pristine city lives at variant_sources/virtual-city.orig.glb
+# (the deployed desktop file is itself a diet build now). The rack's deployed
+# desktop file IS the pristine source (its diet found nothing to cut).
+#
+# QUANTIZE ONLY WHAT THE PAGE DOES NOT TAKE APART (round-37 law: the page
+# instances qblock's mesh for the faq blocks — quantized integer positions
+# drew as metres and shredded the cubes). City and rack are used whole; every
+# prop is COPIED as-is (their originals are draco; meshopt-without-quantize
+# made them BIGGER on the wire: pcb 0.88 -> 1.78MB).
 set -e
 cd /Users/wazzap/Sites/usectl-landing
-T=$(mktemp -d)
-GT="npx --no-install gltf-transform"
-mkdir -p public/models/m "$T"
+mkdir -p public/models/m
 
-# QUANTIZE ONLY WHAT THE PAGE DOES NOT TAKE APART.
-# gltf-transform's quantize rewrites positions into integer space and puts
-# the compensating scale/offset on the NODE. Any code that lifts a
-# geometry out of its node and re-uses it — the page instances qblock's
-# mesh for the faq's mario boxes — then draws integer coordinates as if
-# they were metres: the blocks came out shredded on the phone build while
-# the desktop build was clean ("our mario ? boxes in mobile are broken").
-# The whole vertex-memory win lives in the city and the racks anyway; the
-# props are a rounding error, so they keep their float32 geometry.
-build () {   # name ratio texsize quantize(0|1)
-  n=$1; ratio=$2; tex=$3; q=$4
-  src=public/models/$n.glb
-  a=$T/$n.a.glb; b=$T/$n.b.glb; c=$T/$n.c.glb
-  if [ "$ratio" = "1" ]; then cp "$src" "$a"; else $GT simplify "$src" "$a" --ratio "$ratio" --error 0.004 >/dev/null 2>&1; fi
-  $GT resize "$a" "$b" --width "$tex" --height "$tex" >/dev/null 2>&1 || cp "$a" "$b"
-  if [ "$q" = "1" ]; then $GT quantize "$b" "$c" >/dev/null 2>&1 || cp "$b" "$c"; else cp "$b" "$c"; fi
-  $GT meshopt "$c" public/models/m/$n.glb >/dev/null 2>&1 || cp "$c" public/models/m/$n.glb
-  s0=$(stat -f%z "$src"); s1=$(stat -f%z public/models/m/$n.glb)
-  printf "  %-28s %6.2fMB → %6.2fMB  (ratio %s, tex %s)\n" "$n" "$(echo "scale=2;$s0/1048576"|bc)" "$(echo "scale=2;$s1/1048576"|bc)" "$ratio" "$tex"
-}
+echo "city (desktop + phone):"
+node tools/model-diet.mjs variant_sources/virtual-city.orig.glb public/models/virtual-city.glb
+node tools/model-diet.mjs variant_sources/virtual-city.orig.glb public/models/m/virtual-city.glb mobile 0.55
+# png textures -> lossless webp, bit-exact (tools/webp-lossless.mjs header)
+node tools/webp-lossless.mjs public/models/virtual-city.glb public/models/virtual-city.glb
+node tools/webp-lossless.mjs public/models/m/virtual-city.glb public/models/m/virtual-city.glb
 
-echo "building phone asset set:"
-# A prop that needs neither decimation nor a smaller sheet is COPIED, not
-# re-encoded: the originals are draco, and running them through meshopt
-# without quantization only makes them bigger on the wire (pcb 0.88 →
-# 1.78MB) for no runtime gain at all.
+echo "rack (phone; desktop file is already minimal):"
+node tools/model-diet.mjs public/models/server_racking_system.glb public/models/m/server_racking_system.glb mobile 0.7
+
 copy () { cp "public/models/$1.glb" "public/models/m/$1.glb"
-  printf "  %-28s %6.2fMB → copied as-is\n" "$1" "$(echo "scale=2;$(stat -f%z public/models/$1.glb)/1048576"|bc)"; }
-
-#     name                    ratio tex  quantize
-# the city and the racks carry the geometry bill and are used whole —
-# they simplify and quantize. everything else is a prop the page may take
-# apart, and its quality is what the visitor looks AT: untouched geometry,
-# full-size sheets, no quantization.
-build virtual-city            0.55  1024 1
-build server_racking_system   0.7   1024 1
+  printf "  %-28s %6.2fMB copied as-is\n" "$1" "$(echo "scale=2;$(stat -f%z public/models/$1.glb)/1048576"|bc)"; }
 copy pcb
 copy calculator
 copy sci-fi_control_panel
@@ -67,6 +45,12 @@ copy door
 copy terminal
 copy card
 copy qblock
+
+# .glb.gz siblings for every model — Cloudflare never compresses .glb on the
+# fly, so functions/_middleware.js serves these pre-compressed (meshopt and
+# draco payloads still gzip 20-45% smaller; the mobile city is 4.58 -> 3.72MB)
+tools/compress-models.sh
+
 echo "total:"; du -sh public/models/m
 echo ""
 echo "REMINDER: models changed -> bump VERSION in public/sw.js or return"

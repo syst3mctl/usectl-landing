@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "description": "Scope Pages Functions to where the middleware actually acts: the homepage (markdown negotiation + Link headers) and /models (compressed .glb serving). Every other asset is served statically at the edge — before this file EVERY request invoked the middleware, which marked the whole site cf-cache-status: DYNAMIC.",
+  "include": ["/", "/index.html", "/models/*"],
+  "exclude": []
+}

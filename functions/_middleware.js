@@ -18,6 +18,41 @@ export async function onRequest(context) {
   const { request, next } = context;
   const url = new URL(request.url);
 
+  // ── Compressed model serving ─────────────────────────────────────────
+  // Cloudflare compresses text/js/wasm on the fly but never .glb
+  // (application/octet-stream), so the 3D models — the bulk of the
+  // landing's weight — shipped uncompressed. The build produces .glb.gz
+  // siblings (tools/compress-models.sh); serve one whenever the client
+  // accepts gzip, with encodeBody:'manual' so the runtime passes the
+  // pre-compressed bytes through untouched. Meshopt/draco payloads still
+  // leave ~35-60% on the table for gzip, so this is real money.
+  if (url.pathname.startsWith('/models/') && url.pathname.endsWith('.glb')) {
+    const acceptsGzip = /\bgzip\b/.test(request.headers.get('Accept-Encoding') || '');
+    const hasRange = request.headers.has('Range');
+    if (acceptsGzip && !hasRange && request.method === 'GET') {
+      const gzUrl = new URL(url);
+      gzUrl.pathname += '.gz';
+      const asset = await context.env.ASSETS.fetch(new Request(gzUrl.toString()));
+      if (asset.ok) {
+        const headers = new Headers({
+          'Content-Type': 'model/gltf-binary',
+          'Content-Encoding': 'gzip',
+          'Vary': 'Accept-Encoding',
+          'Cache-Control': 'public, max-age=604800',
+        });
+        const etag = asset.headers.get('ETag');
+        if (etag) headers.set('ETag', etag);
+        return new Response(asset.body, { status: 200, headers, encodeBody: 'manual' });
+      }
+    }
+    // no gzip accepted / no sibling built: raw file, but still typed + cacheable
+    const raw = await next();
+    const rawHeaders = new Headers(raw.headers);
+    rawHeaders.set('Content-Type', 'model/gltf-binary');
+    if (!rawHeaders.has('Cache-Control')) rawHeaders.set('Cache-Control', 'public, max-age=604800');
+    return new Response(raw.body, { status: raw.status, statusText: raw.statusText, headers: rawHeaders });
+  }
+
   // Only handle the root path specially; everything else goes to static serving.
   const isHomepage = url.pathname === '/' || url.pathname === '/index.html';
 

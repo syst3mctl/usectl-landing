@@ -15,9 +15,15 @@
     <!-- start the model downloads in parallel with the script tags below;
          GLTFLoader's fetch then hits the http cache instead of the network.
          THE FIRST FRAME NEEDS EXACTLY THESE TWO — 11.07 of the 18.47 MB —
-         and they are the only two that ask for the bandwidth at full price -->
-    <link rel="preload" href="/models/virtual-city.glb" as="fetch" crossorigin>
-    <link rel="preload" href="/models/server_racking_system.glb" as="fetch" crossorigin>
+         and they are the only two that ask for the bandwidth at full price.
+         each is paired: the desktop model over 768px, the phone's own
+         decimated/quantized twin (/models/m) under it, so a phone never
+         pulls a byte of the desktop geometry. the props keep one url —
+         their two sets are byte-identical -->
+    <link rel="preload" href="/models/virtual-city.glb" as="fetch" crossorigin media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/virtual-city.glb" as="fetch" crossorigin media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <link rel="preload" href="/models/server_racking_system.glb" as="fetch" crossorigin media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
+    <link rel="preload" href="/models/m/server_racking_system.glb" as="fetch" crossorigin media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
     <!-- the late-loading props start their downloads at t=0 too: their
          loader.load calls in the rack callback then hit the http cache.
          they are DEMOTED, not dropped: `as=fetch` preloads default to HIGH
@@ -1974,6 +1980,9 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+<!-- the phone model set (/models/m) is meshopt-compressed, not draco;
+     vendored so the decoder costs no cdn round-trip -->
+<script src="/vendor/r128/libs/meshopt_decoder.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/SVGLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
@@ -2011,15 +2020,28 @@
     }
     if (document.readyState === 'complete') pageIn = true;
     else window.addEventListener('load', function(){ pageIn = true; lower(); });
+    var lastMove = Date.now();   // last sign of life from the loaders
     if (window.THREE && THREE.DefaultLoadingManager){
       THREE.DefaultLoadingManager.onProgress = function(url, ld, tot){
         // itemsTotal grows as nested loads queue, so the ratio can dip —
         // plVeil.progress() is monotonic and shrugs those off
+        lastMove = Date.now();
         if (window.plVeil && tot) window.plVeil.progress(ld / tot);
       };
       THREE.DefaultLoadingManager.onLoad = function(){ glbIn = true; lower(); };
     } else glbIn = true;   // no three at all — nothing to wait for
-    setTimeout(function(){ pageIn = glbIn = true; lower(); }, 15000);
+    // the net fires on SILENCE, not on a clock: this page is the handoff
+    // target for phones without webgpu, and a flat 15s lifted the veil
+    // mid-download on a cell link — the site appeared half-built. while
+    // the loaders keep reporting the veil stands; a dead cdn goes quiet
+    // and falls through in seconds. 180s is the doom line either way.
+    (function net(){
+      var age = Date.now() - t0;
+      if (age > 180000 || (age > 15000 && (Date.now() - lastMove) > 6000)){
+        pageIn = glbIn = true; lower(); return;
+      }
+      setTimeout(net, 1000);
+    })();
     lower();
   })();
 </script>
@@ -2991,8 +3013,35 @@
   // ── the city, exactly as the file has it: no moves, no scale, no touch ──
   var loader = new THREE.GLTFLoader();
   var draco = new THREE.DRACOLoader();
-  draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.4.1/');
+  draco.setDecoderPath('/draco/');   // vendored 1.4.1 (public/draco): the page decodes with no network
   loader.setDRACOLoader(draco);
+  // the phone city/rack use EXT_meshopt_compression + KHR_mesh_quantization:
+  // a quarter of the vertex memory, and a decoder far cheaper on a phone
+  // cpu than draco's wasm. guarded: desktop never loads those files
+  if (window.MeshoptDecoder) loader.setMeshoptDecoder(MeshoptDecoder);
+  // ── the phone model set (/models/m) ──
+  // variant 12 hands every no-webgpu phone off to THIS page, which was
+  // feeding them the desktop set — 18MB of float32 vertex attributes into
+  // a device with a few hundred MB of usable gpu memory. the phone set is
+  // the two heavies decimated (city 0.45, rack 0.6) and quantized; ONLY
+  // those two urls are rewritten — the props are byte-identical between
+  // sets and /models/_orig/* must pass through untouched. the coarse-
+  // pointer clause serves the same set to tablets (a mobile-class gpu
+  // whatever the screen says), matching the <link rel=preload> pairs in
+  // the head so a device downloads one set and only one. this wrapper is
+  // installed BEFORE the texture governor's, so its rewrite runs inside
+  // the governor's call and both compose.
+  var SMALL_ASSETS = window.innerWidth <= 767 || !!(window.matchMedia &&
+    matchMedia('(pointer: coarse)').matches && window.innerWidth <= 1024);
+  if (SMALL_ASSETS) (function(){
+    var _load = loader.load.bind(loader);
+    loader.load = function(url, onLoad, onProgress, onError){
+      if (url === '/models/virtual-city.glb' || url === '/models/server_racking_system.glb'){
+        url = '/models/m' + url.slice('/models'.length);
+      }
+      return _load(url, onLoad, onProgress, onError);
+    };
+  })();
   // ── the texture governor (phones only) ────────────
   // the models carry ~300MB of textures once decoded: the laptop and
   // the calculator alone hold four 2048² webp sheets EACH (~90MB a

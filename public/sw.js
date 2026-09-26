@@ -19,7 +19,7 @@
  * BUMP VERSION WHENEVER public/models OR public/vendor CONTENT CHANGES
  * (tools/mobile-assets.sh reminds about it).
  */
-var VERSION = 'usectl-v1';
+var VERSION = 'usectl-v2';   /* v2: the model diet (dedup + dead-UV prune + wire cut) — v1 caches hold the fat files */
 var HEAVY = /^\/(models|vendor|draco|basis|assets|commercial)\//;
 
 self.addEventListener('install', function(e){ self.skipWaiting(); });

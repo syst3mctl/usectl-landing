@@ -3,7 +3,7 @@
 <head>
     <!-- Google tag (gtag.js) -->
     <link rel="preconnect" href="https://www.googletagmanager.com">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TXPX5SYRNJ"></script>
+    <script>(function(){var f=0;function go(){if(f)return;f=1;var s=document.createElement('script');s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-TXPX5SYRNJ";document.head.appendChild(s);}var t=setInterval(function(){if(window.__veilDown){clearInterval(t);go();}},500);setTimeout(function(){clearInterval(t);go();},20000);})();</script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
@@ -292,138 +292,11 @@
   </footer>
 </div>
 
-<script>
-(function () {
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* ascii rules measured to the container */
-  var rules = Array.prototype.slice.call(document.querySelectorAll('.ta-rule'));
-  var specs = rules.map(function (el) {
-    var open = el.textContent.trim().charAt(0);
-    var close = el.textContent.trim().slice(-1);
-    var title = el.querySelector('.t');
-    return { el: el, open: open, close: close, title: title ? title.cloneNode(true) : null };
-  });
-  function charWidth(el) {
-    var s = document.createElement('span');
-    s.textContent = '─'.repeat(50);
-    s.style.visibility = 'hidden'; s.style.whiteSpace = 'nowrap'; s.style.position = 'absolute';
-    el.appendChild(s);
-    var w = s.getBoundingClientRect().width / 50;
-    el.removeChild(s);
-    return w || 9;
-  }
-  function drawRules() {
-    specs.forEach(function (sp) {
-      var el = sp.el;
-      var total = Math.floor(el.clientWidth / charWidth(el));
-      var titleLen = sp.title ? sp.title.textContent.length : 0;
-      var lead = 2;
-      var tail = Math.max(2, total - lead - titleLen - 4);
-      el.textContent = '';
-      el.appendChild(document.createTextNode(sp.open + '─'.repeat(lead) + ' '));
-      if (sp.title) el.appendChild(sp.title.cloneNode(true));
-      el.appendChild(document.createTextNode(' ' + '─'.repeat(tail) + sp.close));
-    });
-  }
-  drawRules();
-  window.addEventListener('resize', drawRules);
-
-  /* session clock */
-  var clock = document.getElementById('ta-clock');
-  var start = Date.now();
-  function pad(n) { return (n < 10 ? '0' : '') + n; }
-  function tick() {
-    var s = Math.floor((Date.now() - start) / 1000);
-    clock.textContent = pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60);
-  }
-  tick();
-  if (!reduce) setInterval(tick, 1000);
-
-  /* typed terminal: final state is already in the dom, replay it as typing */
-  var pre = document.getElementById('ta-term');
-  var state = document.getElementById('ta-term-state');
-  var newPod = document.getElementById('ta-pod-new');
-  var newPodSt = document.getElementById('ta-pod-new-st');
-  function finish() {
-    state.textContent = 'live';
-    newPod.hidden = false;
-    newPodSt.textContent = 'running';
-    newPod.className = '';
-  }
-  if (reduce) { finish(); return; }
-
-  var finalNodes = Array.prototype.slice.call(pre.childNodes);
-  var lines = [];
-  var cur = [];
-  finalNodes.forEach(function (n) {
-    if (n.nodeType === 3 && n.textContent.indexOf('\n') !== -1) {
-      var parts = n.textContent.split('\n');
-      parts.forEach(function (p, i) {
-        if (i > 0) { lines.push(cur); cur = []; }
-        if (p) cur.push(document.createTextNode(p));
-      });
-    } else cur.push(n);
-  });
-  if (cur.length) lines.push(cur);
-
-  pre.textContent = '';
-  var cursor = document.createElement('span');
-  cursor.className = 'cur'; cursor.setAttribute('aria-hidden', 'true');
-  pre.appendChild(cursor);
-  state.textContent = 'typing';
-
-  function isPrompt(line) { return line[0] && line[0].nodeType === 1 && line[0].className === 'p'; }
-
-  function typeLine(line, done) {
-    var nodes = line.filter(function (n) { return !(n.nodeType === 1 && n.className === 'cur'); })
-      .map(function (n) { return n.cloneNode(true); });
-    var i = 0;
-    function nextNode() {
-      if (i >= nodes.length) return done();
-      var n = nodes[i++];
-      if (n.nodeType === 3 || (n.nodeType === 1 && n.className === 'u')) {
-        var text = n.textContent;
-        var shell = n.nodeType === 1 ? n : null;
-        if (shell) { shell.textContent = ''; pre.insertBefore(shell, cursor); }
-        var j = 0; var holder = shell || document.createTextNode('');
-        if (!shell) pre.insertBefore(holder, cursor);
-        (function step() {
-          if (j >= text.length) return nextNode();
-          holder.textContent += text.charAt(j++);
-          setTimeout(step, 14 + Math.random() * 22);
-        })();
-      } else {
-        pre.insertBefore(n, cursor);
-        nextNode();
-      }
-    }
-    nextNode();
-  }
-
-  var li = 0;
-  function nextLine() {
-    if (li >= lines.length) { finish(); return; }
-    var line = lines[li++];
-    var last = li === lines.length;
-    if (isPrompt(line)) {
-      typeLine(line, function () {
-        if (!last) pre.insertBefore(document.createTextNode('\n'), cursor);
-        setTimeout(nextLine, last ? 0 : 260);
-      });
-    } else {
-      var isCreate = li === 3;
-      if (isCreate) { newPod.hidden = false; }
-      setTimeout(function () {
-        line.forEach(function (n) { pre.insertBefore(n.cloneNode(true), cursor); });
-        pre.insertBefore(document.createTextNode('\n'), cursor);
-        nextLine();
-      }, 320 + Math.random() * 200);
-    }
-  }
-  setTimeout(nextLine, 400);
-})();
-</script>
+<script>(function(){var e=window.matchMedia(`(prefers-reduced-motion: reduce)`).matches,t=Array.prototype.slice.call(document.querySelectorAll(`.ta-rule`)).map(function(e){var t=e.textContent.trim().charAt(0),n=e.textContent.trim().slice(-1),r=e.querySelector(`.t`);return{el:e,open:t,close:n,title:r?r.cloneNode(!0):null}});function n(e){var t=document.createElement(`span`);t.textContent=`─`.repeat(50),t.style.visibility=`hidden`,t.style.whiteSpace=`nowrap`,t.style.position=`absolute`,e.appendChild(t);var n=t.getBoundingClientRect().width/50;return e.removeChild(t),n||9}function r(){t.forEach(function(e){var t=e.el,r=Math.floor(t.clientWidth/n(t)),i=e.title?e.title.textContent.length:0,a=2,o=Math.max(2,r-a-i-4);t.textContent=``,t.appendChild(document.createTextNode(e.open+`─`.repeat(a)+` `)),e.title&&t.appendChild(e.title.cloneNode(!0)),t.appendChild(document.createTextNode(` `+`─`.repeat(o)+e.close))})}r(),window.addEventListener(`resize`,r);var i=document.getElementById(`ta-clock`),a=Date.now();function o(e){return(e<10?`0`:``)+e}function s(){var e=Math.floor((Date.now()-a)/1e3);i.textContent=o(Math.floor(e/3600))+`:`+o(Math.floor(e/60)%60)+`:`+o(e%60)}s(),e||setInterval(s,1e3);var c=document.getElementById(`ta-term`),l=document.getElementById(`ta-term-state`),u=document.getElementById(`ta-pod-new`),d=document.getElementById(`ta-pod-new-st`);function f(){l.textContent=`live`,u.hidden=!1,d.textContent=`running`,u.className=``}if(e){f();return}var p=Array.prototype.slice.call(c.childNodes),m=[],h=[];p.forEach(function(e){e.nodeType===3&&e.textContent.indexOf(`
+`)!==-1?e.textContent.split(`
+`).forEach(function(e,t){t>0&&(m.push(h),h=[]),e&&h.push(document.createTextNode(e))}):h.push(e)}),h.length&&m.push(h),c.textContent=``;var g=document.createElement(`span`);g.className=`cur`,g.setAttribute(`aria-hidden`,`true`),c.appendChild(g),l.textContent=`typing`;function _(e){return e[0]&&e[0].nodeType===1&&e[0].className===`p`}function v(e,t){var n=e.filter(function(e){return e.nodeType!==1||e.className!==`cur`}).map(function(e){return e.cloneNode(!0)}),r=0;function i(){if(r>=n.length)return t();var e=n[r++];if(e.nodeType===3||e.nodeType===1&&e.className===`u`){var a=e.textContent,o=e.nodeType===1?e:null;o&&(o.textContent=``,c.insertBefore(o,g));var s=0,l=o||document.createTextNode(``);o||c.insertBefore(l,g),(function e(){if(s>=a.length)return i();l.textContent+=a.charAt(s++),setTimeout(e,14+Math.random()*22)})()}else c.insertBefore(e,g),i()}i()}var y=0;function b(){if(y>=m.length){f();return}var e=m[y++],t=y===m.length;_(e)?v(e,function(){t||c.insertBefore(document.createTextNode(`
+`),g),setTimeout(b,t?0:260)}):(y===3&&(u.hidden=!1),setTimeout(function(){e.forEach(function(e){c.insertBefore(e.cloneNode(!0),g)}),c.insertBefore(document.createTextNode(`
+`),g),b()},320+Math.random()*200))}setTimeout(b,400)})();</script>
 
 </body>
 </html>

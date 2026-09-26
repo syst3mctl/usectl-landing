@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { minifySync } from 'rolldown/experimental';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -86,8 +87,23 @@ function siteHeadPlugin() {
           twTag('twitter:description', description),
         ];
 
+        // the 3D variant pages: the ~527KB gtag library competes with the
+        // model downloads and pipeline compiles for bandwidth and main
+        // thread during exactly the boot window. Keep the inline dataLayer
+        // stub (gtag() calls queue), but fetch the library only once the
+        // boot veil is down (window.__veilDown, set by variant 12) — or
+        // after 20s for pages that never set it (variant 11, the handoff).
+        let gtagBlock = shared.gtag;
+        const gtagSrc = gtagBlock.match(/<script async src="([^"]*)"><\/script>/)?.[1];
+        if (/^\/variants\//.test(ctx.path) && gtagSrc) {
+          gtagBlock = gtagBlock.replace(
+            /<script async src="[^"]*"><\/script>/,
+            `<script>(function(){var f=0;function go(){if(f)return;f=1;var s=document.createElement('script');s.async=true;s.src=${JSON.stringify(gtagSrc)};document.head.appendChild(s);}var t=setInterval(function(){if(window.__veilDown){clearInterval(t);go();}},500);setTimeout(function(){clearInterval(t);go();},20000);})();</script>`,
+          );
+        }
+
         const block = [
-          shared.gtag,
+          gtagBlock,
           '',
           shared.charset,
           shared.viewport,
@@ -98,6 +114,35 @@ function siteHeadPlugin() {
         ].join('\n    ');
 
         return html.replace(SITE_HEAD_MARKER, block);
+      },
+    },
+  };
+}
+
+// Plugin: minify bare inline <script> blocks at build time. Vite only
+// minifies the module scripts it bundles; the variant pages carry ~700KB of
+// classic inline JS (the 13k-line scene script is ~47% comment bytes) that
+// shipped verbatim — measured 208KB -> 76KB brotli on the wire for variant
+// 12, plus a real parse-time cut on phone CPUs. rolldown's minifier keeps
+// TOP-LEVEL identifiers (verified on a probe) so the cross-<script>-block
+// globals these pages share survive; source files stay fully commented.
+function inlineMinifyPlugin() {
+  return {
+    name: 'inline-minify',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        return html.replace(/<script>([\s\S]*?)<\/script>/g, (m, body) => {
+          if (body.length < 1024) return m;
+          try {
+            const out = minifySync('inline.js', body);
+            return out && out.code && out.code.length < body.length ? `<script>${out.code}</script>` : m;
+          } catch (e) {
+            console.warn('[inline-minify] left a block unminified:', String(e).slice(0, 120));
+            return m;
+          }
+        });
       },
     },
   };
@@ -148,7 +193,7 @@ const variantPages = Object.fromEntries(
 
 export default defineConfig({
   base: './',
-  plugins: [cssPreloadPlugin(), siteHeadPlugin(), dirRedirectPlugin(), variantSidecarPlugin()],
+  plugins: [cssPreloadPlugin(), siteHeadPlugin(), dirRedirectPlugin(), variantSidecarPlugin(), inlineMinifyPlugin()],
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

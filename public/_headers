@@ -7,6 +7,24 @@
 /img/*
   Cache-Control: public, max-age=604800
 
+# ── The heavy 3D payload ──────────────────────────────────────────────
+# Models, decoders and the vendored r128 set are not content-hashed, but
+# they change only with a deliberate rebuild (and sw.js VERSION bumps with
+# them — the service worker is the real revisit cache; these headers are
+# the fallback for browsers before the SW installs). A week, revalidable.
+
+/models/*
+  Cache-Control: public, max-age=604800
+
+/draco/*
+  Cache-Control: public, max-age=604800
+
+/basis/*
+  Cache-Control: public, max-age=604800
+
+/vendor/*
+  Cache-Control: public, max-age=604800
+
 # ── Well-Known Endpoints ──────────────────────────────────────────────
 
 /.well-known/api-catalog
