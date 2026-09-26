@@ -19,10 +19,28 @@
          each preload is paired: the desktop model over 768px, the phone's
          own decimated/quantized twin (/models/m, ~13MB for the whole set)
          under it, so a phone never pulls a byte of the desktop geometry. -->
-    <link rel="preload" href="/models/virtual-city.glb" as="fetch" crossorigin media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
-    <link rel="preload" href="/models/m/virtual-city.glb" as="fetch" crossorigin media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
-    <link rel="preload" href="/models/server_racking_system.glb" as="fetch" crossorigin media="(min-width: 1025px), (min-width: 768px) and (pointer: fine)">
-    <link rel="preload" href="/models/m/server_racking_system.glb" as="fetch" crossorigin media="(max-width: 767px), (max-width: 1024px) and (pointer: coarse)">
+    <script>
+    // the two hero-critical models, preloaded as their .glb.gz siblings —
+    // the host serves .glb raw (no gzip for octet-stream), so the page
+    // fetches the precompressed sibling and inflates it itself with
+    // DecompressionStream (see the loader wrapper): the phone city is
+    // 4.6MB -> 3.56MB on the wire with no server change. a browser
+    // without the api preloads (and later fetches) the raw files. runs
+    // inline right here so the downloads start exactly where the old
+    // static tags started them.
+    (function(){
+      var gz = typeof DecompressionStream !== 'undefined' ? '.gz' : '';
+      var small = matchMedia('(max-width: 767px), (max-width: 1024px) and (pointer: coarse)').matches;
+      var dir = small ? '/models/m/' : '/models/';
+      window.__gzModels = !!gz;
+      ['virtual-city', 'server_racking_system'].forEach(function(n){
+        var l = document.createElement('link');
+        l.rel = 'preload'; l.as = 'fetch'; l.crossOrigin = 'anonymous';
+        l.href = dir + n + '.glb' + gz;
+        document.head.appendChild(l);
+      });
+    })();
+    </script>
     <!-- the seven props + the basis transcoder are preloaded DYNAMICALLY by
          the boot (search __propPreloads) once the backend decision lands:
          a phone without webgpu swaps to the native v11 build, which loads
@@ -2226,6 +2244,7 @@ window.__bootScene = async function(){
   (function(){
     var sm = MOBILE || !!(window.matchMedia && matchMedia('(pointer: coarse)').matches && window.innerWidth <= 1024);
     var dir = sm ? '/models/m/' : '/models/';
+    var gz = (typeof DecompressionStream !== 'undefined') ? '.gz' : '';   // must mirror the loader wrapper's choice
     var names = ['pcb', 'calculator', 'laptop', 'qblock', 'door', 'terminal', 'card', 'sci-fi_control_panel'];
     function pl(href){
       var l = document.createElement('link');
@@ -2233,7 +2252,7 @@ window.__bootScene = async function(){
       l.setAttribute('fetchpriority', 'low'); l.href = href;
       document.head.appendChild(l);
     }
-    for (var i = 0; i < names.length; i++) pl(dir + names[i] + '.glb');
+    for (var i = 0; i < names.length; i++) pl(dir + names[i] + '.glb' + gz);
     pl('/basis/basis_transcoder.wasm'); pl('/basis/basis_transcoder.js');
   })();
   if (renderer.debug) renderer.debug.checkShaderErrors = false;   // dev-only introspection, costs compile time
@@ -4446,8 +4465,47 @@ window.__bootScene = async function(){
   var MODEL_DIR = SMALL_ASSETS ? '/models/m/' : '/models/';
   (function(){
     var _load = loader.load.bind(loader);
+    // ── the .gz sibling, inflated in the PAGE ── the host serves .glb raw
+    // (nginx behind cloudflare compresses no octet-stream), and the server
+    // fix is out of this repo's hands — so the page stops waiting for one:
+    // tools/compress-models.sh ships a .glb.gz next to every model, and
+    // DecompressionStream inflates it here in tens of milliseconds. the
+    // phone set drops ~1.9MB on the wire, the desktop set ~2.5MB. manager
+    // bookkeeping mirrors GLTFLoader.load exactly (itemStart sync, onLoad
+    // BEFORE itemEnd) so the nested-load queue and the veil's gauge see
+    // the same story they always did. any failure — no api, a missing
+    // sibling, a bad stream — falls back to the raw url.
+    var CAN_GZ = typeof DecompressionStream !== 'undefined';
     loader.load = function(url, onLoad, onProgress, onError){
-      return _load(String(url).replace('/models/', MODEL_DIR), onLoad, onProgress, onError);
+      var real = String(url).replace('/models/', MODEL_DIR);
+      if (!CAN_GZ || !/\.glb$/.test(real)) return _load(real, onLoad, onProgress, onError);
+      var mgr = loader.manager || THREE.DefaultLoadingManager;
+      mgr.itemStart(real);
+      fetch(real + '.gz', {credentials: 'same-origin'}).then(function(res){
+        if (!res.ok) throw new Error('gz http ' + res.status);
+        return res.arrayBuffer();
+      }).then(function(buf){
+        // SNIFF, don't trust headers: a dev server (vite) marks .gz files
+        // Content-Encoding: gzip and the browser hands this fetch the
+        // DECODED bytes; production nginx hands the raw gzip stream. the
+        // magic bytes say which arrived — 1f 8b means inflate it here.
+        var u8 = new Uint8Array(buf, 0, 2);
+        if (u8[0] === 0x1f && u8[1] === 0x8b){
+          return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+        }
+        return buf;
+      }).then(function(buf){
+        loader.parse(buf, THREE.LoaderUtils.extractUrlBase(real), function(g){
+          onLoad(g);
+          mgr.itemEnd(real);
+        }, function(e){
+          mgr.itemError(real); mgr.itemEnd(real);
+          if (onError) onError(e);
+        });
+      }).catch(function(){
+        mgr.itemEnd(real);
+        _load(real, onLoad, onProgress, onError);
+      });
     };
   })();
   var draco = new THREE.DRACOLoader();
