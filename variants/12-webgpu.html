@@ -4484,7 +4484,7 @@ window.__bootScene = async function(){
   // desktop and ipad pass through byte-identical.
   if (MOBILE) (function(){
     var tameSeen = {};
-    function tameTextures(root){
+    function tameTextures(root, url){
       // 1024 on rung 2 was set before the phone's bill was measured. it is
       // measured now: 51 textures / 213MB on the gpu, fourteen of them 1024²
       // rgba sheets at 5.3MB each — on props a 390px frame shows at a third
@@ -4492,7 +4492,21 @@ window.__bootScene = async function(){
       // phone screen can resolve. the CLOSE-UP props (calculator, control
       // panel) ship as KTX2 and skip this branch entirely: gpu-compressed,
       // 16× cheaper, and still full resolution — the sharp things stay sharp.
-      var cap = MQ.tier >= 3 ? 768 : (MQ.tier >= 2 ? 512 : 384);
+      // ── THE CLOSE-UP EXCEPTION ── ("slider elements was bad quality, 3
+      // and 4. Built for agents is bad quality… next section is better"):
+      // the subjects the camera PARKS ON — the terminal (slide 3), the
+      // control panel (slide 4), the agents section's laptop — cannot wear
+      // the generic cap: right beside them the KTX2 calculator skips the
+      // governor at full res and the contrast reads as a broken texture.
+      // their maps are also the ones the page canvas-reads (the panel's
+      // display, the laptop's scrub plates), so capping them degrades the
+      // derived art twice. they keep more pixels per rung — 1536/1024/512
+      // against the generic 768/512/384: ~+38MB at ultra, ~+18MB at rung
+      // 2, both far under the 552MB jetsam line the caps were built for.
+      var closeUp = /laptop|sci-fi_control_panel|terminal/.test(url || '');
+      var cap = MQ.tier >= 3 ? (closeUp ? 1536 : 768)
+              : (MQ.tier >= 2 ? (closeUp ? 1024 : 512)
+              : (closeUp ? 512 : 384));
       root.traverse(function(o){
         if (!o.isMesh) return;
         var mats = Array.isArray(o.material) ? o.material : [o.material];
@@ -4525,7 +4539,7 @@ window.__bootScene = async function(){
     var _gltfLoad = loader.load.bind(loader);
     loader.load = function(url, onLoad, onProgress, onError){
       return _gltfLoad(url, function(g){
-        try { tameTextures(g.scene); } catch(e){}
+        try { tameTextures(g.scene, url); } catch(e){}
         onLoad(g);
       }, onProgress, onError);
     };
