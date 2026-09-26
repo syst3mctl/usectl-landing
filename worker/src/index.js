@@ -57,9 +57,49 @@ export default {
       }
     }
 
+    // ── Compressed model serving ──────────────────────────────────────
+    // Neither the origin nor Cloudflare compresses .glb (it's
+    // application/octet-stream — not on the compressible list), so the 3D
+    // landing's biggest files shipped raw. The build produces .glb.gz
+    // siblings (tools/compress-models.sh); serve one whenever the client
+    // accepts gzip — meshopt/draco payloads leave 20-45% for gzip, the
+    // phone city is 4.7 → 3.6MB. If the origin's nginx ever gains
+    // `gzip_static on;` this branch stays correct (it reads the sibling
+    // directly) but becomes redundant.
+    if (url.pathname.startsWith('/models/') && url.pathname.endsWith('.glb') &&
+        request.method === 'GET' && !request.headers.has('Range') &&
+        /\bgzip\b/.test(request.headers.get('Accept-Encoding') || '')) {
+      const gzUrl = new URL(request.url);
+      gzUrl.pathname += '.gz';
+      const gz = await fetch(gzUrl.toString(), { cf: { cacheTtl: 604800 } });
+      if (gz.ok) {
+        return new Response(gz.body, {
+          status: 200,
+          encodeBody: 'manual',
+          headers: {
+            'Content-Type': 'model/gltf-binary',
+            'Content-Encoding': 'gzip',
+            'Vary': 'Accept-Encoding',
+            'Cache-Control': 'public, max-age=604800',
+          },
+        });
+      }
+    }
+
     // Fetch from origin
     const response = await fetch(request);
     const newHeaders = new Headers(response.headers);
+
+    // The service worker file must never be held by the edge: a stale
+    // sw.js pins return visitors to an old VERSION and its cached models
+    // for the edge TTL (measured: 4h of max-age=14400 after a deploy).
+    if (url.pathname === '/sw.js') {
+      newHeaders.set('Cache-Control', 'no-cache');
+    }
+    // Models fetched without the gzip branch still deserve cache headers.
+    if (url.pathname.startsWith('/models/') && !newHeaders.has('Cache-Control')) {
+      newHeaders.set('Cache-Control', 'public, max-age=604800');
+    }
 
     // 2. Homepage Link headers + Content-Signal + Vary: Accept
     if (isHomepage) {
