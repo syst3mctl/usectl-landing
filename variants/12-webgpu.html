@@ -6,11 +6,22 @@
     <meta name="description" content="Every project gets a machine: a private slice of a real server, with its own Postgres, Redis, S3 and domain. One command to deploy. One flat price.">
     <meta name="robots" content="noindex, follow">
 
-    <!-- earlier tls handshakes for the font files and the three.js cdn scripts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <!-- jsdelivr: the phone swiper still loads from it lazily. cdnjs is
+         GONE from this page (round 40 vendored the r128 swap set) and the
+         fonts are self-hosted below, so those handshakes died with them. -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <style>
+  /* self-hosted google font slices (round 48): the stylesheet request
+     was the page's only render-blocking third-party — 4 serial round
+     trips before the veil could paint on a cold cell link. same glyph
+     files, now same-origin under /assets/ (sw + edge cached); weight
+     ranges cover every use (the root's old 800 request was silently
+     ignored by google — these families top out at 700). */
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 500;font-display:swap;src:url(/assets/fonts/jetbrains-mono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 500;font-display:swap;src:url(/assets/fonts/jetbrains-mono-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+  @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:400 700;font-display:swap;src:url(/assets/fonts/space-grotesk-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+  @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:400 700;font-display:swap;src:url(/assets/fonts/space-grotesk-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+</style>
     <link rel="stylesheet" href="/commercial/gsap/commercial.css">
     <!-- start the model downloads in parallel with the script tags below;
          GLTFLoader's fetch then hits the http cache instead of the network.
@@ -3083,6 +3094,24 @@ window.__bootScene = async function(){
   var beautyTex = scenePass.getTextureNode();
   var vzTex = scenePass.getTextureNode('vz');
   var ntTex = scenePass.getTextureNode('nt');
+  // ── round-48 slim: vz/nt ride SINGLE channels ── every consumer reads
+  // .x only (the dof's viewZ, the tonemap's neon mask), yet both
+  // attachments carried full rgba16f — 24 bytes a sample across the
+  // chain where 11 do the same work: −67MB of targets on desktop ultra,
+  // −29MB off the phone's jetsam budget, and the same off every frame's
+  // tile-store traffic. post-creation format mutation, the identical
+  // idiom to the depth-stencil upgrade above; MRTNode narrows each
+  // output to the attachment's component count on its own, and both
+  // targets carry NoBlending, so this is a one-time pipeline-key change
+  // the boot warm compiles like everything else. vz stays f16 (same
+  // precision, one channel); nt is a 0..1 mask where u8's 1/255 steps
+  // sit far beneath the shipped grain.
+  scenePass.getTexture('vz').format = THREE.RedFormat;
+  (function(){
+    var ntT = scenePass.getTexture('nt');
+    ntT.format = THREE.RedFormat;
+    ntT.type = THREE.UnsignedByteType;
+  })();
   // the neon marker: merged over the pass mrt for just that material
   var NOTM_MRT = TSL.mrt({ nt: v4_(TSL.output.a) });
   function noTM(m){ m.toneMapped = false; m.mrtNode = NOTM_MRT; return m; }
@@ -3366,7 +3395,23 @@ window.__bootScene = async function(){
   // shot that shows them the camera is on the rack with nothing in
   // front, so nothing changes on screen. the composite still alpha-overs
   // them AFTER bloom, so the deep mips never see the pure-white type.
-  var platePassNode = TSL.pass(plateScene, camera);
+  // round 48: NO depth buffer — the plates never test against anything
+  // (each shot that shows them has the camera on the rack with a clear
+  // line to both), and the pass's chain-res depth texture was allocated,
+  // cleared every live frame, and never sampled by anyone. −20.7MB and
+  // one full-res clear+store per frame. the color target also drops
+  // f16 → u8 below: the plates are white type composited by alpha-over,
+  // 8 bits is their native precision.
+  var platePassNode = TSL.pass(plateScene, camera, {depthBuffer: false});
+  (function(){
+    var pps = platePassNode.setup;
+    platePassNode.setup = function(builder){
+      var out = pps.call(this, builder);
+      var t = this.renderTarget && this.renderTarget.texture;
+      if (t && t.type !== THREE.UnsignedByteType) t.type = THREE.UnsignedByteType;
+      return out;
+    };
+  })();
   var plateTex = platePassNode.getTextureNode();
   var platePass = {enabled: false, clear: false};   // the driver's switch; the pass itself renders an empty scene when the plates hide
   var gammaPass = {enabled: true};                  // gamma is a node in the chain now
