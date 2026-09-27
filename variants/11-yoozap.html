@@ -33,19 +33,29 @@
          pulls a byte of the desktop geometry. the props keep one url —
          their two sets are byte-identical -->
     <script>
-    // the two heavies preload as their .glb.gz siblings when the page can
-    // inflate them (DecompressionStream — see the loader wrapper): the
-    // phone city is 4.6MB -> 3.56MB on the wire, no server change needed.
-    // the phone set condition mirrors SMALL_ASSETS in the scene script.
+    // the two heavies preload as their compressed siblings when the page
+    // can inflate them (DecompressionStream — see the loader wrapper): the
+    // phone city is 4.6MB -> 3.2MB on the wire, no server change needed.
+    // THE ONE PICKER: __mdlExt is decided here, in the first script that
+    // runs, and the props injector + loader wrapper READ it — every
+    // preload href and loader fetch must carry the SAME extension or the
+    // preloads double-pay. '.br' (safari 18.4+) beats '.gz' (chrome);
+    // tools/compress-models.sh emits BOTH siblings for every .glb. the
+    // phone set condition mirrors SMALL_ASSETS in the scene script.
     (function(){
-      var gz = typeof DecompressionStream !== 'undefined' ? '.gz' : '';
+      window.__mdlExt = (function(){
+        try { new DecompressionStream('brotli'); return '.br'; } catch(e){}
+        try { new DecompressionStream('gzip'); return '.gz'; } catch(e){}
+        return '';
+      })();
+      var ext = window.__mdlExt;
       var small = window.innerWidth <= 767 || (matchMedia('(pointer: coarse)').matches &&
         Math.min(screen.width || 9999, screen.height || 9999) <= 1024);   // orientation-stable, mirrors SMALL_ASSETS
       var dir = small ? '/models/m/' : '/models/';
       ['virtual-city', 'server_racking_system'].forEach(function(n){
         var l = document.createElement('link');
         l.rel = 'preload'; l.as = 'fetch'; l.crossOrigin = 'anonymous';
-        l.href = dir + n + '.glb' + gz;
+        l.href = dir + n + '.glb' + ext;
         document.head.appendChild(l);
       });
     })();
@@ -62,16 +72,23 @@
          (unsupported in older browsers, where it is ignored — i.e. exactly
          the behaviour this line had before.) -->
     <script>
-    // same .gz trick for the props (see above) — the urls must match the
-    // loader wrapper's fetches byte-for-byte or the preloads double-pay.
+    // same compressed-sibling trick for the props (see above) — the urls
+    // must match the loader wrapper's fetches byte-for-byte or the
+    // preloads double-pay, so this READS the head injector's __mdlExt
+    // (the inline probe is only a belt for the impossible case of the
+    // head script not having run).
     (function(){
-      var gz = typeof DecompressionStream !== 'undefined' ? '.gz' : '';
-      ['/models/pcb.glb', '/models/_orig/calculator.glb', '/models/laptop.glb',
+      var ext = window.__mdlExt != null ? window.__mdlExt : (function(){
+        try { new DecompressionStream('brotli'); return '.br'; } catch(e){}
+        try { new DecompressionStream('gzip'); return '.gz'; } catch(e){}
+        return '';
+      })();
+      ['/models/pcb.glb', '/models/_orig/calculator.glb', '/models/_orig/laptop.glb',
        '/models/qblock.glb', '/models/door.glb', '/models/terminal.glb',
        '/models/card.glb'].forEach(function(href){
         var l = document.createElement('link');
         l.rel = 'preload'; l.as = 'fetch'; l.crossOrigin = 'anonymous';
-        l.setAttribute('fetchpriority', 'low'); l.href = href + gz;
+        l.setAttribute('fetchpriority', 'low'); l.href = href + ext;
         document.head.appendChild(l);
       });
     })();
@@ -3083,33 +3100,46 @@
     Math.min(screen.width || 9999, screen.height || 9999) <= 1024);   // min-DIMENSION: same set whichever way the tablet is held
   (function(){
     var _load = loader.load.bind(loader);
-    // ...and the .gz sibling, inflated in the PAGE (the host serves .glb
-    // raw): tools/compress-models.sh ships a .glb.gz next to every model;
-    // DecompressionStream inflates it here in tens of ms. manager
-    // bookkeeping mirrors GLTFLoader.load (itemStart sync, onLoad BEFORE
-    // itemEnd) so the veil's queue drain sees the same story. any failure
-    // falls back to the raw url.
-    var CAN_GZ = typeof DecompressionStream !== 'undefined';
+    // ...and the compressed sibling, inflated in the PAGE (the host serves
+    // .glb raw): tools/compress-models.sh ships .glb.gz AND .glb.br next
+    // to every model; DecompressionStream inflates the fetch here in tens
+    // of ms. the extension comes from __mdlExt — the ONE picker in the
+    // head injector — so these fetches hit the exact urls the preloads
+    // already warmed. manager bookkeeping mirrors GLTFLoader.load
+    // (itemStart sync, onLoad BEFORE itemEnd) so the veil's queue drain
+    // sees the same story. any failure falls back to the raw url.
+    var EXT = window.__mdlExt != null ? window.__mdlExt : (function(){
+      try { new DecompressionStream('brotli'); return '.br'; } catch(e){}
+      try { new DecompressionStream('gzip'); return '.gz'; } catch(e){}
+      return '';
+    })();
     loader.load = function(url, onLoad, onProgress, onError){
       if (SMALL_ASSETS && (url === '/models/virtual-city.glb' || url === '/models/server_racking_system.glb')){
         url = '/models/m' + url.slice('/models'.length);
       }
-      if (!CAN_GZ || !/\.glb$/.test(url)) return _load(url, onLoad, onProgress, onError);
+      if (!EXT || !/\.glb$/.test(url)) return _load(url, onLoad, onProgress, onError);
       var mgr = loader.manager || THREE.DefaultLoadingManager;
       mgr.itemStart(url);
-      fetch(url + '.gz', {credentials: 'same-origin'}).then(function(res){
-        if (!res.ok) throw new Error('gz http ' + res.status);
+      fetch(url + EXT, {credentials: 'same-origin'}).then(function(res){
+        if (!res.ok) throw new Error(EXT + ' http ' + res.status);
         return res.arrayBuffer();
       }).then(function(buf){
         // SNIFF, don't trust headers: a dev server (vite) marks .gz files
         // Content-Encoding: gzip and the browser hands this fetch the
-        // DECODED bytes; production nginx hands the raw gzip stream. the
-        // magic bytes say which arrived — 1f 8b means inflate it here.
-        var u8 = new Uint8Array(buf, 0, 2);
+        // DECODED bytes; production nginx hands the raw compressed stream.
+        // the first 4 bytes say which arrived — 'glTF' means the payload
+        // is already a decoded glb, 1f 8b means gzip. raw brotli has NO
+        // magic, so it is what remains when the fetched extension was
+        // '.br'; anything else throws into the raw-url fallback below.
+        var u8 = new Uint8Array(buf, 0, 4);
+        if (u8[0] === 0x67 && u8[1] === 0x6C && u8[2] === 0x54 && u8[3] === 0x46) return buf;   // 'glTF'
         if (u8[0] === 0x1f && u8[1] === 0x8b){
           return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
         }
-        return buf;
+        if (EXT === '.br'){
+          return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('brotli'))).arrayBuffer();
+        }
+        throw new Error('unrecognized ' + EXT + ' payload');
       }).then(function(buf){
         loader.parse(buf, THREE.LoaderUtils.extractUrlBase(url), function(g){
           onLoad(g);
@@ -7847,7 +7877,7 @@
       // face it with a three-quarter twist like the calculator. faded on
       // the agents window — the whole entrance happens under the addons
       // cover, so it is simply THERE when the radial returns.
-      loader.load('/models/laptop.glb', function(lg){
+      loader.load('/models/_orig/laptop.glb', function(lg){
         // the DOM has typed JetBrains Mono since page one, so by glb time
         // the face is almost always in — every fonts.ready repaint below
         // (terminal, slider plates, hologram bands) is skipped unless the
@@ -11337,9 +11367,12 @@
    the addon board's free-slide row and 'who it is for'. it is only ever
    requested at the ≤767 rung, by whichever row mounts first; the second
    one gets the same load. cb(null) = it never arrived, and the caller
-   falls back to a native scroller (.no-swiper in the sheet). */
+   falls back to a native scroller (.no-swiper in the sheet). self-hosted
+   (swiper@11.2.10 vendored to public/vendor/swiper/); the jsdelivr
+   preconnect up top stays for the r128 example scripts this page still
+   pulls on direct visits. */
 (function(){
-  var URL = 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js';
+  var URL = '/vendor/swiper/swiper-bundle.min.js';
   var queue = null;
   window.__loadSwiper = function(cb){
     if (window.Swiper){ cb(window.Swiper); return; }

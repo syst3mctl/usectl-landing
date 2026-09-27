@@ -24,7 +24,7 @@
  * startup serialized in front of every revisit's HTML. enable() runs
  * the request in parallel; the navigate branch consumes preloadResponse.
  */
-var MV = 'usectl-models-v3';   /* v3: first split-bucket generation (holds what usectl-v2 held) */
+var MV = 'usectl-models-v4';   /* v4: the laptop went KTX2 — same url, new bytes; v3 caches hold the webp one */
 var SV = 'usectl-static-v1';
 var MODELS = /^\/models\//;
 var STATIC = /^\/(vendor|draco|basis|assets|commercial)\//;
