@@ -39,7 +39,8 @@
     // the phone set condition mirrors SMALL_ASSETS in the scene script.
     (function(){
       var gz = typeof DecompressionStream !== 'undefined' ? '.gz' : '';
-      var small = matchMedia('(max-width: 767px), (max-width: 1024px) and (pointer: coarse)').matches;
+      var small = window.innerWidth <= 767 || (matchMedia('(pointer: coarse)').matches &&
+        Math.min(screen.width || 9999, screen.height || 9999) <= 1024);   // orientation-stable, mirrors SMALL_ASSETS
       var dir = small ? '/models/m/' : '/models/';
       ['virtual-city', 'server_racking_system'].forEach(function(n){
         var l = document.createElement('link');
@@ -3078,7 +3079,8 @@
   // installed BEFORE the texture governor's, so its rewrite runs inside
   // the governor's call and both compose.
   var SMALL_ASSETS = window.innerWidth <= 767 || !!(window.matchMedia &&
-    matchMedia('(pointer: coarse)').matches && window.innerWidth <= 1024);
+    matchMedia('(pointer: coarse)').matches &&
+    Math.min(screen.width || 9999, screen.height || 9999) <= 1024);   // min-DIMENSION: same set whichever way the tablet is held
   (function(){
     var _load = loader.load.bind(loader);
     // ...and the .gz sibling, inflated in the PAGE (the host serves .glb

@@ -41,7 +41,8 @@
     // static tags started them.
     (function(){
       var gz = typeof DecompressionStream !== 'undefined' ? '.gz' : '';
-      var small = matchMedia('(max-width: 767px), (max-width: 1024px) and (pointer: coarse)').matches;
+      var small = window.innerWidth <= 767 || (matchMedia('(pointer: coarse)').matches &&
+        Math.min(screen.width || 9999, screen.height || 9999) <= 1024);   // orientation-stable, mirrors SMALL_ASSETS
       var dir = small ? '/models/m/' : '/models/';
       window.__gzModels = !!gz;
       ['virtual-city', 'server_racking_system'].forEach(function(n){
@@ -2195,8 +2196,21 @@ window.__bootScene = async function(){
   // model preloads matter, and never awaited — the first visit populates
   // the cache in passing, only later visits feel it.
   try { if ('serviceWorker' in navigator && !/[?&]nosw/.test(location.search || '')) navigator.serviceWorker.register('/sw.js'); } catch(swE){}
+  // ...and ask the browser to PERSIST that cache: without this it is
+  // best-effort storage — safari wipes it after 7 days without a visit
+  // and any browser may evict it under disk pressure, which silently
+  // re-runs the whole first-visit download. fire-and-forget; browsers
+  // that prompt or refuse just stay best-effort.
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){}); } catch(spE){}
   var FORCE_GL = /[?&]gpu=(0|gl|webgl)/i.test(location.search || '');
   var MOBILE = window.innerWidth <= 767;   // needed HERE for the backend handoff — `var` hoists the name, not the value, and the old declaration sat 100 lines below the check that read it
+  // THE IPAD BRANCH (round 48, the audit's critic): every gate used to
+  // call an ipad a desktop — ULTRA chain 2.0, uncapped dpr, untamed
+  // textures = ~420MB of render targets on an ipad pro 13, 2.6× the
+  // budget this page enforces on iPhones under the SAME os and jetsam
+  // policy. a coarse PRIMARY pointer on a >767px viewport is a tablet
+  // (touch-screen laptops report a fine primary pointer and stay desktop).
+  var TABLET = !MOBILE && !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
   // ── EVERY MOBILE GETS ITS BEST PATH ── a phone WITH webgpu rides this
   // page as designed. a phone WITHOUT it (old ios, budget android) would
   // land on the r186 webgl2 compatibility backend — which was MEASURED
@@ -2231,7 +2245,13 @@ window.__bootScene = async function(){
       return false;   // the rung-1 webgl2 cap below is the last resort
     }
   }
-  if (MOBILE && !FORCE_GL){
+  // TABLETS TOO (round 48): the ipad simulator demonstrated the audit's
+  // third catch live — no webgpu on the tablet meant the r186 webgl2
+  // backend, whose KTX2 uploads then SEGFAULTED WebKit's ANGLE-Metal GPU
+  // process (glCompressedSubImage -> UploadTextureContents -> memmove,
+  // two identical crash logs). v11 loads the _orig webp props — no
+  // compressed uploads, no crash path, and it is the tuned WebGL build.
+  if ((MOBILE || TABLET) && !FORCE_GL){
     var gpuOk = false;
     try { if (navigator.gpu) gpuOk = !!(await navigator.gpu.requestAdapter()); } catch(ge){}
     if (!gpuOk && await swapToNativeBuild('no webgpu adapter on mobile')) return;
@@ -2244,7 +2264,7 @@ window.__bootScene = async function(){
   // returns something) and three still landed on webgl2 — device request
   // failed inside init. the first probe merely saves a renderer boot when
   // it can; THIS one is the decision that counts, whatever path led here.
-  if (MOBILE && !FORCE_GL && window.__gpuBackend !== 'webgpu'){
+  if ((MOBILE || TABLET) && !FORCE_GL && window.__gpuBackend !== 'webgpu'){
     if (await swapToNativeBuild('webgl2 backend on mobile')) return;
   }
   console.info('[12-webgpu] backend: ' + window.__gpuBackend);
@@ -2253,7 +2273,8 @@ window.__bootScene = async function(){
   // head's comment explains why these are not static tags). one set only,
   // picked by the same condition as MODEL_DIR below.
   (function(){
-    var sm = MOBILE || !!(window.matchMedia && matchMedia('(pointer: coarse)').matches && window.innerWidth <= 1024);
+    var sm = MOBILE || !!(window.matchMedia && matchMedia('(pointer: coarse)').matches &&
+      Math.min(screen.width || 9999, screen.height || 9999) <= 1024);   // orientation-stable, mirrors SMALL_ASSETS
     var dir = sm ? '/models/m/' : '/models/';
     var gz = (typeof DecompressionStream !== 'undefined') ? '.gz' : '';   // must mirror the loader wrapper's choice
     var names = ['pcb', 'calculator', 'laptop', 'qblock', 'door', 'terminal', 'card', 'sci-fi_control_panel'];
@@ -2403,6 +2424,10 @@ window.__bootScene = async function(){
     (function(){
       var cssPx = Math.max(1, (window.innerWidth || 1) * (window.innerHeight || 1));
       Q[3].dpr = Math.max(2, Math.min(window.devicePixelRatio || 1, Math.sqrt(2.2e6 / cssPx)));
+      // tablets ride the desktop rung (2) but with a PIXEL BUDGET like the
+      // phone ultra above — ~4M canvas px (more than a phone's 2.2M, far
+      // less than the unbounded desktop grant an ipad pro was getting).
+      if (TABLET) Q[2].dpr = Math.max(1.5, Math.min(window.devicePixelRatio || 1, Math.sqrt(4e6 / cssPx)));
     })();
     var M = {tier: 2, k: Q[2], mobile: MOBILE, forced: false, booted: false,
              ceil: 2, why: 'desktop', gpu: '', cores: 0, mem: 0, panel: 0};
@@ -2867,6 +2892,7 @@ window.__bootScene = async function(){
       // that can't hold it within its first ride
       ULTRA_CAP = 2.0;
       if (dPanel >= 8.3e6) ULTRA_CAP = 1.5;   // 4k-class panel: the fill is the budget even now
+      if (TABLET) ULTRA_CAP = 1.5;            // ipad: desktop-class silicon, iPhone-class memory police
     }
     try {
       var dAd = renderer.backend && renderer.backend.adapter && renderer.backend.adapter.info;
@@ -4545,7 +4571,8 @@ window.__bootScene = async function(){
   // pairs in the head carry the SAME condition, so a device downloads one
   // set and only one.
   var SMALL_ASSETS = MOBILE || !!(window.matchMedia &&
-    matchMedia('(pointer: coarse)').matches && window.innerWidth <= 1024);
+    matchMedia('(pointer: coarse)').matches &&
+    Math.min(screen.width || 9999, screen.height || 9999) <= 1024);   // min-DIMENSION: same set whichever way the tablet is held
   var MODEL_DIR = SMALL_ASSETS ? '/models/m/' : '/models/';
   (function(){
     var _load = loader.load.bind(loader);
@@ -4624,7 +4651,7 @@ window.__bootScene = async function(){
   //   gpu right here in the load callback, behind the boot veil, so a
   //   scroll reveal uploads NOTHING and the spike cannot exist.
   // desktop and ipad pass through byte-identical.
-  if (MOBILE) (function(){
+  if (MOBILE || TABLET) (function(){
     var tameSeen = {};
     function tameTextures(root, url){
       // 1024 on rung 2 was set before the phone's bill was measured. it is
@@ -4646,7 +4673,8 @@ window.__bootScene = async function(){
       // against the generic 768/512/384: ~+38MB at ultra, ~+18MB at rung
       // 2, both far under the 552MB jetsam line the caps were built for.
       var closeUp = /laptop|sci-fi_control_panel|terminal/.test(url || '');
-      var cap = MQ.tier >= 3 ? (closeUp ? 1536 : 768)
+      var cap = TABLET ? (closeUp ? 2048 : 1024)   // ipad: close-ups full, sheets tamed
+              : MQ.tier >= 3 ? (closeUp ? 1536 : 768)
               : (MQ.tier >= 2 ? (closeUp ? 1024 : 512)
               : (closeUp ? 512 : 384));
       root.traverse(function(o){

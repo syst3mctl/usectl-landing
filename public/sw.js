@@ -1,33 +1,55 @@
 /* usectl landing service worker — the revisit killer.
  *
- * WHAT IT DOES: the first visit downloads ~13MB (phone) / ~18MB (desktop)
+ * WHAT IT DOES: the first visit downloads ~7MB (phone) / ~9MB (desktop)
  * of models plus the hashed bundles; without this file every RETURN visit
  * pays whatever the host's cache headers allow it to re-ask for. with it,
  * everything heavy is served from the on-disk Cache Storage in ~0ms and
  * the site works offline after one visit.
  *
- * STRATEGY, by path:
- *   /models/ /vendor/ /draco/ /basis/  → cache-first. immutable in
- *     practice; when one changes, bump VERSION below (the deploy ships a
- *     new sw.js, the browser installs it, activate() drops the old cache
- *     and the next fetch repopulates).
- *   /assets/               → cache-first. vite content-hashes these names.
- *   documents (.html, /)   → network-first, cache fallback: updates land
- *     on the next load, and a dead network still gets the last version.
+ * STRATEGY, by path — TWO buckets since round 48, because one bucket
+ * meant every MODEL bump also re-downloaded ~2.2MB of decoders, vendor
+ * scripts and hashed bundles that had not changed at all:
+ *   /models/               → MODELS bucket, cache-first. bump MV below
+ *     whenever public/models content changes (tools/mobile-assets.sh
+ *     reminds about it).
+ *   /vendor/ /draco/ /basis/ /assets/ /commercial/ + /assets/fonts/
+ *                          → STATIC bucket, cache-first. bump SV only
+ *     when THOSE change (vendored libs, decoders, fonts).
+ *   documents (.html, /)   → network-first, cache fallback, in the
+ *     MODELS bucket (they change with deploys anyway).
  *   everything else        → straight through.
  *
- * BUMP VERSION WHENEVER public/models OR public/vendor CONTENT CHANGES
- * (tools/mobile-assets.sh reminds about it).
+ * NAVIGATION PRELOAD (round 48): without it the browser boots this
+ * worker BEFORE the document fetch may start — 50-300ms of cold SW
+ * startup serialized in front of every revisit's HTML. enable() runs
+ * the request in parallel; the navigate branch consumes preloadResponse.
  */
-var VERSION = 'usectl-v2';   /* v2: the model diet (dedup + dead-UV prune + wire cut) — v1 caches hold the fat files */
-var HEAVY = /^\/(models|vendor|draco|basis|assets|commercial)\//;
+var MV = 'usectl-models-v3';   /* v3: first split-bucket generation (holds what usectl-v2 held) */
+var SV = 'usectl-static-v1';
+var MODELS = /^\/models\//;
+var STATIC = /^\/(vendor|draco|basis|assets|commercial)\//;
 
 self.addEventListener('install', function(e){ self.skipWaiting(); });
 self.addEventListener('activate', function(e){
-  e.waitUntil(caches.keys().then(function(keys){
-    return Promise.all(keys.filter(function(k){ return k !== VERSION; }).map(function(k){ return caches.delete(k); }));
-  }).then(function(){ return self.clients.claim(); }));
+  e.waitUntil(Promise.all([
+    caches.keys().then(function(keys){
+      return Promise.all(keys.filter(function(k){ return k !== MV && k !== SV; }).map(function(k){ return caches.delete(k); }));
+    }),
+    self.registration.navigationPreload ? self.registration.navigationPreload.enable() : Promise.resolve()
+  ]).then(function(){ return self.clients.claim(); }));
 });
+
+function cacheFirst(bucket, req){
+  return caches.open(bucket).then(function(c){
+    return c.match(req).then(function(hit){
+      if (hit) return hit;
+      return fetch(req).then(function(res){
+        if (res && res.ok) c.put(req, res.clone());
+        return res;
+      });
+    });
+  });
+}
 
 self.addEventListener('fetch', function(e){
   var req = e.request;
@@ -35,24 +57,17 @@ self.addEventListener('fetch', function(e){
   var url = new URL(req.url);
   if (url.origin !== location.origin) return;   // cdn/gtag pass through untouched
 
-  if (HEAVY.test(url.pathname)){
-    // cache-first: a hit costs ~0ms and no bytes; a miss populates
-    e.respondWith(caches.open(VERSION).then(function(c){
-      return c.match(req).then(function(hit){
-        if (hit) return hit;
-        return fetch(req).then(function(res){
-          if (res && res.ok) c.put(req, res.clone());
-          return res;
-        });
-      });
-    }));
-    return;
-  }
+  if (MODELS.test(url.pathname)){ e.respondWith(cacheFirst(MV, req)); return; }
+  if (STATIC.test(url.pathname)){ e.respondWith(cacheFirst(SV, req)); return; }
 
   if (req.mode === 'navigate' || /\.html$/.test(url.pathname)){
-    // network-first: fresh html when online, last-known html when not
-    e.respondWith(caches.open(VERSION).then(function(c){
-      return fetch(req).then(function(res){
+    // network-first: fresh html when online, last-known html when not.
+    // preloadResponse is that same network request already in flight.
+    e.respondWith(caches.open(MV).then(function(c){
+      var net = e.preloadResponse
+        ? e.preloadResponse.then(function(pre){ return pre || fetch(req); })
+        : fetch(req);
+      return net.then(function(res){
         if (res && res.ok) c.put(req, res.clone());
         return res;
       }).catch(function(){ return c.match(req); });
