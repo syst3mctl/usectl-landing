@@ -3977,6 +3977,29 @@ window.__bootScene = async function(){
     resize();          // realloc the chain at the new supersample
     bokehStamp++;      // the depth target was reallocated: force a re-render
   }
+  // ── THE WARM RESOLUTION FLOOR ── ("i need u load data, but we need
+  // optimization"): every behind-veil warm renders the REAL presenting
+  // chain — that is what makes its compiled pipelines the ride's own
+  // (offscreen warms build a parallel set; see the __warmY intercept) —
+  // but webgpu pipelines key on formats and sample counts, NEVER on
+  // size: the live chain governor has stepped CHAIN_RES up and down for
+  // rounds without a single recompile, and bloom's mips sit at css size
+  // untouched by the chain. so the warm was paying for pixels nobody
+  // sees: while the veil stands the chain drops to a floor and every
+  // warm frame costs a fraction, compiling the identical pipeline set.
+  // restored before anything presents (completion, abort, handback,
+  // deferred launch — and liftVeil as the belt).
+  var warmResSave = -1;
+  function warmResOn(){
+    if (warmResSave >= 0 || window.__veilDown) return;
+    warmResSave = CHAIN_RES;
+    setChainRes(Math.min(CHAIN_RES, 0.5));
+  }
+  function warmResOff(){
+    if (warmResSave < 0) return;
+    var r = warmResSave; warmResSave = -1;
+    if (CHAIN_RES < r) setChainRes(r);
+  }
 
   // no adaptive resolution: it stepped the pixel ratio down under the
   // ghost-state load and the rack/city went visibly soft. full device
@@ -4002,6 +4025,7 @@ window.__bootScene = async function(){
     // then show it"). a 16s net backstops a warm that runs long.
     function liftVeil(){
       if (veilLifted) return;
+      try { warmResOff(); } catch(wre){}
       if (warmSweepStarted && !warmKill) try { warmDone(); } catch(wde){}   // a COMPLETED warm; a killed or skipped one must not fast-path the next visit
       veilLifted = true; window.__veilDown = true;
       try { if (MQ.bootMark) MQ.bootMark(); } catch(e){}   // the ride starts NOW, not at load
@@ -4047,6 +4071,7 @@ window.__bootScene = async function(){
       try {
         if (!warmed && rackRoot && cityMats.length){
           warmed = true; warmedNow = true;
+          warmResOn();   // the warm resolution floor — restored before anything presents
           // 1) EVERY HIDDEN PROP, IN BATCHES: the load-site warms only
           // drew what was visible at load, so every hidden prop's
           // textures and pipelines were still waiting for its section
@@ -4271,15 +4296,15 @@ window.__bootScene = async function(){
               // compile like v11 always has.
             } else if (!/[?&]tail=0/.test(location.search) && (!MOBILE || warmFast || /[?&]tail=1/.test(location.search))){
               // PHONES SKIP THE TAIL ON THE FIRST VISIT ("i need just
-              // loading be faster in mobile"): the deep-page walk is ~2.4s
-              // of a phone's veil, and rounds 35-41 killed the worst deep
-              // stalls at their sources (load-site warms, the parade, the
-              // pcb dive, the canvas pre-paints) — what the tail still
-              // buys is the milder combo class, measured below 150ms. a
-              // REVISIT runs the tail as always (warmFast, single-draw,
-              // behind a short veil), so a device converges to full
-              // coverage from its second load. desktop keeps the tail
-              // every visit — its veil is seconds, not fifteen.
+              // loading be faster in mobile") — even at the warm floor the
+              // tail is +1.6s of a phone's boot (its warm frames are
+              // cpu-bound, so the floor buys less there), and rounds 35-41
+              // warm the deep page at its sources; the measured first-ride
+              // cost is single-frame 41-69ms blips, zero over 100ms. a
+              // REVISIT runs the tail (warmFast, single-draw) and the
+              // device converges to full coverage from its second load.
+              // desktop runs the full tail every visit — at the floor it
+              // is cheap, and its ride stays at ~a dozen late compiles.
               var maxY = Math.max(band1, (document.documentElement.scrollHeight || 0) - window.innerHeight);
               var TAIL_STEPS = Math.min(warmParam('warmtail', 48), Math.ceil((maxY - band1) / 150));
               for (s = 1; s <= TAIL_STEPS; s++){ y = band1 + (maxY - band1) * s / TAIL_STEPS; seq.push(y); if (!warmFast) seq.push(y); }
@@ -4297,6 +4322,7 @@ window.__bootScene = async function(){
               // ride off __warmY — their scroll would do nothing. hand
               // everything back at once and finish the warm later.
               if (window.__veilDown && !veilLifted){
+                warmResOff();
                 window.__warmY = null; scrubScene = -1;
                 bootSnap = performance.now() + 400; coverJump = true;
                 frameDirtyFlag = true; frameCacheValid = false;
@@ -4315,6 +4341,7 @@ window.__bootScene = async function(){
                 // scrubScene -1 re-arms the scene gate's outer change-guard
                 // so applyScene fires for wherever they actually stand —
                 // the exact trap the state warm's own comment warns about.
+                warmResOff();
                 window.__warmY = null;
                 scrubScene = -1;
                 // the tail sweep RIDES THE RADIAL (gradQ walked, gradQ2
@@ -4354,6 +4381,7 @@ window.__bootScene = async function(){
                 // settled hero is what actually paints, then lift it. THIS
                 // is "load the whole site, THEN show it".
                 window.__warmY = null;
+                warmResOff();   // full res back BEFORE the bundle re-record and the settle frames
                 // two LIVE-path frames at the reveal end, under the veil —
                 // WITH a forced city-bundle re-record: the ghost-state
                 // bundle otherwise records for the first time on the
@@ -4429,6 +4457,7 @@ window.__bootScene = async function(){
               // THE TOP (the sweep's settled-hero tail is exactly right
               // there) and run it then; until that happens the reveal
               // stays the old cold path, no worse than before.
+              warmResOff();   // the sweep will run post-veil, at full res
               armDeferredSweep();
               return;
             }
@@ -6985,7 +7014,7 @@ window.__bootScene = async function(){
     if (adNode){
       var adTop = adNode.getBoundingClientRect().top + window.pageYOffset;
       addonsMidY = adTop + adNode.offsetHeight * 0.5 - VH * 0.5;
-      setChainRes((window.pageYOffset || 0) > addonsMidY ? CHAIN_LAP : CHAIN_HI);
+      if (warmResSave < 0) setChainRes((window.pageYOffset || 0) > addonsMidY ? CHAIN_LAP : CHAIN_HI);
     }
   }
   window.addEventListener('resize', measureScrub);
@@ -10743,7 +10772,7 @@ window.__bootScene = async function(){
       coverJump = true;
       // the invisible moment: while the frame is pure gray, flip the
       // chain's supersample for the side of the cover we are on
-      if (addonsMidY >= 0) setChainRes((window.pageYOffset || 0) > addonsMidY ? CHAIN_LAP : CHAIN_HI);
+      if (addonsMidY >= 0 && warmResSave < 0) setChainRes((window.pageYOffset || 0) > addonsMidY ? CHAIN_LAP : CHAIN_HI);
       return;
     }
     dbgDt += (dt - dbgDt) * 0.05;
