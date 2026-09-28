@@ -1374,7 +1374,21 @@
   // depth. a real #anchor in the url still navigates — only the restored
   // position is refused.
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  if (!location.hash) window.scrollTo(0, 0);
+  function __toHero(){ if (!location.hash) window.scrollTo(0, 0); }
+  __toHero();
+  // iOS SAFARI lands its async scroll restore AFTER this parse-time zero
+  // (measured signature: "scroll down, up, refresh" then the scroll-driven
+  // ride boots from the RESTORED depth and the radial/camera strand —
+  // "brokes my animations"). a one-shot scrollTo can't win that race, so
+  // re-zero on load and across the first frames until the ride takes over.
+  window.addEventListener('load', __toHero);
+  (function zero(n){ __toHero(); if (n < 10) requestAnimationFrame(function(){ zero(n + 1); }); })(0);
+  // BFCACHE: a webgpu page does NOT survive iOS Safari's back-forward
+  // cache — the restored page carries a DEAD gpu device and frozen
+  // scroll-driven state. persisted===true is ONLY a bfcache restore
+  // (never a normal refresh, which is persisted===false — so this adds
+  // no load to a refresh); reload once for a clean context.
+  window.addEventListener('pageshow', function(e){ if (e.persisted){ location.reload(); return; } __toHero(); });
 </script>
 <script>
   // the veil's pulse — the manager's GlitchLogo.tsx timing verbatim:
@@ -2939,7 +2953,25 @@ window.__bootScene = async function(){
   // the one that died and reload ONCE (session-guarded, so a device
   // that even fails rung 0 does not reload forever); the next boot
   // opens on the remembered rung via the probe's memory.
+  // ── THE UNLOADING GUARD (round 52) ── when the page navigates away —
+  // a REFRESH, a link, the tab closing — the browser tears down the gpu
+  // device, and device.lost fires ON THE OUTGOING PAGE. on chrome that
+  // teardown is reason 'destroyed' (gated below); on iOS SAFARI it is
+  // NOT 'destroyed' (measured: the round-49 gate is live and a refresh
+  // still double-loaded), so the reason gate alone missed it and the
+  // outgoing page ran MQ.remember(tier-1) [corrupting the remembered
+  // quality -> "brokes my animations"] AND location.reload() [a second
+  // load stacked on the refresh -> "refresh goes 2 times"]. once the
+  // page is leaving, a device loss is EXPECTED, never a crash: flag it
+  // and make ctxLost a no-op. (the visitor scrolling down-then-up primed
+  // it — the deeper the ride, the more gpu state to tear down.)
+  var __leaving = false;
+  var markLeaving = function(){ __leaving = true; };
+  window.addEventListener('pagehide', markLeaving);
+  window.addEventListener('beforeunload', markLeaving);
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden') __leaving = true; else __leaving = false; });
   function ctxLost(ev){
+    if (__leaving) return;   // teardown on nav/refresh/background — not a crash; do NOT demote or reload
     if (ev && ev.preventDefault) ev.preventDefault();
     try {
       MQ.remember(Math.max(0, MQ.tier - 1), true);   // hard: the probe honors this one untested

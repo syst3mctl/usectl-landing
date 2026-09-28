@@ -1391,7 +1391,11 @@
   // depth. a real #anchor in the url still navigates — only the restored
   // position is refused.
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  if (!location.hash) window.scrollTo(0, 0);
+  function __toHero(){ if (!location.hash) window.scrollTo(0, 0); }
+  __toHero();
+  window.addEventListener('load', __toHero);
+  (function zero(n){ __toHero(); if (n < 10) requestAnimationFrame(function(){ zero(n + 1); }); })(0);
+  window.addEventListener('pageshow', function(e){ if (e.persisted){ location.reload(); return; } __toHero(); });
 </script>
 <script>
   // the veil's pulse — the manager's GlitchLogo.tsx timing verbatim:
@@ -2434,7 +2438,17 @@
   // the one that died and reload ONCE (session-guarded, so a device
   // that even fails rung 0 does not reload forever); the next boot
   // opens on the remembered rung via the probe's memory.
+  // the unloading guard (round 52, same as v12): a REFRESH/nav tears down
+  // the gl context and fires webglcontextlost ON THE OUTGOING PAGE — that
+  // is teardown, not a crash, so demoting the remembered tier + reloading
+  // stacked a second load on the refresh and corrupted the quality. once
+  // the page is leaving, this handler is a no-op.
+  var __leaving11 = false;
+  window.addEventListener('pagehide', function(){ __leaving11 = true; });
+  window.addEventListener('beforeunload', function(){ __leaving11 = true; });
+  document.addEventListener('visibilitychange', function(){ __leaving11 = (document.visibilityState === 'hidden'); });
   canvas.addEventListener('webglcontextlost', function(ev){
+    if (__leaving11) return;
     ev.preventDefault();
     try {
       MQ.remember(Math.max(0, MQ.tier - 1), true);   // hard: the probe honors this one untested
