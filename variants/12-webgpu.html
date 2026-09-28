@@ -71,8 +71,9 @@
          download on exactly the slowest devices. still fetchpriority=low,
          still ahead of the loader chain's own requests by several seconds.
          draco stays static: BOTH paths decode the city/rack with it. -->
-    <link rel="preload" href="/draco/draco_decoder.wasm" as="fetch" crossorigin fetchpriority="low">
-    <link rel="preload" href="/draco/draco_wasm_wrapper.js" as="fetch" crossorigin fetchpriority="low">
+    <!-- the two draco preloads are GONE (2026-09-28 boot audit): chrome reported them
+         unused (sw cross-world mismatch) and the loader fetched both again ~150ms later
+         — a double download of ~290KB on every first visit for nothing. -->
 <style>
   :root{
     /* manager-usectl dark theme */
@@ -696,6 +697,12 @@
     box-sizing:border-box;pointer-events:none;
     border:1px solid var(--blue);border-radius:var(--radius-sm);
     background:var(--blue-soft);box-shadow:0 0 22px rgba(165,180,252,.18);
+    /* a wheel notch lands the scroll in one jump; the plate's box is
+       retargeted every frame, so this short ease turns that jump into
+       the same glide the rack's damped scrub makes of it. it only ever
+       plays while the plate WALKS — parked, its box is fixed in the grid
+       and scrolls with the page natively */
+    transition:transform .28s ease-out,height .28s ease-out;
   }
   /* the machine cards carry li lists now: the site's round blue dots
      do the marking, so the title drops its cube glyph; the title
@@ -1674,6 +1681,9 @@
     //   the rest of this card, the gap, and the rest of the next one
     //   (~170px of scroll on a 240px card), eased so it leaves and lands
     //   softly instead of jerking off the mark.
+    // the scene gets the same walk as window.__machProg and scrubs the
+    // rack's slide payloads and camera off it (see the slide state block
+    // in the loop) — the plate and the rack move as one thing.
     // per scroll frame this is ONE pageYOffset read and two style
     // writes on an absolutely positioned element with no children — no
     // layout read: the grid's page position and every card's box are
@@ -1701,6 +1711,10 @@
       var top = a.t + (b.t - a.t) * t, h = a.h + (b.h - a.h) * t;
       plate.style.transform = 'translate3d(0,' + top.toFixed(2) + 'px,0)';
       plate.style.height = h.toFixed(2) + 'px';
+      // the scene reads BOTH: the continuous index scrubs every slide
+      // state (payloads, door, camera) in step with the walk, the pick
+      // keeps the .on card and __machSlide in line with it
+      window.__machProg = p;
       window.__machPick(Math.round(p));
     }
     function measure(){
@@ -1714,7 +1728,7 @@
     function onScroll(){ if (plateOn && !pend){ pend = true; requestAnimationFrame(frame); } }
     function plateDriver(on){
       plateOn = on;
-      if (!on) return;   // the sheet hides the plate under 768; the listeners stay parked behind plateOn
+      if (!on){ window.__machProg = null; return; }   // the sheet hides the plate under 768; the listeners stay parked behind plateOn, and the scene falls back to its time ramps
       if (!plate){
         plate = document.createElement('div');
         plate.className = 'mach-plate';
@@ -2424,6 +2438,22 @@ window.__bootScene = async function(){
   try {
     var _pl = renderer._pipelines;
     if (_pl && typeof _pl._releasePipeline === 'function') _pl._releasePipeline = function(){};
+    // ...and the PROGRAMS and the NODE-BUILDER STATES with it (2026-09-28,
+    // with the flavor bump in applyCityDim): a flag flip now disposes
+    // every city render object of the outgoing flavor in one frame, so
+    // its builder state's usedTimes hits 0 (NodeManager.delete drops it
+    // from nodeBuilderCache) and its two programs' usedTimes hit 0
+    // (_releaseProgram drops them from programs.*). the re-created
+    // objects then REBUILD the TSL and get NEW ProgrammableStage ids —
+    // and the pipeline cache key is built from those ids, so the pinned
+    // pipelines above are orphaned and every crossing compiled ~180
+    // pipelines again (measured: 415 createRenderPipeline per ride,
+    // ~1s stalls at the split; with these two pins: single digits).
+    // programs are keyed by shader SOURCE and builder states by the
+    // render object's cache key, so held ones are found again exactly.
+    if (_pl && typeof _pl._releaseProgram === 'function') _pl._releaseProgram = function(){};
+    var _nm = renderer._nodes;
+    if (_nm && _nm.nodeBuilderCache instanceof Map) _nm.nodeBuilderCache.delete = function(){ return false; };
   } catch(e){}
   // the plate pass clears its color target to transparent black and the
   // main scene always has a background, so this global clear color only
@@ -3366,6 +3396,11 @@ window.__bootScene = async function(){
   // the racks (inside their screen rect AND nearer than them) while the
   // two-rack metal scene plays — the backdrop city stays
   var metalClearU = u_(0);
+  // the 'what you get' slider's hide (see machFrontNode + the drive in
+  // the loop): how far PAST the rack's back plane, in view-metres, a
+  // city fragment still counts as "in front" and goes, and the feather
+  // past that. console-tunable: window.__machFrontIn / __machFrontSoft
+  var MACH_FRONT_IN = 0.25, MACH_FRONT_SOFT = 1.0;
   var metalRectU = TSL.uniform(new THREE.Vector4(2, 2, 3, 3));   // screen-uv minX,minY,maxX,maxY — parked off-screen
   var metalNearU = TSL.uniform(1e6);   // fragments nearer than this many view-meters count as "in front"
   // the puller focuses the subject's NEAR FACE, not its origin: the
@@ -3420,6 +3455,44 @@ window.__bootScene = async function(){
     metalRectU.value.set(minX - 0.04, minY - 0.04, maxX + 0.04, maxY + 0.04);
     metalNearU.value = Math.max(0.1, near - 0.25);
     window.__mc = {q: metalClearU.value, rect: [+minX.toFixed(2), +minY.toFixed(2), +maxX.toFixed(2), +maxY.toFixed(2)], near: +metalNearU.value.toFixed(1)};
+  }
+  // the slider's depth feed: the rack's front in VIEW DEPTH — the least
+  // -z over the rack box's 8 corners (depth is linear over the box, so a
+  // corner holds the minimum) — not the euclidean nearest point the
+  // metal corridor uses: an oblique wall at the rack's own distance but
+  // off-axis has the smaller depth and counts as in front, which is the
+  // side the hide must err on. one rack (the slider's), 8 transforms
+  function machDepthSync(){
+    if (!rackRoot) return;
+    if (!mcBoxL){
+      var mwb = new THREE.Box3().setFromObject(rackRoot);
+      if (mwb.isEmpty()) return;
+      mcBoxL = mwb.applyMatrix4(new THREE.Matrix4().copy(rackRoot.matrixWorld).invert());
+    }
+    mcBoxW.copy(mcBoxL).applyMatrix4(rackRoot.matrixWorld);
+    var dMin = 1e9, dMax = -1e9;
+    for (var ci = 0; ci < 8; ci++){
+      mcVec.set(ci & 1 ? mcBoxW.max.x : mcBoxW.min.x,
+                ci & 2 ? mcBoxW.max.y : mcBoxW.min.y,
+                ci & 4 ? mcBoxW.max.z : mcBoxW.min.z).applyMatrix4(camera.matrixWorldInverse);
+      if (-mcVec.z < dMin) dMin = -mcVec.z;
+      if (-mcVec.z > dMax) dMax = -mcVec.z;
+    }
+    // the reference is the BACK of the rack's volume, not its front: the
+    // demolished annex's scaffolds and the carved block's walls stand
+    // around the rack at its own depth, and a front-face cut left them
+    // beside and through it ("u show this building in 1,2,4 slides...
+    // it must be hided in all slides"). up to the rack's back plane goes;
+    // the ghost city past it stays. __machFrontRef = 'front' for the cut
+    var dRef = window.__machFrontRef === 'front' ? dMin : dMax;
+    var fIn = window.__machFrontIn != null ? window.__machFrontIn : MACH_FRONT_IN;
+    var fSoft = Math.max(0.05, window.__machFrontSoft != null ? window.__machFrontSoft : MACH_FRONT_SOFT);
+    var dNext = Math.round((dRef + fIn) * 100) / 100;
+    if (dNext !== machDepthU.value || fSoft !== machSoftU.value){
+      machDepthU.value = dNext; machSoftU.value = fSoft;
+      frameDirtyFlag = true;   // the front moved: the cached frame is stale
+    }
+    window.__machFront = {q: machFrontU.value, depth: dNext, soft: fSoft};
   }
   // ULTRA depth-of-field: keep a GENTLE subject-focus cue but do NOT
   // smear the distant city ("far-from-center looks blurry"). the wide
@@ -3792,6 +3865,17 @@ window.__bootScene = async function(){
   // card change (measured ~950ms at the slides), becomes a plain
   // uniform write.
   var clipWraps = [];
+  // the CITY's two shared wrapper pairs (see the city loader): one context
+  // per plane set instead of one per mesh. ?clipshare=0 = per-mesh (A/B)
+  var CLIP_SHARE = !/[?&]clipshare=0/.test(location.search || '');
+  var cityClipBody = null, cityClipWire = null;
+  function feedSharedClip(gU, mm){
+    if (!gU || !mm) return;
+    var gI = gU.children[0];
+    var pl = mm.clippingPlanes, on = !!(pl && pl.length), inter = mm.clipIntersection === true, sh = mm.clipShadows === true;
+    feedClipGroup(gU, pl, on && !inter, sh);
+    feedClipGroup(gI, pl, on && inter, sh);
+  }
   function nearestGroupOrder(n){
     while (n){
       if (n.isGroup) return n.renderOrder;
@@ -3869,6 +3953,7 @@ window.__bootScene = async function(){
     }
     for (var i = 0; i < __clipScan.length; i++){
       var o = __clipScan[i];
+      if (o.__clipShared) continue;   // the city rides its shared pairs (fed below)
       var m = o.material;
       var mm = Array.isArray(m) ? m[0] : m;
       var pl = mm.clippingPlanes;
@@ -3881,6 +3966,16 @@ window.__bootScene = async function(){
         feedClipGroup(gU, pl, !!(pl && pl.length) && !inter, sh);
         feedClipGroup(gI, pl, !!(pl && pl.length) && inter, sh);
       }
+    }
+    if (cityClipBody || cityClipWire){
+      var bodyM = null, wireM = null;
+      for (var cm = 0; cm < cityMats.length; cm++){
+        var cmm = cityMats[cm];
+        if (cmm.name === 'Wire'){ if (!wireM) wireM = cmm; }
+        else if (!bodyM && (cmm.isMeshPhysicalMaterial || cmm.isMeshStandardMaterial)) bodyM = cmm;
+      }
+      feedSharedClip(cityClipBody, bodyM);
+      feedSharedClip(cityClipWire, wireM);
     }
   }
   // ── the pipeline warm bench (webgpu) ────────────────────────────
@@ -4387,8 +4482,8 @@ window.__bootScene = async function(){
             for (var k3 = 0; k3 < rack2Mats.length; k3++) rack2Mats[k3].transparent = r2T[k3];
             rackRoot2.visible = r2v;
           }
-          applyCityDim(1, 1);
           applyScene(m0);                      // the mode the ride owns, not a hardcoded hero
+          applyCityDim(1 - 0.9 * rackFade, 1 - rackFade);   // ...and the DIM the ride owns: a lit hand-back in scene 2 stuck until the fade next moved
           rackRoot.visible = rv;
           warmScenePass();                     // back on the live state
           // 3) the name plates live in the SEPARATE plate scene — the
@@ -5098,6 +5193,7 @@ window.__bootScene = async function(){
   // and the rack fades back to full — both on this one scrub
   var metalWin = {start: 0, end: 1, raw: 0, p: 0};
   var metalClearQ = 0;   // the metal clearing: 1 = ghost city fully hidden behind the two racks
+  var machFrontQ = 0;    // the slider's front hide: 1 = everything nearer than the rack's front gone
   // the rack's own fade-out window on the math panel: right after the
   // radial finishes crossing (leg done at top 70% vh), before the
   // calculator is fully up — between "too fast" and "too late"
@@ -5202,6 +5298,11 @@ window.__bootScene = async function(){
   // free cube's own front row. interaction-damped on the click,
   // gated in/out by the scroll like every slide payload.
   var s2P = 0, s2Show = 0, s2Cam = 0, s2LineQ = -1, slideAwayP = 0, s2Keep = null, s2WasUni = false, s2Hand = 1;
+  // the desktop scrub path (see the slide state block in the loop): the
+  // damped continuous slide index the plate driver publishes as
+  // window.__machProg (-1 = not tracking, snap to raw on the next frame),
+  // the last value it rendered, and the stage gate as a ramp of its own
+  var machProgP = -1, machProgPrev = -2, machGateP = 0;
   // MACH_SPEED — how fast EVERY slide state travels, in units per second,
   // one number for all of them so no card switches faster than another.
   // it is a LINEAR ramp, not the exponential damp this used to be, and
@@ -5635,6 +5736,26 @@ window.__bootScene = async function(){
     var mz = TSL.smoothstep(0.9, 1.6, w.z).mul(TSL.oneMinus(TSL.smoothstep(9.0, 10.8, w.z)));
     return tunU.mul(mx).mul(mz);
   })();
+  // machFrontNode: the 'what you get' slider hides EVERY city fragment
+  // that stands nearer the lens than the rack's BACK — the WHOLE frame,
+  // no screen rect ("hide it in slider What you get whole section"): the
+  // slider's lens is in the street, and the ghost blocks between it and
+  // the rack fill the frame well past the rack's silhouette. per fragment
+  // in view depth, so it is exactly the part in front — the backdrop past
+  // the rack stays the ghost it is. machDepthU is the rack's front in
+  // view depth (+ MACH_FRONT_IN), re-projected from the live camera every
+  // frame (machDepthSync); machSoftU the feather behind it. it rides the
+  // tunnel's own node (tunnelPatch below) — the ONE opacity path that
+  // provably reaches the screen: the originals, the unlit ghost twins the
+  // full-ghost city actually draws, and the green wireframe overlay. the
+  // metal corridor mask (mMask) sits on the originals only, and at full
+  // ghost the twins are bound — which is why that mask never showed in
+  // the slider.
+  var machFrontU = TSL.uniform(0);
+  var machDepthU = TSL.uniform(1e6);
+  var machSoftU = TSL.uniform(1.0);
+  var machFrontNode = machFrontU.mul(TSL.oneMinus(
+    TSL.smoothstep(machDepthU, machDepthU.add(machSoftU), TSL.positionView.z.negate())));
   window.__tunSet = function(v){ ghostU.value = v; cityBundleDirty(); frameDirtyFlag = true; frameCacheValid = false; };
   window.__tunDbg12 = function(){
     var deep = 0, patched = 0;
@@ -5642,7 +5763,9 @@ window.__bootScene = async function(){
       if (cityMats[i].userData.__tun) patched++;
       if (cityMats[i].userData.__tunDeep) deep++;
     }
-    return {tun: tunU.value, ghost: ghostU.value, hideP: addonsHideP, hideRaw: window.__addonsRackHide || 0,
+    return {tun: tunU.value, ghost: ghostU.value, corridor: metalClearU.value, front: machFrontU.value, frontDepth: machDepthU.value, rearmed: tunnelRearmed,
+            fade: rackFade, mode: sceneMode, lights: cityLightsNow, wires: !!(MQ && MQ.k && MQ.k.wires),
+            hideP: addonsHideP, hideRaw: window.__addonsRackHide || 0,
             mats: cityMats.length, patched: patched, deep: deep,
             node: cityMats.length ? !!cityMats[0].opacityNode : null,
             dim: cityDimNow, twinOn: cityTwinOn};
@@ -5651,7 +5774,8 @@ window.__bootScene = async function(){
     if (m.userData.__tun) return;
     m.userData.__tun = true;
     m.userData.__tunDeep = !!deep;   // the twins inherit the family
-    var fade = deep ? TSL.max(tunCorrNode, ghostU) : tunCorrNode;
+    var front = TSL.max(tunCorrNode, machFrontNode);   // the agents corridor OR the slider's front hide
+    var fade = deep ? TSL.max(front, ghostU) : front;
     m.opacityNode = (m.opacityNode || TSL.materialOpacity).mul(TSL.oneMinus(fade));
     // the renderer touched these materials during load (the veil's wire
     // preview) — without this the pipeline keeps the node-less shader
@@ -5676,6 +5800,17 @@ window.__bootScene = async function(){
     frameDirtyFlag = true; frameCacheValid = false;
     tunnelRearmed++;
   }
+  // console probes: the rearm by hand, and the live state of every city
+  // material (which pipeline flavors carry the opacity node is the
+  // question every "why is this still visible" hunt ends at)
+  window.__tunnelRearm = tunnelRearm;
+  window.__annexWire = function(){ return annexWire; };
+  window.__dirty = function(){ frameDirtyFlag = true; frameCacheValid = false; };
+  window.__rack = function(){ return rackRoot; };
+  window.__cityMats = function(){
+    return cityMats.map(function(m){ return {name: m.name, type: m.type, op: +m.opacity.toFixed(3), tr: m.transparent, dw: m.depthWrite,
+      deep: !!m.userData.__tunDeep, node: !!m.opacityNode, emis: m.emissiveIntensity != null ? +m.emissiveIntensity.toFixed(3) : null, ver: m.version}; });
+  };
   function cityTwinFor(m){
     if (!m || !(m.isMeshStandardMaterial || m.isMeshPhysicalMaterial)) return m;   // already unlit
     var t = cityTwins.get(m.uuid);
@@ -5698,8 +5833,11 @@ window.__bootScene = async function(){
     if (!cityTwins) return;
     cityTwins.forEach(function(t){
       var b = t.userData.__src;
+      var pTr = t.transparent, pDw = t.depthWrite, pSw = t.stencilWrite, pSm = t.stencilWriteMask !== 0;
       t.opacity = b.opacity; t.transparent = b.transparent; t.depthWrite = b.depthWrite;
       t.stencilWrite = b.stencilWrite; t.stencilWriteMask = b.stencilWriteMask;
+      // the flavor bump (see applyCityDim): a flag flip is a new render object only through the version
+      if (FLAVOR_BUMP && (t.transparent !== pTr || t.depthWrite !== pDw || t.stencilWrite !== pSw || (t.stencilWriteMask !== 0) !== pSm)) t.needsUpdate = true;
       t.stencilRef = b.stencilRef; t.stencilFunc = b.stencilFunc;
       t.clipIntersection = b.clipIntersection; t.clipShadows = b.clipShadows;
       // NO needsUpdate on the plane swap: the clip bridge carries planes
@@ -5772,6 +5910,7 @@ window.__bootScene = async function(){
   // it can't occlude itself out of order, and the opaque rack shows
   // through every wall while still hiding the city behind it.
   var cityDimNow = 1, cityLightsNow = 1, cityGhostWas = false;
+  var FLAVOR_BUMP = !/[?&]bump=0/.test(location.search || '');   // see the flavor bump in applyCityDim
   function applyCityDim(f, lights){
     if (Math.abs(f - cityDimNow) < 0.003 && Math.abs(lights - cityLightsNow) < 0.003) return;
     cityDimNow = f; cityLightsNow = lights;
@@ -5827,6 +5966,24 @@ window.__bootScene = async function(){
       // EMPTY black ghost scenes — the old 10% ghost stays instead
       if (m.userData.__tunDeep && a > 0 && MQ.k.wires)
         a = Math.max(0.002, a * (1 - Math.max(0, Math.min(1, (1 - f) / 0.9))));
+      // ── THE FLAVOR BUMP ── (root cause of "why buildings are not in
+      // ghost mode" / "building in front of rack", found 2026-09-28 in
+      // three r186's RenderObjects.get): a render object is only
+      // re-created when material.version changed — transparent,
+      // depthWrite and the stencil flags below are part of its cache
+      // key, but flipping them WITHOUT a version bump leaves the old
+      // render object, i.e. the OPAQUE, stencil-less pipeline, drawing
+      // the ghost city: alpha ignored, solid blocks painted over the
+      // rack, and every opacity-node effect (tunnel, corridor, slider
+      // hide) with it. phones never saw it (the twin SWAP is a new
+      // material = a new render object); the desktop, which never
+      // swaps, did. so: bump once, on the frames a flag actually flips
+      // (ghost on/off, depthWrite at 0.3) — the re-created object hits
+      // the node-builder and pipeline caches for a flavor seen before,
+      // and the warm sweep sees every flavor first, behind the veil.
+      // ?bump=0 is the A/B hook for the perf rigs — it brings the broken
+      // ghost back on purpose, never ship a link with it
+      var pTr = m.transparent, pDw = m.depthWrite, pSw = m.stencilWrite, pSm = m.stencilWriteMask !== 0;
       m.opacity = a;
       m.transparent = ghost || b.tr;
       // depth writing stays ON until the city is genuinely faint: flipping
@@ -5847,6 +6004,7 @@ window.__bootScene = async function(){
       m.stencilWriteMask = ghost ? 0 : 0xff;
       m.stencilRef = 1;
       m.stencilFunc = ghost ? THREE.NotEqualStencilFunc : THREE.AlwaysStencilFunc;
+      if (FLAVOR_BUMP && (m.transparent !== pTr || m.depthWrite !== pDw || m.stencilWrite !== pSw || (m.stencilWriteMask !== 0) !== pSm)) m.needsUpdate = true;
     }
     // the body ghost-hide rides the same scrubbed factor as the ghost
     // itself: f 1 (lit hero/footer) -> 0, f 0.1 (full ghost) -> 1
@@ -6341,7 +6499,11 @@ window.__bootScene = async function(){
   var MACHINE_X_PHONE = 0.90;
   function machineAnchorX(){
     if (window.innerWidth <= 767) return MACHINE_X_PHONE;
-    var x = FRAME_X_MIRROR;
+    // slide 1 steps 3% of the frame's width to the RIGHT of the rule's
+    // spot on every frame above the phone rung ("first slide in 'What
+    // you get' move more right + 3%", 2026-09-28, off a desktop
+    // screenshot); the ipad's own step below rides on top of it
+    var x = FRAME_X_MIRROR + 0.03;
     if ((camera.aspect || DESIGN_ASPECT) < DESIGN_ASPECT) x += 0.05;   // the ipad step
     return anchorX(x);
   }
@@ -7674,6 +7836,41 @@ window.__bootScene = async function(){
       cityMeshList.push({o: o, m: o.material, t: many ? tt : tt[0]});
     });
     applyScene(sceneMode);
+    // ── SHARED CLIP WRAPPERS FOR THE CITY ── (2026-09-28, the boot audit)
+    // the bridge wraps EACH clipped mesh in its own ClippingGroup pair,
+    // and three keys every render object on its ClippingContext's UNIQUE
+    // ID (ClippingContext.cacheKey = id:planes). so the 141 city meshes —
+    // one material, one shared plane array — each built their own TSL,
+    // programs and pipelines per state: measured FlatDeprecated alone at
+    // 188 pipelines from 185 distinct programs, ~600 of the boot's ~895
+    // pipelines and most of the sweep's main-thread builds. every body
+    // mesh clips by the same clipPlanes and every 'Wire' mesh by the same
+    // wirePlanes, so ONE wrapper pair per set is the identical clip with
+    // two contexts instead of 141. the wire meshes move under their own
+    // root with their world matrices baked (the city never moves); the
+    // bodies keep the glb tree under the city root. the overlays ride
+    // their parent's set as before (a wire mesh's overlay now clips by
+    // the wire box — the two carve boxes differ by centimetres).
+    if (CLIP_SHARE){
+      var wireRoot = new THREE.Group(); wireRoot.name = 'cityWireRoot';
+      scene.add(wireRoot);
+      var moveW = [];
+      g.scene.traverse(function(o){
+        if (!o.isMesh || !o.material) return;
+        var mw0 = Array.isArray(o.material) ? o.material[0] : o.material;
+        if (mw0.name === 'Wire') moveW.push(o);
+      });
+      for (var wi = 0; wi < moveW.length; wi++){
+        var wmesh = moveW[wi];
+        wireRoot.add(wmesh);                          // detaches from the glb node
+        wmesh.matrix.copy(wmesh.matrixWorld);         // the baked world pose IS its local now
+        wmesh.matrixAutoUpdate = false;
+      }
+      cityClipBody = ensureClipWrap(g.scene);
+      cityClipWire = ensureClipWrap(wireRoot);
+      g.scene.traverse(function(o){ if (o.isMesh) o.__clipShared = true; });
+      wireRoot.traverse(function(o){ if (o.isMesh) o.__clipShared = true; });
+    }
     // nothing in the scene ever moves (only the camera, which lives outside
     // it) — bake all world matrices once and stop the renderer re-walking
     // the whole tree on every one of its passes
@@ -11138,41 +11335,91 @@ window.__bootScene = async function(){
         else window.__machPick((machNow + 1) % (window.__machCount || 4));
       }
     } else machBeatAt = -1;   // off stage: the beat restarts on the next arrival
-    var machWant = window.__machSlide || 0;
-    var machInner = machWant;
-    var machOuter = (machWant !== 0) ? 1 : 0;
     var machStep = dt * MACH_SPEED, machClear = dt * MACH_HANDOVER;
-    // rising rides MACH_SPEED, clearing rides MACH_HANDOVER — see above
-    var s2T = (machInner === 1) ? machGate : 0;
-    var s3T = (machInner === 2) ? machGate : 0;
-    var s4T = (machInner === 3) ? machGate : 0;
-    s2P = machRamp(s2P, s2T, s2T > s2P ? machStep : machClear);
-    s3P = machRamp(s3P, s3T, s3T > s3P ? machStep * S3_IN : machClear * S3_OUT);
-    s4P = machRamp(s4P, s4T, s4T > s4P ? machStep : machClear);
-    slideAwayP = machRamp(slideAwayP, machGate ? machOuter : 0, machStep);
-    // machScroll (hoisted above) is in with the leg-9 landing flight
-    // (macWin), out with whichever flight leaves — macWin's reversal
-    // upward, the deploy dive downward — and with the rack's own fade.
-    // this half is still PURE SCRUB: no time gates, no graded factors,
-    // identical both directions, so scrolling away and back rewinds it.
-    // THE CAMERA DOES NOT WAIT ("dont wait to change camera to next
-    // slide, you can start it imediatly, but other animations will w8").
-    // the lens rides machWant — the card under the cursor RIGHT NOW —
-    // off a SINGLE damp, so the move starts on the hover, in step with
-    // the outgoing slide's own animation out. these three are weights,
-    // not lerp factors; the blend that consumes them is normalized, so
-    // the pose flies straight from the old slide's shot to the new one.
-    var s2CamT = ((machWant === 1) ? machGate : 0) * machScroll;
-    s2Cam = machRamp(s2Cam, s2CamT, machStep);
-    var s3CamT = ((machWant === 2) ? machGate : 0) * machScroll;
-    s3Cam = machRamp(s3Cam, s3CamT, machStep);
-    var s4CamT = ((machWant === 3) ? machGate : 0) * machScroll;
-    s4Cam = machRamp(s4Cam, s4CamT, machStep);
-    // the default framing takes whatever weight no slide is asking for —
-    // which is ZERO all the way through a card→card switch, so the blend
-    // below never passes through the default shot
-    var sBCamT = 1 - Math.max(s2CamT, Math.max(s3CamT, s4CamT));
-    sBCam = machRamp(sBCam, sBCamT, machStep);
+    // the stage gate as a RAMP — MACH_SPEED in, MACH_HANDOVER out, like
+    // every payload — so the scrub path can multiply by it and leaving
+    // the stage still clears the rack instead of snapping it shut
+    machGateP = machRamp(machGateP, machGate, machGate > machGateP ? machStep : machClear);
+    var machProgRaw = window.__machProg;
+    if (typeof machProgRaw === 'number'){
+      // ── DESKTOP: THE SLIDES RIDE THE SCROLL ───────────────────────────
+      // the plate driver (mcInit) publishes the CONTINUOUS slide index —
+      // 1.0 is parked on card 2, 1.5 is half-way down the walk to card 3
+      // — and every slide state is a pure function of it, so scrolling
+      // back rewinds the rack ("when slide active is changing on scroll,
+      // change slides on scroll dynamically too"). damped like a ride
+      // window (rideDamp): a wheel notch reads as a glide, not a pop. it
+      // snaps on the boot warm and the cover jump exactly like the rides.
+      //   payloads — the OUTGOING card's own animation closes across the
+      //   FIRST half of the walk, the INCOMING one opens across the
+      //   SECOND. never both at once: slides 2 and 3 write the same clip
+      //   planes in opposite modes (the s2Hand/s3Hand baton), and the
+      //   scroll range itself carries that ordering now — no time ramps.
+      //   slideAwayP (the door's outer show, any card but the first) is
+      //   1 minus card 1's presence, so it never dips mid-walk.
+      //   camera — the lens never waits: a straight crossfade across the
+      //   WHOLE walk from the outgoing shot to the incoming one (or the
+      //   default framing when card 1 is one of the two); the blend that
+      //   consumes these is normalized, so it flies pose→pose direct.
+      if (machProgP < 0 || window.__warmY != null) machProgP = machProgRaw;
+      else {
+        machProgP += (machProgRaw - machProgP) * rideDamp;
+        if (Math.abs(machProgRaw - machProgP) < 0.0005) machProgP = machProgRaw;
+      }
+      if (machProgP !== machProgPrev){ machProgPrev = machProgP; frameDirtyFlag = true; }
+      var mk = Math.floor(machProgP), mt = machProgP - mk;
+      var mOut = Math.max(0, 1 - mt / 0.5), mIn = Math.max(0, (mt - 0.5) / 0.5);
+      var mp0 = (mk === 0) ? mOut : 0;
+      var mp1 = (mk === 1) ? mOut : (mk === 0) ? mIn : 0;
+      var mp2 = (mk === 2) ? mOut : (mk === 1) ? mIn : 0;
+      var mp3 = (mk === 3) ? mOut : (mk === 2) ? mIn : 0;
+      s2P = mp1 * machGateP; s3P = mp2 * machGateP; s4P = mp3 * machGateP;
+      slideAwayP = (1 - mp0) * machGateP;
+      var mc1 = (mk === 1) ? 1 - mt : (mk === 0) ? mt : 0;
+      var mc2 = (mk === 2) ? 1 - mt : (mk === 1) ? mt : 0;
+      var mc3 = (mk === 3) ? 1 - mt : (mk === 2) ? mt : 0;
+      var camG = machGateP * machScroll;
+      s2Cam = mc1 * camG; s3Cam = mc2 * camG; s4Cam = mc3 * camG;
+      sBCam = 1 - (mc1 + mc2 + mc3) * camG;
+    } else {
+      // ── PHONES: the observer PICKS a card and the rack rides to it on
+      // the time ramps below — the original path, untouched
+      machProgP = -1;
+      var machWant = window.__machSlide || 0;
+      var machInner = machWant;
+      var machOuter = (machWant !== 0) ? 1 : 0;
+      // rising rides MACH_SPEED, clearing rides MACH_HANDOVER — see above
+      var s2T = (machInner === 1) ? machGate : 0;
+      var s3T = (machInner === 2) ? machGate : 0;
+      var s4T = (machInner === 3) ? machGate : 0;
+      s2P = machRamp(s2P, s2T, s2T > s2P ? machStep : machClear);
+      s3P = machRamp(s3P, s3T, s3T > s3P ? machStep * S3_IN : machClear * S3_OUT);
+      s4P = machRamp(s4P, s4T, s4T > s4P ? machStep : machClear);
+      slideAwayP = machRamp(slideAwayP, machGate ? machOuter : 0, machStep);
+      // machScroll (hoisted above) is in with the leg-9 landing flight
+      // (macWin), out with whichever flight leaves — macWin's reversal
+      // upward, the deploy dive downward — and with the rack's own fade.
+      // this half is still PURE SCRUB: no time gates, no graded factors,
+      // identical both directions, so scrolling away and back rewinds it.
+      // THE CAMERA DOES NOT WAIT ("dont wait to change camera to next
+      // slide, you can start it imediatly, but other animations will w8").
+      // the lens rides machWant — the card under the cursor RIGHT NOW —
+      // off a SINGLE damp, so the move starts on the hover, in step with
+      // the outgoing slide's own animation out. these three are weights,
+      // not lerp factors; the blend that consumes them is normalized, so
+      // the pose flies straight from the old slide's shot to the new one.
+      var s2CamT = ((machWant === 1) ? machGate : 0) * machScroll;
+      s2Cam = machRamp(s2Cam, s2CamT, machStep);
+      var s3CamT = ((machWant === 2) ? machGate : 0) * machScroll;
+      s3Cam = machRamp(s3Cam, s3CamT, machStep);
+      var s4CamT = ((machWant === 3) ? machGate : 0) * machScroll;
+      s4Cam = machRamp(s4Cam, s4CamT, machStep);
+      // the default framing takes whatever weight no slide is asking for —
+      // which is ZERO all the way through a card→card switch, so the blend
+      // below never passes through the default shot
+      var sBCamT = 1 - Math.max(s2CamT, Math.max(s3CamT, s4CamT));
+      sBCam = machRamp(sBCam, sBCamT, machStep);
+    }
     // ...but every OTHER animation the slide owns — the rack's one-floor
     // open, the cube wedges, the kiosk, the wall panel — still rides the
     // SEQUENCED state (s2P/s3P/s4P), so it waits its turn behind the
@@ -11191,6 +11438,7 @@ window.__bootScene = async function(){
       coverJump = false;
       for (var cj = 0; cj < LEGS.length; cj++) LEGS[cj].p = LEGS[cj].raw;
       for (var cj2 = 0; cj2 < RIDE.length; cj2++) RIDE[cj2].w.p = RIDE[cj2].w.raw;
+      machProgP = -1;   // the slide scrub snaps to raw with them
       frameDirtyFlag = true;
     }
     // the agents entrance glide (ported from v11): the rack, laptop, lid
@@ -12508,6 +12756,25 @@ window.__bootScene = async function(){
         for (var aw = 0; aw < annexWire.length; aw++) annexWire[aw].visible = annexVis;
         frameDirtyFlag = true;   // materials moved: the cached frame is stale
       }
+      // ...and the dim must AGREE with the fade on EVERY frame, not only
+      // on the frames the fade moves. the boot warm and the reset paths
+      // write the city LIT (applyCityDim(1, 1)) and hand back only the
+      // scene MODE — standing in scene 2 with the fade already settled at
+      // 1, nothing re-dimmed the city until the fade moved again: lit
+      // windows and solid bodies through the whole 'what you get' slider
+      // ("why buildings are not in ghost mode"). idempotent — applyCityDim
+      // returns at once when nothing changed — and it stands down while a
+      // warm sweep drives the ride (the sweep's own values are the law).
+      // the carved block's furniture gets the same re-assert: applyScene(1)
+      // shows it, and a hand-back to mode 2 never hid it again.
+      if (!scrubFree && window.__warmY == null){
+        applyCityDim(1 - 0.9 * rackFade, 1 - rackFade);
+        var annexWant = !(sceneMode === 2 && rackFade > 0.9);
+        if (annexWire.length && annexWire[0].visible !== annexWant){
+          for (var aw2 = 0; aw2 < annexWire.length; aw2++) annexWire[aw2].visible = annexWant;
+          frameDirtyFlag = true;
+        }
+      }
       // no near-plane wipe anymore: the foreground buildings ride the same
       // scroll opacity fade as the rest of the ghost city (the stencil
       // keeps them off the rack, and with their lights at zero there is
@@ -12528,6 +12795,39 @@ window.__bootScene = async function(){
       frameDirtyFlag = true;   // the corridor moved: the cached frame is stale
     }
     if (metalClearQ > 0) metalRectSync();   // the rect rides the scrubbed camera
+    // ── THE SLIDER'S FRONT HIDE ── the whole 'what you get' section, on
+    // the slider's own scroll gate (machScroll: in with the leg-9
+    // landing, out with the deploy dive, both ways): every city fragment
+    // nearer the lens than the rack's front goes — the WHOLE frame, at
+    // every slide and through every flight, the depth re-projected from
+    // the live camera each frame (machFrontNode). the backdrop past the
+    // rack stays the ghost it is. a per-mesh hide was tried first and
+    // wiped the ghost city around the rack (the glb is merged
+    // multi-building chunks) — this is per fragment, so only what is
+    // actually in front goes.
+    // gated on SCROLL WINDOWS alone, never on machScroll: that one also
+    // rides the rack's fade, and a fade parked short of 1 would leave
+    // the hide half on. IN: the metal corridor above hid this same city
+    // through the split, and it RELEASES over machineWin.p 0.35→0.8 as
+    // the machine panel scrolls in — the slider's hide used to rise only
+    // with the later landing flight (macWin), so the block the corridor
+    // had hidden faded back in across that gap ("this building is
+    // hidden, when u start slider component u are showin it again"). so
+    // it rises over machineWin.p 0.15→0.35 — FULL before the corridor
+    // starts letting go — or with the landing, whichever is first; the
+    // two masks overlap instead of handing over, and nothing between the
+    // lens and the rack ever comes back. OUT: with the deploy dive.
+    var mfRise = Math.max(revealEase(Math.min(1, Math.max(0, macWin.p))),
+                          revealEase(Math.min(1, Math.max(0, (machineWin.p - 0.15) / 0.2))));
+    var mfNext = sceneMode === 2
+      ? Math.round(mfRise * (1 - revealEase(Math.min(1, (LEGS[3] ? LEGS[3].p : 0) / 0.45))) * 200) / 200 : 0;
+    if (mfNext !== machFrontQ){
+      machFrontQ = mfNext;
+      machFrontU.value = mfNext;
+      cityBundleDirty();   // see the ghostU drive: bundles re-record to see it
+      frameDirtyFlag = true;
+    }
+    if (machFrontQ > 0) machDepthSync();   // the front rides the scrubbed camera
     // the shell follower must keep ticking AFTER the quantized drivers
     // settle: it lived only inside the fade guard above, and whenever the
     // last 1/200 driver step landed before it converged, the rack parked
@@ -14044,7 +14344,6 @@ if (window.THREE && window.__TSL) window.__bootScene().catch(function(e){ consol
 </script>
 
 <!-- scroll ride recorder for video capture: recordScroll({to}) / sectionTops() -->
-<script src="./scroll-record.js"></script>
 
 </body>
 </html>
