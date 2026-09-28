@@ -4667,7 +4667,17 @@ window.__bootScene = async function(){
               // profile. the reveal band above still warms (that one is
               // felt on every backend); the deep page pays first-visit
               // compile like v11 always has.
-            } else if (!/[?&]tail=0/.test(location.search) && (!MOBILE || /[?&]tail=1/.test(location.search))){
+            } else if (!MOBILE){
+              // the deep-page tail stays DESKTOP-ONLY. running it on the
+              // phone was tried this round for exactly the first-scroll
+              // lag and measured a bad trade: +2s of veil (12.5s -> 14.5s)
+              // for a first scroll that still built ~130 pipelines, because
+              // on a real phone link the streamed props land AT the veil —
+              // after the sweep — so the tail warms a deep page that has no
+              // props in it yet. what DOES pay is below: the queue goes out
+              // in reading order, and the moment the last prop lands the
+              // deferred sweep is armed, which halves the first-scroll
+              // compile (144 -> 64 pipelines) as soon as the reader pauses.
               // PHONES SKIP THE DEEP-PAGE TAIL ON EVERY VISIT (was: first
               // visit only, warmFast ran it on refresh). that refresh-only
               // tail was the "loadings 2-3 times" trigger: a refresh loads
@@ -4882,6 +4892,7 @@ window.__bootScene = async function(){
             }
             step();
             }
+            window.__armDeferredSweep = armDeferredSweep;
             function armDeferredSweep(){
               var dLastY = -1;
               (function deferSweep(){
@@ -5128,7 +5139,24 @@ window.__bootScene = async function(){
   // the bytes itself — so a gate installed under it never sees a single
   // load. it has to be the OUTERMOST wrapper, which means last.
   var LAZY_PHONE = MOBILE;
-  var LAZY_FIRST = /virtual-city|server_racking_system/;   // the first screen
+  // the first screen. putting the slider's props in here too was tried
+  // and measured WORSE: they compete with the city for the same pipe, so
+  // the city itself landed 4s later and the veil went 12.5s -> 23.2s for
+  // a first scroll that still stalled. the fix for that stall is warm
+  // COVERAGE, not load order — see the deep-page tail, which the phone
+  // now runs.
+  var LAZY_FIRST = /virtual-city|server_racking_system/;
+  // ...and the held ones go out in the order the READER meets them, not
+  // the order the callbacks happened to queue them ("lazy load must loads
+  // +1 container"). the slider is the very next thing after the split, so
+  // its three props lead; the faq's qblock is a whole page away and goes
+  // last. anything unlisted sorts after the named ones, in queue order.
+  var LAZY_ORDER = ['door', 'terminal', 'card', 'sci-fi_control_panel', 'pcb', 'laptop', 'calculator', 'qblock'];
+  function lazyRank(url){
+    var f = String(url).split('/').pop();
+    for (var i = 0; i < LAZY_ORDER.length; i++) if (f.indexOf(LAZY_ORDER[i]) === 0) return i;
+    return LAZY_ORDER.length;
+  }
   (function(){
     var origLoad = loader.load.bind(loader);
     var queued = [], released = !LAZY_PHONE;
@@ -5152,7 +5180,22 @@ window.__bootScene = async function(){
       if (released) return 0;
       released = true;
       var q = queued; queued = [];
+      q.sort(function(a, b){ return lazyRank(a[0]) - lazyRank(b[0]); });
       for (var i = 0; i < q.length; i++) dispatch(q[i][0], q[i][1], q[i][2], q[i][3]);
+      // ── AND WARM WHAT THEY BRING ──
+      // the sweep runs while these are still queued, so it warms the city
+      // and the rack and nothing else: every ride state the props own —
+      // the door's fade and its sealing panels, the kiosk, the wall panel —
+      // then compiled under the visitor's thumb on the FIRST scroll into
+      // the slider (measured: 81 pipelines and a 2s frame). each prop's own
+      // warmPropSoon only bakes the pose it lands in, not the states the
+      // ride flips. so when the last of them has landed, walk the page
+      // again: the deferred sweep waits for the reader to be parked and
+      // quiet at the top, then re-rides everything with the props present.
+      (function waitForThem(){
+        if ((window.__glbOut || 0) > 0){ setTimeout(waitForThem, 250); return; }
+        try { if (window.__armDeferredSweep) window.__armDeferredSweep(); } catch(e){}
+      })();
       return q.length;
     };
     window.__lazyPending = function(){ return queued.length; };
