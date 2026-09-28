@@ -678,14 +678,25 @@
      and the same selectable behavior, themed BLUE */
   .after #machine .grid3{grid-template-columns:1fr;gap:22px}
   .after #machine .small{margin-top:26px}   /* the note breathes off the card stack */
-  /* the cards ARE the slider: HOVERING one drives the scene (no click
-     needed), so the whole card — and every glyph inside it — wears the
-     hand. the card itself STAYS PUT: only its border lights up, so the
-     text you are reading never slides under the pointer */
-  .after #machine .grid3 .card,.after #machine .grid3 .card *{cursor:pointer}
-  .after #machine .grid3 .card{transition:background .2s,border-color .2s,box-shadow .25s}
-  .after #machine .grid3 .card:hover{border-color:rgba(165,180,252,.55)}
-  .after #machine .grid3 .card.on{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 22px rgba(165,180,252,.18)}
+  /* the cards ARE the slider, and THE SCROLL IS THE PICKER: the card on
+     the middle line of the frame is the live one (see mcInit). nothing
+     to press, so no hand and no hover chrome. the selected state's plate
+     — blue edge, blue wash, glow — is not drawn by the card any more:
+     it is ONE element (.mach-plate, appended by the script) riding
+     BEHIND the stack, and it slides from the card you are leaving to the
+     one you are reaching in step with the scroll. the cards sit above
+     it, so their hairline goes translucent: the opaque #2a2a2a line
+     would cut straight across the plate's blue edge where the two
+     coincide, and this reads the same over the dark scene. */
+  .after #machine .grid3{position:relative}
+  .after #machine .grid3 .card{position:relative;z-index:1;border-color:rgba(255,255,255,.09)}
+  .after #machine .grid3 .card:hover{background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.09)}
+  .after #machine .mach-plate{
+    position:absolute;left:0;top:0;width:100%;height:0;z-index:0;
+    box-sizing:border-box;pointer-events:none;
+    border:1px solid var(--blue);border-radius:var(--radius-sm);
+    background:var(--blue-soft);box-shadow:0 0 22px rgba(165,180,252,.18);
+  }
   /* the machine cards carry li lists now: the site's round blue dots
      do the marking, so the title drops its cube glyph; the title
      itself steps up to the points' size, in the site blue */
@@ -1171,6 +1182,9 @@
     .after #machine .grid3 .card:hover,
     .after #machine .grid3 .card.on{border:0;background:none;box-shadow:none}
     .after #machine .grid3 .card.on{opacity:1}
+    /* the desktop's sliding plate has no place here: the naked cards say
+       'live' with their weight, and the phone picker is the observer */
+    .after #machine .mach-plate{display:none}
     .after #machine .grid3 .card:nth-child(even){justify-self:end}
     /* the first card gets the same air above it that the 50px gap gives
        every card below — the lead paragraph sat right on top of it */
@@ -1603,11 +1617,12 @@
     function mcInit(){
     var mc = document.getElementById('machCards');
     if (!mc) return;
-    var cards = Array.prototype.slice.call(mc.children);
-    // the door slide opens the container; CLICK picks the slide from
-    // here, exactly like the laptop slider's #for cards. the scene's
-    // autoplay picks through the same door (window.__machPick), so the
-    // active card always mirrors whatever the rack is showing.
+    // the cards only: the desktop plate (below) is appended into the same
+    // grid, so the raw child list is not the slide list any more
+    var cards = Array.prototype.slice.call(mc.children).filter(function(x){ return x.classList.contains('card'); });
+    // the door slide opens the container. the scene reads __machSlide
+    // every frame and ramps the rack to it — this is the ONE state the
+    // active card mirrors, at every width.
     window.__machSlide = 0;
     window.__machCount = cards.length;
     cards.forEach(function(x, j){ x.classList.toggle('on', j === 0); });
@@ -1616,28 +1631,25 @@
       window.__machSlide = i;
       cards.forEach(function(x, j){ x.classList.toggle('on', j === i); });
     };
-    cards.forEach(function(c, i){
-      // a tap picks — except where the scroll is the picker (below), and
-      // there it would only fight the next card to cross the line
-      c.addEventListener('click', function(){ if (!window.__machScrollDriven) window.__machPick(i); });
-    });
-    // ── PHONES: THE CARDS ARE NOT A SLIDER, THEY ARE THE SCROLL ───────
-    // the four cards are docked alternately left and right down a whole
-    // screen each, so on a phone the page already says which one you are
-    // reading — whichever is crossing the line just under mid-screen. it
-    // picks the slide, and the rack changes under you as you read.
-    // the observer's root margin IS that line: the band from 50% to 55%
-    // of the frame. it costs nothing per scroll frame — no listener, no
-    // layout read — the browser tells us only when a card enters or
-    // leaves it. the first card whose box is on the line wins, so a
-    // boundary crossing resolves to the upper of the two.
-    // the autoplay beat stands down while this drives (the scene reads
-    // __machScrollDriven every frame): two pickers on one slide would
-    // fight, and the one the thumb is steering has to win.
-    var phone = window.matchMedia('(max-width:767px)');
+    // ── THE SCROLL IS THE PICKER — at every width now, not only the
+    // phone's. the card on the middle line of the frame is the live one,
+    // and the page already says which one you are reading. so there is
+    // no click (a tap would only fight the next card to cross the line)
+    // and no autoplay beat: the scene reads __machScrollDriven every
+    // frame and stands its 5s beat down for good — two pickers on one
+    // slide would fight, and the one your scroll is steering has to win.
+    // the pointer-hold that paused that beat went with it.
+    window.__machScrollDriven = true;
+    // ── PHONES: the cards are docked alternately left and right down a
+    // whole screen each; whichever is crossing the line just under
+    // mid-screen picks the slide, and the rack changes under you as you
+    // read. the observer's root margin IS that line: the band from 50%
+    // to 55% of the frame. it costs nothing per scroll frame — no
+    // listener, no layout read — the browser tells us only when a card
+    // enters or leaves it. the first card whose box is on the line wins,
+    // so a boundary crossing resolves to the upper of the two.
     var live = [], mcIO = null;
-    function machDriver(on){
-      window.__machScrollDriven = on;
+    function ioDriver(on){
       if (on){
         if (mcIO || !('IntersectionObserver' in window)) return;
         mcIO = new IntersectionObserver(function(ents){
@@ -1647,18 +1659,83 @@
         cards.forEach(function(c){ mcIO.observe(c); });
       } else if (mcIO){ mcIO.disconnect(); mcIO = null; live = []; }
     }
-    machDriver(phone.matches);
-    var machMQ = function(){ machDriver(phone.matches); };
-    if (phone.addEventListener) phone.addEventListener('change', machMQ);
-    else if (phone.addListener) phone.addListener(machMQ);
-    // ...and while the pointer is parked ON the stack the autoplay beat
-    // holds where it is (the scene reads this flag every frame): you are
-    // reading the card, the rack must not slide out from under you.
-    // mouse only — a touch tap leaves a phantom hover that would stop the
-    // beat for good.
-    mc.addEventListener('pointerenter', function(ev){ if (ev.pointerType !== 'touch') window.__machHover = true; });
-    mc.addEventListener('pointerleave', function(){ window.__machHover = false; });
-    mc.addEventListener('pointercancel', function(){ window.__machHover = false; });
+    // ── DESKTOP: THE PLATE RIDES THE SCROLL ───────────────────────────
+    // the selected state's chrome — blue edge, blue wash, glow — is ONE
+    // element (.mach-plate) BEHIND the stack, not a class on the card.
+    // the card whose box holds the MIDDLE LINE of the frame (vh/2) is
+    // the live one and the plate sits square on it. the moment that
+    // card's centre band slides off the line the plate STARTS for the
+    // next card — not a flip: it walks the gap in step with the scroll
+    // (scroll back and it walks back), and it lands the moment the next
+    // card's own centre band reaches the line. the slide itself picks
+    // over at the half-way point of that walk.
+    //   HOLD — the centre band, as a share of the card's half-height.
+    //   the plate is parked while the line is inside it; the walk spans
+    //   the rest of this card, the gap, and the rest of the next one
+    //   (~170px of scroll on a 240px card), eased so it leaves and lands
+    //   softly instead of jerking off the mark.
+    // per scroll frame this is ONE pageYOffset read and two style
+    // writes on an absolutely positioned element with no children — no
+    // layout read: the grid's page position and every card's box are
+    // measured ONCE and again only when something resizes (the grid,
+    // the body — anything above the section growing moves the stack —
+    // the window, the fonts landing).
+    var HOLD = 0.4;
+    var plate = null, geo = [], gridTop = 0, vh = 0, pend = false, plateOn = false;
+    function ease(t){ return t * t * (3 - 2 * t); }   // smoothstep
+    function frame(){
+      pend = false;
+      if (!plateOn || !geo.length) return;
+      var mid = (window.pageYOffset || 0) + vh / 2 - gridTop;   // the frame's middle line, in the grid's own coordinates
+      // p: the continuous slide index — i + 0 is parked on card i, i + 0.5
+      // is half-way down the walk to card i + 1
+      var n = geo.length, p = n - 1;
+      for (var i = 0; i < n; i++){
+        var g = geo[i], c = g.t + g.h / 2, hold = HOLD * g.h / 2;
+        if (mid <= c + hold){ p = i; break; }             // on this card's band (or above the first)
+        if (i === n - 1) break;                            // below the last card's band: parked on it
+        var g2 = geo[i + 1], from = c + hold, to = g2.t + g2.h / 2 - HOLD * g2.h / 2;
+        if (mid < to){ p = i + ease((mid - from) / Math.max(1, to - from)); break; }
+      }
+      var k = Math.floor(p), t = p - k, a = geo[k], b = geo[Math.min(n - 1, k + 1)];
+      var top = a.t + (b.t - a.t) * t, h = a.h + (b.h - a.h) * t;
+      plate.style.transform = 'translate3d(0,' + top.toFixed(2) + 'px,0)';
+      plate.style.height = h.toFixed(2) + 'px';
+      window.__machPick(Math.round(p));
+    }
+    function measure(){
+      if (!plateOn) return;
+      var r = mc.getBoundingClientRect();
+      gridTop = r.top + (window.pageYOffset || 0);
+      vh = window.innerHeight || document.documentElement.clientHeight || 0;
+      geo = cards.map(function(c){ return {t: c.offsetTop, h: c.offsetHeight}; });
+      frame();
+    }
+    function onScroll(){ if (plateOn && !pend){ pend = true; requestAnimationFrame(frame); } }
+    function plateDriver(on){
+      plateOn = on;
+      if (!on) return;   // the sheet hides the plate under 768; the listeners stay parked behind plateOn
+      if (!plate){
+        plate = document.createElement('div');
+        plate.className = 'mach-plate';
+        plate.setAttribute('aria-hidden', 'true');
+        mc.appendChild(plate);
+        window.addEventListener('scroll', onScroll, {passive: true});
+        window.addEventListener('resize', measure);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+        if (window.ResizeObserver){
+          var ro = new ResizeObserver(function(){ measure(); });
+          ro.observe(mc);
+          ro.observe(document.body);
+        }
+      }
+      measure();
+    }
+    var phone = window.matchMedia('(max-width:767px)');
+    function machDriver(){ var ph = phone.matches; ioDriver(ph); plateDriver(!ph); }
+    machDriver();
+    if (phone.addEventListener) phone.addEventListener('change', machDriver);
+    else if (phone.addListener) phone.addListener(machDriver);
     }
   })();
 </script>
@@ -2745,7 +2822,7 @@ window.__bootScene = async function(){
       if (M.booted && t === M.tier) return;
       M.tier = t; M.k = Q[t]; if (why) M.why = why;
       var k = M.k;
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, k.dpr));
+      renderer.setPixelRatio(effPR(k));
       if (M.booted){
         // the tail: the composer shim reads MQ.k and picks the full or
         // the lite chain on the next render — nothing to swap here. the
@@ -2947,6 +3024,21 @@ window.__bootScene = async function(){
         (ULTRA ? 'ultra, chain cap ' + ULTRA_CAP : 'classic tier'));
     } catch(e){}
   }
+  // ── the canvas pixel ratio, capped to the chain (round 52 memory cut) ──
+  // desktop ULTRA renders the post chain at ULTRA_CAP (1.5) device pixels,
+  // but the CANVAS backing was still the full device dpr (2.0) — so the
+  // 1.5x beauty was UPSCALED onto a 2.0x canvas on present, and chrome's
+  // compositor held that oversized swap chain (a real slice of the gpu-
+  // process memory a user measured at GBs). match the canvas to the chain:
+  // nothing is lost (the detail is 1.5x either way — this only moves the
+  // final upscale from the grade pass to the browser's own display scale)
+  // and the canvas + compositor pixels drop ~(1.5/2)^2 = 44%. mobile and
+  // classic keep k.dpr (their chain already equals their canvas).
+  function effPR(k){
+    var dpr = window.devicePixelRatio || 1;
+    var cap = (!MOBILE && ULTRA && typeof ULTRA_CAP === 'number') ? ULTRA_CAP : (k ? k.dpr : dpr);
+    return Math.min(dpr, cap);
+  }
   // ── the context-loss net: the os killing the webgl context IS the
   // strongest "this mobile is bad" signal there is — ios does it under
   // memory pressure with no error anywhere else. remember a rung below
@@ -3037,7 +3129,7 @@ window.__bootScene = async function(){
       });
     } catch(e){}
   })();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, MQ.k.dpr));
+  renderer.setPixelRatio(effPR(MQ.k));
   // one anisotropy budget for the whole scene. the desktop takes the
   // driver's max (16 everywhere that matters); a phone caps at 4 — the
   // grazing angles that need 16 are the city's road texture read across
