@@ -2407,14 +2407,25 @@ window.__bootScene = async function(){
       return '';
     })();
     var names = ['pcb', 'calculator', 'laptop', 'qblock', 'door', 'terminal', 'card', 'sci-fi_control_panel'];
+    // ...but a LAZY PHONE must not preload them either: the point is to
+    // show the page on the first screen's two models, and a preload pulls
+    // the bytes whether the loader asks for them or not. the scene calls
+    // __propPreloadsRun() when it releases the queue (at veil-down), so
+    // they still arrive early — just behind the visible page, not in
+    // front of it. see LAZY_PHONE at the loader.
+    var lazyHold = sm && !/[?&]lazy=0/.test(location.search || '');
     function pl(href){
       var l = document.createElement('link');
       l.rel = 'preload'; l.as = 'fetch'; l.crossOrigin = 'anonymous';
       l.setAttribute('fetchpriority', 'low'); l.href = href;
       document.head.appendChild(l);
     }
-    for (var i = 0; i < names.length; i++) pl(dir + names[i] + '.glb' + ext);
-    pl('/basis/basis_transcoder.wasm'); pl('/basis/basis_transcoder.js');
+    function runPreloads(){
+      for (var i = 0; i < names.length; i++) pl(dir + names[i] + '.glb' + ext);
+      pl('/basis/basis_transcoder.wasm'); pl('/basis/basis_transcoder.js');
+    }
+    window.__propPreloadsRun = runPreloads;
+    if (!lazyHold) runPreloads();
   })();
   if (renderer.debug) renderer.debug.checkShaderErrors = false;   // dev-only introspection, costs compile time
   // ── pin the pipeline cache ── on webgpu three EVICTS a render pipeline
@@ -4363,6 +4374,9 @@ window.__bootScene = async function(){
       try { warmResOff(); } catch(wre){}
       if (warmSweepStarted && !warmKill) try { warmDone(); } catch(wde){}   // a COMPLETED warm; a killed or skipped one must not fast-path the next visit
       veilLifted = true; window.__veilDown = true;
+      // the phone's held-back props start NOW, behind the visible page
+      try { if (window.__propPreloadsRun) window.__propPreloadsRun(); } catch(plE){}
+      try { if (window.__lazyRelease) window.__lazyRelease(); } catch(lzE){}
       try { if (MQ.bootMark) MQ.bootMark(); } catch(e){}   // the ride starts NOW, not at load
       if (veilOnLoad) veilOnLoad();
     }
@@ -4895,19 +4909,20 @@ window.__bootScene = async function(){
   // this counts the loads themselves: bumped on every call, dropped when
   // the model (and whatever it queued in turn) has landed.
   window.__glbOut = 0; window.__glbSeen = 0;
-  (function(){
-    var origLoad = loader.load.bind(loader);
-    loader.load = function(url, onLoad, onProgress, onError){
-      window.__glbOut++; window.__glbSeen++;
-      return origLoad(url, function(g){
-        window.__glbOut--;                 // drop FIRST: whatever this callback
-        if (onLoad) onLoad(g);             // queues next is counted on its own
-      }, onProgress, function(e){
-        window.__glbOut--;
-        if (onError) onError(e);
-      });
-    };
-  })();
+  // ── PHONES LOAD THE PAGE THEY CAN SEE, THEN THE REST ─────────────────
+  // every model used to land before the veil lifted — 7.3MB on the phone
+  // set — but only two of them are in the first screen: the city and the
+  // rack (3.6MB). the other 3.7MB (panel, pcb, calculator, laptop,
+  // terminal, door, card, qblock) belong to sections a phone reaches
+  // many seconds later, and holding the veil for them is the loading the
+  // user actually feels. so on a phone the loader QUEUES them and the
+  // release fires when the veil goes down: the page shows in half the
+  // bytes, and the props stream in behind it in page order. each one
+  // still warms itself as it lands (warmPropSoon in its own callback),
+  // which is the machinery this page already had for late props.
+  // desktop is untouched — its budget was never the problem, and the
+  // "load the whole site, THEN show it" rule stands there. ?lazy=0 opts
+  // a phone back into the old all-at-once behaviour for A/B.
   // NOTE: this file carried TWO copies of the phone texture governor —
   // the v11 port and the v12 one, each wrapping loader.load, so every
   // model was traversed and every map initTexture'd twice at load. the
@@ -5084,6 +5099,50 @@ window.__bootScene = async function(){
         onLoad(g);
       }, onProgress, onError);
     };
+  })();
+  // ── THE LAZY GATE GOES LAST, ON PURPOSE ────────────────────────────
+  // loader.load carries three wrappers by now: this gate, the compressed-
+  // sibling inflater and the phone texture governor. the inflater does NOT
+  // call through for a compressed model — it fetches and loader.parse()s
+  // the bytes itself — so a gate installed under it never sees a single
+  // load. it has to be the OUTERMOST wrapper, which means last.
+  var LAZY_PHONE = MOBILE && !/[?&]lazy=0/.test(location.search || '');
+  var LAZY_FIRST = /virtual-city|server_racking_system/;   // the first screen
+  (function(){
+    var origLoad = loader.load.bind(loader);
+    var queued = [], released = !LAZY_PHONE;
+    function dispatch(url, onLoad, onProgress, onError){
+      window.__glbOut++; window.__glbSeen++;
+      return origLoad(url, function(g){
+        window.__glbOut--;                 // drop FIRST: whatever this callback
+        if (onLoad) onLoad(g);             // queues next is counted on its own
+      }, onProgress, function(e){
+        window.__glbOut--;
+        if (onError) onError(e);
+      });
+    }
+    loader.load = function(url, onLoad, onProgress, onError){
+      // a queued load is NOT counted in __glbOut: the warm sweep waits on
+      // that counter, and it must not wait for models it is not warming
+      if (window.__lazyLog) window.__lazyLog.push([Math.round(performance.now()), released ? 'pass' : (LAZY_FIRST.test(url) ? 'first' : 'queue'), url.split('/').pop()]);
+      if (!released && !LAZY_FIRST.test(url)){
+        queued.push([url, onLoad, onProgress, onError]);
+        if (window.__lazyInfo && queued.length > window.__lazyInfo.peak) window.__lazyInfo.peak = queued.length;
+        return;
+      }
+      return dispatch(url, onLoad, onProgress, onError);
+    };
+    window.__lazyLog = [];
+    window.__lazyRelease = function(){
+      window.__lazyLog.push([Math.round(performance.now()), 'RELEASE', String(queued.length)]);
+      if (released) return 0;
+      released = true;
+      var q = queued; queued = [];
+      for (var i = 0; i < q.length; i++) dispatch(q[i][0], q[i][1], q[i][2], q[i][3]);
+      return q.length;
+    };
+    window.__lazyPending = function(){ return queued.length; };
+    window.__lazyInfo = {mobile: !!MOBILE, lazy: !!LAZY_PHONE, peak: 0};
   })();
   // the demo's own material settings (from its 3d-settings, not in the export):
   // window emission is boosted 10× / 6.1×, streamers 1.42×
