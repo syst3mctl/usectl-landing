@@ -2585,6 +2585,28 @@ window.__bootScene = async function(){
       // less than the unbounded desktop grant an ipad pro was getting).
       if (TABLET) Q[2].dpr = Math.max(1.5, Math.min(window.devicePixelRatio || 1, Math.sqrt(4e6 / cssPx)));
     })();
+    // ── WHAT A PHONE ACTUALLY PAYS FOR, TRIMMED ──────────────────────
+    // two costs were being carried on phones for a picture nobody can
+    // resolve at arm's length, and an iphone 12 felt both ("in mobile its
+    // to much good quality and i have lag in iphone 12"):
+    //
+    //   · THE HANGING WIRES — 1.76M triangles, 61% of the whole city, of
+    //     hair-thin strokes. this table's own note says they are
+    //     "sub-pixel noise" on a 390px frame, and rungs 0 and 1 already
+    //     dropped them for exactly that reason; rungs 2 and 3 kept them.
+    //     off on every phone rung now. the wireframe OVERLAYS — the green
+    //     line work that IS the ghost city's look — stay untouched.
+    //
+    //   · THE TOP RUNG's PIXELS — rung 3 grants ~2.2M canvas px (dpr
+    //     ~2.59 on a 6.1" phone) against rung 2's dpr 2, i.e. 1.67x the
+    //     fragments for every pass in a 19-target chain. rung 3 was added
+    //     when the ghost city was accidentally rendering OPAQUE (the
+    //     missing version bump, fixed this round): restoring the real
+    //     blended ghost put its measured cost back, and the top rung no
+    //     longer fits inside it on a 12. phones cap at 2.
+    // both are demotions only, so the demote-only law still holds.
+    if (MOBILE){ Q[2].wires = false; Q[3].wires = false; }
+    var PHONE_CEIL = 2;   // see the phone trim above: no automatic rung 3
     var M = {tier: 2, k: Q[2], mobile: MOBILE, forced: false, booted: false,
              ceil: 2, why: 'desktop', gpu: '', cores: 0, mem: 0, panel: 0};
     // WEBGPU: the low rung's "fxaa → plain copy" swap is gone as such —
@@ -2839,7 +2861,7 @@ window.__bootScene = async function(){
           t = 3; why.push('benches flagship-class -> ultra over the name');
         }
       }
-      t = Math.max(0, Math.min(3, t));
+      t = Math.max(0, Math.min(PHONE_CEIL, t));
       if (remembered && remembered.t !== t) why.push('over remembered ' + remembered.t);
       M.why = why.length ? ('probe: ' + why.join(', ')) : 'probe: phone full';
       memWrite(t);
