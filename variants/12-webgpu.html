@@ -2907,16 +2907,24 @@ window.__bootScene = async function(){
     } else if (dBench > 45 || (dCores && dCores <= 2)){
       ULTRA = false;   // weak gpu/cpu: the classic tier is this device's best
     } else {
-      // every ultra desktop STARTS at the full device-res chain (beauty,
-      // dof gather and fxaa 1:1 with panel pixels) — the plain url is the
-      // top config, deterministically. the one-shot bench proved too
-      // noisy to gate quality (5-19ms across runs on ONE machine); the
-      // governor's ladder (2.0→1.75→1.5→1.25, working since the
-      // lastCapCR fix) is the measured demotion and settles a machine
-      // that can't hold it within its first ride
-      ULTRA_CAP = 2.0;
-      if (dPanel >= 8.3e6) ULTRA_CAP = 1.5;   // 4k-class panel: the fill is the budget even now
-      if (TABLET) ULTRA_CAP = 1.5;            // ipad: desktop-class silicon, iPhone-class memory police
+      // the ultra desktop chain caps at 1.5 device-res (was 2.0). WHY the
+      // drop: 2.0 was the single biggest gpu-memory consumer (the ~19
+      // render targets scale with the square of the cap — 2.0 vs 1.5 is
+      // 1.8× the target VRAM), and on a machine that could NOT hold it the
+      // governor stepped down mid-scroll (2.0→1.75→1.5→1.25) — each step
+      // reconfigures the webgpu canvas, and REAL chrome's compositor holds
+      // the old presentation surfaces in a way headless never shows: a
+      // user watched the gpu process climb to 5GB "sometimes, scrolling
+      // down". capping where a strong laptop actually HOLDS the frame
+      // means the governor never steps, that trigger never fires, and the
+      // baseline VRAM is ~half. 1.5 + fxaa + the device-res tail still
+      // resolve crisp. ?chain=2 restores the old max for anyone who wants
+      // it and whose gpu holds it. a genuinely weak gpu still falls to
+      // classic above (bench>45), and the governor's ladder still trims
+      // from 1.5 if even that misses.
+      ULTRA_CAP = 1.5;
+      if (dPanel >= 8.3e6) ULTRA_CAP = 1.25;   // 4k-class panel: the fill is the budget, harder
+      if (TABLET) ULTRA_CAP = 1.5;             // ipad: desktop-class silicon, iPhone-class memory police
     }
     try {
       var dAd = renderer.backend && renderer.backend.adapter && renderer.backend.adapter.info;
