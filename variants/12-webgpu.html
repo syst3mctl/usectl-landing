@@ -2413,7 +2413,7 @@ window.__bootScene = async function(){
     // __propPreloadsRun() when it releases the queue (at veil-down), so
     // they still arrive early — just behind the visible page, not in
     // front of it. see LAZY_PHONE at the loader.
-    var lazyHold = sm && !/[?&]lazy=0/.test(location.search || '');
+    var lazyHold = sm;
     function pl(href){
       var l = document.createElement('link');
       l.rel = 'preload'; l.as = 'fetch'; l.crossOrigin = 'anonymous';
@@ -3877,8 +3877,8 @@ window.__bootScene = async function(){
   // uniform write.
   var clipWraps = [];
   // the CITY's two shared wrapper pairs (see the city loader): one context
-  // per plane set instead of one per mesh. ?clipshare=0 = per-mesh (A/B)
-  var CLIP_SHARE = !/[?&]clipshare=0/.test(location.search || '');
+  // per plane set instead of one per mesh.
+  var CLIP_SHARE = true;
   var cityClipBody = null, cityClipWire = null;
   function feedSharedClip(gU, mm){
     if (!gU || !mm) return;
@@ -4921,8 +4921,7 @@ window.__bootScene = async function(){
   // still warms itself as it lands (warmPropSoon in its own callback),
   // which is the machinery this page already had for late props.
   // desktop is untouched — its budget was never the problem, and the
-  // "load the whole site, THEN show it" rule stands there. ?lazy=0 opts
-  // a phone back into the old all-at-once behaviour for A/B.
+  // "load the whole site, THEN show it" rule stands there.
   // NOTE: this file carried TWO copies of the phone texture governor —
   // the v11 port and the v12 one, each wrapping loader.load, so every
   // model was traversed and every map initTexture'd twice at load. the
@@ -5106,7 +5105,7 @@ window.__bootScene = async function(){
   // call through for a compressed model — it fetches and loader.parse()s
   // the bytes itself — so a gate installed under it never sees a single
   // load. it has to be the OUTERMOST wrapper, which means last.
-  var LAZY_PHONE = MOBILE && !/[?&]lazy=0/.test(location.search || '');
+  var LAZY_PHONE = MOBILE;
   var LAZY_FIRST = /virtual-city|server_racking_system/;   // the first screen
   (function(){
     var origLoad = loader.load.bind(loader);
@@ -5124,17 +5123,10 @@ window.__bootScene = async function(){
     loader.load = function(url, onLoad, onProgress, onError){
       // a queued load is NOT counted in __glbOut: the warm sweep waits on
       // that counter, and it must not wait for models it is not warming
-      if (window.__lazyLog) window.__lazyLog.push([Math.round(performance.now()), released ? 'pass' : (LAZY_FIRST.test(url) ? 'first' : 'queue'), url.split('/').pop()]);
-      if (!released && !LAZY_FIRST.test(url)){
-        queued.push([url, onLoad, onProgress, onError]);
-        if (window.__lazyInfo && queued.length > window.__lazyInfo.peak) window.__lazyInfo.peak = queued.length;
-        return;
-      }
+      if (!released && !LAZY_FIRST.test(url)){ queued.push([url, onLoad, onProgress, onError]); return; }
       return dispatch(url, onLoad, onProgress, onError);
     };
-    window.__lazyLog = [];
     window.__lazyRelease = function(){
-      window.__lazyLog.push([Math.round(performance.now()), 'RELEASE', String(queued.length)]);
       if (released) return 0;
       released = true;
       var q = queued; queued = [];
@@ -5142,7 +5134,6 @@ window.__bootScene = async function(){
       return q.length;
     };
     window.__lazyPending = function(){ return queued.length; };
-    window.__lazyInfo = {mobile: !!MOBILE, lazy: !!LAZY_PHONE, peak: 0};
   })();
   // the demo's own material settings (from its 3d-settings, not in the export):
   // window emission is boosted 10× / 6.1×, streamers 1.42×
@@ -5985,7 +5976,7 @@ window.__bootScene = async function(){
       t.opacity = b.opacity; t.transparent = b.transparent; t.depthWrite = b.depthWrite;
       t.stencilWrite = b.stencilWrite; t.stencilWriteMask = b.stencilWriteMask;
       // the flavor bump (see applyCityDim): a flag flip is a new render object only through the version
-      if (FLAVOR_BUMP && (t.transparent !== pTr || t.depthWrite !== pDw || t.stencilWrite !== pSw || (t.stencilWriteMask !== 0) !== pSm)) t.needsUpdate = true;
+      if (t.transparent !== pTr || t.depthWrite !== pDw || t.stencilWrite !== pSw || (t.stencilWriteMask !== 0) !== pSm) t.needsUpdate = true;
       t.stencilRef = b.stencilRef; t.stencilFunc = b.stencilFunc;
       t.clipIntersection = b.clipIntersection; t.clipShadows = b.clipShadows;
       // NO needsUpdate on the plane swap: the clip bridge carries planes
@@ -6058,7 +6049,6 @@ window.__bootScene = async function(){
   // it can't occlude itself out of order, and the opaque rack shows
   // through every wall while still hiding the city behind it.
   var cityDimNow = 1, cityLightsNow = 1, cityGhostWas = false;
-  var FLAVOR_BUMP = !/[?&]bump=0/.test(location.search || '');   // see the flavor bump in applyCityDim
   // ── EVERY RUNTIME `transparent` FLIP GOES THROUGH HERE ───────────────
   // three r186 re-creates a render object — and with it its pipeline —
   // only when material.version changes (RenderObjects.get checks the
@@ -6074,9 +6064,8 @@ window.__bootScene = async function(){
   function setTransparent(m, want){
     if (!m || m.transparent === want) return;
     m.transparent = want;
-    if (FLAVOR_BUMP) m.needsUpdate = true;
+    m.needsUpdate = true;
   }
-  if (/[?&]warmtrace=1/.test(location.search || '')) window.__warmTrace = [];
   function applyCityDim(f, lights){
     if (Math.abs(f - cityDimNow) < 0.003 && Math.abs(lights - cityLightsNow) < 0.003) return;
     cityDimNow = f; cityLightsNow = lights;
@@ -6147,8 +6136,6 @@ window.__bootScene = async function(){
       // (ghost on/off, depthWrite at 0.3) — the re-created object hits
       // the node-builder and pipeline caches for a flavor seen before,
       // and the warm sweep sees every flavor first, behind the veil.
-      // ?bump=0 is the A/B hook for the perf rigs — it brings the broken
-      // ghost back on purpose, never ship a link with it
       var pTr = m.transparent, pDw = m.depthWrite, pSw = m.stencilWrite, pSm = m.stencilWriteMask !== 0;
       m.opacity = a;
       m.transparent = ghost || b.tr;
@@ -6170,7 +6157,7 @@ window.__bootScene = async function(){
       m.stencilWriteMask = ghost ? 0 : 0xff;
       m.stencilRef = 1;
       m.stencilFunc = ghost ? THREE.NotEqualStencilFunc : THREE.AlwaysStencilFunc;
-      if (FLAVOR_BUMP && (m.transparent !== pTr || m.depthWrite !== pDw || m.stencilWrite !== pSw || (m.stencilWriteMask !== 0) !== pSm)) m.needsUpdate = true;
+      if (m.transparent !== pTr || m.depthWrite !== pDw || m.stencilWrite !== pSw || (m.stencilWriteMask !== 0) !== pSm) m.needsUpdate = true;
     }
     // the body ghost-hide rides the same scrubbed factor as the ghost
     // itself: f 1 (lit hero/footer) -> 0, f 0.1 (full ghost) -> 1
@@ -11381,12 +11368,8 @@ window.__bootScene = async function(){
   // the next position, render again, until the budget runs out. the
   // budget is what keeps the tab alive — the veil's own progress gauge
   // still needs frames to paint, and a phone's gpu must not be handed an
-  // unbounded burst (the refresh-VRAM lesson). ?warmbudget=N overrides.
-  var WARM_BUDGET_MS = (function(){
-    var m = /[?&]warmbudget=(\d+(?:\.\d+)?)/.exec(location.search || '');
-    if (m) return Math.max(0, +m[1]);
-    return MOBILE ? 12 : 24;   // ~1.5 vsync at 60Hz; the phone keeps a tighter rein
-  })();
+  // unbounded burst (the refresh-VRAM lesson).
+  var WARM_BUDGET_MS = MOBILE ? 12 : 24;   // ~1.5 vsync at 60Hz; the phone keeps a tighter rein
   // ...and a CAP on the steps one frame may take. the budget alone let a
   // frame swallow ~30 of them, and the sweep then finished in 11 real
   // frames — too few for the work a frame defers (uploads, the gpu's own
@@ -11405,10 +11388,7 @@ window.__bootScene = async function(){
   // are not all built and the RIDE pays. 12 is the fastest cap that still
   // leaves the ride clean; phones take a quarter of it (their gpu budget
   // and the refresh-VRAM lesson).
-  var WARM_STEPS_MAX = (function(){
-    var m = /[?&]warmsteps=(\d+)/.exec(location.search || '');
-    return m ? Math.max(1, +m[1]) : (MOBILE ? 4 : 12);
-  })();
+  var WARM_STEPS_MAX = MOBILE ? 4 : 12;
   function loop(){
     requestAnimationFrame(loop);
     frameOnce();
@@ -13706,13 +13686,6 @@ window.__bootScene = async function(){
       // invisible; the deferred post-veil sweep keeps the offscreen path.
       if (!window.__veilDown){ try { composer.render(); window.__warmOk = (window.__warmOk || 0) + 1; } catch(we){ window.__warmThrew = (window.__warmThrew || 0) + 1; window.__warmErr = String(we && we.message || we).slice(0, 120); warmChainOffscreen(); } }
       else { warmChainOffscreen(); window.__warmOff = (window.__warmOff || 0) + 1; }
-      // ?warmtrace=1 — what ride state each warm step actually reached.
-      // the sweep's whole job is to VISIT states, so when a step's cost
-      // or pacing changes this is the ledger that says what it stopped
-      // visiting (see the step batcher in loop()).
-      if (window.__warmTrace) window.__warmTrace.push([Math.round(window.__warmY), +rackFade.toFixed(3), +cityDimNow.toFixed(3),
-        (cityMats[0] ? (cityMats[0].transparent ? 1 : 0) : -1), (cityMats[0] ? (cityMats[0].depthWrite ? 1 : 0) : -1),
-        (rackRoot && rackRoot.visible ? 1 : 0), +shellPlay.toFixed(2), (window.__pipeN || 0)]);
       staticPrevCam.makeScale(0, 0, 0); return;
     }
     var camMoved = !staticPrevCam.equals(camera.matrixWorld);
