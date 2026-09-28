@@ -10897,7 +10897,18 @@ window.__bootScene = async function(){
     // at half rate nothing about them reads differently, and the phone
     // gets those megabytes back. desktop keeps every frame.
     liveCvTick++;
-    var liveCvSkip = MOBILE && (liveCvTick & 1) === 1;
+    // HALF-RATE on EVERY device now (was mobile-only). the per-frame live
+    // canvases (terminal holo scan 1024×512 = 2MB, control panel gauges)
+    // re-upload their WHOLE raster to the gpu every frame their section
+    // shows — and on real desktop chrome that sustained upload staging
+    // accumulates in the gpu PROCESS (a user watched it climb to GBs while
+    // scrolling; headless never composites so its createTexture count
+    // stayed flat and hid it). at half cadence the breathing scan and the
+    // drifting gauges read identically (round 36 proved this on mobile)
+    // and the upload churn halves. text-bearing plates that upload per
+    // KEYSTROKE (not per frame) are unaffected — they were never the
+    // sustained cost.
+    var liveCvSkip = (liveCvTick & 1) === 1;
     if (!stageVisible || window.__sceneHold) return;   // scrolled away, or under the film's sheet: skip the whole frame
     // the addons flat is fully opaque: nothing of the scene can show —
     // skip the whole chain; the ride resumes as soon as the cover thins.
