@@ -4353,6 +4353,7 @@ window.__bootScene = async function(){
   (function(){
     var veilOnLoad = THREE.DefaultLoadingManager.onLoad;
     var warmed = false;   // the manager fires on every later queue drain too
+    var glbDrains = 0;    // how many times it has fired (the asset generation)
     var veilLifted = false, warmSweepStarted = false, warmKill = false;
     // the veil only drops ONCE, and only after the site is fully loaded
     // AND snapped to the hero — never mid-warm ("load the whole site,
@@ -4401,6 +4402,8 @@ window.__bootScene = async function(){
       setTimeout(warmNet, 500);
     })();
     THREE.DefaultLoadingManager.onLoad = function(){
+      glbDrains++;   // see the sweep's replay check: assets that land AFTER
+                     // the warm began were never in its seq
       var warmedNow = false;
       try {
         if (!warmed && rackRoot && cityMats.length){
@@ -4656,7 +4659,48 @@ window.__bootScene = async function(){
             window.__sweepDeadline = performance.now() + SWEEP_MS;   // the net's clock starts HERE, not at boot
             window.__sweepT0 = performance.now(); window.__sweepSteps = 0;
             var i = 0, warmup = MOBILE ? 12 : 24, startY = window.pageYOffset || 0;
-            (function step(){
+            // ── THE REPLAY ── the sweep starts on the gltf queue's FIRST
+            // drain, but the props nest their own loads inside their
+            // callbacks (the terminal's card, the panel, the door), so
+            // assets keep landing after it begins. that never showed while
+            // the sweep took 7s — it outlived the loads by accident. with
+            // the step batcher it finishes in ~1.4s, ahead of them, and
+            // whatever landed late went into the ride COLD (measured: ride
+            // pipelines 11 -> 48-99, the stalls back at the reveal). so:
+            // remember the asset generation at the start, and if it moved
+            // by the end, run the whole seq once more. one replay only —
+            // it costs about a second and cannot ping-pong.
+            var drainAtStart = glbDrains, replays = 0;
+            var seenAtStart = window.__glbSeen || 0, warmHold = false;
+            // the sweep no longer paces ITSELF at one step per rAF (see the
+            // batcher in loop()): it arms, and whoever gets there first —
+            // the loop's budget or the fallback rAF — takes the step. the
+            // rAF fallback matters for the frames before the batcher can
+            // run and for any machine where the budget is spent.
+            // ONE fallback rAF in flight, ever. armed per step but scheduled
+            // only when nothing is pending: a batch of 30 steps used to
+            // schedule 30 callbacks, and next frame all 30 fired back to
+            // back — each ADVANCING the sweep with no render between them,
+            // so ~70 of the 264 positions were never drawn and their
+            // pipelines went into the ride cold (measured: boot 247 -> 163,
+            // ride 10 -> 55). the batcher renders what it pulls; this is
+            // only the keep-alive.
+            var warmArmed = false, warmRaf = 0;
+            function warmArm(){
+              warmArmed = true;
+              if (warmRaf) return;
+              warmRaf = requestAnimationFrame(function(){
+                warmRaf = 0;
+                if (warmArmed){ warmArmed = false; step(); }
+              });
+            }
+            window.__warmPull = function(){
+              if (warmHold || !warmArmed) return false;   // parked: waiting on a model
+              warmArmed = false;
+              step();
+              return true;
+            };
+            function step(){
               // the veil came down some other way (the net gave up): the
               // visitor can SEE the page now, and this sweep drives the
               // ride off __warmY — their scroll would do nothing. hand
@@ -4708,6 +4752,28 @@ window.__bootScene = async function(){
                 return;
               }
               if (warmKill) i = seq.length;   // the veil net fired mid-warm: complete NOW
+              if (i >= seq.length && !warmKill && replays < 2){
+                // ── THE SWEEP OUTRAN THE MODELS ──
+                // one step per rAF made the sweep take ~7s, which by pure
+                // accident outlasted every async decode; batched it lands
+                // in ~1.5s and the deep-page props (laptop, calculator,
+                // panel, terminal, door) had not arrived — their sections
+                // swept EMPTY, and the pipelines they never built showed
+                // up under the visitor's scroll instead (measured: boot
+                // 276 -> 184 pipelines, ride 10 -> 61, stalls back at the
+                // reveal). so the sweep holds while anything is still in
+                // flight, and replays the whole seq once the last one
+                // lands. at most two replays; SWEEP_MS still caps it.
+                if ((window.__glbOut || 0) > 0){
+                  warmHold = true;
+                  setTimeout(function(){ warmHold = false; warmArm(); }, 120);
+                  return;
+                }
+                if ((window.__glbSeen || 0) !== seenAtStart){
+                  replays++; seenAtStart = window.__glbSeen || 0; i = 0;
+                  syncClipGroups(true);   // the late props want their wrappers before the pass
+                }
+              }
               if (i >= seq.length){
                 // ── warm done: SNAP to the live scroll (the hero on a top
                 // refresh) BEFORE the veil lifts. the sweep left the camera
@@ -4776,8 +4842,9 @@ window.__bootScene = async function(){
               // the reveal + whole-page sweep: gauge 0.85 → 0.99
               try { if (window.__veilPhase) window.__veilPhase(0.85, 0.99, i / seq.length); } catch(ge){}
               window.__warmY = seq[i++]; window.__sweepSteps = i; window.__sweepLen = seq.length;
-              requestAnimationFrame(step);
-            })();
+              warmArm();
+            }
+            step();
             }
             function armDeferredSweep(){
               var dLastY = -1;
@@ -4819,6 +4886,28 @@ window.__bootScene = async function(){
     };
   })();
   var loader = new THREE.GLTFLoader();
+  // ── HOW MANY GLBs ARE STILL IN FLIGHT ────────────────────────────────
+  // the warm sweep must not finish ahead of the models: a prop that lands
+  // after the sweep has passed its section was never drawn behind the veil
+  // and compiles its pipelines under the visitor's thumb instead. the
+  // LoadingManager cannot answer this — the props queue their own loads
+  // from inside other callbacks, so it drains and refills several times.
+  // this counts the loads themselves: bumped on every call, dropped when
+  // the model (and whatever it queued in turn) has landed.
+  window.__glbOut = 0; window.__glbSeen = 0;
+  (function(){
+    var origLoad = loader.load.bind(loader);
+    loader.load = function(url, onLoad, onProgress, onError){
+      window.__glbOut++; window.__glbSeen++;
+      return origLoad(url, function(g){
+        window.__glbOut--;                 // drop FIRST: whatever this callback
+        if (onLoad) onLoad(g);             // queues next is counted on its own
+      }, onProgress, function(e){
+        window.__glbOut--;
+        if (onError) onError(e);
+      });
+    };
+  })();
   // NOTE: this file carried TWO copies of the phone texture governor —
   // the v11 port and the v12 one, each wrapping loader.load, so every
   // model was traversed and every map initTexture'd twice at load. the
@@ -5911,6 +6000,7 @@ window.__bootScene = async function(){
   // through every wall while still hiding the city behind it.
   var cityDimNow = 1, cityLightsNow = 1, cityGhostWas = false;
   var FLAVOR_BUMP = !/[?&]bump=0/.test(location.search || '');   // see the flavor bump in applyCityDim
+  if (/[?&]warmtrace=1/.test(location.search || '')) window.__warmTrace = [];
   function applyCityDim(f, lights){
     if (Math.abs(f - cityDimNow) < 0.003 && Math.abs(lights - cityLightsNow) < 0.003) return;
     cityDimNow = f; cityLightsNow = lights;
@@ -11204,8 +11294,58 @@ window.__bootScene = async function(){
     {w: footWin, e: 0.001},
   ];
 
+  // ── THE WARM SWEEP'S STEP BATCHER ─────────────────────────────────
+  // a sweep step is ONE scroll position rendered behind the veil, and it
+  // is cheap — measured on this page: the sweep's frames ran at a median
+  // of 17ms, i.e. EXACTLY one vsync, which means every frame was WAITING,
+  // not working. one step per rAF therefore priced the whole boot at one
+  // vsync per step: 264 steps = 4.4s at 60Hz before a single millisecond
+  // of real work, on any machine, forever.
+  // so the loop pulls as many steps as the frame affords: render, pull
+  // the next position, render again, until the budget runs out. the
+  // budget is what keeps the tab alive — the veil's own progress gauge
+  // still needs frames to paint, and a phone's gpu must not be handed an
+  // unbounded burst (the refresh-VRAM lesson). ?warmbudget=N overrides.
+  var WARM_BUDGET_MS = (function(){
+    var m = /[?&]warmbudget=(\d+(?:\.\d+)?)/.exec(location.search || '');
+    if (m) return Math.max(0, +m[1]);
+    return MOBILE ? 12 : 24;   // ~1.5 vsync at 60Hz; the phone keeps a tighter rein
+  })();
+  // ...and a CAP on the steps one frame may take. the budget alone let a
+  // frame swallow ~30 of them, and the sweep then finished in 11 real
+  // frames — too few for the work a frame defers (uploads, the gpu's own
+  // execution, the queue behind composer.render()), so states rendered but
+  // their pipelines were not all built and the ride paid for them. the cap
+  // keeps the sweep FRAME-paced while still spending the whole frame.
+  // measured on this page (headless, 1600x900 dsf2, vite preview), veil /
+  // pipelines built behind it / pipelines left for the ride / frames >50ms
+  // during a full ride, cap swept 1..unlimited:
+  //   1 (the old pacing)  8.2s  284  16  3 stalls (one 167ms)
+  //   4                   4.1s  241  17  none
+  //   12                  3.0s  233  23  none        <- the knee
+  //   unlimited           3.1s  200  36  2 stalls (one 133ms)
+  // past ~12 the sweep stops being frame-paced at all and the gpu never
+  // catches up between submissions, so states render but their pipelines
+  // are not all built and the RIDE pays. 12 is the fastest cap that still
+  // leaves the ride clean; phones take a quarter of it (their gpu budget
+  // and the refresh-VRAM lesson).
+  var WARM_STEPS_MAX = (function(){
+    var m = /[?&]warmsteps=(\d+)/.exec(location.search || '');
+    return m ? Math.max(1, +m[1]) : (MOBILE ? 4 : 12);
+  })();
   function loop(){
     requestAnimationFrame(loop);
+    frameOnce();
+    if (window.__warmY != null && window.__warmPull && WARM_BUDGET_MS > 0){
+      var wb0 = performance.now(), wbN = 0;
+      while (wbN < WARM_STEPS_MAX && performance.now() - wb0 < WARM_BUDGET_MS){
+        if (!window.__warmPull()) break;        // the sweep had nothing queued
+        if (window.__warmY == null) break;      // it finished inside that step
+        frameOnce(); wbN++;
+      }
+    }
+  }
+  function frameOnce(){
     var dt = Math.min(clock.getDelta(), 0.05);
     profFrame();
     // ── LIVE CANVAS CADENCE (phones) ──
@@ -11500,6 +11640,13 @@ window.__bootScene = async function(){
       // and FULLY OPEN whenever the rack stands at opacity 1 — the two
       // land together, always in step, reversible with the scroll
       if (lapLid){
+        // console probe for the lid's choreography (assigned once — a
+        // closure per frame here would be real garbage in the loop)
+        if (!window.__lapDbg) window.__lapDbg = function(){
+          return {rx: +lapLid.rotation.x.toFixed(4), q: lapLidQ, vert: lapLidVertQ, faq: lapLidFaqQ,
+                  vis: !!(lapRoot && lapRoot.visible), lapQ: lapQ, hideP: +addonsHideP.toFixed(3),
+                  hideRaw: window.__addonsRackHide, coverOp: window.__addonsCoverOp};
+        };
         var lidNext = Math.round((1 - addonsHideP) * 200) / 200;
         // slider mode straightens the panel to exactly 90° while the
         // terminal un-types, dead vertical right as the slides take the
@@ -13476,8 +13623,15 @@ window.__bootScene = async function(){
       // crossing still created 236-240 dawn pipelines / ~1.2-1.5s after
       // every offscreen warm). presenting under the opaque veil is
       // invisible; the deferred post-veil sweep keeps the offscreen path.
-      if (!window.__veilDown){ try { composer.render(); } catch(we){ warmChainOffscreen(); } }
-      else warmChainOffscreen();
+      if (!window.__veilDown){ try { composer.render(); window.__warmOk = (window.__warmOk || 0) + 1; } catch(we){ window.__warmThrew = (window.__warmThrew || 0) + 1; window.__warmErr = String(we && we.message || we).slice(0, 120); warmChainOffscreen(); } }
+      else { warmChainOffscreen(); window.__warmOff = (window.__warmOff || 0) + 1; }
+      // ?warmtrace=1 — what ride state each warm step actually reached.
+      // the sweep's whole job is to VISIT states, so when a step's cost
+      // or pacing changes this is the ledger that says what it stopped
+      // visiting (see the step batcher in loop()).
+      if (window.__warmTrace) window.__warmTrace.push([Math.round(window.__warmY), +rackFade.toFixed(3), +cityDimNow.toFixed(3),
+        (cityMats[0] ? (cityMats[0].transparent ? 1 : 0) : -1), (cityMats[0] ? (cityMats[0].depthWrite ? 1 : 0) : -1),
+        (rackRoot && rackRoot.visible ? 1 : 0), +shellPlay.toFixed(2), (window.__pipeN || 0)]);
       staticPrevCam.makeScale(0, 0, 0); return;
     }
     var camMoved = !staticPrevCam.equals(camera.matrixWorld);
@@ -13566,7 +13720,11 @@ window.__bootScene = async function(){
     // scroll and the judder governor keep the fixed 60hz grid; only the
     // idle animators ride the adaptive hold
     var ambHold = liveCost > 0.02 ? liveCost * 2.2 : 0.0161;
-    var skipOk = ambClock < ((ambientOnly && frameLive) ? ambHold : 0.0161) && frameCacheValid &&
+    // the warm sweep is never paced: every step exists precisely to force
+    // a render (and with the batcher its dt is ~0, so ambClock would sit
+    // under every threshold and skip the whole sweep)
+    var skipOk = window.__warmY == null &&
+                 ambClock < ((ambientOnly && frameLive) ? ambHold : 0.0161) && frameCacheValid &&
                  !renderer.shadowMap.needsUpdate;
     W.cap = liveCap;
     // static (grain-only) frames join the paced family too: replaying
@@ -13584,7 +13742,7 @@ window.__bootScene = async function(){
     // instant scrolling stops (frameDirtyFlag persists → next frame
     // renders). the scene under motion at 30fps is hidden by the dof
     // and the motion itself.
-    if (!MOBILE && scrollActive && frameLive){
+    if (!MOBILE && scrollActive && frameLive && window.__warmY == null){
       scrollSkip = !scrollSkip;
       if (scrollSkip) return;   // main thread free this frame for the page scroll
     } else scrollSkip = false;
@@ -14197,8 +14355,8 @@ if (window.THREE && window.__TSL) window.__bootScene().catch(function(e){ consol
   var addonsSec = document.getElementById('addons') || board;
   function win(v, a, b){ return Math.max(0, Math.min(1, (v - a) / (b - a))); }
   function ease(t){ return t * t * (3 - 2 * t); }
-  var addonsTopY = -1;
-  function addonsDrop(){ addonsTopY = -1; }
+  var addonsTopY = -1, addonsBotY = -1;
+  function addonsDrop(){ addonsTopY = -1; addonsBotY = -1; }
   addEventListener('resize', addonsDrop);
   addEventListener('orientationchange', addonsDrop);
   if (window.ResizeObserver) try { new ResizeObserver(addonsDrop).observe(document.body); } catch(e){}
@@ -14209,8 +14367,21 @@ if (window.THREE && window.__TSL) window.__bootScene().catch(function(e){ consol
     // ride had written its css vars, so it flushed layout each frame. the
     // page top is cached and invalidated by the observers above; the live
     // top is that minus the scroll.
-    if (addonsTopY < 0) addonsTopY = addonsSec.getBoundingClientRect().top + (window.pageYOffset || 0);
-    var r = { top: addonsTopY - (window.pageYOffset || 0) };
+    // BOTH edges, cached. the rect read moved off the scroll handler to
+    // stop it flushing layout every frame, but only `top` was kept — and
+    // the two EXIT windows below read `r.bottom`, so they were win(undefined)
+    // = NaN, __addonsRackHide went NaN, the scene's `|| 0` swallowed it and
+    // the addons flat simply never happened: the rack never stepped out,
+    // the gray cover never took the radial, and THE LAPTOP LID (which rides
+    // that same factor) never closed and re-opened on the way through.
+    // the height is invalidated by the same observers as the top.
+    if (addonsTopY < 0){
+      var ar = addonsSec.getBoundingClientRect(), asy = (window.pageYOffset || 0);
+      addonsTopY = ar.top + asy;
+      addonsBotY = ar.bottom + asy;
+    }
+    var sy0 = (window.pageYOffset || 0);
+    var r = { top: addonsTopY - sy0, bottom: addonsBotY - sy0 };
     // entry: rack fades over section top 75%→50% vh (+20% later per user —
     // was 95→70; the seal completes at 75, so revert → fade → cover chain
     // stays ordered), cover over 68%→45%
