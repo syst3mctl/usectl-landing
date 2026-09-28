@@ -2942,10 +2942,22 @@ window.__bootScene = async function(){
     } catch(e){}
   }
   canvas.addEventListener('webglcontextlost', ctxLost, false);   // the webgl2 fallback backend
-  // WEBGPU: the device reports its own death — same meaning, same move
+  // WEBGPU: the device reports its own death — same meaning, same move,
+  // EXCEPT an intentional teardown. reason 'destroyed' is only ever an
+  // explicit device.destroy()/dispose or the UA tearing the device down
+  // on navigation/background — never a real loss (a genuine crash or
+  // jetsam reports 'unknown'). three's OWN handler on this same promise
+  // reason-gates it (WebGPUBackend.js: `if (info.reason==='destroyed')
+  // return`); the page's parallel handler must too, or a plain refresh's
+  // teardown fires ctxLost -> MQ.remember(tier-1) + location.reload() and
+  // the visitor watches the loader a second time ("if i refresh i see
+  // loadings 2-3 times"). real losses still recover (rounds 37b/38).
   try {
     if (renderer.backend && renderer.backend.device && renderer.backend.device.lost)
-      renderer.backend.device.lost.then(function(){ ctxLost(null); });
+      renderer.backend.device.lost.then(function(info){
+        if (info && info.reason === 'destroyed') return;
+        ctxLost(null);
+      });
   } catch(e){}
   // ── the crash net: jetsam — ios killing the whole TAB under memory
   // pressure — fires NO event at all: no context loss, no error, no
@@ -4389,17 +4401,23 @@ window.__bootScene = async function(){
               // profile. the reveal band above still warms (that one is
               // felt on every backend); the deep page pays first-visit
               // compile like v11 always has.
-            } else if (!/[?&]tail=0/.test(location.search) && (!MOBILE || warmFast || /[?&]tail=1/.test(location.search))){
-              // PHONES SKIP THE TAIL ON THE FIRST VISIT ("i need just
-              // loading be faster in mobile") — even at the warm floor the
-              // tail is +1.6s of a phone's boot (its warm frames are
-              // cpu-bound, so the floor buys less there), and rounds 35-41
-              // warm the deep page at its sources; the measured first-ride
-              // cost is single-frame 41-69ms blips, zero over 100ms. a
-              // REVISIT runs the tail (warmFast, single-draw) and the
-              // device converges to full coverage from its second load.
-              // desktop runs the full tail every visit — at the floor it
-              // is cheap, and its ride stays at ~a dozen late compiles.
+            } else if (!/[?&]tail=0/.test(location.search) && (!MOBILE || /[?&]tail=1/.test(location.search))){
+              // PHONES SKIP THE DEEP-PAGE TAIL ON EVERY VISIT (was: first
+              // visit only, warmFast ran it on refresh). that refresh-only
+              // tail was the "loadings 2-3 times" trigger: a refresh loads
+              // EVERY model instantly from the sw cache (no network pacing
+              // spreading the decode+upload) AND re-ran the whole band1->
+              // footer warm behind the veil — one dense VRAM burst that
+              // tripped the webgpu device loss on a memory-tight phone,
+              // whose ctxLost reloaded the page (an extra veil). the tail's
+              // pipelines are already OS-shader-cached from the first
+              // visit's natural scroll, so re-warming them behind the veil
+              // bought nothing and cost the burst. the reveal band above
+              // (the felt split lag) still warms every visit; the deep page
+              // is covered by armDeferredSweep + the natural first scroll.
+              // ("i need just loading be faster in mobile" — this makes a
+              // refresh no heavier than a first visit.) desktop keeps the
+              // full tail every visit — its memory budget is not the phone's.
               var maxY = Math.max(band1, (document.documentElement.scrollHeight || 0) - window.innerHeight);
               var TAIL_STEPS = Math.min(warmParam('warmtail', 48), Math.ceil((maxY - band1) / 150));
               for (s = 1; s <= TAIL_STEPS; s++){ y = band1 + (maxY - band1) * s / TAIL_STEPS; seq.push(y); if (!warmFast) seq.push(y); }
