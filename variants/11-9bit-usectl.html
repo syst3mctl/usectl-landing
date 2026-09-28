@@ -29,27 +29,21 @@
   /* the written spine is the no-scene fallback: hidden from sight, read by assistive
      tech, and promoted to real content wherever the lead-in is skipped */
   .uc-beats{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .uc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  /* the scene hands over to a clean full-height close rather than sharing a viewport
+     with the tail of the room */
+  .uc-end{min-height:100vh;display:flex;flex-direction:column}
+  .uc-end > #cta{flex:1;align-content:center;padding-top:0 !important}
   /* reserve the site-list column so the centred copy can never enter it */
   @media (min-width:761px){
     .uc-hero{ padding-right:300px !important; }
   }
   @media (max-width:760px){
-    .uc-term{ flex-direction:column !important; }
-    .uc-term > div:first-child{ border-right:0 !important; border-bottom:1px solid rgba(100,116,136,.22); }
-    .uc-term{left:14px !important;right:14px !important;bottom:14px !important;width:auto !important}
+    #uc-pips{ right:14px !important; bottom:14px !important; }
   }
   @media (max-width:900px){
-    .uc-grid{ grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
-    .uc-grid.two{ grid-template-columns:minmax(0,1fr) !important; }
-    .uc-many{ grid-template-columns:minmax(0,1fr) !important; }
-    .uc-faq-row{ grid-template-columns:minmax(0,1fr) !important; row-gap:7px; }
-    .uc-bar{ display:none !important; }
     #cta{ grid-template-columns:minmax(0,1fr) !important; row-gap:26px; }
     .uc-sec{ grid-template-columns:minmax(0,1fr) !important; row-gap:18px; }
-    .uc-sec li{ grid-template-columns:2.6em minmax(0,1fr) !important; row-gap:6px; }
-    .uc-sec li p:last-child{ grid-column:2; }
-    .uc-term-row{ grid-template-columns:minmax(0,1fr) !important; }
-    .uc-term-row > div{ border-right:0 !important; border-bottom:1px solid rgba(100,116,136,.18); padding:12px 0 !important; display:flex; gap:14px; }
   }
   /* No motion, no scene: the stage is nothing but scroll-driven animation, so it is
      removed outright and the six beats it teaches become readable prose instead.
@@ -59,16 +53,13 @@
   @media (prefers-reduced-motion:reduce){
     .uc-scene-wrap{height:auto !important}
     .uc-scene-sticky{position:static !important;height:auto !important;overflow:visible !important}
-    #uc-canvas,.uc-pins,.uc-sites,.uc-hero,#uc-roomhead,.uc-term{display:none !important}
+    #uc-canvas,.uc-pins,.uc-sites,.uc-hero,#uc-roomhead,#uc-pips{display:none !important}
     .uc-beats{position:static;width:auto;height:auto;clip-path:none;white-space:normal;
       max-width:1180px;margin:0 auto;padding:88px 26px 0}
     .uc-beats h3{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:26px 0 8px;color:#fff}
     .uc-beats p{font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);max-width:36em}
     .uc-beats pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;
       color:#8fae99;overflow-x:auto;margin:0 0 10px;padding-bottom:2px}
-  }
-  @media (max-width:560px){
-    .uc-grid{ grid-template-columns:minmax(0,1fr) !important; }
   }
 </style>
 </head>
@@ -100,7 +91,7 @@
 
       <div class="uc-sites" id="uc-sites" style="opacity:1;visibility:visible;pointer-events:auto;position:absolute;right:30px;bottom:30px;z-index:4;display:flex;flex-direction:column;gap:8px;font-family:'JetBrains Mono',monospace">
         <div style="display:flex;align-items:center;gap:14px;padding-bottom:4px">
-          <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8fae99">pick a site</span>
+          <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8fae99">sites</span>
           <span style="flex:1"></span>
           <span style="display:flex;align-items:center;gap:6px;font-size:10.5px;color:#8fae99"><span style="display:block;width:8px;height:8px;background:#e6ede8"></span>hetzner locations</span>
         </div>
@@ -138,7 +129,7 @@
         <h1 style="font-size:clamp(34px,6vw,86px);line-height:.94;font-weight:700;letter-spacing:-.035em;text-shadow:0 2px 24px rgba(0,0,0,.9)">one box<span style="color:#11A32A">.</span><br>many machines<span style="color:#11A32A">.</span></h1>
         <p style="font-size:clamp(15px,1.5vw,21px);line-height:1.4;max-width:34em;color:#fff;text-wrap:pretty;text-shadow:0 2px 18px rgba(0,0,0,.9)">every project gets its own computer: an isolated namespace with its own postgres, redis, s3, domain and agent. one flat price. on our metal or yours.</p>
         <div style="display:flex;align-items:center;gap:18px;margin-top:6px;pointer-events:auto">
-          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8fae99">pick a site to go inside →</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#8fae99">going inside falkenstein →</span>
           <button id="uc-skip" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#D6F7DC;background:none;border:0;border-bottom:1px solid rgba(214,247,220,.35);padding:0 0 2px;cursor:pointer">or read the details ↓</button>
         </div>
       </div>
@@ -150,364 +141,52 @@
         <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;color:#8fae99;text-transform:uppercase">rack a · unit 12 · hetzner fsn1</span>
       </div>
 
-      <div class="uc-term" id="uc-term" style="opacity:0;visibility:hidden;pointer-events:none;position:absolute;left:26px;right:26px;bottom:22px;z-index:5;background:rgba(8,10,14,.86);backdrop-filter:blur(6px);border:1px solid rgba(100,116,136,.28);border-radius:12px;display:flex;align-items:stretch;overflow:hidden">
+      <!-- the beats stay navigable without the scene: real buttons, keyboard reachable,
+           floated on the stage now that the panel under them is gone -->
+      <div id="uc-pips" style="opacity:0;visibility:hidden;pointer-events:none;position:absolute;right:26px;bottom:22px;z-index:5;display:flex;gap:4px"></div>
 
-        <div style="flex:1.35;min-width:0;display:flex;flex-direction:column;border-right:1px solid rgba(100,116,136,.22)">
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1px solid rgba(100,116,136,.22)">
-            <span style="width:8px;height:8px;border-radius:50%;background:#ff5f57"></span>
-            <span style="width:8px;height:8px;border-radius:50%;background:#febc2e"></span>
-            <span style="width:8px;height:8px;border-radius:50%;background:#28c840"></span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#8fae99;margin-left:4px">usectl cli · omnitech</span>
-          </div>
-          <div id="uc-lines" style="flex:1;padding:10px 13px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;display:flex;flex-direction:column;min-height:84px"></div>
-        </div>
-
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;padding:11px 15px 12px;gap:10px">
-          <div>
-            <div id="uc-kicker" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8fae99;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-            <p id="uc-lesson" style="margin-top:5px;font-size:13.5px;line-height:1.45;color:#fff;text-wrap:pretty"></p>
-          </div>
-
-          <div>
-            <div style="display:flex;align-items:baseline;gap:10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#8fae99">
-              <span style="letter-spacing:.08em;text-transform:uppercase">machine budget</span>
-              <span style="flex:1"></span>
-              <span id="uc-quota-label" style="color:#5d6570;white-space:nowrap"></span>
-            </div>
-            <span style="display:block;height:7px;margin-top:6px;background:#131a16">
-              <span id="uc-quota-fill" style="display:block;height:7px;width:0%;background:#5d6570"></span>
-            </span>
-            <div style="display:flex;align-items:center;gap:9px;margin-top:11px">
-              <span id="uc-caption" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#8fae99;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
-              <span style="flex:1"></span>
-              <div id="uc-pips" style="display:flex;gap:4px;flex:none"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- devo and the cli speak on canvas, which no screen reader can see: this mirrors
+           whatever the current beat is saying as live text -->
+      <p id="uc-say" class="uc-sr" aria-live="polite"></p>
 
       <div class="uc-beats">
-        <h3>1 · Machine</h3>
-        <pre>$ usectl machines create my-app --vcpu 2 --ram 4 --storage 10
-✓ namespace created</pre>
-        <p>A machine is a namespace and a quota. It holds no code.</p>
-        <h3>2 · Pod</h3>
-        <pre>$ usectl machines pods create my-app web \
-    --repo github.com/you/your-saas --port 3000
-✓ build complete (28s)</pre>
-        <p>A pod is one workload. Three repos means three blades.</p>
-        <h3>3 · Addons</h3>
-        <pre>$ usectl machines addons add my-app --type database
-$ usectl machines addons add my-app --type cache
-$ usectl machines addons add my-app --type worker
-$ usectl machines pods attach-addon my-app web database cache worker</pre>
-        <p>Provisioned is not attached. Three addons mean three attach calls.</p>
-        <h3>4 · Domain</h3>
-        <pre>$ usectl machines pods set my-app web domain=my-app
-✓ live at https://my-app.usectl.com</pre>
-        <p>No domain, no route. Everything else is reachable only from inside.</p>
+        <h3>1 · what you get · one namespace, one bill</h3>
+        <pre>$ usectl login
+$ usectl machines create omnitech \
+    --repo github.com/you/shop</pre>
+        <p>a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes.</p>
+        <h3>2 · managed addons · down the aisle</h3>
+        <pre>$ usectl machines addons add omnitech \
+    --type postgres --managed
+✓ postgres ready. DATABASE_URL injected
+✓ 0 vcpu · 0 gb from your budget</pre>
+        <p>managed addons are logically isolated databases, queues and buckets carved out of shared platform instances. they consume none of your machine’s resources.</p>
+        <h3>3 · dedicated addons · in your rack</h3>
+        <pre>$ usectl machines addons add omnitech \
+    --type postgres --dedicated
+✓ statefulset + pvc in your namespace
+⚠ 0.5 vcpu · 1 gb from your budget</pre>
+        <p>dedicated addons run inside your own namespace with their own persistent volume, and draw directly from your machine’s vcpu and ram.</p>
+        <h3>4 · how it ships · four steps, in order</h3>
+        <pre>$ usectl deploy omnitech
+⋯ building in the cluster...</pre>
+        <p>we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.</p>
+        <h3>5 · push git. get https.</h3>
+        <pre>✓ build 28s · tls issued · live at
+  https://omnitech.usectl.com</pre>
+        <p>every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.</p>
+        <h3>6 · known limits · we say it plainly</h3>
+        <pre>$ usectl machines addons inspect omnitech postgres
+  volume: local-path · node-bound
+  reschedule: no, if that disk goes down</pre>
+        <p>a dedicated addon’s volume is local-path: it pins that pod to one node’s disk and cannot reschedule if the host goes down. dedicated nats streams default to one replica unless your client asks for three.</p>
+        <p>and yeah — i’m devo, your ai assistant. i can check your pod metrics, read the logs and tell you what broke. try it if you like — free for 30 days. no pressure.</p>
       </div>
     </div>
   </section>
 
-  <section id="agents" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px" class="uc-sec">
-    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">built for agents</b>cli first, mcp if you prefer</p>
-    <div>
-      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">your agent already knows how to use it.</h2>
-      <p style="margin:0;font-size:17px;line-height:1.45;max-width:36em;color:rgba(255,255,255,.8);text-wrap:pretty">the cli is the product. one binary, every command with --json, clear errors an agent can act on. claude code, cursor, codex or a shell script: they all deploy the same way. there is an mcp server if you prefer tool calls.</p>
-
-      <ol style="list-style:none;margin:34px 0 0;padding:0;border-top:1px solid rgba(100,116,136,.35)">
-          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">1</span>
-            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">deploy from the chat</p>
-            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty"><code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#8fae99">usectl machines create</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#8fae99">usectl deploy</code>, <code style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#8fae99">usectl logs --follow</code>. no plugin needed.</p>
-          </li>
-          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">2</span>
-            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">agents that live here</p>
-            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">add a hermes or openclaw pod to a machine and it runs 24/7 with its own memory, its own headless browser and a local model. one agent, one machine, its own walls.</p>
-          </li>
-          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">3</span>
-            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">read what happened</p>
-            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">logs, metrics, traces and pod insights through the same cli, so the agent that deployed can also debug.</p>
-          </li>
-      </ol>
-
-      <div style="margin-top:34px;display:grid;grid-template-columns:minmax(0,2.4fr) minmax(0,9fr);column-gap:26px;border-top:1px solid rgba(100,116,136,.35);border-bottom:1px solid rgba(100,116,136,.35)" class="uc-term-row">
-        <div style="padding:18px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;border-right:1px solid rgba(100,116,136,.18)"><span style="display:block;color:#fff">terminal</span><span style="display:block">agent session</span></div>
-        <pre style="margin:0;padding:18px 0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;overflow-x:auto;color:rgba(255,255,255,.88)"><span style="color:#8fae99">$</span> usectl machines create radiodj --repo github.com/you/radiodj --postgres
-<span style="color:#8fae99">$</span> usectl addons add radiodj --type hermes
-<span style="color:#11A32A">✓</span> hermes agent pod running. telegram gateway connected.
-<span style="color:#8fae99">$</span> usectl logs radiodj --follow</pre>
-      </div>
-    </div>
-  </section>
-
-  <section id="machine" style="max-width:1180px;margin:0 auto;padding:88px 26px 100px;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px" class="uc-sec">
-    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">what you get</b>one namespace, one bill</p>
-    <div>
-      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">a machine is a computer that is only yours.</h2>
-      <p style="margin:0;font-size:17px;line-height:1.45;max-width:36em;color:rgba(255,255,255,.8);text-wrap:pretty">on usectl a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes. you see a box with a slider.</p>
-
-      <ol style="list-style:none;margin:34px 0 0;padding:0;border-top:1px solid rgba(100,116,136,.35)">
-          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">1</span>
-            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">isolated by default</p>
-            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">its own network policy, its own quota, its own secrets. a neighbour cannot reach you and you cannot reach it.</p>
-          </li>
-          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">2</span>
-            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">everything inside</p>
-            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">postgres, redis, s3, cron, domains and tls live in the machine, not in five other dashboards.</p>
-          </li>
-          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">3</span>
-            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">one bill</p>
-            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">a machine’s budget is shared by all its apps, addons and groups. adding a second app does not add a second bill.</p>
-          </li>
-          <li style="display:grid;grid-template-columns:2.6em minmax(0,1fr) minmax(0,1.9fr);column-gap:22px;padding:15px 0;border-bottom:1px solid rgba(100,116,136,.18)">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding-top:4px">4</span>
-            <p style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">stage and prod</p>
-            <p style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.72);text-wrap:pretty">split a machine into groups, each with its own namespace and its own database, on the same budget.</p>
-          </li>
-      </ol>
-      <p style="margin:18px 0 0;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.6;color:#8fae99;max-width:60em">apps inside a machine can be web, worker or release. each has its own repo, branch, port, replicas and rollout. pr previews get their own namespace and url.</p>
-    </div>
-  </section>
-
-  <section id="addons" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
-    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">addons</b>12 lines, one toggle each</p>
-    <div>
-      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">the stack, one toggle each.</h2>
-      <p style="margin:0;font-size:17px;line-height:1.45;max-width:36em;color:rgba(255,255,255,.8);text-wrap:pretty">managed on shared platform instances, or dedicated in your own namespace with its own volume and size. attach to any app in one command.</p>
-      <div class="uc-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:rgba(100,116,136,.28);border-top:1px solid rgba(100,116,136,.35);border-bottom:1px solid rgba(100,116,136,.35);margin-top:34px">
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>postgres</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">managed or dedicated. pgvector and timescale on request. scheduled backups to a private bucket.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>redis</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">managed with a key prefix, or dedicated with aof and search modules.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>s3 storage</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">your own bucket and iam user on seaweedfs, with a cdn url.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>nats</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">jetstream on its own volume, websocket in.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>mongodb</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">per machine database, or dedicated.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>sql server</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">for the apps that need it.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>meilisearch</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">search with its own persistent volume.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>cron</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">scheduled jobs from your app image, with run history.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>oauth2 proxy</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">github or google login in front of any app, no code.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>grafana</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">dedicated per machine, wired read only to your own telemetry.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>glitchtip</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">sentry compatible error tracking, one dsn per environment.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:16px 20px 20px">
-          <b style="display:block;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:500;color:#fff;margin-bottom:7px"><span style="color:#11A32A">· </span>ai</b>
-          <p style="margin:0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.72);text-wrap:pretty">an openai compatible endpoint in the cluster: qwen3-14b for chat, bge-m3 for embeddings, metered per machine.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="modes" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
-    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">one product, two rooms</b>managed, self hosted</p>
-    <div>
-      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">on our metal, or on yours.</h2>
-      <div class="uc-grid two" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:rgba(100,116,136,.28);border-top:1px solid rgba(100,116,136,.35);border-bottom:1px solid rgba(100,116,136,.35);margin-top:34px">
-        <div style="background:rgb(30,29,29);padding:22px 26px 26px">
-          <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em;margin-bottom:14px">a · we run it</span>
-          <h3 style="margin:0 0 12px;font-size:26px;line-height:1;letter-spacing:-.025em;font-weight:600">managed<span style="color:#11A32A">.</span></h3>
-          <p style="margin:0;font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.8);text-wrap:pretty">we run it. bare metal we own in falkenstein, kubernetes we operate, backups, ingress, tls and the 3am pager on us. you push git.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:22px 26px 26px">
-          <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em;margin-bottom:14px">b · you run it</span>
-          <h3 style="margin:0 0 12px;font-size:26px;line-height:1;letter-spacing:-.025em;font-weight:600">self hosted<span style="color:#11A32A">.</span></h3>
-          <p style="margin:0;font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.8);text-wrap:pretty">you run it. the same platform on your own hardware, your data never leaves the building. self hosted usectl ships this month.</p>
-        </div>
-      </div>
-      <p style="margin:20px 0 0;font-size:16px;line-height:1.45;max-width:40em;color:rgba(255,255,255,.82)">same cli, same addons, same one command. the only choice is whose room the box stands in.</p>
-    </div>
-  </section>
-
-  <section id="for" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
-    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">who it is for</b>three kinds of many</p>
-    <div>
-      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">people who run many things.</h2>
-      <div class="uc-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:rgba(100,116,136,.28);border-top:1px solid rgba(100,116,136,.35);border-bottom:1px solid rgba(100,116,136,.35);margin-top:34px">
-        <div style="background:rgb(30,29,29);padding:22px 26px 26px">
-          <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em;margin-bottom:14px">software shops</span>
-
-          <p style="margin:0;font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.8);text-wrap:pretty">one machine per client. their own database, their own domain, their own bill you can pass through. hand them the keys when the engagement ends.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:22px 26px 26px">
-          <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em;margin-bottom:14px">agent builders</span>
-
-          <p style="margin:0;font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.8);text-wrap:pretty">one machine per client agent, with postgres, a browser and a local model inside. isolation at the namespace, not inside the prompt.</p>
-        </div>
-        <div style="background:rgb(30,29,29);padding:22px 26px 26px">
-          <span style="display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em;margin-bottom:14px">self hosters</span>
-
-          <p style="margin:0;font-size:15.5px;line-height:1.45;color:rgba(255,255,255,.8);text-wrap:pretty">the same box on your own hardware. one physical server becomes many isolated machines with their stacks.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="math" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
-    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">the math</b>list prices, sept 2026</p>
-    <div>
-      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">the math</h2>
-      <p style="margin:0;font-size:17px;line-height:1.45;max-width:36em;color:rgba(255,255,255,.8);text-wrap:pretty">a 2 vcpu / 4 gb / 20 gb machine is $40.20 a month. postgres, redis, s3, cron, domains, tls, unlimited seats. no bandwidth meter. the sticker is the ceiling.</p>
-      <div style="overflow-x:auto;margin-top:34px">
-        <table style="width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums">
-          <caption style="text-align:left;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;padding:0 0 10px">ledger · same box, list prices, sept 2026</caption>
-          <thead><tr style="border-bottom:1px solid rgba(100,116,136,.35)">
-            <th style="text-align:left;padding:0 0 11px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#8fae99;letter-spacing:.04em">no.</th>
-            <th style="text-align:left;padding:0 0 11px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#8fae99;letter-spacing:.04em">item</th>
-            <th class="uc-bar" aria-hidden="true"></th>
-            <th style="text-align:right;padding:0 0 11px 28px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#8fae99;letter-spacing:.04em">monthly</th>
-          </tr></thead>
-          <tbody>
-          <tr style="border-bottom:1px solid rgba(100,116,136,.18)">
-            <td style="padding:13px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;width:3.5em;vertical-align:baseline">1</td>
-            <td style="padding:13px 24px 13px 0;font-size:14.5px;vertical-align:baseline;font-weight:600;color:#fff">usectl machine, everything in</td>
-            <td class="uc-bar" style="width:26%;padding:13px 0 13px 28px;vertical-align:middle"><span style="display:block;height:6px;width:32%;background:#11A32A"></span></td>
-            <td style="padding:13px 0 13px 28px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap;font-size:15.5px;font-weight:500;vertical-align:baseline;color:#35E055">$40.20</td>
-          </tr>
-          <tr style="border-bottom:1px solid rgba(100,116,136,.18)">
-            <td style="padding:13px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;width:3.5em;vertical-align:baseline">2</td>
-            <td style="padding:13px 24px 13px 0;font-size:14.5px;vertical-align:baseline;color:rgba(255,255,255,.82)">vercel pro + supabase pro + upstash + s3, one seat</td>
-            <td class="uc-bar" style="width:26%;padding:13px 0 13px 28px;vertical-align:middle"><span style="display:block;height:6px;width:50%;background:#5f6c66"></span></td>
-            <td style="padding:13px 0 13px 28px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap;font-size:15.5px;font-weight:500;vertical-align:baseline;color:#fff">$60 and up<small style="display:block;font-size:11.5px;font-weight:400;color:#8fae99">before bandwidth</small></td>
-          </tr>
-          <tr style="border-bottom:1px solid rgba(100,116,136,.18)">
-            <td style="padding:13px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;width:3.5em;vertical-align:baseline">3</td>
-            <td style="padding:13px 24px 13px 0;font-size:14.5px;vertical-align:baseline;color:rgba(255,255,255,.82)">railway, same box, reserved</td>
-            <td class="uc-bar" style="width:26%;padding:13px 0 13px 28px;vertical-align:middle"><span style="display:block;height:6px;width:66%;background:#5f6c66"></span></td>
-            <td style="padding:13px 0 13px 28px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap;font-size:15.5px;font-weight:500;vertical-align:baseline;color:#fff">about $80<small style="display:block;font-size:11.5px;font-weight:400;color:#8fae99">plus egress</small></td>
-          </tr>
-          <tr style="border-bottom:1px solid rgba(100,116,136,.18)">
-            <td style="padding:13px 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;width:3.5em;vertical-align:baseline">4</td>
-            <td style="padding:13px 24px 13px 0;font-size:14.5px;vertical-align:baseline;color:rgba(255,255,255,.82)">render pro + postgres standard</td>
-            <td class="uc-bar" style="width:26%;padding:13px 0 13px 28px;vertical-align:middle"><span style="display:block;height:6px;width:100%;background:#5f6c66"></span></td>
-            <td style="padding:13px 0 13px 28px;text-align:right;font-family:'JetBrains Mono',monospace;white-space:nowrap;font-size:15.5px;font-weight:500;vertical-align:baseline;color:#fff">$125</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="margin-top:30px;padding-top:20px;border-top:1px solid rgba(100,116,136,.18);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:26px;align-items:baseline" class="uc-many">
-        <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99;letter-spacing:.04em">many machines</div>
-          <p style="margin:8px 0 0;font-size:16px;line-height:1.45;color:rgba(255,255,255,.82);text-wrap:pretty">ten client machines at 1 vcpu / 2 gb: $200 a month on usectl. about $400 on railway before storage.</p>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;border-top:1px solid rgba(100,116,136,.18);padding-top:14px">
-          <div style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums"><b style="display:block;font-size:26px;font-weight:600;letter-spacing:-.02em;color:#35E055">$200</b><span style="font-size:11.5px;color:#8fae99">usectl, ten machines</span></div>
-          <div style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums"><b style="display:block;font-size:26px;font-weight:600;letter-spacing:-.02em;color:#fff">~$400</b><span style="font-size:11.5px;color:#8fae99">railway, before storage</span></div>
-        </div>
-      </div>
-      <p style="margin:18px 0 0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8fae99">railway shown at reserved equivalent. all prices list, september 2026.</p>
-    </div>
-  </section>
-
-  <section id="ship" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
-    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">how it ships</b>four steps, in order</p>
-    <div>
-      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">push git. get https.</h2>
-      <ol style="list-style:none;margin:30px 0 0;padding:0;border-top:1px solid rgba(100,116,136,.35)">
-          <li style="display:grid;grid-template-columns:3.2em minmax(0,1fr);column-gap:22px;padding:20px 0;border-bottom:1px solid rgba(100,116,136,.18);align-items:baseline">
-            <span style="font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1;color:#fff">1<span style="color:#11A32A">.</span></span>
-            <p style="margin:0;font-size:17px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.82);text-wrap:pretty">connect a repo through the github app, or push from the cli.</p>
-          </li>
-          <li style="display:grid;grid-template-columns:3.2em minmax(0,1fr);column-gap:22px;padding:20px 0;border-bottom:1px solid rgba(100,116,136,.18);align-items:baseline">
-            <span style="font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1;color:#fff">2<span style="color:#11A32A">.</span></span>
-            <p style="margin:0;font-size:17px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.82);text-wrap:pretty">we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.</p>
-          </li>
-          <li style="display:grid;grid-template-columns:3.2em minmax(0,1fr);column-gap:22px;padding:20px 0;border-bottom:1px solid rgba(100,116,136,.18);align-items:baseline">
-            <span style="font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1;color:#fff">3<span style="color:#11A32A">.</span></span>
-            <p style="margin:0;font-size:17px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.82);text-wrap:pretty">the app goes live at <code style="font-family:'JetBrains Mono',monospace;font-size:15px;color:#8fae99">https://name.usectl.com</code> with a certificate. add your own domain in one command.</p>
-          </li>
-          <li style="display:grid;grid-template-columns:3.2em minmax(0,1fr);column-gap:22px;padding:20px 0;border-bottom:1px solid rgba(100,116,136,.18);align-items:baseline">
-            <span style="font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1;color:#fff">4<span style="color:#11A32A">.</span></span>
-            <p style="margin:0;font-size:17px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.82);text-wrap:pretty">every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.</p>
-          </li>
-      </ol>
-    </div>
-  </section>
-
-  <section id="proof" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
-    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">in use</b>systemctl, tbilisi</p>
-    <div>
-      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">customer zero</h2>
-      <p style="margin:0;font-size:19px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.85);text-wrap:pretty">systemctl runs its own <b style="font-weight:600;color:#fff">9</b> person software shop on usectl: <b style="font-weight:600;color:#fff">133</b> deployments, an ev charging platform with <b style="font-weight:600;color:#fff">16</b> services, a taxi app, a clinic, online shops, and the agents that run our socials.</p>
-      <p style="margin:18px 0 0;font-size:19px;line-height:1.4;max-width:34em;color:rgba(255,255,255,.85);text-wrap:pretty">we built usectl because we needed it. every client we ship gets its own machine, and when it breaks at night it is our pager, not theirs.</p>
-    </div>
-  </section>
-
-  <section id="closing" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
-    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">self hosted</b>ships this month</p>
-    <div>
-      <p style="margin:0;font-size:clamp(24px,3.4vw,46px);line-height:1.05;letter-spacing:-.03em;font-weight:600;text-wrap:balance">on our metal, or on yours<span style="color:#11A32A">.</span> self hosted usectl ships this month<span style="color:#11A32A">.</span></p>
-    </div>
-  </section>
-
-  <section id="faq" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:88px 26px 0;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,9fr);column-gap:26px">
-    <p style="margin:0;padding-top:5px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8fae99"><b style="display:block;color:#fff;font-weight:500">faq</b>six questions</p>
-    <div>
-      <h2 style="margin:0 0 16px;font-size:clamp(26px,3vw,42px);line-height:1;letter-spacing:-.03em;font-weight:600">questions people ask</h2>
-      <dl style="margin:32px 0 0;border-top:1px solid rgba(100,116,136,.35)">
-        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
-          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">is a machine a vm?</dt>
-          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty"><b style="font-weight:600;color:#fff">no.</b> it is a kubernetes namespace with a network policy, a quota and its own secrets on nodes we operate. container isolation, not a microvm. we say that plainly because it matters for some workloads.</dd>
-        </div>
-        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
-          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">can i leave?</dt>
-          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty"><b style="font-weight:600;color:#fff">yes.</b> your dockerfile, your postgres dump and your bucket run anywhere. if we disappeared tomorrow your stack still works.</dd>
-        </div>
-        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
-          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">where is my data?</dt>
-          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty">on bare metal we own at hetzner in falkenstein, germany. with self hosted usectl, on your own hardware.</dd>
-        </div>
-        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
-          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">what about backups?</dt>
-          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty">managed postgres is dumped nightly at the platform level. dedicated postgres gets scheduled backups to a private bucket only that database can reach.</dd>
-        </div>
-        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
-          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">is there a bandwidth meter or a seat fee?</dt>
-          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty"><b style="font-weight:600;color:#fff">no and no.</b> the sticker is the ceiling.</dd>
-        </div>
-        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);column-gap:26px;padding:16px 0;border-bottom:1px solid rgba(100,116,136,.18)" class="uc-faq-row">
-          <dt style="margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35;color:#fff">do i need docker?</dt>
-          <dd style="margin:0;font-size:14.5px;line-height:1.5;color:rgba(255,255,255,.75);text-wrap:pretty">not for next.js, vite, node or static sites. for anything else, a dockerfile.</dd>
-        </div>
-      </dl>
-    </div>
-  </section>
-
+  <!-- the close is its own screen: you come out of the scene into it, not under it -->
+  <div class="uc-end">
   <section id="cta" class="uc-sec" style="max-width:1180px;margin:0 auto;padding:96px 26px 0;display:grid;grid-template-columns:minmax(0,7fr) minmax(0,4fr);column-gap:26px;align-items:end">
     <div>
       <h2 style="margin:0;font-size:clamp(34px,5.6vw,80px);line-height:.94;letter-spacing:-.035em;font-weight:700">one box<span style="color:#11A32A">.</span><br>many machines<span style="color:#11A32A">.</span></h2>
@@ -525,6 +204,7 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       <div style="display:flex;gap:20px"><a href="https://docs.usectl.com">documentation</a><a href="https://github.com/syst3mctl/">github</a><a href="/llms.txt">llms.txt</a></div>
     </div>
   </footer>
+  </div>
 </div>
 
 <script>
@@ -548,12 +228,17 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
   var MASK_HZ   = 'vdABBcUFEbsFIgMC1QIB0gIszgIGzgIuwwIDBwfJAjPEAg/KAjPHAg3MAjDJAg3MAi7JAgzPAizJAgzIAjPJAg3EAjbKAg3EAjXMAgrHAjPKAgzOAgECKcgCD7sCBBIoxgIRuwIHCC/FAhPIAjDEAhXGAjHEAhTGAjLFAhLHAjLFAhDKAjHEAhDHAgQBIgUMwwIIzgIDAwIBEwIHDQcFAb0CAd0CEQMDFgQBBZkFER4KoAUHIQmeBQYBBSQDnAUFAgUmA5kFBgQCKQOWBQUzBJAFCDUEjQUFOwOKBQXWAgPNBQUBBMMFD8EFD8EFD8AFEb4FEr4FEr4FEMAFDcMFDfgDAsoBDr8DO8oBDLsDAwJBAgK/AQu9AwMBSLwBC70DTiADnAEBwwNPHQXfBFEaBt8EUhkG3wRTFgneBFQNEd4EVAsR3wRVBhPiBFUGEeQEVAYS5ARTAxbkBG3jBGrmBGnnBGXsBGTsBGPuBGHwBGDxBF7yBF30BFz0BF30BFz1BFr2BFn5BFX+BFGBBU2DBUyKBUSPBUCTBQcEMp8FMKEFMKEFHggCAgWiBQMDDAcFDASpBQoZBagFCBsFqQUGHAapBQUdBakFBR0FqgUEHgSsBQIfA80FA8AgAdIFAdAFAdIFAdAFAc8FAs4FAr7PCQ==';
 
   function Room(){
-    this.state = { beat:0, typed:0, mapT:0, stage:'map' };
+    this.state = { beat:0, typed:0, said:0, chunk:0, mapT:0, stage:'map' };
 
     // laptop screen captures: drop manager.usectl.com urls in and the screen
     // cycles them every 2.6s; empty draws the pods-panel wireframe instead.
     this.PROPS = { shotPod:'', shotAddons:'', shotDomain:'',
-                   dyingLight:true, neighbourRacks:3, dragEnabled:true };
+                   dyingLight:true, neighbourRacks:3, dragEnabled:true,
+                   autoFly:true };
+    // The map is an establishing shot, not a menu: falkenstein is the only site we
+    // run, so the camera holds long enough to read the headline and then goes in on
+    // its own. Clicking a pin or a site row only brings that forward.
+    this.AUTOFLY_MS = 2000;
 
     this._p = 0; this._mp = 0; this._lastMove = 0; this._tick = 0; this._lastTick = 0;
     this._drag = null; this._seq = null; this._dirty = true; this._cellFor = 0;
@@ -589,31 +274,54 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       { kicker:'what you get · one namespace, one bill',
         caption:'devo waves you over · the bays are empty',
         lesson:'a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill. you never see kubernetes.',
+      // spoken in order across the beat; rejoins into lesson verbatim
+      says:['a machine is a kubernetes namespace with a resource budget, its own addons, its own domains, its own team and one bill.',
+             'you never see kubernetes.'],
         speech:['come here —','i have something to show you'], quota:0,
         lines:[['$ usectl login','rgba(255,255,255,.85)'],['$ usectl machines create omnitech \\','rgba(255,255,255,.85)'],['    --repo github.com/you/shop','rgba(255,255,255,.6)']] },
       { kicker:'managed addons · down the aisle',
         caption:'slices of a shared instance · nothing from your budget',
         lesson:'managed addons are logically isolated databases, queues and buckets carved out of shared platform instances. they consume none of your machine’s resources.',
+      // spoken in order across the beat; rejoins into lesson verbatim
+      says:['managed addons are logically isolated databases, queues and buckets carved out of shared platform instances.',
+             'they consume none of your machine’s resources.'],
         quota:0,
         lines:[['$ usectl machines addons add omnitech \\','rgba(255,255,255,.85)'],['    --type postgres --managed','rgba(255,255,255,.6)'],['✓ postgres ready. DATABASE_URL injected','#11A32A'],['✓ 0 vcpu · 0 gb from your budget','#8fae99']] },
       { kicker:'dedicated addons · in your rack',
         caption:'own namespace, own volume · draws on your budget',
         lesson:'dedicated addons run inside your own namespace with their own persistent volume, and draw directly from your machine’s vcpu and ram.',
+      // spoken in order across the beat; rejoins into lesson verbatim
+      says:['dedicated addons run inside your own namespace with their own persistent volume,',
+             'and draw directly from your machine’s vcpu and ram.'],
         quota:0.25,
         lines:[['$ usectl machines addons add omnitech \\','rgba(255,255,255,.85)'],['    --type postgres --dedicated','rgba(255,255,255,.6)'],['✓ statefulset + pvc in your namespace','#11A32A'],['⚠ 0.5 vcpu · 1 gb from your budget','#FEBC2E']] },
       { kicker:'how it ships · four steps, in order',
         caption:'built in the cluster with kaniko',
         lesson:'we detect next.js, vite, node or static and build it in the cluster with kaniko. or bring your own dockerfile.',
+      // spoken in order across the beat; rejoins into lesson verbatim
+      says:['we detect next.js, vite, node or static and build it in the cluster with kaniko.',
+             'or bring your own dockerfile.'],
         quota:0.25,
         lines:[['$ usectl deploy omnitech','rgba(255,255,255,.85)'],['⋯ building in the cluster...','#FEBC2E']] },
       { kicker:'push git. get https.',
         caption:'tls issued · live',
         lesson:'every deploy keeps history. roll back without a rebuild. auto rollback watches for 5xx after a deploy.',
+      // spoken in order across the beat; rejoins into lesson verbatim
+      says:['every deploy keeps history.',
+             'roll back without a rebuild.',
+             'auto rollback watches for 5xx after a deploy.'],
         quota:0.25,
         lines:[['✓ build 28s · tls issued · live at','#11A32A'],['  https://omnitech.usectl.com','#ffffff']] },
       { kicker:'known limits · we say it plainly',
+        // his own sign-off, after the machine is running — not part of the lesson copy
+        outro:['and yeah — i’m devo, your ai assistant.',
+               'i can check your pod metrics, read the logs and tell you what broke.',
+               'try it if you like — free for 30 days. no pressure.'],
         caption:'node-bound disk · single-replica streams',
         lesson:'a dedicated addon’s volume is local-path: it pins that pod to one node’s disk and cannot reschedule if the host goes down. dedicated nats streams default to one replica unless your client asks for three.',
+      // spoken in order across the beat; rejoins into lesson verbatim
+      says:['a dedicated addon’s volume is local-path: it pins that pod to one node’s disk and cannot reschedule if the host goes down.',
+             'dedicated nats streams default to one replica unless your client asks for three.'],
         quota:0.25,
         lines:[['$ usectl machines addons inspect omnitech postgres','rgba(255,255,255,.85)'],['  volume: local-path · node-bound','#FEBC2E'],['  reschedule: no, if that disk goes down','#FEBC2E']] }
     ];
@@ -627,6 +335,11 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       { tag:'nats',     at:0.440, live:0.465, cable:0.49 }
     ];
     this.SCHED = { blade:0.52, bladeDur:0.10, built:0.60, uplink:0.69, limits:0.84 };
+    // A maintenance ladder in the aisle, and when devo uses it. The climb is timed
+    // against SCHED.uplink so he is at the top exactly while the uplink line is
+    // climbing to the ceiling tray — he lands it, it does not land itself.
+    this.LADDER = { x:2.2, w:1.5, h:9.0, rise:6.0 };
+    this.CLIMB  = { step:0.650, up:0.682, top:0.735, down:0.775, back:0.815 };
   }
 
   Room.prototype = {
@@ -639,18 +352,12 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       this._hz   = this.unpack(MASK_HZ);
 
       this.el = {
-        pins:    document.getElementById('uc-pins'),
-        sites:   document.getElementById('uc-sites'),
-        hero:    document.getElementById('uc-hero'),
-        head:    document.getElementById('uc-roomhead'),
-        term:    document.getElementById('uc-term'),
-        lines:   document.getElementById('uc-lines'),
-        kicker:  document.getElementById('uc-kicker'),
-        lesson:  document.getElementById('uc-lesson'),
-        caption: document.getElementById('uc-caption'),
-        qLabel:  document.getElementById('uc-quota-label'),
-        qFill:   document.getElementById('uc-quota-fill'),
-        pips:    document.getElementById('uc-pips')
+        pins:  document.getElementById('uc-pins'),
+        sites: document.getElementById('uc-sites'),
+        hero:  document.getElementById('uc-hero'),
+        head:  document.getElementById('uc-roomhead'),
+        pips:  document.getElementById('uc-pips'),
+        say:   document.getElementById('uc-say')
       };
 
       // six pips, built once; render only repaints them
@@ -682,6 +389,13 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       window.addEventListener('pointermove', function(e){ self.pointerMove(e); });
       window.addEventListener('pointerup', function(){ self.pointerUp(); });
 
+      // scroll is locked through the lead-in, so a wheel or a swipe never reaches the
+      // page — read it as "get on with it" and start the flight now instead of
+      // sitting on a map that refuses to move.
+      var hurry = function(){ if(self.state.stage === 'map') self.flyTo(self.liveSite()); };
+      window.addEventListener('wheel', hurry, { passive:true });
+      window.addEventListener('touchmove', hurry, { passive:true });
+
       var kick = function(){ self.frame(Date.now()); };
       window.addEventListener('scroll', kick, { passive:true });
       window.addEventListener('resize', kick);
@@ -691,6 +405,7 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       requestAnimationFrame(pump);
 
       this.typeBeat(0);
+      this.typeSay();
       this.render();
       this.frame(Date.now());
     },
@@ -747,6 +462,8 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
         this._p = p; this._lastMove = Date.now(); this._dirty = true;
         var beat = Math.min(5, Math.floor(p * 6));
         if(beat !== this.state.beat){ this.setState({ beat: beat }); this.typeBeat(beat); }
+        var chunk = this.chunkFor(p);
+        if(chunk !== this.state.chunk){ this.setState({ chunk: chunk }); this.typeSay(); }
       }
       var self = this;
       var srcs = [this.PROPS.shotPod, this.PROPS.shotAddons, this.PROPS.shotDomain].filter(Boolean);
@@ -788,9 +505,39 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
         var next = self.state.typed + 2;
         if(next >= total){ clearInterval(self._typer); self.setState({ typed: total }); }
         else self.setState({ typed: next });
+        self._dirty = true;
       }, 60);
     },
 
+    // What devo has to get through in this beat: his greeting where there is one,
+    // then the lesson in the order it was written.
+    sayQueue: function(b){
+      this._queues = this._queues || {};
+      if(!this._queues[b]){
+        var B = this.BEATS[b], q = [];
+        if(B.speech) q.push(B.speech.join(' '));
+        this._queues[b] = q.concat(B.says || []).concat(B.outro || []);
+      }
+      return this._queues[b];
+    },
+    // the beat's scroll range, divided evenly between the things he has to say
+    chunkFor: function(p){
+      var b = Math.min(5, Math.floor(p * 6)), local = p*6 - b;
+      var n = this.sayQueue(b).length;
+      return Math.max(0, Math.min(n - 1, Math.floor(local * n)));
+    },
+    typeSay: function(){
+      var self = this;
+      clearInterval(this._sayer);
+      var q = this.sayQueue(this.state.beat), total = (q[this.state.chunk] || '').length;
+      this.setState({ said: 0 });
+      this._sayer = setInterval(function(){
+        var next = self.state.said + 2;
+        if(next >= total){ clearInterval(self._sayer); self.setState({ said: total }); }
+        else self.setState({ said: next });
+        self._dirty = true;
+      }, 60);
+    },
     goBeat: function(i){
       var s = document.getElementById('machine-room'); if(!s) return;
       var range = s.offsetHeight - window.innerHeight;
@@ -801,7 +548,7 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
     skipGo: function(){
       this._mp = 1; this.lockScroll(false);
       this.setState({ stage:'room', mapT:1 });
-      var t = document.getElementById('agents');
+      var t = document.getElementById('cta');
       if(t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY, behavior:'smooth' });
     },
 
@@ -873,7 +620,13 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       if(on){ h.style.overflow = 'hidden'; }
       else if(h.style.overflow === 'hidden'){ h.style.overflow = ''; }
     },
+    // the destination the camera goes to by itself: the first site we actually run
+    liveSite: function(){
+      for(var k=0;k<this.PINS.length;k++) if(this.PINS[k].live) return this.PINS[k];
+      return null;
+    },
     flyTo: function(pin){
+      if(!pin) return;
       if(this.state.stage !== 'map') return;
       if(!pin.live) return;   // planned sites are not destinations: we do not fake a room
       this._pin = pin; this._flyFrom = Date.now();
@@ -895,6 +648,10 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       } else {
         this._mp = 0;
         this.lockScroll(true);
+        // hold, then fly on our own. driven off the frame loop rather than a timer so
+        // a backgrounded tab holds its establishing shot until it is actually looked at.
+        if(this._mapSince == null) this._mapSince = Date.now();
+        if(this.PROPS.autoFly && Date.now() - this._mapSince >= this.AUTOFLY_MS) this.flyTo(this.liveSite());
       }
       this.placePins();
     },
@@ -1106,6 +863,35 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       var ph=Date.now()/150, step=Math.sin(ph);
       if(moving) return { yaw:64*D, lean:5*D, y:Math.abs(Math.cos(ph))*0.14, walk:true,
         armL:{pitch:step*34*D}, armR:{pitch:-step*34*D}, legL:step*30*D, legR:-step*30*D };
+
+      // On the ladder, hand over hand, while the uplink climbs with him. No laptop —
+      // both hands are on the rungs.
+      var cl=this.climbAt(p);
+      if(cl>0.015){
+        var rung=Math.sin(Date.now()/260);
+        // arms up on the rungs and reaching slightly forward; legs tucked and
+        // alternating. Swinging the legs far forward read as sitting, not climbing.
+        return { yaw:18*D, lean:0, y:cl*this.LADDER.rise, climb:true,
+          armL:{roll:(148+rung*16)*D, pitch:22*D}, armR:{roll:(148-rung*16)*D, pitch:22*D},
+          legL:(16+rung*14)*D, legR:(16-rung*14)*D };
+      }
+
+      // Hands on the module. He turns into the rack, braces a leg and shoves it home
+      // at the height of whichever bay it is going into — top bay is a reach up, the
+      // bottom one is a crouch. The laptop goes away: this is two-handed work.
+      var pb=this.pushingBay(p);
+      if(pb!=null){
+        // Roll swings the arm out sideways; pitch is what lifts a forward reach, since
+        // the hand ends up at -2.5*cos(roll)*cos(pitch) above the shoulder. So the bay
+        // height rides on pitch. He cannot literally touch the top bays — he is a small
+        // robot beside a tall rack, which is what the ladder is for — so this reads as
+        // intent, not contact, and only the bottom bay gets a real crouch.
+        var reach=[108,99,90,78][pb], heave=Math.sin(Date.now()/150)*4;
+        return { yaw:38*D, lean:2*D, y:0, push:true, crouch: pb===3?0.4:0,
+          armL:{pitch:(reach-5+heave)*D, roll:12*D},
+          armR:{pitch:(reach+heave)*D, roll:20*D},
+          legL:14*D, legR:-9*D };
+      }
       if(b===0){
         // calls you over: open stance, big waving arm, speech bubble
         var wave=Math.sin(Date.now()/170);
@@ -1156,50 +942,216 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
         ctx.imageSmoothingEnabled=true;
         ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, 1, 1);
       } else {
-        // Placeholder wireframe of the manager pods panel, in unit space, until
-        // real manager.usectl.com captures are supplied through PROPS.
-        ctx.fillStyle='#0c1a15'; ctx.fillRect(0,0,1,0.15);
-        ctx.fillStyle='#11A32A'; ctx.fillRect(0.035,0.045,0.055,0.06);
-        ctx.fillStyle='#2c3f36'; ctx.fillRect(0.105,0.055,0.34,0.04);
-        ctx.fillStyle='#11A32A'; ctx.fillRect(0.78,0.04,0.185,0.07);
-        var rows=[0.22,0.40,0.58,0.76];
-        rows.forEach(function(y,i){
-          var on=i<3;
-          ctx.fillStyle= i===2 ? '#152a20' : '#101d18';
-          ctx.fillRect(0.035,y,0.93,0.14);
-          ctx.fillStyle= on ? '#35E055' : '#3a4d43';
-          ctx.fillRect(0.06,y+0.05,0.035,0.035);
-          ctx.fillStyle='#55705f'; ctx.fillRect(0.125,y+0.045,0.30,0.042);
-          ctx.fillStyle='#2f4038'; ctx.fillRect(0.47,y+0.05,0.16,0.032);
-          ctx.fillStyle= on ? '#1c6b31' : '#2a3a32'; ctx.fillRect(0.70,y+0.045,0.10,0.042);
-          ctx.fillStyle='#2f4038'; ctx.fillRect(0.84,y+0.05,0.12,0.032);
-        });
-        ctx.fillStyle='#11A32A'; ctx.fillRect(0.035,0.93,0.22,0.045);
+        // At 36px across, detail is wasted: all the lid has to say is that it is on
+        // and working. The words themselves are in the bubble wired to it.
+        ctx.fillStyle='#0c1a15'; ctx.fillRect(0,0,1,1);
+        ctx.fillStyle='#11A32A'; ctx.fillRect(0,0,1,0.12);
+        ctx.fillStyle='#35E055'; ctx.fillRect(0.08,0.30,0.50,0.08);
+        ctx.fillStyle='#1c6b31'; ctx.fillRect(0.08,0.46,0.70,0.06);
+        ctx.fillStyle='#1c6b31'; ctx.fillRect(0.08,0.60,0.40,0.06);
+        if((this._tick||0)%2){ ctx.fillStyle='#35E055'; ctx.fillRect(0.08,0.74,0.10,0.07); }
       }
       ctx.restore();
     },
-    speechBubble: function(ctx, hx, hy, lines){
-      var s=this._cell||5, fs=Math.max(10, Math.round(s*2.0));
-      ctx.font='500 '+fs+"px 'JetBrains Mono', monospace";
-      var tw=Math.max.apply(null, lines.map(function(l){ return ctx.measureText(l).width; }));
-      var padX=Math.round(fs*0.7), padY=Math.round(fs*0.55), lh=Math.round(fs*1.5);
-      var bw=tw+padX*2, bh2=lines.length*lh+padY*2;
-      var x=(hx+4)*s, y=(hy-3)*s-bh2;
-      var maxX=this.GW*s-bw-4; if(x>maxX) x=maxX; if(x<4) x=4; if(y<4) y=4;
-      ctx.fillStyle='rgba(8,10,14,.92)'; ctx.fillRect(x,y,bw,bh2);
-      ctx.fillStyle='#11A32A';
-      ctx.fillRect(x,y,bw,s); ctx.fillRect(x,y+bh2-s,bw,s);
-      ctx.fillRect(x,y,s,bh2); ctx.fillRect(x+bw-s,y,s,bh2);
-      ctx.fillRect(x+Math.round(s*2),y+bh2,Math.round(s*2),s*2);
-      ctx.fillStyle='#D6F7DC'; ctx.textBaseline='top';
-      lines.forEach(function(l,i){ ctx.fillText(l, x+padX, y+padY+i*lh); });
-      ctx.textBaseline='alphabetic';
+    // Both voices, drawn after the room so they sit over it. devo's lesson goes above
+    // his head and is held off the rack; the cli goes low and left, where the strip
+    // used to be, wired back up to the laptop lid.
+    drawVoices: function(ctx, dw, rackX){
+      var s = this._cell || 5, W = this.GW*s;
+      // The scene carries the whole page now that the written sections are gone, so
+      // both voices are sized to be read, not glanced at. 13px is the canvas floor;
+      // fitFont only drops under these when the viewport genuinely cannot hold them.
+      var capSay = Math.max(17, Math.round(s*3.0));
+      var cap    = Math.max(20, Math.round(s*3.8));   // the cli, the loudest thing here
+
+      var text = (this.sayQueue(this.state.beat)[this.state.chunk] || '');
+      if(text){
+        var head = this.proj(dw.x, 10.4*this.DSCALE, dw.z);
+        var maxW = Math.min(W*0.8, capSay*0.62*44);   // ~44 characters is a comfortable measure
+        var longest = text.split(' ').reduce(function(a,b){ return a.length > b.length ? a : b; }, '');
+        var fs = this.fitFont(ctx, [longest], maxW, capSay);
+        ctx.font = this.sayFont(fs);
+        var wrapped = this.wrapText(ctx, text, maxW);
+        var shown = this.revealLines(wrapped, this.state.said);
+        if(shown.length) this.bubble(ctx, {
+          lines: shown.map(function(t){ return { t:t, c:'#D6F7DC' }; }),
+          measure: wrapped,
+          fs: fs, ax: head[0], ay: head[1], rackX: rackX
+        });
+      }
+
+      var B = this.BEATS[this.state.beat], left = this.state.typed, tl = [];
+      for(var i=0;i<B.lines.length;i++){
+        if(left <= 0) break;
+        tl.push({ t: B.lines[i][0].slice(0, left), c: B.lines[i][1] });
+        left -= B.lines[i][0].length;
+      }
+      if(tl.length){
+        var hard = B.lines.map(function(l){ return l[0]; });
+        var mfs = this.fitFont(ctx, hard, W*0.86, cap);
+        // beat one has no laptop yet — he is still waving you over — so the wire
+        // falls back to his hand
+        var a = this._lidAnchor || this.proj(dw.x + 1.4, 5.2, dw.z);
+        this.bubble(ctx, {
+          lines: tl, measure: hard, fs: mfs, ax: a[0], ay: a[1], place: 'floor', wire: true,
+          title: 'usectl cli · omnitech', edge: 'rgba(100,116,136,.45)'
+        });
+      }
     },
-    devoWorld: function(){ var walk = Math.min(1, this._p / 0.22);
-      return { x:-0.6 + walk*1.0, z:(20.5 - walk*4.6) - this.cam()*0.25 }; },
+
+    // ---------------- the two voices ----------------
+    // Everything the scene teaches is spoken in the room now: devo says the lesson
+    // above his head, and the cli answers in its own bubble wired to his laptop.
+    // Nothing is laid out in a panel, so both boxes have to size, wrap and place
+    // themselves against whatever the viewport gives them.
+
+    sayFont: function(fs, weight){ return (weight||500)+' '+fs+"px 'JetBrains Mono', monospace"; },
+
+    // greedy wrap; the caller has already picked a font size that fits
+    wrapText: function(ctx, text, maxPx){
+      var words = String(text).split(' '), out = [], line = '';
+      for(var i=0;i<words.length;i++){
+        var next = line ? line + ' ' + words[i] : words[i];
+        if(line && ctx.measureText(next).width > maxPx){ out.push(line); line = words[i]; }
+        else line = next;
+      }
+      if(line) out.push(line);
+      return out;
+    },
+
+    // Canvas text has a 13px floor — below that the labels stop being readable at
+    // typical cell sizes. Take the largest size that still fits the widest
+    // unbreakable line, and only go under the floor when the viewport leaves no choice.
+    fitFont: function(ctx, hardLines, maxPx, cap){
+      var fs = cap;
+      while(fs > 8){
+        ctx.font = this.sayFont(fs);
+        var widest = 0;
+        for(var i=0;i<hardLines.length;i++) widest = Math.max(widest, ctx.measureText(hardLines[i]).width);
+        if(widest <= maxPx) break;
+        fs--;
+      }
+      return fs;
+    },
+
+    // reveal n characters across already-wrapped lines, so the wrap does not reflow
+    // as the text types in
+    revealLines: function(lines, n){
+      var out = [], left = n;
+      for(var i=0;i<lines.length;i++){
+        if(left <= 0) break;
+        out.push(lines[i].slice(0, left));
+        left -= lines[i].length + 1;    // + the space the wrap consumed
+      }
+      return out;
+    },
+
+    // o: { lines:[{t,c}], fs, ax, ay (tail target, grid cells), place, title, wire }
+    bubble: function(ctx, o){
+      var s = this._cell || 5, fs = o.fs, lines = o.lines;
+      ctx.font = this.sayFont(fs);
+      var padX = Math.round(fs*0.7), padY = Math.round(fs*0.55), lh = Math.round(fs*1.5);
+      // Size the box from the FINISHED text, never from what has been typed so far.
+      // Measuring the revealed slice made the box grow and — since it hangs from its
+      // own bottom edge — climb, on every other frame of the typing. That flicker is
+      // what made the whole thing painful to watch.
+      var meas = o.measure || lines.map(function(l){ return l.t; });
+      var tw = 0;
+      for(var i=0;i<meas.length;i++) tw = Math.max(tw, ctx.measureText(meas[i]).width);
+      var titleH = o.title ? Math.round(fs*1.9) : 0;
+      if(o.title){ ctx.font = this.sayFont(Math.round(fs*0.85)); tw = Math.max(tw, ctx.measureText(o.title).width + fs*3.2); }
+      var bw = Math.max(tw + padX*2, fs*6), bh = meas.length*lh + padY*2 + titleH;
+
+      // place, then clamp into the canvas — a bubble that runs off the edge is worse
+      // than one that has moved off its ideal anchor
+      var W = this.GW*s, H = this.GH*s, m = Math.round(s*2);
+      var x, y;
+      if(o.place === 'floor'){                 // the machine: low and left, where the strip used to be
+        x = m*3; y = H - bh - m*3;
+      } else {                                  // devo: above his head, clear of the rack
+        x = (o.ax + 4)*s;
+        if(o.rackX != null) x = Math.min(x, o.rackX*s - bw - m);
+        y = (o.ay - 3)*s - bh;
+      }
+      x = Math.max(m, Math.min(x, W - bw - m));
+      y = Math.max(m, Math.min(y, H - bh - m));
+
+      // a wire from the box to whatever is speaking: the room is full of cabling, so
+      // the cli's line back to the laptop reads as one more of them
+      if(o.wire){
+        // cables in this room drop and then run. an L reads as one; a straight diagonal
+        // across the floor reads as a scratch on the screen.
+        var drop = y/s - 3, land = Math.max(x/s + 3, Math.min(o.ax, x/s + bw/s - 3));
+        this.seg(ctx, [o.ax, o.ay], [o.ax, drop], '#2d3436');
+        this.seg(ctx, [o.ax, drop], [land, drop], '#2d3436');
+        this.seg(ctx, [land, drop], [land, y/s], '#2d3436');
+        this.R(ctx, o.ax-1, o.ay-1, 2, 2, '#5d6570');
+      }
+
+      ctx.fillStyle = 'rgba(8,10,14,.92)'; ctx.fillRect(x, y, bw, bh);
+      ctx.fillStyle = o.edge || '#11A32A';
+      ctx.fillRect(x, y, bw, s); ctx.fillRect(x, y+bh-s, bw, s);
+      ctx.fillRect(x, y, s, bh); ctx.fillRect(x+bw-s, y, s, bh);
+
+      if(o.title){
+        var tb = y + titleH;
+        ctx.fillStyle = 'rgba(100,116,136,.28)'; ctx.fillRect(x+s, tb-1, bw-s*2, 1);
+        var dot = Math.max(3, Math.round(fs*0.42)), dy = y + Math.round(titleH/2) - Math.round(dot/2);
+        ['#ff5f57','#febc2e','#28c840'].forEach(function(c,k){
+          ctx.fillStyle = c; ctx.fillRect(x + padX + k*(dot*2), dy, dot, dot);
+        });
+        ctx.fillStyle = '#8fae99'; ctx.textBaseline = 'middle';
+        ctx.font = this.sayFont(Math.round(fs*0.85));
+        ctx.fillText(o.title, x + padX + dot*6.2, y + titleH/2);
+        ctx.textBaseline = 'alphabetic';
+      }
+
+      ctx.font = this.sayFont(fs);
+      ctx.textBaseline = 'top';
+      for(var j=0;j<lines.length;j++){
+        ctx.fillStyle = lines[j].c || '#D6F7DC';
+        ctx.fillText(lines[j].t, x + padX, y + titleH + padY + j*lh);
+      }
+      ctx.textBaseline = 'alphabetic';
+      // the tail, on the edge nearest whatever is speaking
+      if(!o.wire){
+        ctx.fillStyle = o.edge || '#11A32A';
+        var tx = Math.max(x + s*2, Math.min((o.ax)*s - s, x + bw - s*4));
+        ctx.fillRect(tx, y + bh, Math.round(s*2), Math.round(s*2));
+      }
+    },
+
+    // 0 at the floor, 1 at the top of the ladder
+    climbAt: function(p){
+      var C=this.CLIMB;
+      if(p<=C.up || p>=C.back) return 0;
+      if(p<C.top)  return (p-C.up)/(C.top-C.up);
+      if(p<C.down) return 1;
+      return 1-(p-C.down)/(C.back-C.down);
+    },
+    // 0 at the rack face, 1 standing at the ladder
+    atLadder: function(p){
+      var C=this.CLIMB, out=C.back+0.03;
+      if(p<=C.step || p>=out) return 0;
+      if(p<C.up)   return (p-C.step)/(C.up-C.step);
+      if(p<C.back) return 1;
+      return 1-(p-C.back)/(out-C.back);
+    },
+    // which bay he currently has his hands on, if any
+    pushingBay: function(p){
+      var bay=null, A=this.ADDONS;
+      if(p>this.SCHED.blade && p<this.SCHED.blade+this.SCHED.bladeDur) bay=0;
+      for(var i=0;i<A.length;i++) if(p>A[i].at && p<A[i].at+0.055) bay=i+1;
+      return bay;
+    },
+    devoWorld: function(){
+      var walk = Math.min(1, this._p / 0.22);
+      var base = -0.6 + walk*1.0, lad = this.atLadder(this._p);
+      var rung = this.LADDER.x + this.LADDER.w/2;
+      return { x: base + lad*(rung-base), z:(20.5 - walk*4.6) - this.cam()*0.25 }; },
     devoBox: function(){
-      var s=this._cell||5, w=this.devoWorld();
-      var f=this.proj(w.x,0,w.z), h=this.proj(w.x,9.5*this.DSCALE,w.z);
+      var s=this._cell||5, w=this.devoWorld(), cy=this.climbAt(this._p)*this.LADDER.rise;
+      var f=this.proj(w.x,cy,w.z), h=this.proj(w.x,cy+9.5*this.DSCALE,w.z);
       var halfW=Math.abs(this.proj(w.x+3.6,0,w.z)[0]-f[0]);
       return { x:(f[0]-halfW)*s, y:h[1]*s, w:halfW*2*s, h:(f[1]-h[1])*s };
     },
@@ -1243,8 +1195,11 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
           o=self.rotY(o,pose.yaw||0);
           return [W.x+o[0], (pose.y||0)+o[1], W.z+o[2]];
         };
-        this.drawScreen(ctx, this._screenLocal.map(toWorld));
-      }
+        var W3=this._screenLocal.map(toWorld);
+        // top edge of the lid: where the cli's wire lands
+        this._lidAnchor=this.proj((W3[0][0]+W3[1][0])/2, (W3[0][1]+W3[1][1])/2, (W3[0][2]+W3[1][2])/2);
+        this.drawScreen(ctx, W3);
+      } else { this._lidAnchor=null; }
       return pose;
     },
 
@@ -1253,9 +1208,13 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       var cv = this.canvas(); if(!cv) return;
       var ctx = cv.getContext('2d'); if(!ctx) return;
       var s = this._cell || 5, p = this._p, t = this._tick || 0;
+      var B = this.BEATS[this.state.beat];
       var GW=this.GW, GH=this.GH, CH=this.CH, AI=this.AISLE, cz=this.cam();
       var Z=function(z){ return z-cz; };
-      var lightOn = this.PROPS.dyingLight === false ? true : !(t % 7 === 3 || t % 11 === 5);
+      // A dying strip light, not a strobe. The old pattern dropped the whole room 22%
+      // of the time — roughly every 1.7s — and that full-canvas wash is hard to read
+      // against. One brief dip every ~9s keeps the idea without the flicker.
+      var lightOn = this.PROPS.dyingLight === false ? true : (t % 23 !== 11);
 
       ctx.clearRect(0,0,GW*s,GH*s);
       this.R(ctx,0,0,GW,GH,'#090b0a');
@@ -1355,9 +1314,25 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
       this.R(ctx,x0,yt,rw,1,'#8a93a0'); this.R(ctx,x0,yb-1,rw,1,'#8a93a0');
       this.R(ctx,x0,yt,1,rh,'#8a93a0'); this.R(ctx,x1-1,yt,1,rh,'#8a93a0');
       var labelPx = Math.max(11, Math.min(18, Math.round(rw*s*0.055)));
-      if(p>0.05){ ctx.fillStyle='#8a93a0'; ctx.font='600 '+Math.max(9,Math.round(labelPx*0.78))+"px 'JetBrains Mono', monospace";
-        ctx.fillText('2v · 4g · 10g',(x0+3)*s,(yt+6)*s); }
-      var bh=Math.floor((rh-8)/4), bays=[0,1,2,3].map(function(i){ return yt+7+i*bh; });
+      var specPx = Math.max(13, Math.round(labelPx*0.78));
+      // The machine budget is etched on the chassis now that the strip is gone. The
+      // arithmetic is the strip's, unchanged: a dedicated addon takes 0.5 vcpu and 1 gb
+      // of the 2 vcpu / 4 gb the machine has.
+      var TOP = 20;                               // cells reserved above the bays
+      if(p>0.05){
+        ctx.font='600 '+specPx+"px 'JetBrains Mono', monospace";
+        ctx.fillStyle='#8a93a0'; ctx.fillText('2v · 4g · 10g',(x0+3)*s,(yt+6)*s);
+        var quota = B.quota || 0, qCol = quota > 0 ? '#FEBC2E' : '#5d6570';
+        var qTxt = quota > 0 ? '0.5 of 2 vcpu · 1 of 4 gb' : '0 of 2 vcpu · 4 gb';
+        ctx.font='600 '+Math.max(13,Math.round(specPx*0.85))+"px 'JetBrains Mono', monospace";
+        // on a narrow rack the bar alone carries it rather than spilling off the chassis
+        if(ctx.measureText(qTxt).width <= (rw-6)*s){
+          ctx.fillStyle=qCol; ctx.fillText(qTxt,(x0+3)*s,(yt+13)*s);
+        }
+        this.R(ctx,x0+3,yt+15,rw-6,3,'#131a16');
+        if(quota>0) this.R(ctx,x0+3,yt+15,Math.max(1,Math.round((rw-6)*quota)),3,qCol);
+      }
+      var bh=Math.floor((rh-TOP-1)/4), bays=[0,1,2,3].map(function(i){ return yt+TOP+i*bh; });
       bays.forEach(function(by){ self.R(ctx,x0+2,by,rw-4,bh-2,'#151a1b'); self.R(ctx,x0+2,by,rw-4,1,'#3d454b'); });
 
       // Modules start a rack-width outside the chassis, so everything that slides is
@@ -1419,44 +1394,34 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
         this.R(ctx,x1-6,yt+2,2,2, fu>0.7?'#35E055':(t%2?'#FEBC2E':'#6b5410'));
       }
 
+      // ---- the ladder, standing in the aisle where devo left it ----
+      // Scenery from the first frame rather than something that appears when needed,
+      // so the climb reads as him using the room, not the room growing a prop.
+      var LD=this.LADDER, ladZ=(20.5-4.6)-cz*0.25;
+      [0,0.14].forEach(function(o){
+        self.seg(ctx,self.proj(LD.x+o,0,ladZ),self.proj(LD.x+o,LD.h,ladZ),'#5d6570');
+        self.seg(ctx,self.proj(LD.x+LD.w+o,0,ladZ),self.proj(LD.x+LD.w+o,LD.h,ladZ),'#5d6570');
+      });
+      for(var ry=1.0; ry<LD.h; ry+=1.3)
+        this.seg(ctx,this.proj(LD.x,ry,ladZ),this.proj(LD.x+LD.w,ry,ladZ),'#8a93a0');
+
       // ---- devo ----
       var dw=this.devoWorld(), fc=this.proj(dw.x,0,dw.z);
       if(!this._drag){ var fx=Math.round(fc[0]), fy=Math.round(fc[1]);
         this.R(ctx,fx-8,fy+1,16,1,'#070909'); this.R(ctx,fx-5,fy+2,10,1,'#0a0d0d'); }
-      var pose=this.drawDevo(ctx);
-      if(pose && pose.speech && this.state.stage === 'room'){
-        var head=this.proj(dw.x, 10.4*this.DSCALE, dw.z);
-        var sp=this.BEATS[0].speech;
-        if(sp) this.speechBubble(ctx, head[0], head[1], sp);
-      }
+      this.drawDevo(ctx);
+      if(this.state.stage === 'room') this.drawVoices(ctx, dw, x0);
       if(this.state.stage !== 'room'){
         this.drawMap(ctx, this._mp == null ? 0 : this._mp);
       }
     },
 
     // ---------------- the bottom strip ----------------
+    // Nothing teaches from the DOM any more: render only drives the overlays that are
+    // still elements, and mirrors what the scene is saying for anyone who cannot see it.
     render: function(){
       var e = this.el; if(!e) return;
       var b = this.state.beat, B = this.BEATS[b];
-
-      // terminal: one div per line, reused, sliced to the typed character count
-      var left = this.state.typed, want = [];
-      for(var i=0;i<B.lines.length;i++){
-        if(left <= 0) break;
-        want.push({ t: B.lines[i][0].slice(0, left), c: B.lines[i][1] });
-        left -= B.lines[i][0].length;
-      }
-      while(e.lines.children.length > want.length) e.lines.removeChild(e.lines.lastChild);
-      while(e.lines.children.length < want.length){
-        var d = document.createElement('div');
-        d.style.cssText = 'white-space:pre-wrap;word-break:break-word';
-        e.lines.appendChild(d);
-      }
-      for(var j=0;j<want.length;j++){
-        var el = e.lines.children[j];
-        if(el.textContent !== want[j].t) el.textContent = want[j].t;
-        if(el.style.color !== want[j].c) el.style.color = want[j].c;
-      }
 
       for(var k=0;k<6;k++) this._pipEls[k].style.background = (k === b ? '#11A32A' : '#5d6570');
 
@@ -1478,21 +1443,14 @@ $ usectl machines pods attach-addon my-app web database cache worker</pre>
 
       var inRoom = stage === 'room';
       e.head.style.opacity = inRoom ? '1' : '0';
-      e.term.style.opacity = inRoom ? '1' : '0';
-      e.term.style.visibility = inRoom ? 'visible' : 'hidden';
-      e.term.style.pointerEvents = inRoom ? 'auto' : 'none';
+      e.pips.style.opacity = inRoom ? '1' : '0';
+      e.pips.style.visibility = inRoom ? 'visible' : 'hidden';
+      e.pips.style.pointerEvents = inRoom ? 'auto' : 'none';
 
-      var quota = B.quota || 0;
-      // the meter must stay arithmetically true against the 2 vcpu / 4 gb budget
-      e.qFill.style.width = Math.round(quota * 100) + '%';
-      e.qFill.style.background = quota > 0 ? '#FEBC2E' : '#5d6570';
-      e.qLabel.style.color = quota > 0 ? '#FEBC2E' : '#5d6570';
-      e.qLabel.textContent = quota > 0 ? '0.5 of 2 vcpu · 1 of 4 gb' : '0 of 2 vcpu · 4 gb';
-
-      e.kicker.textContent = B.kicker;
-      e.lesson.textContent = B.lesson;
-      e.caption.textContent = B.caption;
-
+      var spoken = B.kicker + '. ' + B.lesson + ' ' + B.caption + '. '
+                 + B.lines.map(function(l){ return l[0]; }).join(' ')
+                 + (B.outro ? ' ' + B.outro.join(' ') : '');
+      if(e.say.textContent !== spoken) e.say.textContent = spoken;
       var cv = this.canvas();
       if(cv) cv.setAttribute('aria-label', 'Server room: devo at rack A unit 12. ' + B.kicker + '. ' + B.lesson);
     }
