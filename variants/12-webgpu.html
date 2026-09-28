@@ -4467,22 +4467,22 @@ window.__bootScene = async function(){
           applyCityDim(0.5, 0.5);
           cityTwinBind(false);
           var rT = [];
-          for (var i = 0; i < rackMats.length; i++){ rT[i] = rackMats[i].transparent; rackMats[i].transparent = true; }
+          for (var i = 0; i < rackMats.length; i++){ rT[i] = rackMats[i].transparent; setTransparent(rackMats[i], true); }
           warmScenePass();                     // the fade flavor (blending on)
           // ...crossed with the union clip mode (slide 2 opening while a
           // fade still runs) — the last rack combo a violent ride can hit
           for (var iu = 0; iu < rackMats.length; iu++) rackMats[iu].clipIntersection = true;
           warmScenePass();
           for (var ju = 0; ju < rackMats.length; ju++) rackMats[ju].clipIntersection = false;
-          for (var j = 0; j < rackMats.length; j++) rackMats[j].transparent = rT[j];
+          for (var j = 0; j < rackMats.length; j++) setTransparent(rackMats[j], rT[j]);
           // the clone at mid-fade: its own materials, its own combos
           if (rackRoot2){
             var r2v = rackRoot2.visible;
             rackRoot2.visible = true;
             var r2T = [];
-            for (var k2 = 0; k2 < rack2Mats.length; k2++){ r2T[k2] = rack2Mats[k2].transparent; rack2Mats[k2].transparent = true; }
+            for (var k2 = 0; k2 < rack2Mats.length; k2++){ r2T[k2] = rack2Mats[k2].transparent; setTransparent(rack2Mats[k2], true); }
             warmScenePass();
-            for (var k3 = 0; k3 < rack2Mats.length; k3++) rack2Mats[k3].transparent = r2T[k3];
+            for (var k3 = 0; k3 < rack2Mats.length; k3++) setTransparent(rack2Mats[k3], r2T[k3]);
             rackRoot2.visible = r2v;
           }
           applyScene(m0);                      // the mode the ride owns, not a hardcoded hero
@@ -6000,6 +6000,23 @@ window.__bootScene = async function(){
   // through every wall while still hiding the city behind it.
   var cityDimNow = 1, cityLightsNow = 1, cityGhostWas = false;
   var FLAVOR_BUMP = !/[?&]bump=0/.test(location.search || '');   // see the flavor bump in applyCityDim
+  // ── EVERY RUNTIME `transparent` FLIP GOES THROUGH HERE ───────────────
+  // three r186 re-creates a render object — and with it its pipeline —
+  // only when material.version changes (RenderObjects.get checks the
+  // cache key ONLY inside that guard), and `transparent` is part of that
+  // pipeline's cache key. so flipping it on a fade without a version bump
+  // leaves the OLD pipeline drawing: the prop does not fade, it JUMPS
+  // between fully opaque and gone ("first slide sequrity door
+  // construction, its sticky, u need make opacity on scroll"). the same
+  // bug the ghost city had. the flip is rare — once per fade, per prop —
+  // so the rebuild is cheap, and the warm sweep sees both flavors first.
+  // load-time setup (transparent = true before anything is drawn) does
+  // NOT need this; only flips on a LIVE material do.
+  function setTransparent(m, want){
+    if (!m || m.transparent === want) return;
+    m.transparent = want;
+    if (FLAVOR_BUMP) m.needsUpdate = true;
+  }
   if (/[?&]warmtrace=1/.test(location.search || '')) window.__warmTrace = [];
   function applyCityDim(f, lights){
     if (Math.abs(f - cityDimNow) < 0.003 && Math.abs(lights - cityLightsNow) < 0.003) return;
@@ -12587,7 +12604,7 @@ window.__bootScene = async function(){
         var shellOp = shellPlay;
         for (var ri = 0; ri < rackMats.length; ri++){
           rackMats[ri].opacity = shellOp;
-          rackMats[ri].transparent = shellOp < 1;
+          setTransparent(rackMats[ri], shellOp < 1);
         }
         if (cubeMeshG && cubesMoved){
           var cubeVis = cubeFade > 0;
@@ -12986,7 +13003,7 @@ window.__bootScene = async function(){
       if (window.__warmY != null) shellPlay = shellChase;   // the rack's transparent/opaque flip must warm where the ride sits
       for (var rjf = 0; rjf < rackMats.length; rjf++){
         rackMats[rjf].opacity = shellPlay;
-        rackMats[rjf].transparent = shellPlay < 1;
+        setTransparent(rackMats[rjf], shellPlay < 1);
       }
       frameDirtyFlag = true;
     }
@@ -13011,7 +13028,7 @@ window.__bootScene = async function(){
         var r2op = Math.min(1, rack2Op / 0.35);
         for (var r2i = 0; r2i < rack2Mats.length; r2i++){
           rack2Mats[r2i].opacity = r2op;
-          rack2Mats[r2i].transparent = r2op < 1;
+          setTransparent(rack2Mats[r2i], r2op < 1);
         }
         if (rackLamp2) rackLamp2.intensity = 0.55 * r2op;
         if (rackSpot2) rackSpot2.intensity = 2.4 * r2op;
@@ -13113,6 +13130,11 @@ window.__bootScene = async function(){
     // table used to clip the construction in and rip it out — both
     // ends are a plain opacity ramp now, on the same windows.
     if (doorRoot){
+      if (!window.__doorDbg) window.__doorDbg = function(){
+        var m = doorMats[0];
+        return {q: doorQ, p: +doorP.toFixed(4), vis: !!doorRoot.visible, win: +doorWin.p.toFixed(3),
+                op: m ? +m.opacity.toFixed(3) : -1, tr: m ? m.transparent : null, ver: m ? m.version : -1};
+      };
       var dgT = Math.min(1, Math.max(0, doorWin.p / 0.30));
       // EXIT ("outer animation"): panels OPEN back into their pockets
       // (0→0.55), then the construction FADES away over the rip's old
@@ -13135,7 +13157,7 @@ window.__bootScene = async function(){
         doorQ = dorNext;
         for (var dri = 0; dri < doorMats.length; dri++){
           doorMats[dri].opacity = doorQ;
-          doorMats[dri].transparent = doorQ < 0.999;
+          setTransparent(doorMats[dri], doorQ < 0.999);
         }
         if (doorLamp) doorLamp.intensity = 1.4 * doorQ;
         var dorVis = doorQ > 0.001;
@@ -13191,7 +13213,7 @@ window.__bootScene = async function(){
         panelQ = cpq;
         for (var cpi = 0; cpi < panelMats.length; cpi++){
           panelMats[cpi].opacity = panelQ;
-          panelMats[cpi].transparent = panelQ < 0.999;
+          setTransparent(panelMats[cpi], panelQ < 0.999);
         }
         if (panelLamp) panelLamp.intensity = 1.2 * panelQ;
         var cpv = panelQ > 0.001;
@@ -13261,7 +13283,7 @@ window.__bootScene = async function(){
         termQ = tq2;
         for (var tqi = 0; tqi < termMats.length; tqi++){
           termMats[tqi].opacity = termQ;
-          termMats[tqi].transparent = termQ < 0.999;
+          setTransparent(termMats[tqi], termQ < 0.999);
         }
         if (termLamp) termLamp.intensity = 1.4 * termQ;
         if (termHoloMat && reducedMotion) termHoloMat.opacity = termQ * 0.92;
@@ -13376,7 +13398,7 @@ window.__bootScene = async function(){
         // still scene 1 (scroll interrupt): the flash ends with the rack gone
         rackRoot.visible = false;
         if (rackLamp) rackLamp.intensity = 0;
-        for (var gi = 0; gi < rackMats.length; gi++){ rackMats[gi].opacity = 0; rackMats[gi].transparent = true; }
+        for (var gi = 0; gi < rackMats.length; gi++){ rackMats[gi].opacity = 0; setTransparent(rackMats[gi], true); }
         renderer.shadowMap.needsUpdate = true;
       }
     }
@@ -13521,7 +13543,7 @@ window.__bootScene = async function(){
           if (rackLamp) rackLamp.intensity = 0;
           for (var gq = 0; gq < rackMats.length; gq++){
             rackMats[gq].opacity = 0;
-            rackMats[gq].transparent = true;
+            setTransparent(rackMats[gq], true);
           }
           renderer.shadowMap.needsUpdate = true;
         } else {
@@ -13558,7 +13580,7 @@ window.__bootScene = async function(){
             rackRoot.updateMatrixWorld(true);
             for (var gj = 0; gj < rackMats.length; gj++){
               rackMats[gj].opacity = 1;
-              rackMats[gj].transparent = false;
+              setTransparent(rackMats[gj], false);
             }
           }
           if (rackLamp) rackLamp.intensity = gOn ? 0.55 : 0;
