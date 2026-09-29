@@ -1,0 +1,17 @@
+{
+  "name": "usectl-landing",
+  "install": "npm ci && npm --prefix worker install",
+  "terminals": [
+    {
+      "name": "vite-dev",
+      "command": "npm run dev -- --host 0.0.0.0 --port 5173",
+      "description": "Vite dev server for the usectl landing site (http://localhost:5173)."
+    }
+  ],
+  "ports": [
+    {
+      "name": "vite-dev",
+      "port": 5173
+    }
+  ]
+}
