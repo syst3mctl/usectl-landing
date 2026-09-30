@@ -503,6 +503,9 @@
   h2 .o{color:var(--accent-hover)} h2 .b{color:var(--blue)}
   .sub{font-size:20px;line-height:1.6;max-width:60ch;margin:10px 0 50px 0;color:rgba(255,255,255,.72)}
   @media (max-width:1700px){h1{font-size:65px}.sub{font-size:16px;margin:10px 0 30px 0}.hero-over{padding-left:50px}}
+  /* full hd sits in the wide bucket but a 1920 line at 110px crowds the
+     hero — the band between the 1700 step and 1920 reads at 90 */
+  @media (min-width:1701px) and (max-width:1920px){h1{font-size:90px}}
   .ctas{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
   .btn{font-family:var(--display);font-weight:600;font-size:14.5px;letter-spacing:.02em;text-decoration:none;padding:11px 18px;border-radius:var(--radius-sm);border:1px solid transparent;display:inline-block}
   /* the header button's skin, verbatim: the accent at 88%, the hairline
