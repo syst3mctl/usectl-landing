@@ -2984,10 +2984,20 @@ window.__bootScene = async function(){
     // rung 1 is never promoted into the settings that are the reason
     // this ladder exists — only a device that dipped (a hot battery, a
     // background tab) climbs back out
-    // the ceiling sits ONE rung over where the probe landed (capped at
-    // 2): a bench hiccup or a remembered bad day can be climbed out of,
-    // and the watchdog's wrong-climb lockout still nails it back down
-    M.boot = function(){ var t = probe(); M.booted = true; M.ceil = Math.min(3, t + 1); M.tier = -1; apply(t); };
+    // the ceiling sits ONE rung over where the probe landed: a bench
+    // hiccup or a remembered bad day can be climbed out of, and the
+    // watchdog's wrong-climb lockout still nails it back down.
+    // ...ON A PHONE IT STOPS AT PHONE_CEIL. this line said Math.min(3, ...)
+    // while its own comment said "capped at 2", and the trim above spent a
+    // whole round establishing that an iphone 12 cannot hold rung 3 — the
+    // probe honored that and the WATCHDOG walked straight past it: six
+    // seconds of cheap riding frames plus a pause is all the climb branch
+    // needs, and a settled shot is a cache replay that measures nothing.
+    // caught in the rig, which ended a phone run at 'rung 3 dpr 2.59'
+    // after the trim had supposedly capped it at 2. a phone that the
+    // watchdog DEMOTED can still climb back to where the probe put it,
+    // which is the whole point of having a ceiling over the tier.
+    M.boot = function(){ var t = probe(); M.booted = true; M.ceil = Math.min(M.mobile ? PHONE_CEIL : 3, t + 1); M.tier = -1; apply(t); };
     M.set = function(t){ M.forced = true; apply(t, 'manual'); return M.why; };
     M.info = function(){ return {tier: M.tier, why: M.why, gpu: M.gpu, cores: M.cores,
       mem: M.mem, panel: M.panel, dpr: renderer.getPixelRatio(), chain: CHAIN_RES, k: M.k}; };
@@ -4391,6 +4401,10 @@ window.__bootScene = async function(){
     var warmed = false;   // the manager fires on every later queue drain too
     var glbDrains = 0;    // how many times it has fired (the asset generation)
     var veilLifted = false, warmSweepStarted = false, warmKill = false;
+    // set by armDeferredSweep's runner: this pass is the DEFERRED one —
+    // post-veil, props landed, reader parked at the top. it costs no
+    // veil time, so it may warm what the boot sweep cannot afford.
+    var sweepDeferred = false;
     // the veil only drops ONCE, and only after the site is fully loaded
     // AND snapped to the hero — never mid-warm ("load the whole site,
     // then show it"). a 16s net backstops a warm that runs long.
@@ -4670,9 +4684,26 @@ window.__bootScene = async function(){
               // profile. the reveal band above still warms (that one is
               // felt on every backend); the deep page pays first-visit
               // compile like v11 always has.
-            } else if (!MOBILE){
-              // the deep-page tail stays DESKTOP-ONLY. running it on the
-              // phone was tried this round for exactly the first-scroll
+            } else if (!MOBILE || sweepDeferred){
+              // ── THE PHONE GETS THE TAIL TOO — BUT ONLY DEFERRED ──
+              // measured on the phone profile (4x cpu, 4Mbps, no sw
+              // cache): a first ride down the page built 175 pipelines
+              // with a 2033ms frame, and a SECOND ride over the same
+              // page still built 40 more and still stalled 600ms —
+              // because nothing past the reveal band is ever warmed on
+              // a phone. the deferred sweep was supposed to cover it
+              // (the note below says so) and did not: it re-runs THIS
+              // builder, which skipped the tail for being MOBILE, so
+              // it only ever re-rode the reveal band with the props in.
+              // the boot-time objection stands and is untouched — a
+              // tail behind the veil costs +2s of veil and warms a deep
+              // page the streamed props have not reached yet. deferred,
+              // BOTH of those go away: the veil is already down, the
+              // props have landed (the release waits on __glbOut), the
+              // reader is parked at the hero, and a scroll aborts the
+              // whole pass within one frame (see swAborted).
+              // THE BOOT SWEEP ON A PHONE STILL SKIPS IT. running it there
+              // was tried a round ago for exactly the first-scroll
               // lag and measured a bad trade: +2s of veil (12.5s -> 14.5s)
               // for a first scroll that still built ~130 pipelines, because
               // on a real phone link the streamed props land AT the veil —
@@ -4901,7 +4932,7 @@ window.__bootScene = async function(){
               (function deferSweep(){
                 var dy = window.pageYOffset || 0;
                 var dQuiet = dy === dLastY; dLastY = dy;
-                if (dy <= 4 && dQuiet){ runRevealSweep(); return; }
+                if (dy <= 4 && dQuiet){ sweepDeferred = true; runRevealSweep(); return; }
                 setTimeout(deferSweep, 1500);
               })();
             }
