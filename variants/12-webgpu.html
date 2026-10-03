@@ -7968,8 +7968,26 @@ window.__bootScene = async function(){
       .mul(TSL.materialReference('emissiveIntensity', 'float'))
       .mul(won);
   }
+  // ── PHONES: THE OVERLAY IS THE BUILDINGS' EDGES, NOT EVERY TRIANGLE ──
+  // a wireframe mesh draws three line segments per triangle: on the phone
+  // city that is ~1M blended line segments EVERY frame (rig, per-frame
+  // draw stats: 0.9-1.6M lines against 0.3-2.4M triangles for everything
+  // else), and lines cost per PRIMITIVE, not per pixel — which is why the
+  // iphone 12's HUD read 39ms frames at rung 2 and 43-49ms at rung 1: the
+  // ladder halved the pixels and the frame did not move. EdgesGeometry
+  // keeps every edge where the faces actually bend (silhouettes, window
+  // reveals, roof lines) and drops the diagonals that hatch each flat
+  // face — the same outlines, a fraction of the segments. desktop keeps
+  // the full hatching it can afford. the material is shared on purpose:
+  // every write to wireMat (dim, tunnel, clip, stencil) reaches both.
+  var WIRE_EDGE_DEG = 1;            // bend angle that keeps an edge; 1° = only true coplanar diagonals go
+  // the phone's density: fewer, truer lines need more alpha each to read
+  // as the same amount of green; ?wireop=0.2 is the A/B hook for the eye
+  // 0.2 chosen against the full-hatch hero shot (rig, phone profile): 0.05
+  // made the outlines vanish, 0.12 read thin, 0.3 heavier than the original
+  var WIRE_OP_PHONE = +((/[?&]wireop=([\d.]+)/.exec(location.search || '') || [])[1]) || 0.2;
   var wireMat = new THREE.MeshBasicMaterial({
-    wireframe: true, color: 0x0ec435, transparent: true, opacity: 0.05, depthWrite: false
+    wireframe: !MOBILE, color: 0x0ec435, transparent: true, opacity: MOBILE ? WIRE_OP_PHONE : 0.05, depthWrite: false
   });
   tunnelPatch(wireMat);   // the green building lines clear the agents corridor too
   // "perfect shape": the overlay's lines trace the EXACT triangles of
@@ -8163,8 +8181,10 @@ window.__bootScene = async function(){
         cityWireStrokes.push(o);   // ...and the phone ladder's first geometry cut
         return;
       }
-      // the demo's wireframe overlay, recolored to the manager green
-      var w = new THREE.Mesh(o.geometry, wireMat);
+      // the demo's wireframe overlay, recolored to the manager green —
+      // on a phone, the building's EDGES as line segments (see wireMat)
+      var w = MOBILE ? new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, WIRE_EDGE_DEG), wireMat)
+                     : new THREE.Mesh(o.geometry, wireMat);
       w.castShadow = false; w.receiveShadow = false;
       w.renderOrder = 10000 + orderSeq;   // overlays ride with the wires
       o.userData.__wire = w;
@@ -8234,7 +8254,7 @@ window.__bootScene = async function(){
     // unlit and is handed back unchanged — twin === original for those)
     cityTwins = new Map();
     g.scene.traverse(function(o){
-      if (!o.isMesh || !o.material) return;
+      if (!(o.isMesh || o.isLineSegments) || !o.material) return;   // the phone's edge overlays are lines, same cull
       cityAllMeshes.push({o: o, hid: false});
       var many = Array.isArray(o.material);
       var mm = many ? o.material : [o.material];
@@ -8278,8 +8298,11 @@ window.__bootScene = async function(){
       }
       cityClipBody = ensureClipWrap(g.scene);
       cityClipWire = ensureClipWrap(wireRoot);
-      g.scene.traverse(function(o){ if (o.isMesh) o.__clipShared = true; });
-      wireRoot.traverse(function(o){ if (o.isMesh) o.__clipShared = true; });
+      // ...lines too: the phone's edge overlays would otherwise each get a
+      // clip wrapper of their own = one clipping context + pipeline set
+      // PER BUILDING, the boot explosion of [[clip-context-boot-cost]]
+      g.scene.traverse(function(o){ if (o.isMesh || o.isLineSegments) o.__clipShared = true; });
+      wireRoot.traverse(function(o){ if (o.isMesh || o.isLineSegments) o.__clipShared = true; });
     }
     // nothing in the scene ever moves (only the camera, which lives outside
     // it) — bake all world matrices once and stop the renderer re-walking
