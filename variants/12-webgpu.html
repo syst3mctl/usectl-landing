@@ -2551,7 +2551,15 @@ window.__bootScene = async function(){
       // grain, no fxaa. bloom at dpr 1 / chain 0.75 costs a fraction of
       // what it costs at rung 1's dpr 1.5, so this rung is still the
       // cheapest frame in the ladder by a wide margin.
-      {dpr: 1,   chain: 0.75, dof: false, bloom: true,  fxaa: false, grain: 0,     wires: false, overlay: true,  calm: true},
+      // calm is OFF here now ("on iphone se animation not worked"): calm
+      // stood every animator down — the hero spin, the window flicker,
+      // the holo scan, every fade snapped to its target — so a phone that
+      // ended up here (a hard-remembered rung after a jetsam kill, or two
+      // watchdog steps) showed a page that reads as BROKEN, not as cheap.
+      // the frame this rung draws is 0.14M chain px on a 375-wide phone;
+      // the ambient animators are affordable on anything that boots webgpu.
+      // the OS's own reduce-motion switch still calms everything.
+      {dpr: 1,   chain: 0.75, dof: false, bloom: true,  fxaa: false, grain: 0,     wires: false, overlay: true,  calm: false},
       // 1 — every phone starts here
       {dpr: 1.5, chain: 0.9,  dof: true,  bloom: true,  fxaa: true,  grain: 0.055, wires: false, overlay: true,  calm: false},
       // 2 — the page as written (desktop always; a phone by default)
@@ -2611,7 +2619,8 @@ window.__bootScene = async function(){
     if (MOBILE){ Q[2].wires = false; Q[3].wires = false; }
     var PHONE_CEIL = 2;   // see the phone trim above: no automatic rung 3
     var M = {tier: 2, k: Q[2], mobile: MOBILE, forced: false, booted: false,
-             ceil: 2, why: 'desktop', gpu: '', cores: 0, mem: 0, panel: 0};
+             ceil: 2, why: 'desktop', gpu: '', cores: 0, mem: 0, panel: 0,
+             pace: false, paceN: 0};   // pace: the 3d redraws every other frame while scrolling (see watch)
     // WEBGPU: the low rung's "fxaa → plain copy" swap is gone as such —
     // the composer shim picks between two prebuilt node graphs (full and
     // lite) off MQ.k, and the lite one simply has no fxaa node in it.
@@ -2727,7 +2736,7 @@ window.__bootScene = async function(){
     function memRead(){
       try {
         var v = JSON.parse(localStorage.getItem(MEM_KEY) || 'null');
-        if (v && v.sig === memSig() && (Date.now() - v.at) < 6048e5) return {t: v.t, hard: !!v.hard};
+        if (v && v.sig === memSig() && (Date.now() - v.at) < 6048e5) return {t: v.t, hard: !!v.hard, pace: !!v.pace};
       } catch(e){}
       return null;
     }
@@ -2735,7 +2744,7 @@ window.__bootScene = async function(){
     // loss. everything else (watchdog steps, past benches) is soft —
     // history, which the boot bench below now outranks.
     function memWrite(t, hard){
-      try { localStorage.setItem(MEM_KEY, JSON.stringify({t: t, sig: memSig(), at: Date.now(), hard: !!hard})); } catch(e){}
+      try { localStorage.setItem(MEM_KEY, JSON.stringify({t: t, sig: memSig(), at: Date.now(), hard: !!hard, pace: !!M.pace})); } catch(e){}
     }
     function probe(){
       if (!MOBILE) return 2;
@@ -2794,6 +2803,10 @@ window.__bootScene = async function(){
       // LOSS: the os killed webgl, and re-opening high risks killing it
       // again into a black canvas — that rung is honored untested.
       var remembered = memRead();
+      // pacing is remembered like a rung, but it is not a rung: it costs
+      // no pixels, so it opens the visit already on (one more engagement
+      // locks it for the visit — see watch)
+      if (remembered && remembered.pace){ M.pace = true; M.paceN = 1; }
       if (remembered && remembered.hard){ M.why = 'remembered rung ' + remembered.t + ' (context loss)'; return remembered.t; }
       // 0. the BACKEND. webgpu = the page as designed. webgl2 = the
       //    compatibility path: no pipeline pinning, GLSL recompiles where
@@ -2907,7 +2920,7 @@ window.__bootScene = async function(){
     // actually doing — which means this can only ever detect the MISS,
     // never the headroom. hence: stepping DOWN is measured, stepping up
     // is a cautious one-shot that locks out the moment it is wrong.
-    var hot = 0, cool = 0, cd = 0, climbed = 0, bootAt = performance.now(), rideAt = 0;
+    var hot = 0, warm = 0, cool = 0, cd = 0, climbed = 0, bootAt = performance.now(), rideAt = 0;
     function watch(dt, cost, riding){
       if (!M.mobile || M.forced) return;
       // ── BOOT FRAMES ARE NOT THE VISITOR'S FRAMES ──
@@ -2920,7 +2933,7 @@ window.__bootScene = async function(){
       // full-chain frames all land here, and all of them are one-time.
       // the gate opens when the visitor does (liftVeil → bootMark, or the
       // veil lowering by any other path).
-      if (window.__warmY != null){ hot = cool = 0; return; }   // the sweep drives the camera itself
+      if (window.__warmY != null){ hot = warm = cool = 0; return; }   // the sweep drives the camera itself
       if (!rideAt){
         if (!window.__veilDown){ hot = cool = 0; return; }
         // the veil went down without the scene's own lift (a net gave up):
@@ -2934,11 +2947,16 @@ window.__bootScene = async function(){
       // liveCost ema still carries the sweep's weight for ~15 frames)
       if (cd > 0){ hot = cool = 0; return; }
       var tick = Math.max(0.0166, nativeDt);   // judge against 60hz, never a 120hz panel's tick
+      // two lines: HOT (1.7x the tick) is the demotion line it always was;
+      // WARM (1.25x) is the pacing line — a phone riding at 22-27ms frames
+      // sat between "cool" and "hot" forever, a 40fps judder the ladder
+      // never answered. pacing costs no pixels, so it answers earlier.
       if (riding && cost){
-        if (cost > tick * 1.7){ hot += dt; cool = 0; }
-        else if (cost < tick * 1.1){ cool += dt; hot = 0; }
-        else { hot = 0; }
-      } else { hot = 0; }
+        if (cost > tick * 1.7){ hot += dt; warm += dt; cool = 0; }
+        else if (cost > tick * 1.25){ warm += dt; hot = 0; cool = 0; }
+        else if (cost < tick * 1.1){ cool += dt; hot = 0; warm = 0; }
+        else { hot = 0; warm = 0; }
+      } else { hot = 0; warm = 0; }
       // the first seconds used to run a third of the cruising patience
       // (0.4s of hot frames demotes). that fired on the FIRST RIDE, where
       // the costs are one-time — texture uploads landing, the first
@@ -2952,13 +2970,33 @@ window.__bootScene = async function(){
       // are judged at cruising patience. kept as the expression it was so
       // the intent stays readable: nothing before the ride, 1.2s after.
       var hotAt = rideAt ? 1.2 : 0.4;
-      if (hot > hotAt && M.tier > 0){
+      // ── PACE BEFORE YOU DEMOTE ── the first answer to sustained misses
+      // is not a softer picture, it is the desktop's own scroll priority:
+      // redraw the 3D every OTHER frame while the page is in motion — a
+      // steady 30 instead of a juddering 40, every pixel of the rung kept
+      // (the scrub state still advances every frame; only the draw is
+      // skipped, and full rate is back the instant the scroll stops).
+      // only when even that misses does the rung step down ("in mobile
+      // its to much good quality and i have lag" wants the lag gone, not
+      // the quality). a release needs the same six clean settled seconds
+      // a climb does; the second engagement in a visit locks it, so the
+      // page cannot ping-pong between a smooth ride and a judder test.
+      if (warm > hotAt && !M.pace){
+        hot = warm = cool = 0; cd = 4; M.pace = true; M.paceN++;
+        M.why = 'watchdog: pacing (' + Math.round(cost * 1000) + 'ms frames)';
+        console.info('[12-webgpu] ' + M.why + ' — 3d at half rate while scrolling');
+        memWrite(M.tier);   // the next visit rides paced from its first scroll
+      } else if (hot > hotAt && M.tier > 0){
         // a step down that lands right after a climb means the climb was
         // wrong: nail the ceiling shut so the two can never trade places
         if (climbed > 0){ M.ceil = M.tier - 1; }
         hot = cool = 0; cd = 5;
         apply(M.tier - 1, 'watchdog: ' + Math.round(cost * 1000) + 'ms frames');
         memWrite(M.tier);   // the next visit opens where this one settled
+      } else if (cool > 6 && !riding && M.pace && M.paceN < 2){
+        cool = 0; cd = 6; M.pace = false;
+        M.why = 'watchdog: pacing released';
+        memWrite(M.tier);
       } else if (cool > 6 && !riding && M.tier < M.ceil){
         cool = 0; cd = 10; climbed = 20;
         apply(M.tier + 1, 'watchdog: headroom');
@@ -3040,7 +3078,7 @@ window.__bootScene = async function(){
         var mem = 0;
         try { var m = renderer.info.memory; mem = Math.round((m.texturesSize + m.attributesSize + m.indexAttributesSize) / 1048576); } catch(e){}
         el.textContent =
-          'rung ' + i.tier + '   dpr ' + (+i.dpr).toFixed(2) + '   ' + cv.width + '\u00d7' + cv.height + '\n' +
+          'rung ' + i.tier + '   dpr ' + (+i.dpr).toFixed(2) + '   ' + cv.width + '\u00d7' + cv.height + (MQ.pace ? '   PACED' : '') + '\n' +
           'gpu  ' + (MQ.cls || '?') + (MQ.gpu ? ' [' + MQ.gpu.slice(0, 28) + ']' : '') + '\n' +
           'cpu  ' + (MQ.cpu != null ? MQ.cpu + 'ms' : '?') + '   fill ' + Math.round(MQ.bench()) + 'ms' +
             '   cores ' + (MQ.cores || '?') + '   ram ' + (MQ.mem || '?') + '\n' +
@@ -3146,6 +3184,13 @@ window.__bootScene = async function(){
       if (!sessionStorage.getItem('yz_ctxr')){
         sessionStorage.setItem('yz_ctxr', '1');
         location.reload();
+      } else if (!FORCE_GL){
+        // a SECOND loss in one session: this device cannot hold the webgpu
+        // page. the old answer was nothing — a dead renderer under a page
+        // that still scrolls ("on iphone se animation not worked"). the
+        // site has a native webgl build of the same page, tuned for exactly
+        // the phones that lose a device twice: hand over, url unchanged.
+        swapToNativeBuild('webgpu device lost twice');
       }
     } catch(e){}
   }
@@ -4605,6 +4650,19 @@ window.__bootScene = async function(){
           // instant the user really scrolls, and only from a top-of-page
           // load, so it can never hijack the ride.
           (function(){
+            // ── THE DEFERRED PASS, RESUMABLE ── a post-veil sweep used to
+            // need the reader PARKED AT THE TOP, ran the whole page in one
+            // go, and restarted from zero after every scroll. a real phone
+            // visitor scrolls within seconds of the veil and rarely comes
+            // back to the hero, so the deep page compiled under the thumb
+            // anyway (rig: 142 pipelines, one 3.7s frame on the first
+            // ride; 22 and 0.7s once the deferred pass had run). now it
+            // runs wherever the reader pauses, AHEAD of them first, in
+            // slices that hand the canvas back between them, and keeps a
+            // ledger of the positions already walked for this asset
+            // generation so a resumed pass never re-walks warm ground.
+            var sweepDone = {}, sweepDoneGen = -1, deferArmed = false, deferHoldUntil = 0;
+            var SLICE_MS = 2500, DEFER_QUIET_MS = 700;
             function runRevealSweep(){
             // rackFade tracks scroll EXACTLY here (the leg damp is snapped
             // while __warmY is set), so a fine one-frame-per-step sweep lands
@@ -4735,10 +4793,38 @@ window.__bootScene = async function(){
               for (s = 1; s <= 8; s++){ y = FOOT0 + (maxY - FOOT0) * s / 8; seq.push(y); if (!warmFast) seq.push(y); }
               for (h = 0; h < 5; h++) seq.push(maxY);   // settle at the footer pose (its own static-cache state)
             }
+            // ── a DEFERRED pass walks only what is still cold, ahead first ──
+            // the seq above is the full ride in page order (every step
+            // pushed twice for the metal finalize). for a deferred pass:
+            // drop every position the ledger already holds for this asset
+            // generation, then rotate so the walk starts at the reader's
+            // own position and runs DOWN the page before wrapping to the
+            // ground above them — the states they scroll into next are
+            // the ones that must never compile under the thumb.
+            var deferredRun = sweepDeferred;
+            if (deferredRun){
+              var gen = window.__glbSeen || 0;
+              if (sweepDoneGen !== gen){ sweepDone = {}; sweepDoneGen = gen; }   // new props landed: everything is cold again
+              var uniq = [], u;
+              for (u = 0; u < seq.length; u++){
+                if (uniq.length && uniq[uniq.length - 1].y === seq[u]) uniq[uniq.length - 1].n++;
+                else uniq.push({y: seq[u], n: 1});
+              }
+              var here = window.pageYOffset || 0, from = uniq.length;
+              for (u = 0; u < uniq.length; u++) if (uniq[u].y >= here - 60){ from = u; break; }
+              var ordered = uniq.slice(from).concat(uniq.slice(0, from));
+              seq = [];
+              for (u = 0; u < ordered.length; u++){
+                if (sweepDone[Math.round(ordered[u].y)]) continue;
+                for (var un = 0; un < ordered[u].n; un++) seq.push(ordered[u].y);
+              }
+              if (!seq.length) return;   // nothing left cold for this asset generation
+            }
             warmSweepStarted = true;
             window.__sweepDeadline = performance.now() + SWEEP_MS;   // the net's clock starts HERE, not at boot
             window.__sweepT0 = performance.now(); window.__sweepSteps = 0;
             var i = 0, warmup = MOBILE ? 12 : 24, startY = window.pageYOffset || 0;
+            var sliceT0 = performance.now(), pausedAtTop = false;
             // ── THE REPLAY ── the sweep starts on the gltf queue's FIRST
             // drain, but the props nest their own loads inside their
             // callbacks (the terminal's card, the panel, the door), so
@@ -4797,7 +4883,26 @@ window.__bootScene = async function(){
               // dance first, so our shadow pass sees the full, settled cast
               if (warmup > 0){ warmup--; requestAnimationFrame(step); return; }
               var swAborted = Math.abs((window.pageYOffset || 0) - startY) > 4;
-              if (swAborted){
+              // ── THE SLICE ── a deferred pass holds the canvas still (its
+              // steps render off-screen, nothing presents — the hero spin
+              // and the ambient animators freeze for its duration), so it
+              // runs in slices of SLICE_MS, hands the canvas back for a
+              // breather of live frames, and resumes from the ledger at
+              // the next quiet moment.
+              var swPause = !swAborted && deferredRun && !warmKill && i < seq.length && (performance.now() - sliceT0) > SLICE_MS;
+              if (swAborted || (swPause && startY > 4)){
+                handBack();
+                if (swPause) deferHoldUntil = performance.now() + 900;
+                // the pipeline set is still COLD after an abort or a pause —
+                // re-arm the deferred runner so it resumes at the next
+                // quiet moment, wherever that is, instead of never
+                armDeferredSweep();
+                return;
+              }
+              // paused AT the hero: finish through the hero reset below (the
+              // only handback that puts the hero pose back exactly), resume later
+              if (swPause){ pausedAtTop = true; i = seq.length; }
+              function handBack(){
                 // the user took the scroll mid-sweep: hand EVERYTHING back
                 // to the live ride — NO hero reset (they are not at the
                 // hero; the old unconditional reset stranded sceneMode 1
@@ -4825,14 +4930,9 @@ window.__bootScene = async function(){
                 bootSnap = performance.now() + 400; coverJump = true;
                 frameDirtyFlag = true; frameCacheValid = false;
                 liftVeil();
-                // the reveal's pipeline set is still COLD after an abort —
-                // re-arm the deferred runner so it completes at the next
-                // parked-at-top quiet moment instead of never
-                armDeferredSweep();
-                return;
               }
               if (warmKill) i = seq.length;   // the veil net fired mid-warm: complete NOW
-              if (i >= seq.length && !warmKill && replays < 2){
+              if (i >= seq.length && !warmKill && !pausedAtTop && replays < 2){
                 // ── THE SWEEP OUTRAN THE MODELS ──
                 // one step per rAF made the sweep take ~7s, which by pure
                 // accident outlasted every async decode; batched it lands
@@ -4855,6 +4955,15 @@ window.__bootScene = async function(){
                 }
               }
               if (i >= seq.length){
+                if (deferredRun && !pausedAtTop && seq.length) sweepDone[Math.round(seq[seq.length - 1])] = 1;
+                if (deferredRun && startY > 4){
+                  // a deferred pass that ran out MID-PAGE: the reader is
+                  // parked somewhere real — hand back to there, never to
+                  // the hero reset below (which assumes the top of the page)
+                  handBack();
+                  armDeferredSweep();   // idempotent: runs again only if this generation still has cold ground
+                  return;
+                }
                 // ── warm done: SNAP to the live scroll (the hero on a top
                 // refresh) BEFORE the veil lifts. the sweep left the camera
                 // and the radial at the page's far end (the footer, with the
@@ -4915,25 +5024,53 @@ window.__bootScene = async function(){
                 scrubScene = -1;   // re-arm the scene gate (see the abort branch)
                 bootSnap = performance.now() + 700; coverJump = true;
                 frameDirtyFlag = true; frameCacheValid = false;
-                var hold = 6;
-                (function settle(){ if (hold-- > 0){ requestAnimationFrame(settle); return; } liftVeil(); })();
+                var hold = 6, resumeLater = deferredRun && pausedAtTop;
+                (function settle(){
+                  if (hold-- > 0){ requestAnimationFrame(settle); return; }
+                  liftVeil();
+                  // a sliced pass at the hero: the breather, then the rest
+                  if (resumeLater){ deferHoldUntil = performance.now() + 900; armDeferredSweep(); }
+                })();
                 return;
               }
               // the reveal + whole-page sweep: gauge 0.85 → 0.99
               try { if (window.__veilPhase) window.__veilPhase(0.85, 0.99, i / seq.length); } catch(ge){}
+              // the ledger: the previous position has rendered every draw it
+              // owns by the time a DIFFERENT one is pulled (the batcher and
+              // the fallback rAF both render between pulls)
+              if (deferredRun && i > 0 && seq[i - 1] !== seq[i]) sweepDone[Math.round(seq[i - 1])] = 1;
               window.__warmY = seq[i++]; window.__sweepSteps = i; window.__sweepLen = seq.length;
               warmArm();
             }
             step();
             }
             window.__armDeferredSweep = armDeferredSweep;
+            // the runner: ONE poller at a time (every caller re-arms freely),
+            // firing the moment the page is live, nothing is downloading,
+            // the stage is on screen and the scroll has been still for
+            // DEFER_QUIET_MS — at ANY position, not only the top. the
+            // breather after a slice (deferHoldUntil) is honored here too.
             function armDeferredSweep(){
-              var dLastY = -1;
+              if (deferArmed) return;
+              deferArmed = true;
+              var dLastY = -1, dSince = performance.now();
               (function deferSweep(){
+                var now = performance.now();
                 var dy = window.pageYOffset || 0;
-                var dQuiet = dy === dLastY; dLastY = dy;
-                if (dy <= 4 && dQuiet){ sweepDeferred = true; runRevealSweep(); return; }
-                setTimeout(deferSweep, 1500);
+                if (dy !== dLastY){ dLastY = dy; dSince = now; }
+                // quiet is judged on BOTH clocks: wall-clock since the last
+                // scroll change AND the loop's own scrollQuietT, which only
+                // advances by rendered frames (dt capped at 50ms). a compile
+                // stall mid-ride freezes pageYOffset for a second, and on the
+                // wall clock alone that read as a reading pause — the sweep
+                // then started under a moving thumb and added its own steps
+                // to the stall (rig: 57 pipelines in one band, mid-ride).
+                var ready = veilLifted && window.__warmY == null && (window.__glbOut || 0) === 0 &&
+                            document.visibilityState !== 'hidden' && stageVisible && !window.__sceneHold &&
+                            !scrollActive && scrollQuietT >= DEFER_QUIET_MS / 1000 &&
+                            now >= deferHoldUntil && (now - dSince) >= DEFER_QUIET_MS;
+                if (ready){ deferArmed = false; sweepDeferred = true; runRevealSweep(); return; }
+                setTimeout(deferSweep, 250);
               })();
             }
             if ((window.pageYOffset || 0) > 4 || veilLifted){
@@ -5676,6 +5813,27 @@ window.__bootScene = async function(){
   var PD_SCR = [[82, 211, 125, 146, 9.7, 0], [83, 376, 124, 140, 6.3, 2.4], [287, 382, 129, 138, 13.1, 5.1]];
   // slide 3's money terminal: a kiosk standing right of the rack
   var termRoot = null, termMats = [], termLamp = null, termQ = 0;
+  // ── EVERY PROP LAMP EXISTS FROM BOOT ── three hashes EVERY light's id
+  // into every render object's cache key (LightsNode.customCacheKey →
+  // RenderObject.getDynamicCacheKey): the moment a light joins the scene,
+  // every render object in it goes stale — re-created, its TSL program
+  // rebuilt, its pipeline re-keyed. on a phone the seven props stream in
+  // AFTER the boot sweep (LAZY_PHONE), and five of them used to bring a
+  // lamp with them — so each landing threw the whole swept pipeline set
+  // away, and the first ride compiled the reveal AGAIN under the thumb
+  // (rig, phone profile, 4x cpu, ride 2s after the veil: 64 pipelines in
+  // the 500-1000 band the boot sweep had just walked, one 3.7s frame).
+  // the lamps are born HERE, dark, before any model lands; the props only
+  // aim and dim them. the light count the sweep sees is the final one on
+  // every path (desktop loaded them all before sweeping anyway).
+  termLamp = LP(new THREE.PointLight(0xffe6c0, 0, 6));
+  doorLamp = LP(new THREE.PointLight(0xffe6c0, 0, 6));
+  panelLamp = LP(new THREE.PointLight(0xffe6c0, 0, 7));
+  calcLamp = LP(new THREE.PointLight(new THREE.Color(calcLightCfg.key.c), 0, 12, 2));
+  calcFill = LP(new THREE.PointLight(new THREE.Color(calcLightCfg.fill.c), 0, 12, 2));
+  lapLamp = LP(new THREE.PointLight(0xffe6c0, 0, 6, 2));
+  scene.add(termLamp); scene.add(doorLamp); scene.add(panelLamp);
+  scene.add(calcLamp); scene.add(calcFill); scene.add(lapLamp);
   // the terminal's LIVE holo dashboard: canvas-drawn in the site blue,
   // rings at different speeds, charts that never repeat, road-blink
   var termHoloMat = null, termHoloTex = null, termHoloDraw = null, termHoloOff = false;
@@ -8975,9 +9133,7 @@ window.__bootScene = async function(){
         warmPropSoon(function(){ return termRoot; }, 80);
         warmPropSoon(function(){ return termRoot; }, 4000);   // the nested card lands late
         scene.add(twrap);
-        termLamp = LP(new THREE.PointLight(0xffe6c0, 0, 6));
-        termLamp.position.set(2.3, 2.2, 1.6);
-        scene.add(termLamp);
+        termLamp.position.set(2.3, 2.2, 1.6);   // born at boot (see EVERY PROP LAMP EXISTS FROM BOOT) — aimed here
         warmScenePass();
         // ── the payment card, child of the kiosk: it rides twrap's
         // own scale/heading, sliding into the reader in local space ──
@@ -9111,9 +9267,7 @@ window.__bootScene = async function(){
         scene.add(dwrap);
         // its own warm key, driven by the fade — dark panels read as a
         // hole under the rack lamp alone (the calculator taught this)
-        doorLamp = LP(new THREE.PointLight(0xffe6c0, 0, 6));
-        doorLamp.position.set(0.6, rackTopY * 0.75, rackBox.max.z + 2.1);
-        scene.add(doorLamp);
+        doorLamp.position.set(0.6, rackTopY * 0.75, rackBox.max.z + 2.1);   // born at boot — aimed here
         warmScenePass();
         if (--dracoPending === 0) draco.dispose();
       });
@@ -9456,10 +9610,8 @@ window.__bootScene = async function(){
         // its own warm key, driven by the fade: this wall is the rack's
         // shadowed side and the dark body reads as a hole without it
         // (the door lamp's lesson)
-        panelLamp = LP(new THREE.PointLight(0xffe6c0, 0, 7));
         panelLamp.position.set(rackBox.max.x + 2.2, rackBotY + rackH * 0.32,
-                               (rackBox.min.z + rackBox.max.z) * 0.5);
-        scene.add(panelLamp);
+                               (rackBox.min.z + rackBox.max.z) * 0.5);   // born at boot — aimed here
         warmScenePass();
         frameDirtyFlag = true;
       });
@@ -10086,9 +10238,8 @@ window.__bootScene = async function(){
         // deliberately: the power below is 9× what it was, and a long
         // cutoff would carry all of that onto the ghosted city standing
         // behind the right circle. past 12 units this rig lights nothing
-        calcLamp = LP(new THREE.PointLight(new THREE.Color(calcLightCfg.key.c), 0, 12, 2));
-        calcFill = LP(new THREE.PointLight(new THREE.Color(calcLightCfg.fill.c), 0, 12, 2));
-        scene.add(calcLamp); scene.add(calcFill);
+        // calcLamp / calcFill are born at boot (EVERY PROP LAMP EXISTS FROM
+        // BOOT); the ride aims them off calcRoot every frame it stands
         for (var cei = 0; cei < calcMats.length; cei++){
           calcMats[cei].emissiveIntensity = calcLightCfg.emis;
           calcMats[cei].metalness = calcLightCfg.metal;
@@ -11032,12 +11183,11 @@ window.__bootScene = async function(){
         }
         // its own small warm key, in the scene from load (constant light
         // count) — the dark body would read as a hole against the night
-        lapLamp = LP(new THREE.PointLight(0xffe6c0, 0, 6, 2));
+        // (lapLamp is born at boot — EVERY PROP LAMP EXISTS FROM BOOT)
         // key from the LEFT: the leg-11 lens looks from the left, so a
         // right-side lamp lands its specular hotspot square on the lid
         // glass ("light is on display") — mirrored left it slides off
         lapLamp.position.set(lwrap.position.x - 1.6, groundY + 1.6, lwrap.position.z + 1.9);
-        scene.add(lapLamp);
         // compile now, in load idle — the first visible frame comes right
         // as the addons cover thins; a shader stall there would hitch it
         warmScenePass();
@@ -13895,7 +14045,9 @@ window.__bootScene = async function(){
     // instant scrolling stops (frameDirtyFlag persists → next frame
     // renders). the scene under motion at 30fps is hidden by the dof
     // and the motion itself.
-    if (!MOBILE && scrollActive && frameLive && window.__warmY == null){
+    // ...and the PHONE joins when its watchdog says so (MQ.pace): the
+    // ladder's first step is this half-rate ride, not a softer rung
+    if ((!MOBILE || MQ.pace) && scrollActive && frameLive && window.__warmY == null){
       scrollSkip = !scrollSkip;
       if (scrollSkip) return;   // main thread free this frame for the page scroll
     } else scrollSkip = false;

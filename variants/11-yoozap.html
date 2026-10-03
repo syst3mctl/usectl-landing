@@ -2196,7 +2196,11 @@
       // grain, no fxaa. bloom at dpr 1 / chain 0.75 costs a fraction of
       // what it costs at rung 1's dpr 1.5, so this rung is still the
       // cheapest frame in the ladder by a wide margin.
-      {dpr: 1,   chain: 0.75, dof: false, bloom: true,  fxaa: false, grain: 0,     wires: false, overlay: true,  calm: true},
+      // calm is OFF here now (mirrors v12: "on iphone se animation not
+      // worked") — a phone parked on this rung by a remembered context
+      // loss showed a page with every animator standing down, which reads
+      // as broken, not as cheap. the OS reduce-motion switch still calms.
+      {dpr: 1,   chain: 0.75, dof: false, bloom: true,  fxaa: false, grain: 0,     wires: false, overlay: true,  calm: false},
       // 1 — every phone starts here
       {dpr: 1.5, chain: 0.9,  dof: true,  bloom: true,  fxaa: true,  grain: 0.055, wires: false, overlay: true,  calm: false},
       // 2 — the page as written (desktop always; a phone only by promotion)
