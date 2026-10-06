@@ -8,6 +8,9 @@
 //        TAG=name (output files are written next to this script). needs puppeteer-core (path below).
 // never run this against the user's own Chrome window — it launches its own headless instance.
 const fs = require('fs');
+// puppeteer-core comes from the npx cache (not a dependency of this repo —
+// the rig is a tool, not part of the build). PUPPETEER= overrides the path.
+const puppeteer = require(process.env.PUPPETEER || '/Users/wazzap/.npm/_npx/0f94ee7615faf582/node_modules/puppeteer-core');
 const SP = __dirname;
 const URL = process.env.URL || 'http://127.0.0.1:5179/variants/12-webgpu.html?nosw';
 const WAIT = +(process.env.WAIT || 2);

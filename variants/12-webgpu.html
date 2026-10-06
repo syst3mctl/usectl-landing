@@ -4115,8 +4115,14 @@ window.__bootScene = async function(){
   function warmProp(root){
     if (!root) return;
     try {
-      var touched = [];
-      root.traverse(function(o){ if (!o.visible){ touched.push(o); o.visible = true; } });
+      var touched = [], unculled = [];
+      root.traverse(function(o){
+        if (!o.visible){ touched.push(o); o.visible = true; }
+        // the warm renders from wherever the camera stands, and a prop
+        // staged at the far end of the page is frustum-culled out of it —
+        // staged but never drawn, so nothing compiled (see the batch warm)
+        if (o.frustumCulled && (o.isMesh || o.isLineSegments)){ unculled.push(o); o.frustumCulled = false; }
+      });
       var wn = root;
       while (wn){ if (!wn.visible){ touched.push(wn); wn.visible = true; } wn = wn.parent; }
       warmChainOffscreen();   // LIVE-chain keys — warmScenePass compiles
@@ -4124,7 +4130,24 @@ window.__bootScene = async function(){
                               // reuses (the port's own measured lesson)
       warmChainOffscreen();   // twice: metal finalizes a pipeline's shader
                               // on first EXECUTION, not on create
+      // ...and the OTHER blend flavor, exactly as the batched boot warm
+      // flips: a prop warmed at the opacity it landed with leaves its
+      // other half (opaque if it is fading in, blended if it is standing)
+      // to compile mid-ride. same two draws, then restore.
+      var pflip = [];
+      root.traverse(function(o){
+        if (!o.isMesh && !o.isLineSegments) return;
+        var pm = Array.isArray(o.material) ? o.material : [o.material];
+        for (var pi = 0; pi < pm.length; pi++) if (pm[pi] && pflip.indexOf(pm[pi]) === -1) pflip.push(pm[pi]);
+      });
+      if (pflip.length){
+        var pwas = [];
+        for (var pa = 0; pa < pflip.length; pa++){ pwas[pa] = pflip[pa].transparent; setTransparent(pflip[pa], !pwas[pa]); }
+        try { warmChainOffscreen(); warmChainOffscreen(); } catch(pe){}
+        for (var pb = 0; pb < pflip.length; pb++) setTransparent(pflip[pb], pwas[pb]);
+      }
       for (var wi = 0; wi < touched.length; wi++) touched[wi].visible = false;
+      for (var wu = 0; wu < unculled.length; wu++) unculled[wu].frustumCulled = true;
     } catch(e){}
   }
   // the reveal-sweep warm needs the LIVE pipeline set, not warmScenePass's:
@@ -4519,12 +4542,27 @@ window.__bootScene = async function(){
           (function(){
             var hidden = [];
             scene.traverse(function(o){ if (o.isMesh || o.isLineSegments) hidden.push(o); });
-            var bi = 0, BATCH = Math.max(8, Math.ceil(hidden.length / 12));
+            // the city's flavors are warmed state by state below (ghost,
+            // twin, dim); mark its materials so the blend flip further
+            // down leaves them alone — flipping ~2000 of them per batch
+            // would re-create every city render object twice for nothing
+            for (var cm = 0; cm < cityMats.length; cm++) cityMats[cm].userData.__cityM = 1;
+            var bi = 0, BATCH = Math.max(8, Math.ceil(hidden.length / 12)), flipStamp = 0;
             (function warmChunk(){
               if (bi >= hidden.length) return;
-              var end = Math.min(hidden.length, bi + BATCH), touched = [];
+              var end = Math.min(hidden.length, bi + BATCH), touched = [], unculled = [];
               for (var k = bi; k < end; k++){
                 var n = hidden[k];
+                // ...AND OFF THE FRUSTUM TEST. staging a prop visible is
+                // not enough: this warm renders from wherever the camera
+                // stands (the hero), and every prop that lives at the
+                // rack — the door, the clone, the panel, the card — sits
+                // outside that view and is culled before it can draw, so
+                // the batch compiled nothing for exactly the props whose
+                // first draw hitches the ride. frustumCulled off = it
+                // draws for this warm whatever the camera sees; restored
+                // with the visibility below.
+                if (n.frustumCulled){ unculled.push(n); n.frustumCulled = false; }
                 while (n){   // the mesh AND its ancestor chain must stand
                   if (!n.visible){ touched.push(n); n.visible = true; }
                   n = n.parent;
@@ -4533,7 +4571,42 @@ window.__bootScene = async function(){
               // real presenting path under the veil (see the __warmY
               // intercept: offscreen warms compile a parallel pipeline set)
               try { composer.render(); composer.render(); } catch(we){ warmChainOffscreen(); }
+              // ── ...AND THE BLEND FLAVOR THE PROP IS NOT WEARING ──
+              // every prop is born transparent at opacity 0 and turns
+              // OPAQUE the moment its fade lands (and back, scrolling
+              // out). blending keys a webgpu pipeline, so this batch
+              // builds exactly the ONE flavor the prop happens to wear at
+              // load and the ride compiles the other under the visitor's
+              // thumb. measured on a laptop ride (headless 1512x945 dsf2,
+              // whole page, after a COMPLETE 264-step boot sweep): the
+              // clone rack's 9 opaque pipelines at the metal split — a
+              // 150-300ms frame, the worst on the page — the door's 4
+              // blended ones at the reveal, the terminal's opaque one at
+              // the slider. the sweep cannot cover these: it rides the
+              // scroll, and at every y it visits a prop wears exactly one
+              // flavor. so flip the batch's own materials, draw twice
+              // (metal finalizes on first EXECUTION), restore. batches
+              // that are all city flip nothing and skip the two draws.
+              var flip = [];
+              flipStamp++;
+              for (var fk = bi; fk < end; fk++){
+                var fmat = hidden[fk].material;
+                var fms = Array.isArray(fmat) ? fmat : [fmat];
+                for (var fi = 0; fi < fms.length; fi++){
+                  var fm = fms[fi];
+                  if (!fm || fm.userData.__cityM || fm.userData.__flipS === flipStamp) continue;
+                  fm.userData.__flipS = flipStamp;   // shared materials: flip once, restore once
+                  flip.push(fm);
+                }
+              }
+              if (flip.length){
+                var was = [];
+                for (var fa = 0; fa < flip.length; fa++){ was[fa] = flip[fa].transparent; setTransparent(flip[fa], !was[fa]); }
+                try { composer.render(); composer.render(); } catch(we2){ try { warmChainOffscreen(); } catch(we3){} }
+                for (var fb = 0; fb < flip.length; fb++) setTransparent(flip[fb], was[fb]);
+              }
               for (var t = 0; t < touched.length; t++) touched[t].visible = false;
+              for (var u = 0; u < unculled.length; u++) unculled[u].frustumCulled = true;
               bi = end;
               // the cast walking on stage: gauge 0.75 → 0.85
               try { if (window.__veilPhase) window.__veilPhase(0.75, 0.85, bi / hidden.length); } catch(ge){}
@@ -11657,10 +11730,29 @@ window.__bootScene = async function(){
   //   unlimited           3.1s  200  36  2 stalls (one 133ms)
   // past ~12 the sweep stops being frame-paced at all and the gpu never
   // catches up between submissions, so states render but their pipelines
-  // are not all built and the RIDE pays. 12 is the fastest cap that still
-  // leaves the ride clean; phones take a quarter of it (their gpu budget
-  // and the refresh-VRAM lesson).
-  var WARM_STEPS_MAX = MOBILE ? 4 : 12;
+  // are not all built and the RIDE pays. 12 read as the knee THEN; the
+  // round below re-measured it over the whole page and found 23-27
+  // pipelines still landing under the thumb, so the knee has moved.
+  // phones still take their own cap (gpu budget, the refresh-VRAM lesson).
+  // measured again this round, with the staged-prop warm below fixed in
+  // the same pass (it was staging props the camera could not see). the
+  // ride is the WHOLE page at 14px a frame on a laptop profile (headless
+  // 1512x945 dsf2), medians of 3; "left for the ride" is pipelines
+  // compiled under the visitor's thumb:
+  //   cap 12   sweep 2.5s   27 left   worst 100ms   3 frames >50ms
+  //   cap 4    sweep 2.8s   24 left   worst 117ms   4 frames >50ms
+  //   cap 3    sweep 3.3s    6 left   worst  67ms   1 frame  >50ms
+  // the cliff between 4 and 3 is sharp and repeatable: past it a warm
+  // position's draws land but its PIPELINES do not all get built, and
+  // the page pays them back at the door, the slider and the clone rack —
+  // a 150-350ms frame at the metal split, intermittent because it
+  // depends on how the batch happened to fall ("sometimes on scroll when
+  // u load assets in laptop version i have lag"). 0.6-0.8s of veil buys
+  // the whole ride; that is the trade this file has always made.
+  // PHONES KEEP 4, unmeasured here: their boot sweep skips the deep page
+  // entirely (the deferred pass rides it post-veil) and their veil budget
+  // is the one the user actually feels. worth a rig run of its own.
+  var WARM_STEPS_MAX = MOBILE ? 4 : 3;
   function loop(){
     requestAnimationFrame(loop);
     frameOnce();
