@@ -35,7 +35,7 @@ function siteHeadPlugin() {
   };
   const SHARED_META = new Set([
     'author', 'theme-color', 'msapplication-TileImage', 'msapplication-TileColor', 'content-signal',
-    'og:image', 'og:image:secure_url', 'og:image:type', 'og:image:width', 'og:image:height',
+    'og:image', 'og:image:secure_url', 'og:image:type', 'og:image:width', 'og:image:height', 'og:image:alt',
     'og:site_name', 'og:locale', 'twitter:card', 'twitter:image', 'twitter:site', 'twitter:creator',
   ]);
   const SHARED_LINK = new Set(['icon', 'apple-touch-icon', 'manifest']);
@@ -44,7 +44,8 @@ function siteHeadPlugin() {
   const readIndexHead = () => {
     const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
     const head = html.match(/<head>([\s\S]*?)<\/head>/)[1];
-    const gtag = head.match(/<!-- Google tag[\s\S]*?<\/script>\s*<script>[\s\S]*?<\/script>/)?.[0] ?? '';
+    // gtag block plus the Databuddy tag that follows it.
+    const gtag = head.match(/<!-- Google tag[\s\S]*?<\/script>\s*<script>[\s\S]*?<\/script>(?:\s*<!-- Databuddy -->\s*<script[^>]*databuddy[^>]*><\/script>)?/)?.[0] ?? '';
     const shared = { gtag, meta: [], link: [], charset: '', viewport: '' };
     for (const tag of head.match(/<(?:meta|link)\b[^>]*>/g) ?? []) {
       if (/^<meta\s+charset=/i.test(tag)) shared.charset = tag;
@@ -81,7 +82,6 @@ function siteHeadPlugin() {
           ogTag('og:url', url),
           ogTag('og:title', title),
           ogTag('og:description', description),
-          ogTag('og:image:alt', title),
           twTag('twitter:url', url),
           twTag('twitter:title', title),
           twTag('twitter:description', description),
