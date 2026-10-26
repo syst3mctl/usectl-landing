@@ -132,6 +132,14 @@
                             <li><strong>AI Model Invocation Data:</strong> If you utilize our AI Addons or Copilot
                                 capabilities, prompt metadata and token consumption counts are metered per project to
                                 enforce budget caps.</li>
+                            <li><strong>Product Usage Recordings:</strong> To find and fix confusing parts of the
+                                product, we record how visitors use <code>usectl.com</code> and the dashboard (clicks,
+                                scrolling, pages visited, page layout, and approximate location derived from IP address).
+                                Text typed into form fields is never recorded; email addresses and numbers on screen are
+                                masked; secrets, logs, terminals and AI chats are excluded. Recordings are kept on our own
+                                infrastructure, are visible only to <code>usectl</code> administrators, and are deleted
+                                after 30 days. The browser's Do Not Track setting is honored, and signed-in users can turn
+                                recording off on their profile page.</li>
                         </ul>
                     </section>
 
@@ -236,6 +244,7 @@
 
     <!-- SCRIPTS -->
     <script type="module" src="/js/animations.js"></script>
+    <script type="module" src="/js/session-replay.js"></script>
 </body>
 
 </html>

@@ -458,7 +458,7 @@ $ usectl machines create --repo … --postgres --redis</code></pre>
                         </div>
                         <div class="compat-right">
                             <a href="https://docs.usectl.com" class="compat-link" target="_blank">CLI docs</a>
-                            <button class="compat-btn" onclick="window.location.href='https://manager.usectl.com/register'"><img
+                            <button class="compat-btn" onclick="window.location.href=(window.usectlWithLandingSession||String)('https://manager.usectl.com/register')"><img
                                     src="img/rocket.svg" style="width:14px;height:14px;vertical-align:middle;"
                                     alt="rocket"> Create a machine</button>
                         </div>
@@ -671,6 +671,7 @@ $ usectl machines create --repo … --postgres --redis</code></pre>
 
     <!-- SCRIPTS -->
     <script type="module" src="/js/animations.js"></script>
+    <script type="module" src="/js/session-replay.js"></script>
     <script>
 
         /*
@@ -744,7 +745,7 @@ $ usectl machines create --repo … --postgres --redis</code></pre>
 
                 // Redirect to login page after 2 seconds
                 setTimeout(() => {
-                    window.location.href = 'https://manager.usectl.com/login';
+                    window.location.href = (window.usectlWithLandingSession || String)('https://manager.usectl.com/login');
                 }, 2000);
             }).catch((err) => {
                 btn.textContent = 'Create a machine';
